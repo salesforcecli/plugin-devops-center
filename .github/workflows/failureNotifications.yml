@@ -6,6 +6,7 @@ on:
       - version, tag and github release
       - publish
     types:
+    test
       - completed
 
 jobs:
