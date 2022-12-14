@@ -5,4 +5,13 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-// TODO: remove file after we have another test
+export type PromotePipelineResult = {
+  status: string;
+};
+
+export enum TestLevel {
+  NoTestRun = 'NoTestRun',
+  RunSpecifiedTests = 'RunSpecifiedTests',
+  RunLocalTests = 'RunLocalTests',
+  RunAllTestsInOrg = 'RunAllTestsInOrg',
+}
