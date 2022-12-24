@@ -737,7 +737,7 @@
     is-wsl "^2.1.1"
     tslib "^2.3.1"
 
-"@oclif/core@^1.0.8", "@oclif/core@^1.2.1", "@oclif/core@^1.20.3", "@oclif/core@^1.20.4", "@oclif/core@^1.21.0", "@oclif/core@^1.3.6", "@oclif/core@^1.6.3", "@oclif/core@^1.6.4":
+"@oclif/core@^1.0.8", "@oclif/core@^1.2.1", "@oclif/core@^1.20.3", "@oclif/core@^1.20.4", "@oclif/core@^1.22.0", "@oclif/core@^1.3.6", "@oclif/core@^1.6.3", "@oclif/core@^1.6.4":
   version "1.22.0"
   resolved "https://registry.yarnpkg.com/@oclif/core/-/core-1.22.0.tgz#dfdd76db6435cc1be2de7bbe25c23302332b9297"
   integrity sha512-Bvyi6uFbmpkFl9XUATsGMlqEDGfqMKWL0Mu5VQTuPg7/NIyfygYkaburn11uGkOp0a8yG6fPpyVBfGmztjNPGA==
@@ -831,14 +831,14 @@
     chalk "^4.1.0"
     tslib "^2.3.1"
 
-"@oclif/plugin-command-snapshot@^3.2.12":
-  version "3.2.12"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-command-snapshot/-/plugin-command-snapshot-3.2.12.tgz#6bcc88b12dac2405fca6fa43acfdc16e40b8b763"
-  integrity sha512-36QHfxpP/bR5Le7nEa8lmaBlEyTNd8mor+ofDh+6jy3emqs5tQ8B9X4RvpdNis6GMtPexrC7Tcmj8lp8+vvEig==
+"@oclif/plugin-command-snapshot@^3.2.14":
+  version "3.2.14"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-command-snapshot/-/plugin-command-snapshot-3.2.14.tgz#d7f32b35e5909e85a5cf29bfd71c8cf2c5ebfc0e"
+  integrity sha512-gq37zTCHMGaDlvxn0WNbIz+H4s727orDV/lWFft8x1zpztiCa52LE/g8L+uIvJ8fG0Fw3j8mrOuYl7/wvRJENA==
   dependencies:
-    "@oclif/core" "^1.21.0"
+    "@oclif/core" "^1.22.0"
     chalk "^4.1.2"
-    just-diff "^5.1.1"
+    just-diff "^5.2.0"
     lodash "^4.17.21"
     semver "^7.3.8"
     ts-json-schema-generator "^1.1.2"
@@ -4714,10 +4714,10 @@ just-diff-apply@^5.2.0:
   resolved "https://registry.yarnpkg.com/just-diff-apply/-/just-diff-apply-5.4.1.tgz#1debed059ad009863b4db0e8d8f333d743cdd83b"
   integrity sha512-AAV5Jw7tsniWwih8Ly3fXxEZ06y+6p5TwQMsw0dzZ/wPKilzyDgdAnL0Ug4NNIquPUOh1vfFWEHbmXUqM5+o8g==
 
-just-diff@^5.0.1, just-diff@^5.1.1:
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/just-diff/-/just-diff-5.1.1.tgz#8da6414342a5ed6d02ccd64f5586cbbed3146202"
-  integrity sha512-u8HXJ3HlNrTzY7zrYYKjNEfBlyjqhdBkoyTVdjtn7p02RJD5NvR8rIClzeGA7t+UYP1/7eAkWNLU0+P3QrEqKQ==
+just-diff@^5.0.1, just-diff@^5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/just-diff/-/just-diff-5.2.0.tgz#60dca55891cf24cd4a094e33504660692348a241"
+  integrity sha512-6ufhP9SHjb7jibNFrNxyFZ6od3g+An6Ai9mhGRvcYe8UJlH0prseN64M+6ZBBUoKYHZsitDP42gAJ8+eVWr3lw==
 
 just-extend@^4.0.2:
   version "4.2.1"
