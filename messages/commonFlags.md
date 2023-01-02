@@ -4,7 +4,7 @@ Name of the DevOps Center project.
 
 # promote.branch-name.summary
 
-Name of the branch from which to deploy changes to the stage’s org.
+Name of the branch in the source control repository from which to deploy changes to the stage’s org.
 
 # promote.deploy-all.summary
 
@@ -12,7 +12,7 @@ Deploy all metadata in branch.
 
 # promote.deploy-all.description
 
-If you don’t specify this flag, only changes in this stage’s branch are deployed.
+If you don’t specify this flag, only changes in the stage’s branch are deployed.
 
 # promote.devops-center-username.summary
 
@@ -24,7 +24,7 @@ Version name of the bundle.
 
 # promote.bundle-version-name.description
 
-Bundle version name when deploying to the first stage after the bundling stage.
+You must indicate the bundle version if deploying to the environment that correspond to the first stage after the bundling stage.
 
 # promote.tests.summary
 
