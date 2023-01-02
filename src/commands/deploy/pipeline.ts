@@ -27,7 +27,7 @@ export default class DeployPipeline extends SfCommand<PromotePipelineResult> {
   public static readonly examples = messages.getMessages('examples');
   public static readonly state = 'beta';
 
-  public static flags = {
+  public static readonly flags = {
     'branch-name': branchName,
     'bundle-version-name': bundleVersionName,
     'deploy-all': deployAll,

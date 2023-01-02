@@ -12,7 +12,7 @@ import { TestLevel } from '../common';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
 
-export function validateTestFlags(testLevel: TestLevel, tests: Nullable<string[]>): void {
+export function validateTestFlags(testLevel: Nullable<TestLevel>, tests: Nullable<string[]>): void {
   if (testLevel === TestLevel.RunSpecifiedTests && (tests ?? []).length === 0) {
     throw messages.createError('error.NoTestsSpecified');
   } else if (testLevel !== TestLevel.RunSpecifiedTests && tests) {
