@@ -29,7 +29,7 @@ describe('validate flags', () => {
     .stderr()
     .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests'])
     .it(
-      'runs deploy pipeline with test level RunSpecifiedTests but does not indicates specifi test with flag -t',
+      'runs deploy pipeline with test level RunSpecifiedTests but does not indicate specific tests with flag -t',
       (ctx) => {
         expect(ctx.stderr).to.contain(
           'You must specify tests using the --tests flag if the --test-level flag is set to RunSpecifiedTests.'
@@ -42,9 +42,17 @@ describe('validate flags', () => {
     .stderr()
     .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunLocalTests', '-t=DummyTestClass'])
     .it(
-      'runs deploy pipeline with test level RunSpecifiedTests but does not indicates specifi test with flag -t',
+      'runs deploy pipeline indicating specific tests to run but with test level other than RunSpecifiedTests',
       (ctx) => {
         expect(ctx.stderr).to.contain('runTests can only be used with a testLevel of RunSpecifiedTests.');
       }
     );
+
+  test
+    .stdout()
+    .stderr()
+    .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests', '-t=DummyTestClass'])
+    .it('runs deploy pipeline with the correct flags and validation pass', (ctx) => {
+      expect(ctx.stderr).to.equal('');
+    });
 });
