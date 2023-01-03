@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "command": "deploy:pipeline",
+    "plugin": "@salesforce/plugin-devops-center",
+    "flags": [
+      "branch-name",
+      "bundle-version-name",
+      "deploy-all",
+      "devops-center-project-name",
+      "devops-center-username",
+      "json",
+      "test-level",
+      "tests"
+    ],
+    "alias": []
+  }
+]

@@ -1,0 +1,46 @@
+/*
+ * Copyright (c) 2021, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
+
+import { Messages } from '@salesforce/core';
+import { SfCommand } from '@salesforce/sf-plugins-core';
+import { PromotePipelineResult, validateTestFlags } from '../../common';
+import {
+  branchName,
+  bundleVersionName,
+  deployAll,
+  devopsCenterProjectName,
+  devopsCenterUsername,
+  specificTests,
+  testLevel,
+} from '../../common/flags';
+
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
+
+export default class DeployPipeline extends SfCommand<PromotePipelineResult> {
+  public static readonly summary = messages.getMessage('summary');
+  public static readonly description = messages.getMessage('description');
+  public static readonly examples = messages.getMessages('examples');
+  public static readonly state = 'beta';
+
+  public static readonly flags = {
+    'branch-name': branchName,
+    'bundle-version-name': bundleVersionName,
+    'deploy-all': deployAll,
+    'devops-center-project-name': devopsCenterProjectName,
+    'devops-center-username': devopsCenterUsername,
+    tests: specificTests,
+    'test-level': testLevel(),
+  };
+
+  public async run(): Promise<PromotePipelineResult> {
+    const { flags } = await this.parse(DeployPipeline);
+    validateTestFlags(flags['test-level'], flags.tests);
+
+    return { status: 'status' };
+  }
+}

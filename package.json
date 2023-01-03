@@ -1,6 +1,6 @@
 {
-  "name": "@salesforce/plugin-template-sf",
-  "description": "A template repository for sf plugins",
+  "name": "@salesforce/plugin-devops-center",
+  "description": "The DevOps Center CLI plugin provides a command-line alternative to performing equivalent actions in the DevOps Center graphical UI",
   "version": "0.0.1",
   "author": "Salesforce",
   "bugs": "https://github.com/forcedotcom/cli/issues",
@@ -74,7 +74,11 @@
       "@oclif/plugin-command-snapshot",
       "@salesforce/plugin-command-reference"
     ],
-    "topics": {}
+    "topics": {
+      "deploy": {
+        "description": "Commands to deploy artifacts to an environment."
+      }
+    }
   },
   "repository": "salesforcecli/plugin-template-sf",
   "scripts": {
