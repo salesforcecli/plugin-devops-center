@@ -26,6 +26,10 @@ export const branchName = Flags.string({
   required: true,
 });
 
+/**
+ * Custom flag for the test level.
+ * Validates that the passed in value is a valid test level.
+ */
 export const testLevel = OclifFlags.custom<TestLevel>({
   char: 'l',
   parse: (input) => Promise.resolve(input as TestLevel),
@@ -53,6 +57,11 @@ export const bundleVersionName = Flags.string({
   description: messages.getMessage('promote.bundle-version-name.description'),
 });
 
+/**
+ * Custom flag for the target devops center org.
+ * Makes this flag required and validates that passed in alias/username corresponds to an authenticated org.
+ * If no value is passed in, then it looks for the alias/username set in the --target-devops-center config variable.
+ */
 export const requiredDoceOrgFlag = OclifFlags.custom({
   char: 'c',
   summary: messages.getMessage('flags.targetDoceOrg.summary'),
@@ -61,6 +70,12 @@ export const requiredDoceOrgFlag = OclifFlags.custom({
   defaultHelp: async () => (await getOrgOrThrow())?.getUsername(),
 });
 
+/**
+ *
+ * @param input alias/username of an org
+ * @returns instance of an Org that correspons to the alias/username passed in
+ * or to the alias/username set in --target-devops-center config variable.
+ */
 const getOrgOrThrow = async (input?: string): Promise<Org> => {
   const aggregator = await ConfigAggregator.create({ customConfigMeta: ConfigMeta });
   let org: Org;

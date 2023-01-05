@@ -21,6 +21,9 @@ import {
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
 
+/**
+ * Contains the logic to execute the sf deploy pipeline command.
+ */
 export default class DeployPipeline extends SfCommand<PromotePipelineResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
@@ -41,6 +44,7 @@ export default class DeployPipeline extends SfCommand<PromotePipelineResult> {
     const { flags } = await this.parse(DeployPipeline);
     validateTestFlags(flags['test-level'], flags.tests);
 
+    // hardcoded value so it compiles until main logic is implemented
     return { status: 'status' };
   }
 }

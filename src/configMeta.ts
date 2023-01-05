@@ -14,6 +14,10 @@ export enum ConfigVars {
   TARGET_DEVOPS_CENTER = 'target-devops-center',
 }
 
+/**
+ * Creates a configuration variable called --target-devops-center.
+ * Once set, it acts as the default target devops center org for the commands in this plugin.
+ */
 export default [
   {
     key: ConfigVars.TARGET_DEVOPS_CENTER,
