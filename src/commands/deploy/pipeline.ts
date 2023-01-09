@@ -16,6 +16,7 @@ import {
   devopsCenterUsername,
   specificTests,
   testLevel,
+  async,
 } from '../../common/flags';
 
 Messages.importMessagesDirectory(__dirname);
@@ -35,6 +36,7 @@ export default class DeployPipeline extends SfCommand<PromotePipelineResult> {
     'devops-center-username': devopsCenterUsername,
     tests: specificTests,
     'test-level': testLevel(),
+    async,
   };
 
   public async run(): Promise<PromotePipelineResult> {

@@ -55,3 +55,8 @@ export const bundleVersionName = Flags.string({
   summary: messages.getMessage('promote.bundle-version-name.summary'),
   description: messages.getMessage('promote.bundle-version-name.description'),
 });
+
+export const async = Flags.boolean({
+  description: messages.getMessage('promote.async.description'),
+  summary: messages.getMessage('promote.async.summary'),
+});
