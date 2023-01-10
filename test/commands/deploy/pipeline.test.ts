@@ -8,6 +8,7 @@
 import { expect, test } from '@oclif/test';
 import * as sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import { PromoteCommand } from '../../../src/common/abstractPromote';
 
 const DOCE_ORG = {
   id: '1',
@@ -21,6 +22,7 @@ const DOCE_ORG = {
 
 describe('validate flags', () => {
   let sandbox: sinon.SinonSandbox;
+  let executeCommandStub: sinon.SinonStub;
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
@@ -74,8 +76,13 @@ describe('validate flags', () => {
   test
     .stdout()
     .stderr()
+    .do(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      executeCommandStub = sandbox.stub(PromoteCommand.prototype, 'executePromotion' as any);
+    })
     .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests', '-t=DummyTestClass'])
     .it('runs deploy pipeline with the correct flags and validation pass', (ctx) => {
       expect(ctx.stderr).to.equal('');
+      expect(executeCommandStub.called).to.equal(true);
     });
 });

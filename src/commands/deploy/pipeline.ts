@@ -6,8 +6,8 @@
  */
 
 import { Messages } from '@salesforce/core';
-import { SfCommand } from '@salesforce/sf-plugins-core';
-import { PromotePipelineResult, validateTestFlags } from '../../common';
+import { PromoteCommand } from '../../common/abstractPromote';
+import { PipelineStage, PromotePipelineResult, validateTestFlags } from '../../common';
 import {
   branchName,
   bundleVersionName,
@@ -24,7 +24,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'depl
 /**
  * Contains the logic to execute the sf deploy pipeline command.
  */
-export default class DeployPipeline extends SfCommand<PromotePipelineResult> {
+export default class DeployPipeline extends PromoteCommand {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -43,8 +43,17 @@ export default class DeployPipeline extends SfCommand<PromotePipelineResult> {
   public async run(): Promise<PromotePipelineResult> {
     const { flags } = await this.parse(DeployPipeline);
     validateTestFlags(flags['test-level'], flags.tests);
+    return this.executePromotion(flags['devops-center-project-name'], flags['branch-name'], flags);
+  }
 
-    // hardcoded value so it compiles until main logic is implemented
-    return { status: 'status' };
+  /**
+   * Computes the target stage Id for deployOnly promotions. If the given stage has a previous stage
+   * then the target stage is the previous stage. If not the it means this is the
+   * first stage of the pipeline and target stage Id = Approved.
+   */
+  protected computeTargetStageId(pipelineStage: PipelineStage): void {
+    this.targetStageId = pipelineStage?.sf_devops__Pipeline_Stages__r
+      ? pipelineStage.sf_devops__Pipeline_Stages__r.records[0].Id
+      : 'Approved';
   }
 }
