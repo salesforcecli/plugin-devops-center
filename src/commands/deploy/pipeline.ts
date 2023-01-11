@@ -8,6 +8,7 @@
 import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { PromotePipelineResult, validateTestFlags } from '../../common';
+import { DeployPipelineCache } from '../../common/deployPipelineCache';
 import {
   branchName,
   bundleVersionName,
@@ -42,6 +43,13 @@ export default class DeployPipeline extends SfCommand<PromotePipelineResult> {
   public async run(): Promise<PromotePipelineResult> {
     const { flags } = await this.parse(DeployPipeline);
     validateTestFlags(flags['test-level'], flags.tests);
+
+    // TODO Timeout case
+    if (flags.async) {
+      // TODO Get the aorId
+      const aorId = 'TODO';
+      await DeployPipelineCache.set(aorId, {});
+    }
 
     return { status: 'status' };
   }

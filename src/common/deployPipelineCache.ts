@@ -10,10 +10,7 @@ import { Duration } from '@salesforce/kit';
 import { JsonMap } from '@salesforce/ts-types';
 
 Messages.importMessagesDirectory(__dirname);
-const cacheMessages = Messages.load('@salesforce/plugin-devops-center', 'cache', [
-  'error.NoRecentAorId',
-  'error.InvalidAorId',
-]);
+const cacheMessages = Messages.load('@salesforce/plugin-devops-center', 'cache', ['error.NoRecentAorId']);
 
 // For the moment we will just store the timestamp
 export type AORData = Record<string, never>;

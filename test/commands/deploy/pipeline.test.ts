@@ -6,6 +6,8 @@
  */
 
 import { expect, test } from '@oclif/test';
+import { TestContext } from '@salesforce/core/lib/testSetup';
+import { DeployPipelineCache } from '../../../src/common/deployPipelineCache';
 
 describe('validate flags', () => {
   test
@@ -54,5 +56,39 @@ describe('validate flags', () => {
     .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests', '-t=DummyTestClass'])
     .it('runs deploy pipeline with the correct flags and validation pass', (ctx) => {
       expect(ctx.stderr).to.equal('');
+    });
+});
+
+describe('cache', () => {
+  const $$ = new TestContext();
+
+  beforeEach(async () => {
+    // Mock the cache
+    $$.setConfigStubContents('DeployPipelineCache', {});
+  });
+
+  test
+    .stdout()
+    .stderr()
+    .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+    .it('does not cache when running deploy pipeline without the async flag', async () => {
+      const cache = await DeployPipelineCache.create();
+      let excThrown = false;
+      try {
+        cache.resolveLatest();
+      } catch (err) {
+        excThrown = true;
+      }
+      expect(excThrown);
+    });
+
+  test
+    .stdout()
+    .stderr()
+    .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '--async'])
+    .it('cache the aorId when running deploy pipeline with the async flag', async () => {
+      const cache = await DeployPipelineCache.create();
+      const key = cache.resolveLatest();
+      expect(key).not.to.be.undefined;
     });
 });
