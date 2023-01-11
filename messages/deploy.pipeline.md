@@ -15,15 +15,3 @@ Before you run this command, changes in the branch must be merged in the source 
 - Deploy all changes in the main branch to the release environment:
 
   <%= config.bin %> <%= command.id %> --devops-center-project-name “Recruiting App” --branch-name main --devops-center-username MyReleaseOrg --deploy-all
-
-# error.BranchNotFound
-
-Can't find any branch named %s in project %s.
-
-# error.NoTestsSpecified
-
-You must specify tests using the --tests flag if the --test-level flag is set to RunSpecifiedTests.
-
-# error.InvalidRunTests
-
-runTests can only be used with a testLevel of RunSpecifiedTests.

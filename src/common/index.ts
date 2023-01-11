@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2020, salesforce.com, inc.
+ * Copyright (c) 2022, salesforce.com, inc.
  * All rights reserved.
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-export { PromotePipelineResult, TestLevel } from './types';
-export { validateTestFlags } from './utils';
+export { ApiError, PipelineStage, PromotePipelineResult, TestLevel } from './types';
+export { fetchAndValidatePipelineStage, validateTestFlags } from './utils';
