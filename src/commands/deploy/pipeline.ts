@@ -6,17 +6,9 @@
  */
 
 import { Messages } from '@salesforce/core';
+import { SfCommand } from '@salesforce/sf-plugins-core';
 import { PromoteCommand } from '../../common/abstractPromote';
-import { PipelineStage, PromotePipelineResult, validateTestFlags } from '../../common';
-import {
-  branchName,
-  bundleVersionName,
-  deployAll,
-  devopsCenterProjectName,
-  requiredDoceOrgFlag,
-  specificTests,
-  testLevel,
-} from '../../common/flags';
+import { PipelineStage, PromotePipelineResult } from '../../common';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
@@ -24,26 +16,14 @@ const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'depl
 /**
  * Contains the logic to execute the sf deploy pipeline command.
  */
-export default class DeployPipeline extends PromoteCommand {
+export default class DeployPipeline extends PromoteCommand<typeof SfCommand> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly state = 'beta';
 
-  public static readonly flags = {
-    'branch-name': branchName,
-    'bundle-version-name': bundleVersionName,
-    'deploy-all': deployAll,
-    'devops-center-project-name': devopsCenterProjectName,
-    'devops-center-username': requiredDoceOrgFlag(),
-    tests: specificTests,
-    'test-level': testLevel(),
-  };
-
   public async run(): Promise<PromotePipelineResult> {
-    const { flags } = await this.parse(DeployPipeline);
-    validateTestFlags(flags['test-level'], flags.tests);
-    return this.executePromotion(flags['devops-center-project-name'], flags['branch-name'], flags);
+    return this.executePromotion();
   }
 
   /**

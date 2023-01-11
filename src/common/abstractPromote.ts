@@ -6,28 +6,52 @@
  */
 import { Org } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { fetchAndValidatePipelineStage, PipelineStage, PromotePipelineResult, TestLevel } from '../common';
+import { Flags, Interfaces } from '@oclif/core';
+import { fetchAndValidatePipelineStage, PipelineStage, PromotePipelineResult, validateTestFlags } from '../common';
+import {
+  branchName,
+  bundleVersionName,
+  deployAll,
+  devopsCenterProjectName,
+  requiredDoceOrgFlag,
+  specificTests,
+  testLevel,
+} from '../common/flags';
 
-export type PromoteFlags = {
-  'branch-name': string;
-  'bundle-version-name'?: string;
-  'deploy-all'?: boolean;
-  'devops-center-project-name': string;
-  'devops-center-username': Org;
-  'test-level'?: TestLevel;
-  tests?: string[];
-};
+export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
+  typeof PromoteCommand['globalFlags'] & T['flags']
+>;
 
-export abstract class PromoteCommand extends SfCommand<PromotePipelineResult> {
+export abstract class PromoteCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
+  // common flags that can be inherited by any command that extends PromoteCommand
+  public static globalFlags = {
+    'branch-name': branchName,
+    'bundle-version-name': bundleVersionName,
+    'deploy-all': deployAll,
+    'devops-center-project-name': devopsCenterProjectName,
+    'devops-center-username': requiredDoceOrgFlag(),
+    tests: specificTests,
+    'test-level': testLevel(),
+  };
+  protected flags!: Flags<T>;
   protected targetStageId: string;
 
-  protected async executePromotion(
-    projectName: string,
-    branchName: string,
-    flags: Partial<PromoteFlags>
-  ): Promise<PromotePipelineResult> {
-    const doceOrg: Org = await Org.create({ aliasOrUsername: flags['devops-center-username']?.getUsername() });
-    const pipelineStage: PipelineStage = await fetchAndValidatePipelineStage(doceOrg, projectName, branchName);
+  public async init(): Promise<void> {
+    await super.init();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { flags } = await this.parse(this.constructor as Interfaces.Command.Class);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    this.flags = flags;
+  }
+
+  protected async executePromotion(): Promise<PromotePipelineResult> {
+    validateTestFlags(this.flags['test-level'], this.flags.tests);
+    const doceOrg: Org = await Org.create({ aliasOrUsername: this.flags['devops-center-username']?.getUsername() });
+    const pipelineStage: PipelineStage = await fetchAndValidatePipelineStage(
+      doceOrg,
+      this.flags['devops-center-project-name'],
+      this.flags['branch-name']
+    );
     this.computeTargetStageId(pipelineStage);
 
     // hardcoded value so it compiles until main logic is implemented
