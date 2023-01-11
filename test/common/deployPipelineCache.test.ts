@@ -109,7 +109,7 @@ describe('deployPipelineCache', () => {
     expect(excThrown);
   });
 
-  it('stores the cache file in the .sf global directory for 3 days', async () => {
+  it('stores the cache file in the .sf global directory with a 3 day ttl', async () => {
     const options = DeployPipelineCache.getDefaultOptions();
     expect(options.isGlobal);
     expect(options.stateFolder).to.be.equal(Global.SF_STATE_FOLDER);
