@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, salesforce.com, inc.
+ * Copyright (c) 2022, salesforce.com, inc.
  * All rights reserved.
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
@@ -14,7 +14,7 @@ import {
   bundleVersionName,
   deployAll,
   devopsCenterProjectName,
-  devopsCenterUsername,
+  requiredDoceOrgFlag,
   specificTests,
   testLevel,
   async,
@@ -23,6 +23,9 @@ import {
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
 
+/**
+ * Contains the logic to execute the sf deploy pipeline command.
+ */
 export default class DeployPipeline extends SfCommand<PromotePipelineResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
@@ -34,7 +37,7 @@ export default class DeployPipeline extends SfCommand<PromotePipelineResult> {
     'bundle-version-name': bundleVersionName,
     'deploy-all': deployAll,
     'devops-center-project-name': devopsCenterProjectName,
-    'devops-center-username': devopsCenterUsername,
+    'devops-center-username': requiredDoceOrgFlag(),
     tests: specificTests,
     'test-level': testLevel(),
     async,
@@ -51,6 +54,7 @@ export default class DeployPipeline extends SfCommand<PromotePipelineResult> {
       await DeployPipelineCache.set(aorId, {});
     }
 
+    // hardcoded value so it compiles until main logic is implemented
     return { status: 'status' };
   }
 }

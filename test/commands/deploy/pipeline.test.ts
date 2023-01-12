@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, salesforce.com, inc.
+ * Copyright (c) 2022, salesforce.com, inc.
  * All rights reserved.
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
@@ -8,8 +8,31 @@
 import { expect, test } from '@oclif/test';
 import { TestContext } from '@salesforce/core/lib/testSetup';
 import { DeployPipelineCache } from '../../../src/common/deployPipelineCache';
+import * as sinon from 'sinon';
+import { Org } from '@salesforce/core';
+
+const DOCE_ORG = {
+  id: '1',
+  getOrgId() {
+    return '1';
+  },
+  getAlias() {
+    return ['doceOrg'];
+  },
+};
 
 describe('validate flags', () => {
+  let sandbox: sinon.SinonSandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sandbox.stub(Org, 'create' as any).returns(DOCE_ORG);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
   test
     .stdout()
     .stderr()

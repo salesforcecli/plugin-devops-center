@@ -12,6 +12,13 @@ import { TestLevel } from '../common';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
 
+/**
+ * @description validates the following:
+ * - if RunSpecifiedTests is selected, then it needs to indicate tests to run.
+ * - if other than RunSpecifiedTests is selected, then it can't indicate tests to run.
+ * @param testLevel selected test level
+ * @param tests specific tests to run
+ */
 export function validateTestFlags(testLevel: Nullable<TestLevel>, tests: Nullable<string[]>): void {
   if (testLevel === TestLevel.RunSpecifiedTests && (tests ?? []).length === 0) {
     throw messages.createError('error.NoTestsSpecified');
