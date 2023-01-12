@@ -57,6 +57,11 @@ export const bundleVersionName = Flags.string({
   description: messages.getMessage('promote.bundle-version-name.description'),
 });
 
+export const async = Flags.boolean({
+  description: messages.getMessage('promote.async.description'),
+  summary: messages.getMessage('promote.async.summary'),
+});
+
 /**
  * Custom flag for the target devops center org.
  * Makes this flag required and validates that passed in alias/username corresponds to an authenticated org.

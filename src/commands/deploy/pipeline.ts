@@ -8,6 +8,7 @@
 import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { PromotePipelineResult, validateTestFlags } from '../../common';
+import { DeployPipelineCache } from '../../common/deployPipelineCache';
 import {
   branchName,
   bundleVersionName,
@@ -16,6 +17,7 @@ import {
   requiredDoceOrgFlag,
   specificTests,
   testLevel,
+  async,
 } from '../../common/flags';
 
 Messages.importMessagesDirectory(__dirname);
@@ -38,11 +40,19 @@ export default class DeployPipeline extends SfCommand<PromotePipelineResult> {
     'devops-center-username': requiredDoceOrgFlag(),
     tests: specificTests,
     'test-level': testLevel(),
+    async,
   };
 
   public async run(): Promise<PromotePipelineResult> {
     const { flags } = await this.parse(DeployPipeline);
     validateTestFlags(flags['test-level'], flags.tests);
+
+    // TODO Timeout case
+    if (flags.async) {
+      // TODO Get the aorId
+      const aorId = 'TODO';
+      await DeployPipelineCache.set(aorId, {});
+    }
 
     // hardcoded value so it compiles until main logic is implemented
     return { status: 'status' };

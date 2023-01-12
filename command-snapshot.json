@@ -3,6 +3,7 @@
     "command": "deploy:pipeline",
     "plugin": "@salesforce/plugin-devops-center",
     "flags": [
+      "async",
       "branch-name",
       "bundle-version-name",
       "deploy-all",
