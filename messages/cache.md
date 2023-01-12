@@ -1,3 +1,3 @@
 # error.NoRecentAorId
 
-There are no recent aor IDs available.
+No job ID could be found. Verify that a pipeline promotion has been started.

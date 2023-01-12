@@ -13,14 +13,14 @@ Messages.importMessagesDirectory(__dirname);
 const cacheMessages = Messages.load('@salesforce/plugin-devops-center', 'cache', ['error.NoRecentAorId']);
 
 // For the moment we will just store the timestamp
-export type AORData = Record<string, never>;
+export type AsyncOperationData = Record<string, never>;
 
 /**
  * Caches the AOR data
  *
  * @author JuanStenghele-sf
  */
-export class DeployPipelineCache extends TTLConfig<TTLConfig.Options, AORData> {
+export class DeployPipelineCache extends TTLConfig<TTLConfig.Options, AsyncOperationData> {
   /**
    * Returns the cache's filename
    */
@@ -44,7 +44,7 @@ export class DeployPipelineCache extends TTLConfig<TTLConfig.Options, AORData> {
   /**
    * Caches the data sent
    */
-  public static async set(aorId: string, data: AORData): Promise<void> {
+  public static async set(aorId: string, data: AsyncOperationData): Promise<void> {
     const cache = await DeployPipelineCache.create();
     cache.set(aorId, data);
     await cache.write();
@@ -72,7 +72,7 @@ export class DeployPipelineCache extends TTLConfig<TTLConfig.Options, AORData> {
   /**
    * Returns the data associated with the aorId
    */
-  public get(aorId: string): TTLConfig.Entry<AORData> {
+  public get(aorId: string): TTLConfig.Entry<AsyncOperationData> {
     return super.get(aorId);
   }
 
