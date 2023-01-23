@@ -4,7 +4,7 @@ You must specify tests using the --tests flag if the --test-level flag is set to
 
 # error.InvalidRunTests
 
-runTests can only be used with a testLevel of RunSpecifiedTests.
+runTests can be used only with a testLevel of RunSpecifiedTests.
 
 # error.BranchNotFound
 

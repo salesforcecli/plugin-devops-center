@@ -69,7 +69,7 @@ describe('validate flags', () => {
     .it(
       'runs deploy pipeline indicating specific tests to run but with test level other than RunSpecifiedTests',
       (ctx) => {
-        expect(ctx.stderr).to.contain('runTests can only be used with a testLevel of RunSpecifiedTests.');
+        expect(ctx.stderr).to.contain('runTests can be used only with a testLevel of RunSpecifiedTests.');
       }
     );
 
