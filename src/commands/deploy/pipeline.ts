@@ -9,6 +9,7 @@ import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { PromoteCommand } from '../../common/abstractPromote';
 import { PipelineStage, PromotePipelineResult } from '../../common';
+import { DeployPipelineCache } from '../../common/deployPipelineCache';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
@@ -23,6 +24,12 @@ export default class DeployPipeline extends PromoteCommand<typeof SfCommand> {
   public static readonly state = 'beta';
 
   public async run(): Promise<PromotePipelineResult> {
+    // TODO Timeout case
+    if (flags.async) {
+      // TODO Get the aorId
+      const aorId = 'TODO';
+      await DeployPipelineCache.set(aorId, {});
+    }
     return this.executePromotion();
   }
 
