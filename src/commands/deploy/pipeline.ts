@@ -25,7 +25,7 @@ export default class DeployPipeline extends PromoteCommand<typeof SfCommand> {
 
   public async run(): Promise<PromotePipelineResult> {
     // TODO Timeout case
-    if (flags.async) {
+    if (this.flags.async) {
       // TODO Get the aorId
       const aorId = 'TODO';
       await DeployPipelineCache.set(aorId, {});

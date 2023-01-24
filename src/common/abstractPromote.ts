@@ -16,6 +16,7 @@ import {
   requiredDoceOrgFlag,
   specificTests,
   testLevel,
+  async,
 } from '../common/flags';
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
@@ -32,6 +33,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     'devops-center-username': requiredDoceOrgFlag(),
     tests: specificTests,
     'test-level': testLevel(),
+    async,
   };
   protected flags!: Flags<T>;
   protected targetStageId: string;

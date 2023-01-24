@@ -66,28 +66,29 @@ describe('deploy pipeline', () => {
         }
       );
 
-  test
-    .stdout()
-    .stderr()
-    .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunLocalTests', '-t=DummyTestClass'])
-    .it(
-      'runs deploy pipeline indicating specific tests to run but with test level other than RunSpecifiedTests',
-      (ctx) => {
-        expect(ctx.stderr).to.contain('runTests can be used only with a testLevel of RunSpecifiedTests.');
-      }
-    );
+    test
+      .stdout()
+      .stderr()
+      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunLocalTests', '-t=DummyTestClass'])
+      .it(
+        'runs deploy pipeline indicating specific tests to run but with test level other than RunSpecifiedTests',
+        (ctx) => {
+          expect(ctx.stderr).to.contain('runTests can be used only with a testLevel of RunSpecifiedTests.');
+        }
+      );
 
-  test
-    .stdout()
-    .stderr()
-    .do(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      executeCommandStub = sandbox.stub(PromoteCommand.prototype, 'executePromotion' as any);
-    })
-    .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests', '-t=DummyTestClass'])
-    .it('runs deploy pipeline with the correct flags and validation pass', (ctx) => {
-      expect(ctx.stderr).to.equal('');
-      expect(executeCommandStub.called).to.equal(true);
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        executeCommandStub = sandbox.stub(PromoteCommand.prototype, 'executePromotion' as any);
+      })
+      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests', '-t=DummyTestClass'])
+      .it('runs deploy pipeline with the correct flags and validation pass', (ctx) => {
+        expect(ctx.stderr).to.equal('');
+        expect(executeCommandStub.called).to.equal(true);
+      });
   });
 
   describe('cache', () => {
