@@ -9,6 +9,7 @@ import { expect, test } from '@oclif/test';
 import { TestContext } from '@salesforce/core/lib/testSetup';
 import * as sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import { PromoteCommand } from '../../../src/common/abstractPromote';
 import { DeployPipelineCache } from '../../../src/common/deployPipelineCache';
 
 const DOCE_ORG = {
@@ -23,6 +24,7 @@ const DOCE_ORG = {
 
 describe('deploy pipeline', () => {
   let sandbox: sinon.SinonSandbox;
+  let executeCommandStub: sinon.SinonStub;
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
@@ -71,16 +73,21 @@ describe('deploy pipeline', () => {
       .it(
         'runs deploy pipeline indicating specific tests to run but with test level other than RunSpecifiedTests',
         (ctx) => {
-          expect(ctx.stderr).to.contain('runTests can only be used with a testLevel of RunSpecifiedTests.');
+          expect(ctx.stderr).to.contain('runTests can be used only with a testLevel of RunSpecifiedTests.');
         }
       );
 
     test
       .stdout()
       .stderr()
+      .do(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        executeCommandStub = sandbox.stub(PromoteCommand.prototype, 'executePromotion' as any);
+      })
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests', '-t=DummyTestClass'])
       .it('runs deploy pipeline with the correct flags and validation pass', (ctx) => {
         expect(ctx.stderr).to.equal('');
+        expect(executeCommandStub.called).to.equal(true);
       });
   });
 
