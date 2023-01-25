@@ -117,7 +117,11 @@ describe('deploy pipeline', () => {
     test
       .stdout()
       .stderr()
-      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '--async'])
+      .do(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        executeCommandStub = sandbox.stub(PromoteCommand.prototype, 'executePromotion' as any);
+      })
+      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-c=doceOrg', '--async'])
       .it('cache the aorId when running deploy pipeline with the async flag', async () => {
         const cache = await DeployPipelineCache.create();
         const key = cache.resolveLatest();
