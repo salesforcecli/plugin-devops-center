@@ -83,17 +83,10 @@ export const requiredDoceOrgFlag = OclifFlags.custom({
  */
 const getOrgOrThrow = async (input?: string): Promise<Org> => {
   const aggregator = await ConfigAggregator.create({ customConfigMeta: ConfigMeta });
-  let org: Org;
-  try {
-    org = await Org.create({
-      aliasOrUsername: input ? input : aggregator.getInfo(ConfigVars.TARGET_DEVOPS_CENTER)?.value?.toString(),
-    });
-  } catch (e) {
-    if (!input) {
-      throw messages.createError('errors.NoDefaultDoceEnv');
-    } else {
-      throw e;
-    }
+  const alias = input ? input : aggregator.getInfo(ConfigVars.TARGET_DEVOPS_CENTER)?.value?.toString();
+  if (!alias) {
+    throw messages.createError('errors.NoDefaultDoceEnv');
   }
+  const org: Org = await Org.create({ aliasOrUsername: alias });
   return org;
 };

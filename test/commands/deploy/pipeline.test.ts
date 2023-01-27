@@ -8,7 +8,8 @@
 import { expect, test } from '@oclif/test';
 import { TestContext } from '@salesforce/core/lib/testSetup';
 import * as sinon from 'sinon';
-import { Org } from '@salesforce/core';
+import { ConfigAggregator, Org } from '@salesforce/core';
+import { ConfigVars } from '../../../src/configMeta';
 import { PromoteCommand } from '../../../src/common/abstractPromote';
 import { DeployPipelineCache } from '../../../src/common/deployPipelineCache';
 
@@ -30,6 +31,13 @@ describe('deploy pipeline', () => {
     sandbox = sinon.createSandbox();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sandbox.stub(Org, 'create' as any).returns(DOCE_ORG);
+    sandbox.stub(ConfigAggregator.prototype, 'getInfo').returns({
+      value: 'TARGET_DEVOPS_CENTER_ALIAS',
+      key: ConfigVars.TARGET_DEVOPS_CENTER,
+      isLocal: () => false,
+      isGlobal: () => true,
+      isEnvVar: () => false,
+    });
   });
 
   afterEach(() => {
@@ -117,6 +125,10 @@ describe('deploy pipeline', () => {
     test
       .stdout()
       .stderr()
+      .do(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        executeCommandStub = sandbox.stub(PromoteCommand.prototype, 'executePromotion' as any);
+      })
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '--async'])
       .it('cache the aorId when running deploy pipeline with the async flag', async () => {
         const cache = await DeployPipelineCache.create();

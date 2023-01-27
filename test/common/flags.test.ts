@@ -110,7 +110,7 @@ describe('requiredDoceOrgFlag', () => {
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.message).to.include(
-        'You must specify the DevOps Center org username by indicating the -c flag on the command line or by setting the --target-devops-center configuration variable.'
+        'You must specify the DevOps Center org username by indicating the -c flag on the command line or by setting the target-devops-center configuration variable.'
       );
     }
   });
@@ -132,6 +132,26 @@ describe('requiredDoceOrgFlag', () => {
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.message).to.include(`No authorization information found for ${invalidAlias}`);
+    }
+  });
+
+  it('fails when no alias is provided and the --target-devops-center config var is set but invalid', async () => {
+    const invalidTargetDevopsCenter = 'invalid-target-devops-center';
+    sandbox.stub(ConfigAggregator.prototype, 'getInfo').returns({
+      value: 'invalid-target-devops-center',
+      key: ConfigVars.TARGET_DEVOPS_CENTER,
+      isLocal: () => false,
+      isGlobal: () => true,
+      isEnvVar: () => false,
+    });
+    try {
+      await Parser.parse(['--requiredDoceOrg='], {
+        flags: { requiredDoceOrg: requiredDoceOrgFlag() },
+      });
+      assert.fail('This should have failed');
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(err.message).to.include(`No authorization information found for ${invalidTargetDevopsCenter}`);
     }
   });
 });
