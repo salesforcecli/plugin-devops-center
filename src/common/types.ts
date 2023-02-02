@@ -6,7 +6,8 @@
  */
 
 export type PromotePipelineResult = {
-  status: string;
+  jobId: string;
+  status?: string;
 };
 
 export type Pipeline = {

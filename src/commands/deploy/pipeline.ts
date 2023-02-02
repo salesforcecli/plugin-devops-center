@@ -9,7 +9,6 @@ import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { PromoteCommand } from '../../common/abstractPromote';
 import { PipelineStage, PromotePipelineResult } from '../../common';
-import { DeployPipelineCache } from '../../common/deployPipelineCache';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
@@ -24,23 +23,24 @@ export default class DeployPipeline extends PromoteCommand<typeof SfCommand> {
   public static readonly state = 'beta';
 
   public async run(): Promise<PromotePipelineResult> {
-    // TODO Timeout case
-    if (this.flags.async) {
-      // TODO Get the aorId
-      const aorId = 'TODO';
-      await DeployPipelineCache.set(aorId, {});
-    }
     return this.executePromotion();
   }
 
   /**
-   * Computes the target stage Id for deployOnly promotions. If the given stage has a previous stage
-   * then the target stage is the previous stage. If not the it means this is the
-   * first stage of the pipeline and target stage Id = Approved.
+   * Computes the source stage Id for deployOnly promotions. If the given stage has a previous stage
+   * then the source stage is the previous stage. If not the it means this is the
+   * first stage of the pipeline and source stage Id = Approved.
    */
-  protected computeTargetStageId(pipelineStage: PipelineStage): void {
-    this.targetStageId = pipelineStage?.sf_devops__Pipeline_Stages__r
+  protected computeSourceStageId(pipelineStage: PipelineStage): void {
+    this.sourceStageId = pipelineStage?.sf_devops__Pipeline_Stages__r
       ? pipelineStage.sf_devops__Pipeline_Stages__r.records[0].Id
       : 'Approved';
+  }
+
+  /**
+   * Adds a promote option so it performs an undeployed only promotion
+   */
+  protected addPromoteOptions(): void {
+    this.deployOptions = { ...this.deployOptions, undeployedOnly: true };
   }
 }
