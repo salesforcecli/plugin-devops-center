@@ -23,6 +23,7 @@ export abstract class DOCeStreaming {
    *
    * @param event The event we want to proccess (CDC)
    * @param processor The especific processor we want to use for the event
+   * @param idToInspect The object ID we want to spect
    */
   protected async startStream(
     event: string,
@@ -50,7 +51,9 @@ export abstract class DOCeStreaming {
     }
   }
 
-  // Returns the Id of the object we want to inspect
+  /**
+   * Returns the Id of the object we want to inspect
+   */
   protected getIdtoInspect(): string {
     return this.idToInspect;
   }

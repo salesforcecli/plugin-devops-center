@@ -14,6 +14,12 @@ export default class AsyncOpStreaming extends DOCeStreaming {
     super(org, wait);
   }
 
+  /**
+   * It sends the correct config to the streamer
+   *
+   * @param asyncOpId the Id of the AOR we want to inspect
+   * @returns
+   */
   public async startStreaming(asyncOpId: string): Promise<void | AnyJson> {
     return this.startStream(
       '/data/Async_Operation_Result__ChangeEvent',
@@ -24,11 +30,11 @@ export default class AsyncOpStreaming extends DOCeStreaming {
   }
 
   /**
+   * This is the processor for the AOR CDC
    *
    * @param event The event JSON from the CDC
    * @returns StatusResult
    */
-  // eslint-disable-next-line class-methods-use-this
   private startAsyncOpStreamProcessor(event: JsonMap): StatusResult {
     const pl = ensureJsonMap(event.payload);
 
