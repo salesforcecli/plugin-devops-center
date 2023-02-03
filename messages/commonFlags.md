@@ -62,11 +62,11 @@ Run the command asynchronously.
 
 # promote.wait.description
 
-If the command continues to run after the wait period, the CLI returns control of the terminal window to you. To resume watching the deploy operation, run this command again. To check the status of the deploy operation, run "sf deploy pipeline report".
+If the command continues to run after the wait period, the CLI returns control of the terminal window to you and returns the job ID.
 
 # promote.wait.summary
 
-Number of minutes to wait for the command to complete and display results.
+Number of minutes to wait for command to complete and display results.
 
 # flags.targetDoceOrg.summary
 
