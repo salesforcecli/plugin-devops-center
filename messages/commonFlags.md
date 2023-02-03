@@ -74,4 +74,4 @@ Username or alias of the target org.
 
 # errors.NoDefaultDoceEnv
 
-You must specify the DevOps Center org username by indicating the -c flag on the command line or by setting the --target-devops-center configuration variable.
+You must specify the DevOps Center org username by indicating the -c flag on the command line or by setting the target-devops-center configuration variable.
