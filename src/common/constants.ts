@@ -6,3 +6,4 @@
  */
 
 export const REST_PROMOTE_BASE_URL = '/services/apexrest/sf_devops/pipeline/promote/v1/';
+export const APPROVED = 'Approved';

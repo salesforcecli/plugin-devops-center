@@ -9,7 +9,13 @@ import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
 import { HttpRequest } from 'jsforce';
 import { DeployPipelineCache } from '../common/deployPipelineCache';
-import { fetchAndValidatePipelineStage, PipelineStage, PromotePipelineResult, validateTestFlags } from '../common';
+import {
+  fetchAndValidatePipelineStage,
+  PipelineStage,
+  PromoteOptions,
+  PromotePipelineResult,
+  validateTestFlags,
+} from '../common';
 import {
   branchName,
   bundleVersionName,
@@ -26,14 +32,6 @@ export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
   (typeof PromoteCommand)['globalFlags'] & T['flags']
 >;
 
-export type PromoteOptions = {
-  fullDeploy: boolean;
-  testLevel: string;
-  runTests: string;
-  undeployedOnly: boolean;
-  checkDeploy: boolean;
-  deploymentId: string;
-};
 export abstract class PromoteCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
   // common flags that can be inherited by any command that extends PromoteCommand
   public static globalFlags = {
@@ -47,9 +45,9 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     async,
   };
   protected flags!: Flags<T>;
-  protected sourceStageId: string;
-  protected deployOptions: Partial<PromoteOptions>;
-  private projectId: string;
+  private targetStage: PipelineStage;
+  private sourceStageId: string;
+  private deployOptions: Partial<PromoteOptions>;
 
   public async init(): Promise<void> {
     await super.init();
@@ -62,13 +60,12 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
   protected async executePromotion(): Promise<PromotePipelineResult> {
     validateTestFlags(this.flags['test-level'], this.flags.tests);
     const doceOrg: Org = this.flags['devops-center-username'] as Org;
-    const pipelineStage: PipelineStage = await fetchAndValidatePipelineStage(
+    this.targetStage = await fetchAndValidatePipelineStage(
       doceOrg,
       this.flags['devops-center-project-name'],
       this.flags['branch-name']
     );
-    this.projectId = pipelineStage.sf_devops__Pipeline__r.sf_devops__Project__c;
-    this.computeSourceStageId(pipelineStage);
+    this.sourceStageId = this.getSourceStageId();
     const asyncOperationId: string = await this.requestPromotion(doceOrg);
 
     if (this.flags.async) {
@@ -82,37 +79,46 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     return { jobId: asyncOperationId };
   }
 
+  protected getTargetStage(): PipelineStage {
+    return this.targetStage;
+  }
+
   private async requestPromotion(targetOrg: Org): Promise<string> {
+    this.buildPromoteOptions();
     const req: HttpRequest = {
       method: 'POST',
-      url: `${REST_PROMOTE_BASE_URL as string}${this.projectId}/pipelineName/${this.sourceStageId}`,
+      url: `${REST_PROMOTE_BASE_URL as string}${
+        this.targetStage.sf_devops__Pipeline__r.sf_devops__Project__c
+      }/pipelineName/${this.sourceStageId}`,
       body: JSON.stringify({
         changeBundleName: this.flags['bundle-version-name'],
-        promoteOptions: this.buildPromoteOptions(),
+        promoteOptions: this.deployOptions,
       }),
     };
     return targetOrg.getConnection().request(req);
   }
 
-  private buildPromoteOptions(): Partial<PromoteOptions> {
-    // set base promote options
+  private buildPromoteOptions(): void {
     this.deployOptions = {
       fullDeploy: this.flags['deploy-all'],
       testLevel: this.flags['test-level'] ?? 'Default',
       runTests: this.flags['tests'] ? this.flags['tests'].join(',') : undefined,
+      // get more promote options from the concrete implementation if needed
+      ...this.getPromoteOptions(),
     };
-    // ask concrete implementation to add more promote options if needed
-    this.addPromoteOptions();
-    return this.deployOptions;
   }
 
   /**
    * Knows how to compute the target pipeline stage Id based on the type of promotion.
+   *
+   * @returns: string. It is the source stage Id.
    */
-  protected abstract computeSourceStageId(pipelineStage: PipelineStage): void;
+  protected abstract getSourceStageId(): string;
 
   /**
-   * Allows concrete implementations to add promote optiones on top of the base ones
+   * Returns the specific promote options specific for every concrete implementations.
+   *
+   * @returns: Partial<PromoteOptions>.
    */
-  protected abstract addPromoteOptions(): void;
+  protected abstract getPromoteOptions(): Partial<PromoteOptions>;
 }
