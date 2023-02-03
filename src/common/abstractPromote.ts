@@ -5,6 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Org } from '@salesforce/core';
+import { Duration } from '@salesforce/kit';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
 import { fetchAndValidatePipelineStage, PipelineStage, PromotePipelineResult, validateTestFlags } from '../common';
@@ -17,10 +18,12 @@ import {
   specificTests,
   testLevel,
   async,
+  wait,
 } from '../common/flags';
+import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
-  typeof PromoteCommand['globalFlags'] & T['flags']
+  (typeof PromoteCommand)['globalFlags'] & T['flags']
 >;
 
 export abstract class PromoteCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
@@ -34,6 +37,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     tests: specificTests,
     'test-level': testLevel(),
     async,
+    wait,
   };
   protected flags!: Flags<T>;
   protected targetStageId: string;
@@ -55,6 +59,17 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       this.flags['branch-name']
     );
     this.computeTargetStageId(pipelineStage);
+
+    if (this.flags.async) {
+      // Empty waiting for logic
+      // We just return the aorId here
+      return { status: 'asyncStatus' };
+    }
+
+    const waitTimeout: Duration = this.flags.wait;
+    const streamer: AsyncOpStreaming = new AsyncOpStreaming(doceOrg, waitTimeout);
+    // harcoded value for the AOR until we get a real aorID
+    await streamer.startStreaming('fakeID');
 
     // hardcoded value so it compiles until main logic is implemented
     return { status: 'status' };

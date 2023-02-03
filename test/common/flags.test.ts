@@ -9,8 +9,9 @@ import { assert, expect } from 'chai';
 import * as sinon from 'sinon';
 import { Parser } from '@oclif/core';
 import { ConfigAggregator, Org } from '@salesforce/core';
+import { Duration } from '@salesforce/kit';
 import { ConfigVars } from '../../src/configMeta';
-import { requiredDoceOrgFlag } from '../../src/common/flags';
+import { requiredDoceOrgFlag, wait } from '../../src/common/flags';
 
 const TARGET_DEVOPS_CENTER_ALIAS = 'target-devops-center';
 const MOCK_TARGET_DEVOPS_CENTER = {
@@ -69,7 +70,7 @@ describe('requiredDoceOrgFlag', () => {
     expect(out.flags.requiredDoceOrg).to.deep.equal(MOCK_TARGET_DEVOPS_CENTER);
   });
 
-  it('returns the org that correpsonds to the alias provided and that overides the --target-devops-center org', async () => {
+  it('returns the org that corresponds to the alias provided and that overides the --target-devops-center org', async () => {
     sandbox
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .stub(Org, 'create' as any)
@@ -133,5 +134,33 @@ describe('requiredDoceOrgFlag', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.message).to.include(`No authorization information found for ${invalidAlias}`);
     }
+  });
+});
+
+describe('waitFlag', () => {
+  it('errors when input value < min value(3)', async () => {
+    try {
+      // wrong value provided < 3
+      await Parser.parse(['--wait=0'], {
+        flags: { wait },
+      });
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(err.message).to.include('The value must be between 3 and undefined (inclusive).');
+    }
+  });
+
+  it('returns the correct value ', async () => {
+    const out = await Parser.parse(['--wait=4'], {
+      flags: { wait },
+    });
+    expect(out.flags.wait).to.deep.equal(Duration.minutes(4));
+  });
+
+  it('returns the default value ', async () => {
+    const out = await Parser.parse([], {
+      flags: { wait },
+    });
+    expect(out.flags.wait).to.deep.equal(wait.default);
   });
 });

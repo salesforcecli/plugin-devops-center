@@ -6,6 +6,7 @@
  */
 
 import { ConfigAggregator, Messages, Org } from '@salesforce/core';
+import { Duration } from '@salesforce/kit';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Flags as OclifFlags } from '@oclif/core';
 import { TestLevel } from '../common';
@@ -60,6 +61,23 @@ export const bundleVersionName = Flags.string({
 export const async = Flags.boolean({
   description: messages.getMessage('promote.async.description'),
   summary: messages.getMessage('promote.async.summary'),
+  exclusive: ['wait'],
+});
+
+/**
+ * Wait flag
+ * This is used to determine how many minutes we are going to stream results before giving back the control of the terminal to the user.
+ */
+export const wait = Flags.duration({
+  unit: 'minutes',
+  char: 'w',
+  summary: messages.getMessage('promote.wait.summary'),
+  description: messages.getMessage('promote.wait.description'),
+  defaultValue: 33,
+  default: Duration.minutes(33),
+  helpValue: '<minutes>',
+  min: 3,
+  exclusive: ['async'],
 });
 
 /**
