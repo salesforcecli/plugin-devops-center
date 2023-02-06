@@ -39,7 +39,7 @@ To use your plugin, run using the local `./bin/dev` or `./bin/dev.cmd` file.
 
 ```bash
 # Run using local run file.
-./bin/dev hello world
+./bin/dev deploy pipeline
 ```
 
 There should be no differences when running via the Salesforce CLI or using the local run file. However, it can be useful to link the plugin to do some additional testing or run your commands from anywhere on your machine.
@@ -54,3 +54,94 @@ sf plugins
 ## Commands
 
 <!-- commands -->
+
+- [`sf deploy pipeline`](#sf-deploy-pipeline)
+
+## `sf deploy pipeline`
+
+Deploy changes from a branch to the pipeline stage’s org.
+
+```
+USAGE
+$ sf deploy pipeline [--json] [-c <value>] [-p <value>] [-b <value>] [-v <value>] [-a] [--async | -w <value>] [--concise | --verbose]
+    [-t <value>] [-l NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg]
+
+  -a, --deploy-all                                Deploy all metadata in the branch.
+  -b, --branch-name=<value>                       Name of the branch in the source control repository from which to deploy changes to the stage’s org.
+  -c, --devops-center-username=<value>            Username or alias for the DevOps Center org.
+  -l, --test-level=<option>                       [default: NoTestRun] Deployment Apex testing level.
+                                                  <options: NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg>
+  -p, --devops-center-project-name=<value>        Name of the DevOps Center project.
+  -t, --tests=<value>...                          Apex tests to run when --test-level is RunSpecifiedTests.
+  -v, --bundle-version-name=<value>               Version name of the bundle.
+  -w, --wait=<minutes>                            Number of minutes to wait for command to complete and display results.
+  --async                                         Run the command asynchronously.
+  --concise                                       Show concise output of the deploy result.
+  --verbose                                       Show verbose output of the deploy result.
+
+GLOBAL FLAGS
+  --json  Format output as json
+
+DESCRIPTION
+Before you run this command, changes in the branch must be merged in the source control repository
+
+EXAMPLES
+Deploy changes in the Staging branch to the Staging environment (sandbox), if the previous stage is the bundling stage:
+
+  $ sf deploy pipeline —devops-center-project-name “Recruiting App” —branch-name staging —devops-center-username MyStagingSandbox —bundle-version-name 1.0
+
+Deploy all changes in the main branch to the release environment:
+
+  $ sf deploy pipeline —devops-center-project-name “Recruiting App” —branch-name main —devops-center-username MyReleaseOrg —deploy-all
+
+FLAG DESCRIPTIONS
+-a, --deploy-all  Deploy all metadata in the branch
+
+  If you don’t specify this flag, only changes in the stage’s branch are deployed.
+
+-b, --branch-name=<value> Name of the branch in the source control repository from which to deploy changes to the stage’s org.
+
+-c, --devops-center-username=<value> Username or alias for the DevOps Center org.
+
+-l, --test-level=NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg  Deployment Apex testing level.
+
+    Valid values are:
+
+    - NoTestRun — No tests are run. This test level applies only to deployments to development environments, such as
+    sandbox, Developer Edition, or trial orgs. This test level is the default for development environments.
+
+    - RunSpecifiedTests — Runs only the tests that you specify with the --run-tests flag. Code coverage requirements
+    differ from the default coverage requirements when using this test level. Executed tests must comprise a minimum of
+    75% code coverage for each class and trigger in the deployment package. This coverage is computed for each class and
+    trigger individually and is different than the overall coverage percentage.
+
+    - RunLocalTests — All tests in your org are run, except the ones that originate from installed managed and unlocked
+    packages. This test level is the default for production deployments that include Apex classes or triggers.
+
+    - RunAllTestsInOrg — All tests in your org are run, including tests of managed packages.
+
+    If you don’t specify a test level, the default behavior depends on the contents of your deployment package. For more
+    information, see [Running Tests in a
+    Deployment](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_deploy_running_tests.htm)
+    in the "Metadata API Developer Guide".
+
+-p, --devops-center-project-name=<value> Name of the DevOps Center project.
+
+-t, --tests=<value>... Apex tests to run when --test-level is RunSpecifiedTests.
+
+  Separate multiple test names with commas, and enclose the entire flag value in double quotes if a test contains a space.
+
+-v, --bundle-version-name=<value> Version name of the bundle
+
+  You must indicate the bundle version if deploying to the environment that correspond to the first stage after the bundling stage.
+
+-w, --wait=<minutes> Number of minutes to wait for command to complete and display results.
+
+  If the command continues to run after the wait period, the CLI returns control of the terminal window to you and returns the job ID.
+  To check the status of the deploy operation, run "sf deploy pipeline report".
+
+--async  Run the command asynchronously.
+
+  The command immediately returns the job ID and control of the terminal to you. This way, you can continue to use the CLI. To resume the deployment,
+  run "sf deploy pipeline resume". To check the status of the deployment, run "sf deploy pipeline report".
+```
