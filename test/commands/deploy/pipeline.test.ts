@@ -235,7 +235,7 @@ describe('deploy pipeline', () => {
         '-b=testBranch',
         '-a',
         '-l=RunSpecifiedTests',
-        '-t=DummyTest',
+        '-t=DummyTest_1,DummyTest_2,DummyTest_3',
         '-v=DummyChangeBundleName',
       ])
       .it('correctly builds the promote options passed using flags', () => {
@@ -247,7 +247,7 @@ describe('deploy pipeline', () => {
         const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
         expect(requestArgument.body).to.contain('"fullDeploy":true');
         expect(requestArgument.body).to.contain('"testLevel":"RunSpecifiedTests"');
-        expect(requestArgument.body).to.contain('"runTests":"DummyTest"');
+        expect(requestArgument.body).to.contain('"runTests":"DummyTest_1,DummyTest_2,DummyTest_3"');
         expect(requestArgument.body).to.contain('"changeBundleName":"DummyChangeBundleName"');
       });
 
@@ -341,5 +341,36 @@ describe('deploy pipeline', () => {
           }
         );
     });
+
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        // mock the pipeline stage record
+        pipelineStageMock = {
+          Id: firstStageId,
+          sf_devops__Branch__r: {
+            sf_devops__Name__c: 'mockBranchName',
+          },
+          sf_devops__Pipeline__r: {
+            sf_devops__Project__c: 'mockProjectId',
+          },
+          sf_devops__Pipeline_Stages__r: undefined,
+        };
+        fetchAndValidatePipelineStageStub = sandbox
+          .stub(Utils, 'fetchAndValidatePipelineStage')
+          .resolves(pipelineStageMock);
+        requestMock = sinon.stub();
+      })
+      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+      .it('correctly sets the test level as deault when no test level is provided by the user', () => {
+        // verify we made the request
+        expect(requestMock.called).to.equal(true);
+        // now that we know the request was made
+        // we can get the call argument
+        // and validate its values
+        const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
+        expect(requestArgument.body).to.contain('"testLevel":"Default"');
+      });
   });
 });
