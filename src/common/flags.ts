@@ -73,6 +73,7 @@ export const requiredDoceOrgFlag = OclifFlags.custom({
   parse: async (input: string | undefined) => getOrgOrThrow(input),
   default: async () => getOrgOrThrow(),
   defaultHelp: async () => (await getOrgOrThrow())?.getUsername(),
+  required: true,
 });
 
 /**
