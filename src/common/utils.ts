@@ -32,6 +32,13 @@ export function validateTestFlags(testLevel: Nullable<TestLevel>, tests: Nullabl
  *
  * Query the target org to get a pipeline stage filtering by project name and branch name.
  * Also uses the same query to validate that Devops Center is installed in the target org.
+ *
+ * @param targetOrg Org. Target org.
+ * @param projectName string. Name of the project.
+ * @param branchName string. Name of the branch.
+ * @throws if Devops Center is not installed in the target org.
+ * @throws if it cant' find the given project.
+ * @throws if it cant' find the a pipeline stge that matches the given branch.
  */
 export async function fetchAndValidatePipelineStage(
   targetOrg: Org,

@@ -7,7 +7,15 @@
 import { Org } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
-import { fetchAndValidatePipelineStage, PipelineStage, PromotePipelineResult, validateTestFlags } from '../common';
+import { HttpRequest } from 'jsforce';
+import { DeployPipelineCache } from '../common/deployPipelineCache';
+import {
+  fetchAndValidatePipelineStage,
+  PipelineStage,
+  PromoteOptions,
+  PromotePipelineResult,
+  validateTestFlags,
+} from '../common';
 import {
   branchName,
   bundleVersionName,
@@ -18,9 +26,10 @@ import {
   testLevel,
   async,
 } from '../common/flags';
+import { REST_PROMOTE_BASE_URL } from './constants';
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
-  typeof PromoteCommand['globalFlags'] & T['flags']
+  (typeof PromoteCommand)['globalFlags'] & T['flags']
 >;
 
 export abstract class PromoteCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
@@ -36,7 +45,9 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     async,
   };
   protected flags!: Flags<T>;
-  protected targetStageId: string;
+  private targetStage: PipelineStage;
+  private sourceStageId: string;
+  private deployOptions: Partial<PromoteOptions>;
 
   public async init(): Promise<void> {
     await super.init();
@@ -48,20 +59,66 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
 
   protected async executePromotion(): Promise<PromotePipelineResult> {
     validateTestFlags(this.flags['test-level'], this.flags.tests);
-    const doceOrg: Org = await Org.create({ aliasOrUsername: this.flags['devops-center-username']?.getUsername() });
-    const pipelineStage: PipelineStage = await fetchAndValidatePipelineStage(
+    const doceOrg: Org = this.flags['devops-center-username'] as Org;
+    this.targetStage = await fetchAndValidatePipelineStage(
       doceOrg,
       this.flags['devops-center-project-name'],
       this.flags['branch-name']
     );
-    this.computeTargetStageId(pipelineStage);
+    this.sourceStageId = this.getSourceStageId();
+    const asyncOperationId: string = await this.requestPromotion(doceOrg);
 
-    // hardcoded value so it compiles until main logic is implemented
-    return { status: 'status' };
+    if (this.flags.async) {
+      await DeployPipelineCache.set(asyncOperationId, {});
+      // TODO display async message
+    }
+
+    // TODO: move this to logger service
+    this.log(`Job ID: ${asyncOperationId}`);
+
+    return { jobId: asyncOperationId };
+  }
+
+  protected getTargetStage(): PipelineStage {
+    return this.targetStage;
+  }
+
+  private async requestPromotion(targetOrg: Org): Promise<string> {
+    this.buildPromoteOptions();
+    const req: HttpRequest = {
+      method: 'POST',
+      url: `${REST_PROMOTE_BASE_URL as string}${
+        this.targetStage.sf_devops__Pipeline__r.sf_devops__Project__c
+      }/pipelineName/${this.sourceStageId}`,
+      body: JSON.stringify({
+        changeBundleName: this.flags['bundle-version-name'],
+        promoteOptions: this.deployOptions,
+      }),
+    };
+    return targetOrg.getConnection().request(req);
+  }
+
+  private buildPromoteOptions(): void {
+    this.deployOptions = {
+      fullDeploy: this.flags['deploy-all'],
+      testLevel: this.flags['test-level'] ?? 'Default',
+      runTests: this.flags['tests'] ? this.flags['tests'].join(',') : undefined,
+      // get more promote options from the concrete implementation if needed
+      ...this.getPromoteOptions(),
+    };
   }
 
   /**
    * Knows how to compute the target pipeline stage Id based on the type of promotion.
+   *
+   * @returns: string. It is the source stage Id.
    */
-  protected abstract computeTargetStageId(pipelineStage: PipelineStage): void;
+  protected abstract getSourceStageId(): string;
+
+  /**
+   * Returns the specific promote options specific for every concrete implementations.
+   *
+   * @returns: Partial<PromoteOptions>.
+   */
+  protected abstract getPromoteOptions(): Partial<PromoteOptions>;
 }
