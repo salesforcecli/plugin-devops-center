@@ -62,7 +62,7 @@ Run the command asynchronously.
 
 # promote.wait.description
 
-If the command continues to run after the wait period, the CLI returns control of the terminal window to you and returns the job ID.
+If the command continues to run after the wait period, the CLI returns control of the terminal window to you and returns the job ID. To check the status of the deploy operation, run "sf deploy pipeline report".
 
 # promote.wait.summary
 

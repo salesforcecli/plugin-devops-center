@@ -4,8 +4,7 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { Org } from '@salesforce/core';
-import { Duration } from '@salesforce/kit';
+import { Org, SfError, Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
 import { fetchAndValidatePipelineStage, PipelineStage, PromotePipelineResult, validateTestFlags } from '../common';
@@ -21,6 +20,9 @@ import {
   wait,
 } from '../common/flags';
 import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
+
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
   (typeof PromoteCommand)['globalFlags'] & T['flags']
@@ -66,13 +68,26 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       return { status: 'asyncStatus' };
     }
 
-    const waitTimeout: Duration = this.flags.wait;
-    const streamer: AsyncOpStreaming = new AsyncOpStreaming(doceOrg, waitTimeout);
     // harcoded value for the AOR until we get a real aorID
-    await streamer.startStreaming('fakeID');
+    const streamer: AsyncOpStreaming = new AsyncOpStreaming(doceOrg, this.flags.wait, 'AORID');
+    await streamer.startStreaming();
 
     // hardcoded value so it compiles until main logic is implemented
     return { status: 'status' };
+  }
+
+  /**
+   * Default function for catching commands errors.
+   *
+   * @param error
+   * @returns
+   */
+  protected catch(error: Error | SfError): Promise<SfCommand.Error> {
+    if (error.name.includes('GenericTimeoutError')) {
+      const err = messages.createError('error.ClientTimeout');
+      return super.catch({ ...error, name: err.name, message: err.message, code: err.code });
+    }
+    return super.catch(error);
   }
 
   /**
