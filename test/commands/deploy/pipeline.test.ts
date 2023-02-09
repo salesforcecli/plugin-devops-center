@@ -100,8 +100,8 @@ describe('deploy pipeline', () => {
 
     test
       .do(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .stub(PromoteCommand.prototype, 'executePromotion' as any)
           .throwsException({ name: 'GenericTimeoutError' });
       })
