@@ -97,6 +97,22 @@ describe('deploy pipeline', () => {
         expect(ctx.stderr).to.equal('');
         expect(executeCommandStub.called).to.equal(true);
       });
+
+    test
+      .do(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox
+          .stub(PromoteCommand.prototype, 'executePromotion' as any)
+          .throwsException({ name: 'GenericTimeoutError' });
+      })
+      .stdout()
+      .stderr()
+      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '--wait=3'])
+      .it('runs deploy:pipeline and handles a GenericTimeoutError', (ctx) => {
+        expect(ctx.stderr).to.contain(
+          'The command has timed out, although the deployment is still running. To check the status of the deploy operation, run "sf deploy pipeline report".'
+        );
+      });
   });
 
   describe('cache', () => {

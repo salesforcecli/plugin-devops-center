@@ -61,7 +61,6 @@ export const bundleVersionName = Flags.string({
 export const async = Flags.boolean({
   description: messages.getMessage('promote.async.description'),
   summary: messages.getMessage('promote.async.summary'),
-  exclusive: ['wait'],
 });
 
 /**

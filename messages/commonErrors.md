@@ -17,7 +17,3 @@ The %s project doesn't exist. Specify a valid project name and try again.
 # error.DevopsAppNotInstalled
 
 The DevOps Center app wasn't found in the specified org. Verify the org username and try again.
-
-# error.ClientTimeout
-
-The client has timed out. Use the corresponding report command to resume watching this operation.

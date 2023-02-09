@@ -15,3 +15,7 @@ Before you run this command, changes in the branch must be merged in the source 
 - Deploy all changes in the main branch to the release environment:
 
   <%= config.bin %> <%= command.id %> --devops-center-project-name “Recruiting App” --branch-name main --devops-center-username MyReleaseOrg --deploy-all
+
+# error.ClientTimeout
+
+The command has timed out, although the deployment is still running. To check the status of the deploy operation, run "sf deploy pipeline report".
