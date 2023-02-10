@@ -83,7 +83,7 @@ GLOBAL FLAGS
   --json  Format output as json
 
 DESCRIPTION
-Before you run this command, changes in the branch must be merged in the source control repository
+Before you run this command, changes in the branch must be merged in the source control repository.
 
 EXAMPLES
 Deploy changes in the Staging branch to the Staging environment (sandbox), if the previous stage is the bundling stage:
@@ -133,7 +133,7 @@ FLAG DESCRIPTIONS
 
 -v, --bundle-version-name=<value> Version name of the bundle
 
-  You must indicate the bundle version if deploying to the environment that correspond to the first stage after the bundling stage.
+  You must indicate the bundle version if deploying to the environment that corresponds to the first stage after the bundling stage.
 
 -w, --wait=<minutes> Number of minutes to wait for command to complete and display results.
 
