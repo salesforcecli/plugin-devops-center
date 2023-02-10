@@ -6,7 +6,8 @@
  */
 
 export type PromotePipelineResult = {
-  status: string;
+  jobId: string;
+  status?: string;
 };
 
 export type Pipeline = {
@@ -39,3 +40,12 @@ export interface ApiError extends Error {
   errorCode: string;
   name: string;
 }
+
+export type PromoteOptions = {
+  fullDeploy: boolean;
+  testLevel: string;
+  runTests: string;
+  undeployedOnly: boolean;
+  checkDeploy: boolean;
+  deploymentId: string;
+};
