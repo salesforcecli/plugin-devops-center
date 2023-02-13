@@ -93,6 +93,30 @@ export const requiredDoceOrgFlag = OclifFlags.custom({
   required: true,
 });
 
+export const concise = Flags.boolean({
+  summary: messages.getMessage('flags.concise.summary'),
+  exclusive: ['verbose'],
+});
+
+export const verbose = Flags.boolean({
+  summary: messages.getMessage('flags.verbose.summary'),
+  exclusive: ['verbose'],
+});
+
+export const jobId = Flags.salesforceId({
+  char: 'i',
+  description: messages.getMessage('flags.job-id.description'),
+  summary: messages.getMessage('flags.job-id.summary'),
+  exactlyOne: ['use-most-recent', 'job-id'],
+});
+
+export const useMostRecent = Flags.boolean({
+  char: 'r',
+  description: messages.getMessage('flags.use-most-recent.description'),
+  summary: messages.getMessage('flags.use-most-recent.summary'),
+  exactlyOne: ['use-most-recent', 'job-id'],
+});
+
 /**
  *
  * @param input alias/username of an org

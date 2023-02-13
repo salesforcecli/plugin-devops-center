@@ -11,7 +11,7 @@ import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
 import { PromotePipelineResult } from '../../../common';
 import AsyncOpStreaming from '../../../streamer/processors/asyncOpStream';
-import { requiredDoceOrgFlag } from '../../../common/flags';
+import { concise, jobId, requiredDoceOrgFlag, verbose, useMostRecent, wait } from '../../../common/flags';
 import { DeployPipelineCache } from '../../../common/deployPipelineCache';
 import { isNotResumable } from '../../../common/abstractPromote';
 import { AsyncOperationResult } from '../../../common/types';
@@ -27,43 +27,18 @@ export default class DeployPipelineResume extends SfCommand<PromotePipelineResul
   public static readonly state = 'beta';
 
   public static readonly flags = {
-    concise: Flags.boolean({
-      summary: messages.getMessage('flags.concise.summary'),
-      exclusive: ['verbose'],
-    }),
     'devops-center-username': requiredDoceOrgFlag(),
-    'job-id': Flags.salesforceId({
-      char: 'i',
-      startsWith: '0Af',
-      description: messages.getMessage('flags.job-id.description'),
-      summary: messages.getMessage('flags.job-id.summary'),
-      exactlyOne: ['use-most-recent', 'job-id'],
-    }),
-    'use-most-recent': Flags.boolean({
-      char: 'r',
-      description: messages.getMessage('flags.use-most-recent.description'),
-      summary: messages.getMessage('flags.use-most-recent.summary'),
-      exactlyOne: ['use-most-recent', 'job-id'],
-    }),
-    verbose: Flags.boolean({
-      summary: messages.getMessage('flags.verbose.summary'),
-      exclusive: ['concise'],
-    }),
-    wait: Flags.duration({
-      char: 'w',
-      summary: messages.getMessage('flags.wait.summary'),
-      description: messages.getMessage('flags.wait.description'),
-      unit: 'minutes',
-      helpValue: '<minutes>',
-      min: 3,
-      defaultValue: 33,
-    }),
+    'job-id': jobId,
+    'use-most-recent': useMostRecent,
+    concise,
+    verbose,
+    wait,
   };
 
   public async run(): Promise<PromotePipelineResult> {
     const { flags } = await this.parse(DeployPipelineResume);
     const doceOrg: Org = flags['devops-center-username'] as Org;
-    // const cache = await DeployPipelineCache.create();
+
     const asyncJobId = (await DeployPipelineCache.create()).resolveLatest(flags['use-most-recent'], flags['job-id']);
     const asyncJob: AsyncOperationResult = await getAsyncOperationResult(doceOrg.getConnection(), asyncJobId);
 
@@ -73,22 +48,9 @@ export default class DeployPipelineResume extends SfCommand<PromotePipelineResul
 
     this.log('*** Resuming Deployment ***');
     this.log(`Deploy ID: ${bold(asyncJobId)}`);
-    // new DeployProgress(deploy, this.jsonEnabled()).start();
-
-    // const result = await deploy.pollStatus(500, wait.seconds);
-    // process.exitCode = determineExitCode(result);
-
-    // const formatter = new DeployResultFormatter(result, {
-    //   ...flags,
-    //   verbose: deployOpts.verbose,
-    //   concise: deployOpts.concise,
-    // });
-
-    const streamer: AsyncOpStreaming = new AsyncOpStreaming(doceOrg, flags.wait as Duration, asyncJobId);
+    const streamer: AsyncOpStreaming = new AsyncOpStreaming(doceOrg, flags.wait, asyncJobId);
     await streamer.startStreaming();
-    return { jobId: '' };
+
+    return { jobId: asyncJobId };
   }
 }
-
-// TODO:
-// Job ID 0AfDS00002pON6B0AW is not resumable with status Succeeded.
