@@ -17,3 +17,7 @@ The %s project doesn't exist. Specify a valid project name and try again.
 # error.DevopsAppNotInstalled
 
 The DevOps Center app wasn't found in the specified org. Verify the org username and try again.
+
+# error.InvalidAorId
+
+No job found for ID: %s.

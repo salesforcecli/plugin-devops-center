@@ -29,10 +29,15 @@ import {
 } from '../common/flags';
 import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
 import { REST_PROMOTE_BASE_URL } from './constants';
+import { AsyncOperationStatus } from './types';
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
   (typeof PromoteCommand)['globalFlags'] & T['flags']
 >;
+
+export function isNotResumable(status: AsyncOperationStatus): boolean {
+  return [AsyncOperationStatus.Completed, AsyncOperationStatus.Error, AsyncOperationStatus.Ignored].includes(status);
+}
 
 export abstract class PromoteCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
   // common flags that can be inherited by any command that extends PromoteCommand
@@ -72,13 +77,14 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     this.sourceStageId = this.getSourceStageId();
     const asyncOperationId: string = await this.requestPromotion(doceOrg);
 
-    if (this.flags.async) {
-      // TODO display async message
-    }
-
     // TODO: move this to logger service
     this.log(`Job ID: ${asyncOperationId}`);
     await DeployPipelineCache.set(asyncOperationId, {});
+
+    if (this.flags.async) {
+      // TODO display async message
+      return { jobId: asyncOperationId };
+    }
 
     // const streamer: DoceMonitor = new AsyncOpStreaming(doceOrg, this.flags.wait, 'AORID');
     const streamer: AsyncOpStreaming = new AsyncOpStreaming(doceOrg, this.flags.wait, asyncOperationId);

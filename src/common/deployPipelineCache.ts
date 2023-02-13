@@ -7,10 +7,10 @@
 
 import { Global, Messages, TTLConfig } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import { JsonMap } from '@salesforce/ts-types';
+import { JsonMap, Nullable } from '@salesforce/ts-types';
 
 Messages.importMessagesDirectory(__dirname);
-const cacheMessages = Messages.load('@salesforce/plugin-devops-center', 'cache', ['error.NoRecentAorId']);
+const cacheMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'cache');
 
 // For the moment we will just store the timestamp
 export type AsyncOperationData = Record<string, never>;
@@ -77,12 +77,35 @@ export class DeployPipelineCache extends TTLConfig<TTLConfig.Options, AsyncOpera
   }
 
   /**
-   * Returns the latest data cached
+   * Returns the latest data cached or throws if can't find any.
    */
-  public resolveLatest(): string {
+  public getLatestKeyOrThrow(): string {
     const aorId = this.getLatestKey();
     if (!aorId) throw cacheMessages.createError('error.NoRecentAorId');
 
     return aorId;
+  }
+  public resolveLatest(useMostRecent: boolean, key: Nullable<string>): string {
+    const jobId = useMostRecent ? this.getLatestKeyOrThrow() : key;
+
+    if (!jobId || (jobId && !this.has(jobId))) {
+      throw cacheMessages.createError('error.InvalidJobId');
+    }
+
+    return this.resolveLongId(jobId);
+  }
+
+  public resolveLongId(jobId: string): string {
+    if (jobId.length === 18) {
+      return jobId;
+    } else if (jobId.length === 15) {
+      const resolvedId = this.keys().find((k) => k.startsWith(jobId));
+      if (!resolvedId) {
+        throw cacheMessages.createError('error.InvalidJobId', [jobId]);
+      }
+      return resolvedId;
+    } else {
+      throw cacheMessages.createError('error.InvalidJobId', [jobId]);
+    }
   }
 }

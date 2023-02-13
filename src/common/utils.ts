@@ -5,10 +5,12 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Messages, Org, SfError } from '@salesforce/core';
+import { Connection, Messages, Org, SfError } from '@salesforce/core';
 import { getString, Nullable } from '@salesforce/ts-types';
 import { ApiError, PipelineStage, TestLevel } from '../common';
 import { selectPipelineStagesByProject } from '../common/selectors/pipelineStageSelector';
+import { selectAsyncOperationResultById } from './selectors/asyncOperationResultsSelector';
+import { AsyncOperationResult } from './types';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -66,4 +68,18 @@ export async function fetchAndValidatePipelineStage(
     throw messages.createError('error.BranchNotFound', [branchName, projectName]);
   }
   return stage;
+}
+
+export async function getAsyncOperationResult(con: Connection, aorId: string): Promise<AsyncOperationResult> {
+  let aor: AsyncOperationResult;
+  try {
+    aor = await selectAsyncOperationResultById(con, aorId);
+  } catch (err) {
+    const error = err as Error;
+    if (error.name === 'SingleRecordQuery_NoRecords') {
+      throw messages.createError('error.InvalidAorId', [aorId]);
+    }
+    throw err;
+  }
+  return aor;
 }
