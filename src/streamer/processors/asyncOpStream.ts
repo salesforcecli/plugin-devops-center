@@ -47,7 +47,7 @@ export default class AsyncOpStreaming extends SObjectStreaming {
         console.log(jsonPayload.sf_devops__Message__c);
       }
 
-      if (jsonPayload.sf_devops__Status__c !== 'In Progress') {
+      if (jsonPayload.sf_devops__Status__c && jsonPayload.sf_devops__Status__c !== 'In Progress') {
         // Verify if any error
         if (jsonPayload.sf_devops__Error_Details__c) {
           // eslint-disable-next-line no-console

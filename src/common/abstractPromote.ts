@@ -81,7 +81,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     await DeployPipelineCache.set(asyncOperationId, {});
 
     // const streamer: DoceMonitor = new AsyncOpStreaming(doceOrg, this.flags.wait, 'AORID');
-    const streamer: AsyncOpStreaming = new AsyncOpStreaming(doceOrg, this.flags.wait, 'AORID');
+    const streamer: AsyncOpStreaming = new AsyncOpStreaming(doceOrg, this.flags.wait, asyncOperationId);
     await streamer.startStreaming();
 
     return { jobId: asyncOperationId };
