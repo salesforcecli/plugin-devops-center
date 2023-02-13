@@ -7,8 +7,7 @@
 
 import { bold } from 'chalk';
 import { Messages, Org } from '@salesforce/core';
-import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { Duration } from '@salesforce/kit';
+import { SfCommand } from '@salesforce/sf-plugins-core';
 import { PromotePipelineResult } from '../../../common';
 import AsyncOpStreaming from '../../../streamer/processors/asyncOpStream';
 import { concise, jobId, requiredDoceOrgFlag, verbose, useMostRecent, wait } from '../../../common/flags';
