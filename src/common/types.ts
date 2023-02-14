@@ -8,6 +8,8 @@
 export type PromotePipelineResult = {
   jobId: string;
   status?: string;
+  message?: string;
+  errorDetails?: string;
 };
 
 export type Pipeline = {

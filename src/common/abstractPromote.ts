@@ -29,7 +29,8 @@ import {
 } from '../common/flags';
 import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
 import { REST_PROMOTE_BASE_URL } from './constants';
-import { AsyncOperationStatus } from './types';
+import { AsyncOperationResult, AsyncOperationStatus } from './types';
+import { getAsyncOperationResult } from './utils';
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
   (typeof PromoteCommand)['globalFlags'] & T['flags']
@@ -90,7 +91,13 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     const streamer: AsyncOpStreaming = new AsyncOpStreaming(doceOrg, this.flags.wait, asyncOperationId);
     await streamer.startStreaming();
 
-    return { jobId: asyncOperationId };
+    const asyncJob: AsyncOperationResult = await getAsyncOperationResult(doceOrg.getConnection(), asyncOperationId);
+    return {
+      jobId: asyncOperationId,
+      status: asyncJob.sf_devops__Status__c,
+      message: asyncJob.sf_devops__Message__c,
+      errorDetails: asyncJob.sf_devops__Error_Details__c,
+    };
   }
 
   protected getTargetStage(): PipelineStage {

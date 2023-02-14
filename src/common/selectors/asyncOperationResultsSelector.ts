@@ -13,7 +13,7 @@ import { AsyncOperationResult } from '../types';
  * Returns an Async Operation Result record filtering by project name.
  */
 export async function selectAsyncOperationResultById(con: Connection, aorId: string): Promise<AsyncOperationResult> {
-  const queryStr = `SELECT sf_devops__Status__c
+  const queryStr = `SELECT sf_devops__Status__c, sf_devops__Message__c, sf_devops__Error_Details__c
                     FROM sf_devops__Async_Operation_Result__c  
                     WHERE Id = '${aorId}'`;
   return con.singleRecordQuery(queryStr);
