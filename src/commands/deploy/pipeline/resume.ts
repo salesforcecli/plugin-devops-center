@@ -6,11 +6,11 @@
  */
 
 import { bold } from 'chalk';
-import { Messages, Org } from '@salesforce/core';
+import { Messages, Org, SfError } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { PromotePipelineResult } from '../../../common';
 import AsyncOpStreaming from '../../../streamer/processors/asyncOpStream';
-import { concise, jobId, requiredDoceOrgFlag, verbose, useMostRecent, wait } from '../../../common/flags';
+import { jobId, requiredDoceOrgFlag, useMostRecent, wait } from '../../../common/flags';
 import { DeployPipelineCache } from '../../../common/deployPipelineCache';
 import { isNotResumable } from '../../../common/abstractPromote';
 import { AsyncOperationResult } from '../../../common/types';
@@ -29,18 +29,16 @@ export default class DeployPipelineResume extends SfCommand<PromotePipelineResul
     'devops-center-username': requiredDoceOrgFlag(),
     'job-id': jobId,
     'use-most-recent': useMostRecent,
-    concise,
-    verbose,
     wait,
   };
 
   public async run(): Promise<PromotePipelineResult> {
     const { flags } = await this.parse(DeployPipelineResume);
-    const doceOrg: Org = flags['devops-center-username'] as Org;
-
     const asyncJobId = (await DeployPipelineCache.create()).resolveLatest(flags['use-most-recent'], flags['job-id']);
-    const asyncJob: AsyncOperationResult = await getAsyncOperationResult(doceOrg.getConnection(), asyncJobId);
 
+    // get the latest state of the async job and validate that it's resumable
+    const doceOrg: Org = flags['devops-center-username'] as Org;
+    const asyncJob: AsyncOperationResult = await getAsyncOperationResult(doceOrg.getConnection(), asyncJobId);
     if (isNotResumable(asyncJob.sf_devops__Status__c)) {
       throw messages.createError('error.DeployNotResumable', [asyncJobId, asyncJob.sf_devops__Status__c]);
     }
@@ -51,5 +49,13 @@ export default class DeployPipelineResume extends SfCommand<PromotePipelineResul
     await streamer.startStreaming();
 
     return { jobId: asyncJobId };
+  }
+
+  protected catch(error: Error | SfError): Promise<SfCommand.Error> {
+    if (error.name.includes('GenericTimeoutError')) {
+      const err = messages.createError('error.ClientTimeout');
+      return super.catch({ ...error, name: err.name, message: err.message, code: err.code });
+    }
+    return super.catch(error);
   }
 }

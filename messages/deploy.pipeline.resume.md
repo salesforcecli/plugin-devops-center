@@ -21,3 +21,7 @@ Run this command by either passing it a job ID or specifying the --use-most-rece
 # error.DeployNotResumable
 
 Job ID %s is not resumable with status %s.
+
+# error.ClientTimeout
+
+The command has timed out, although the deployment is still running. To check the status of the deploy operation, run "sf deploy pipeline report".

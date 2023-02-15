@@ -81,14 +81,16 @@ export class DeployPipelineCache extends TTLConfig<TTLConfig.Options, AsyncOpera
    */
   public getLatestKeyOrThrow(): string {
     const aorId = this.getLatestKey();
-    if (!aorId) throw cacheMessages.createError('error.NoRecentAorId');
+    if (!aorId || aorId === 'undefined') {
+      throw cacheMessages.createError('error.NoRecentAorId');
+    }
 
     return aorId;
   }
   public resolveLatest(useMostRecent: boolean, key: Nullable<string>): string {
     const jobId = useMostRecent ? this.getLatestKeyOrThrow() : key;
 
-    if (!jobId || (jobId && !this.has(jobId))) {
+    if (!jobId) {
       throw cacheMessages.createError('error.InvalidJobId');
     }
 

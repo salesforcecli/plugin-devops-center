@@ -62,10 +62,10 @@ export type DeploymentResult = {
 
 export type AsyncOperationResult = {
   Id: string;
-  CreatedDate: string;
-  CreatedById: string;
-  CreatedBy: User;
-  LastModifiedDate: string;
+  CreatedDate?: string;
+  CreatedById?: string;
+  CreatedBy?: User;
+  LastModifiedDate?: string;
   sf_devops__Message__c: string;
   sf_devops__Status__c: AsyncOperationStatus;
   sf_devops__Error_Details__c: string;
