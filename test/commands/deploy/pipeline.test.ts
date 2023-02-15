@@ -9,10 +9,11 @@
 import { expect, test } from '@oclif/test';
 import { TestContext } from '@salesforce/core/lib/testSetup';
 import * as sinon from 'sinon';
-import { ConfigAggregator, Org } from '@salesforce/core';
+import { ConfigAggregator, Org, StreamingClient } from '@salesforce/core';
 import { HttpRequest } from 'jsforce';
 import { ConfigVars } from '../../../src/configMeta';
 import { DeployPipelineCache } from '../../../src/common/deployPipelineCache';
+import AsyncOpStreaming from '../../../src/streamer/processors/asyncOpStream';
 import { PipelineStage } from '../../../src/common';
 import * as Utils from '../../../src/common/utils';
 import { REST_PROMOTE_BASE_URL } from '../../../src/common/constants';
@@ -30,9 +31,20 @@ const DOCE_ORG = {
   getConnection() {
     return {
       request: requestMock,
+      getApiVersion: () => '1',
     };
   },
 };
+
+const stubStreamingClient = async (options?: StreamingClient.Options) => ({
+  handshake: async () => StreamingClient.ConnectionState.CONNECTED,
+  replay: async () => -1,
+  subscribe: async () =>
+    options?.streamProcessor({
+      payload: { message: 'Completed' },
+      event: { replayId: 20 },
+    }),
+});
 
 describe('deploy pipeline', () => {
   let sandbox: sinon.SinonSandbox;
@@ -116,10 +128,44 @@ describe('deploy pipeline', () => {
           .stub(Utils, 'fetchAndValidatePipelineStage')
           .resolves(pipelineStageMock);
         requestMock = sinon.stub().resolves('mock-aor-id');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(AsyncOpStreaming.prototype, 'monitor' as any).returns({ completed: true, payload: {} });
       })
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests', '-t=DummyTestClass'])
       .it('runs deploy pipeline with the correct flags and validation pass', (ctx) => {
         expect(ctx.stderr).to.equal('');
+      });
+
+    test
+      .do(() => {
+        pipelineStageMock = {
+          Id: 'mock-id',
+          sf_devops__Branch__r: {
+            sf_devops__Name__c: 'mockBranchName',
+          },
+          sf_devops__Pipeline__r: {
+            sf_devops__Project__c: 'mockProjectId',
+          },
+          sf_devops__Pipeline_Stages__r: undefined,
+        };
+        fetchAndValidatePipelineStageStub = sandbox
+          .stub(Utils, 'fetchAndValidatePipelineStage')
+          .resolves(pipelineStageMock);
+        requestMock = sinon.stub().resolves('mock-aor-id');
+        sandbox
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .stub(AsyncOpStreaming.prototype, 'monitor' as any)
+          .throwsException({ name: 'GenericTimeoutError' });
+      })
+      .stdout()
+      .stderr()
+      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '--wait=3'])
+      .it('runs deploy:pipeline and handles a GenericTimeoutError', (ctx) => {
+        expect(ctx.stderr).to.contain(
+          'The command has timed out, although it\'s still running. To check the status of the current operation, run "sf deploy:pipeline report".'
+        );
       });
   });
 

@@ -60,6 +60,14 @@ The command immediately returns the job ID and control of the terminal to you. T
 
 Run the command asynchronously.
 
+# promote.wait.description
+
+If the command continues to run after the wait period, the CLI returns control of the terminal window to you and returns the job ID. To check the status of the deploy operation, run "<%= config.bin %> <%= command.id %> report".
+
+# promote.wait.summary
+
+Number of minutes to wait for command to complete and display results.
+
 # flags.targetDoceOrg.summary
 
 Username or alias of the target org.

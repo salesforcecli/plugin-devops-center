@@ -4,11 +4,12 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { Org } from '@salesforce/core';
+import { Messages, Org, SfError } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
 import { HttpRequest } from 'jsforce';
 import { DeployPipelineCache } from '../common/deployPipelineCache';
+import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
 import {
   fetchAndValidatePipelineStage,
   PipelineStage,
@@ -25,8 +26,13 @@ import {
   specificTests,
   testLevel,
   async,
+  wait,
 } from '../common/flags';
+import DoceMonitor from '../streamer/doceMonitor';
 import { REST_PROMOTE_BASE_URL } from './constants';
+
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
   (typeof PromoteCommand)['globalFlags'] & T['flags']
@@ -43,6 +49,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     tests: specificTests,
     'test-level': testLevel(),
     async,
+    wait,
   };
   protected flags!: Flags<T>;
   private targetStage: PipelineStage;
@@ -68,19 +75,36 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     this.sourceStageId = this.getSourceStageId();
     const asyncOperationId: string = await this.requestPromotion(doceOrg);
 
+    // TODO: move this to logger service
+    this.log(`Job ID: ${asyncOperationId}`);
+
     if (this.flags.async) {
       await DeployPipelineCache.set(asyncOperationId, {});
       // TODO display async message
+    } else {
+      const doceMonitor: DoceMonitor = new AsyncOpStreaming(doceOrg, this.flags.wait, asyncOperationId);
+      await doceMonitor.monitor();
     }
-
-    // TODO: move this to logger service
-    this.log(`Job ID: ${asyncOperationId}`);
 
     return { jobId: asyncOperationId };
   }
 
   protected getTargetStage(): PipelineStage {
     return this.targetStage;
+  }
+
+  /**
+   * Default function for catching commands errors.
+   *
+   * @param error
+   * @returns
+   */
+  protected catch(error: Error | SfError): Promise<SfCommand.Error> {
+    if (error.name.includes('GenericTimeoutError')) {
+      const err = messages.createError('error.ClientTimeout', [this.config.bin, this.id]);
+      return super.catch({ ...error, name: err.name, message: err.message, code: err.code });
+    }
+    return super.catch(error);
   }
 
   private async requestPromotion(targetOrg: Org): Promise<string> {

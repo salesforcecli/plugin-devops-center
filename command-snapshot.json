@@ -11,7 +11,8 @@
       "devops-center-username",
       "json",
       "test-level",
-      "tests"
+      "tests",
+      "wait"
     ],
     "alias": []
   }
