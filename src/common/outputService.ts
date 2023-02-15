@@ -149,7 +149,7 @@ export class OutputService {
     changeBundleInstalls: ChangeBundleInstall[]
   ): Promise<DeploySummary> {
     // We need to get the stage name and the org url first
-    const envId: string = changeBundleInstalls[0].sf_devops__Environment__r.Id;
+    const envId: string = changeBundleInstalls[changeBundleInstalls.length - 1].sf_devops__Environment__r.Id;
     const envQueryResp: EnvQueryResult = await selectPipelineStageByEnvironment(this.con, envId);
 
     const stageName: string = envQueryResp.sf_devops__Pipeline_Stages__r.records[0].Name;
