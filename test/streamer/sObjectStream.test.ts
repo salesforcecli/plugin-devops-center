@@ -78,7 +78,6 @@ describe('AsyncOpStreaming', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sandbox.stub(SObjectStreaming.prototype, 'startStream' as any);
       await instance.watchForSObjectTest(processor);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = instance.matchingProcessorTest(channelEvent);
       expect(result.completed).to.equal(false);
     });
@@ -88,7 +87,6 @@ describe('AsyncOpStreaming', () => {
       sandbox.stub(SObjectStreaming.prototype, 'startStream' as any);
       await instance.watchForSObjectTest(processor);
       channelEvent.payload.ChangeEventHeader = { recordIds: ['aorId'] };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = instance.matchingProcessorTest(channelEvent);
       expect(result.completed).to.equal(true);
       expect(result.payload).to.equal(channelEvent.payload);
