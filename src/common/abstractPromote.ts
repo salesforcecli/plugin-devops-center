@@ -18,6 +18,7 @@ import {
   testLevel,
   async,
 } from '../common/flags';
+import { OutputService } from './outputService';
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
   typeof PromoteCommand['globalFlags'] & T['flags']
@@ -55,6 +56,10 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       this.flags['branch-name']
     );
     this.computeTargetStageId(pipelineStage);
+
+    const aorId = 'a007d0000081OilAAE';
+    const outputService: OutputService = new OutputService(doceOrg.getConnection());
+    await outputService.printProgressSummary(aorId, this.flags['branch-name']);
 
     // hardcoded value so it compiles until main logic is implemented
     return { status: 'status' };

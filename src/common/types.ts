@@ -15,9 +15,11 @@ export type Pipeline = {
 
 export type PipelineStage = {
   Id: string;
+  Name: string;
   sf_devops__Branch__r: Branch;
   sf_devops__Pipeline__r: Pipeline;
   sf_devops__Pipeline_Stages__r?: PreviousPipelineStages;
+  sf_devops__Environment__r: Environment;
 };
 
 export type PreviousPipelineStages = {
@@ -39,3 +41,34 @@ export interface ApiError extends Error {
   errorCode: string;
   name: string;
 }
+
+export type AsyncOperationResult = {
+  Id: string;
+  sf_devops__Error_Details__c: string;
+  sf_devops__Status__c: string;
+  sf_devops__Message__c: string;
+};
+
+export type WorkItem = {
+  Name: string;
+};
+
+export type WorkItemPromote = {
+  sf_devops__Pipeline_Stage__r: PipelineStage;
+  sf_devops__Work_Item__r: WorkItem;
+};
+
+export type Environment = {
+  Id: string;
+  sf_devops__Named_Credential__c: string;
+};
+
+export type ChangeBundleInstall = {
+  sf_devops__Environment__r: Environment;
+  sf_devops__Change_Bundle__r: ChangeBundle;
+};
+
+export type ChangeBundle = {
+  Id: string;
+  sf_devops__Version_Name__c: string;
+};
