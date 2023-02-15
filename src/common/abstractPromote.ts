@@ -29,7 +29,7 @@ import {
   wait,
 } from '../common/flags';
 import DoceMonitor from '../streamer/doceMonitor';
-import { OutputService } from './outputService';
+// import { OutputService } from './outputService';
 import { REST_PROMOTE_BASE_URL } from './constants';
 
 Messages.importMessagesDirectory(__dirname);
@@ -87,9 +87,9 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       await doceMonitor.monitor();
     }
 
-    const aorId = 'a007d0000081OilAAE';
-    const outputService: OutputService = new OutputService(doceOrg.getConnection());
-    await outputService.printProgressSummary(aorId, this.flags['branch-name']);
+    // const aorId = 'a007d0000081OilAAE';
+    // const outputService: OutputService = new OutputService(doceOrg.getConnection());
+    // await outputService.printProgressSummary(aorId, this.flags['branch-name']);
 
     return { jobId: asyncOperationId };
   }
