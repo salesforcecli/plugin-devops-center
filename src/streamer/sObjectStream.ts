@@ -43,7 +43,7 @@ export default abstract class SObjectStreaming extends DOCeStreaming {
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     if (changeEventHeader.recordIds != null && this.idsToInspect.includes(changeEventHeader.recordIds[0])) {
-      return this.matchProcessor(event);
+      return this.matchProcessor(jsonPayload);
     } else {
       return { completed: false };
     }

@@ -39,7 +39,7 @@ const channelEvent = {
   },
 };
 
-const processor = (message: JsonMap) => ({ completed: true, payload: message.payload });
+const processor = (jsonPayload: JsonMap) => ({ completed: true, payload: jsonPayload });
 
 describe('AsyncOpStreaming', () => {
   let sandbox: sinon.SinonSandbox;

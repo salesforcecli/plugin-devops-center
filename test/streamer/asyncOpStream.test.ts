@@ -30,33 +30,27 @@ const DOCE_ORG = {
 };
 
 const errorEvent = {
-  payload: {
-    // eslint-disable-next-line camelcase
-    sf_devops__Status__c: 'Error',
-    // eslint-disable-next-line camelcase
-    sf_devops__Error_Details__c: 'Error here',
-    ChangeEventHeader: { recordIds: ['testId'] },
-  },
+  // eslint-disable-next-line camelcase
+  sf_devops__Status__c: 'Error',
+  // eslint-disable-next-line camelcase
+  sf_devops__Error_Details__c: 'Error here',
+  ChangeEventHeader: { recordIds: ['testId'] },
 };
 
 const completedEvent = {
-  payload: {
-    // eslint-disable-next-line camelcase
-    sf_devops__Message__c: 'prints something completed',
-    // eslint-disable-next-line camelcase
-    sf_devops__Status__c: 'Completed',
-    ChangeEventHeader: { recordIds: ['testId'] },
-  },
+  // eslint-disable-next-line camelcase
+  sf_devops__Message__c: 'prints something completed',
+  // eslint-disable-next-line camelcase
+  sf_devops__Status__c: 'Completed',
+  ChangeEventHeader: { recordIds: ['testId'] },
 };
 
 const inProgressEvent = {
-  payload: {
-    // eslint-disable-next-line camelcase
-    sf_devops__Message__c: 'prints something in progress',
-    // eslint-disable-next-line camelcase
-    sf_devops__Status__c: 'In Progress',
-    ChangeEventHeader: { recordIds: ['testId'] },
-  },
+  // eslint-disable-next-line camelcase
+  sf_devops__Message__c: 'prints something in progress',
+  // eslint-disable-next-line camelcase
+  sf_devops__Status__c: 'In Progress',
+  ChangeEventHeader: { recordIds: ['testId'] },
 };
 
 describe('AsyncOpStreaming', () => {
@@ -93,7 +87,7 @@ describe('AsyncOpStreaming', () => {
       const result = instance.asyncOpStreamProcessorStub(completedEvent);
 
       expect(result.completed).to.be.equal(true);
-      expect(result.payload).to.be.equal(completedEvent.payload);
+      expect(result.payload).to.be.equal(completedEvent);
       expect(ctx.stdout).to.contain('prints something completed');
     });
 
@@ -108,7 +102,7 @@ describe('AsyncOpStreaming', () => {
       const result = instance.asyncOpStreamProcessorStub(errorEvent);
 
       expect(result.completed).to.be.equal(true);
-      expect(result.payload).to.be.equal(errorEvent.payload);
+      expect(result.payload).to.be.equal(errorEvent);
       expect(ctx.stdout).to.contain('Error here');
     });
   });

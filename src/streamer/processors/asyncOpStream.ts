@@ -26,12 +26,12 @@ export default class AsyncOpStreaming extends SObjectStreaming {
   /**
    * This is the processor for the AOR. While InProgress we print the message from the AOR. We finish the stream after completed or errored.
    *
-   * @param event The event JSON from the CDC
+   * @param payload The payload from the CDC event
    * @returns StatusResult Completed: true => will end the stream.
    */
   // eslint-disable-next-line class-methods-use-this
-  protected asyncOpStreamProcessor(event: JsonMap): StatusResult {
-    const jsonPayload = ensureJsonMap(event.payload);
+  protected asyncOpStreamProcessor(payload: JsonMap): StatusResult {
+    const jsonPayload = ensureJsonMap(payload);
 
     // Print the message from the payload if it exists
     if (jsonPayload.sf_devops__Message__c) {
