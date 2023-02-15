@@ -21,3 +21,7 @@ The DevOps Center app wasn't found in the specified org. Verify the org username
 # error.InvalidAorId
 
 No job found for ID: %s.
+
+# error.ClientTimeout
+
+The command has timed out, although it's still running. To check the status of the current operation, run "%s %s report".

@@ -12,37 +12,36 @@ import { ASYNC_OPERATION_CDC } from '../../common/constants';
 
 export default class AsyncOpStreaming extends SObjectStreaming {
   public constructor(org: Org, wait: Duration, idToInspect: string) {
-    super(org, wait, new Array(idToInspect));
+    super(org, wait, new Array(idToInspect), ASYNC_OPERATION_CDC);
   }
 
   /**
-   * It sends the correct config to the streamer
+   * Connects to the AsyncOperationResults CDC channel and begins to monit for changes to the AOR we are monitoring.  If the AOR......
    */
-  public async startStreaming(): Promise<void | AnyJson> {
-    return this.startStream(
-      ASYNC_OPERATION_CDC,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      this.startAsyncOpStreamProcessor.bind(this)
-    );
+  public async monitor(): Promise<void | AnyJson> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    return this.watchForSObject(this.asyncOpStreamProcessor.bind(this));
   }
 
   /**
-   * This is the processor for the AOR CDC
+   * This is the processor for the AOR. While InProgress we print the message from the AOR. We finish the stream after completed or errored.
    *
-   * @param event The event JSON from the CDC
+   * @param payload The payload from the CDC event
    * @returns StatusResult Completed: true => will end the stream.
    */
-  protected startAsyncOpStreamProcessor(event: JsonMap): StatusResult {
-    const jsonPayload = ensureJsonMap(event.payload);
+  // eslint-disable-next-line class-methods-use-this
+  protected asyncOpStreamProcessor(payload: JsonMap): StatusResult {
+    const jsonPayload = ensureJsonMap(payload);
 
-    const changeEventHeader = ensureJsonMap(jsonPayload.ChangeEventHeader);
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    if (changeEventHeader.recordIds != null && this.isValidIdToInspect(changeEventHeader.recordIds[0])) {
-      // in a future we want to test !Is_Completed__c
-
-      // Print the message from the payload if it exists
-      if (jsonPayload.sf_devops__Message__c) {
+    // Print the message from the payload if it exists
+    if (jsonPayload.sf_devops__Message__c) {
+      // eslint-disable-next-line no-console
+      console.log(jsonPayload.sf_devops__Message__c);
+    }
+    // In a future we want to test !Is_Completed__c instead of Status != In Progress
+    if (jsonPayload.sf_devops__Status__c && jsonPayload.sf_devops__Status__c !== 'In Progress') {
+      // Verify if any error
+      if (jsonPayload.sf_devops__Error_Details__c) {
         // eslint-disable-next-line no-console
         console.log(jsonPayload.sf_devops__Message__c);
       }
@@ -61,6 +60,10 @@ export default class AsyncOpStreaming extends SObjectStreaming {
       } else {
         return { completed: false };
       }
+      return {
+        completed: true,
+        payload: jsonPayload,
+      };
     }
     return { completed: false };
   }

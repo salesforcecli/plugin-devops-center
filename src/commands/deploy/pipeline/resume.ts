@@ -15,6 +15,7 @@ import { DeployPipelineCache } from '../../../common/deployPipelineCache';
 import { isNotResumable } from '../../../common/abstractPromote';
 import { AsyncOperationResult } from '../../../common/types';
 import { getAsyncOperationResult } from '../../../common/utils';
+import DoceMonitor from '../../../streamer/doceMonitor';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline.resume');
@@ -45,8 +46,8 @@ export default class DeployPipelineResume extends SfCommand<PromotePipelineResul
 
     this.log('*** Resuming Deployment ***');
     this.log(`Deploy ID: ${bold(asyncJobId)}`);
-    const streamer: AsyncOpStreaming = new AsyncOpStreaming(doceOrg, flags.wait, asyncJobId);
-    await streamer.startStreaming();
+    const streamer: DoceMonitor = new AsyncOpStreaming(doceOrg, flags.wait, asyncJobId);
+    await streamer.monitor();
 
     return { jobId: asyncJobId };
   }
