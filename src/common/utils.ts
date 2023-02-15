@@ -6,9 +6,11 @@
  */
 
 import { Connection, Messages, Org, SfError } from '@salesforce/core';
+import { Duration } from '@salesforce/kit';
 import { getString, Nullable } from '@salesforce/ts-types';
 import { ApiError, PipelineStage, TestLevel } from '../common';
 import { selectPipelineStagesByProject } from '../common/selectors/pipelineStageSelector';
+import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
 import { selectAsyncOperationResultById } from './selectors/asyncOperationResultsSelector';
 import { AsyncOperationResult } from './types';
 
@@ -82,4 +84,8 @@ export async function getAsyncOperationResult(con: Connection, aorId: string): P
     throw err;
   }
   return aor;
+}
+
+export function getAsyncOperationStreamer(org: Org, waitTime: Duration, idToInspect: string): AsyncOpStreaming {
+  return new AsyncOpStreaming(org, waitTime, idToInspect);
 }

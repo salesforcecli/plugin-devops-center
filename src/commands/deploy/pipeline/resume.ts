@@ -9,16 +9,18 @@ import { bold } from 'chalk';
 import { Messages, Org, SfError } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { PromotePipelineResult } from '../../../common';
-import AsyncOpStreaming from '../../../streamer/processors/asyncOpStream';
 import { jobId, requiredDoceOrgFlag, useMostRecent, wait } from '../../../common/flags';
 import { DeployPipelineCache } from '../../../common/deployPipelineCache';
-import { isNotResumable } from '../../../common/abstractPromote';
-import { AsyncOperationResult } from '../../../common/types';
-import { getAsyncOperationResult } from '../../../common/utils';
+import { AsyncOperationResult, AsyncOperationStatus } from '../../../common';
+import { getAsyncOperationResult, getAsyncOperationStreamer } from '../../../common';
 import DoceMonitor from '../../../streamer/doceMonitor';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline.resume');
+
+export function isNotResumable(status: AsyncOperationStatus): boolean {
+  return [AsyncOperationStatus.Completed, AsyncOperationStatus.Error, AsyncOperationStatus.Ignored].includes(status);
+}
 
 export default class DeployPipelineResume extends SfCommand<PromotePipelineResult> {
   public static readonly summary = messages.getMessage('summary');
@@ -46,7 +48,7 @@ export default class DeployPipelineResume extends SfCommand<PromotePipelineResul
 
     this.log('*** Resuming Deployment ***');
     this.log(`Deploy ID: ${bold(asyncJobId)}`);
-    const streamer: DoceMonitor = new AsyncOpStreaming(doceOrg, flags.wait, asyncJobId);
+    const streamer: DoceMonitor = getAsyncOperationStreamer(doceOrg, flags.wait, asyncJobId);
     await streamer.monitor();
 
     return { jobId: asyncJobId };

@@ -30,7 +30,7 @@ import {
 } from '../common/flags';
 import DoceMonitor from '../streamer/doceMonitor';
 import { REST_PROMOTE_BASE_URL } from './constants';
-import { AsyncOperationResult, AsyncOperationStatus } from './types';
+import { AsyncOperationResult } from './types';
 import { getAsyncOperationResult } from './utils';
 
 Messages.importMessagesDirectory(__dirname);
@@ -39,10 +39,6 @@ const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'comm
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
   (typeof PromoteCommand)['globalFlags'] & T['flags']
 >;
-
-export function isNotResumable(status: AsyncOperationStatus): boolean {
-  return [AsyncOperationStatus.Completed, AsyncOperationStatus.Error, AsyncOperationStatus.Ignored].includes(status);
-}
 
 export abstract class PromoteCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
   // common flags that can be inherited by any command that extends PromoteCommand

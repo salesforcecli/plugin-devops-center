@@ -13,7 +13,8 @@ import { ConfigAggregator, Org } from '@salesforce/core';
 import { ConfigVars } from '../../../../src/configMeta';
 import * as AorSelector from '../../../../src/common/selectors/asyncOperationResultsSelector';
 import { AsyncOperationResult, AsyncOperationStatus } from '../../../../src/common/types';
-// import * as asyncOpStreaming from '../../../../src/streamer/processors/asyncOpStream';
+import AsyncOpStreaming from '../../../../src/streamer/processors/asyncOpStream';
+import * as Utils from '../../../../src/common/utils';
 
 const DOCE_ORG = {
   id: '1',
@@ -82,8 +83,6 @@ describe('deploy pipeline resume', () => {
       .stderr()
       .command(['deploy pipeline resume'])
       .it('runs deploy pipeline resume without any fo the required flags', (ctx) => {
-        // eslint-disable-next-line no-console
-        console.log(ctx.stderr);
         expect(ctx.stderr).to.contain('Exactly one of the following must be provided: --job-id, --use-most-recent');
       });
 
@@ -103,6 +102,22 @@ describe('deploy pipeline resume', () => {
       .it('runs deploy pipeline resume specifying -r when there are no Ids in cache', (ctx) => {
         expect(ctx.stderr).to.contain('No job ID could be found. Verify that a pipeline promotion has been started');
       });
+  });
+
+  describe('stream aor status', () => {
+    const spyStreamerBuilder = sinon.spy(Utils, 'getAsyncOperationStreamer');
+    let monitorStub: sinon.SinonStub;
+    beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      sandbox.stub(Org, 'create' as any).returns(DOCE_ORG);
+      sandbox.stub(ConfigAggregator.prototype, 'getInfo').returns({
+        value: 'TARGET_DEVOPS_CENTER_ALIAS',
+        key: ConfigVars.TARGET_DEVOPS_CENTER,
+        isLocal: () => false,
+        isGlobal: () => true,
+        isEnvVar: () => false,
+      });
+    });
 
     test
       .stdout()
@@ -134,23 +149,50 @@ describe('deploy pipeline resume', () => {
           sf_devops__Error_Details__c: 'mockErrorDetail',
         };
         sandbox.stub(AorSelector, 'selectAsyncOperationResultById').resolves(mockAorRecord);
+        monitorStub = sinon.stub(AsyncOpStreaming.prototype, 'monitor');
       })
       .command(['deploy pipeline resume', `-i=${mockAorId}`])
-      .it('fails because the async job is not resumable due to error state', (ctx) => {
-        // expect(ctx.stderr).to.contain(`Job ID ${mockAorId} is not resumable with status ${mockAorRecord.sf_devops__Status__c}.`);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        // const classStubbedInstance = Sinon.createStubInstance(asyncOpStreaming.AsyncOpStreaming);
-        // const constructorStub = Sinon.stub(asyncOpStreaming, 'AsyncOpStreaming').returns(classStubbedInstance);
-        // // verify we made the request
-        // expect(requestMock.called).to.equal(true);
-        // // now that we know the request was made
-        // // we can get the call argument
-        // // and validate its values
-        // const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
-        // expect(requestArgument.body).to.contain('"fullDeploy":true');
-        // expect(requestArgument.body).to.contain('"testLevel":"RunSpecifiedTests"');
-        // expect(requestArgument.body).to.contain('"runTests":"DummyTest_1,DummyTest_2,DummyTest_3"');
-        // expect(requestArgument.body).to.contain('"changeBundleName":"DummyChangeBundleName"');
+      .it('correclty streams the status of the async operation', (ctx) => {
+        // verify output
+        expect(ctx.stdout).to.contain('*** Resuming Deployment ***');
+        expect(ctx.stdout).to.contain(`Deploy ID: ${mockAorId}`);
+        // verify we instanciated the streamer correctly
+        expect(spyStreamerBuilder.called).to.equal(true);
+        // now we can get the call argument
+        // and validate its values
+        const builderArgs = spyStreamerBuilder.getCall(0).args;
+        expect(builderArgs[0]).to.equal(DOCE_ORG);
+        expect(builderArgs[1]).to.contain({ quantity: 33, unit: 0 });
+        expect(builderArgs[2]).to.equal(mockAorId);
+        expect(monitorStub.called).to.equal(true);
+      });
+
+    test
+      .only()
+      // .stdout()
+      .stderr()
+      .do(() => {
+        mockAorRecord = {
+          Id: mockAorId,
+          sf_devops__Message__c: 'mockMessage',
+          sf_devops__Status__c: AsyncOperationStatus.InProgress,
+          sf_devops__Error_Details__c: 'mockErrorDetail',
+        };
+        sandbox.stub(AorSelector, 'selectAsyncOperationResultById').resolves(mockAorRecord);
+        monitorStub = sinon
+          .stub(AsyncOpStreaming.prototype, 'monitor')
+          .throwsException({ name: 'GenericTimeoutError' });
+      })
+      .command(['deploy pipeline resume', `-i=${mockAorId}`])
+      .it('catches a timeout exception from the monitor service and displays proper error message', (ctx) => {
+        // verify output error message
+
+        // eslint-disable-next-line no-console
+        console.log(ctx.stderr);
+        expect(ctx.stderr).to.contain(
+          'The command has timed out, although it is still running. To check the status of the deploy operation, run "sf deploy pipeline report".'
+        );
+        expect(monitorStub.called).to.equal(true);
       });
   });
 });

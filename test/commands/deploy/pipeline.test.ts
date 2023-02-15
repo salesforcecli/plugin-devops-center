@@ -12,7 +12,6 @@ import * as sinon from 'sinon';
 import { ConfigAggregator, Org, StreamingClient } from '@salesforce/core';
 import { HttpRequest } from 'jsforce';
 import { ConfigVars } from '../../../src/configMeta';
-import { DeployPipelineCache } from '../../../src/common/deployPipelineCache';
 import AsyncOpStreaming from '../../../src/streamer/processors/asyncOpStream';
 import { PipelineStage } from '../../../src/common';
 import * as Utils from '../../../src/common/utils';
@@ -139,6 +138,7 @@ describe('deploy pipeline', () => {
       });
 
     test
+      .only()
       .do(() => {
         pipelineStageMock = {
           Id: 'mock-id',

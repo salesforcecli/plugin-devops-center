@@ -24,4 +24,4 @@ Job ID %s is not resumable with status %s.
 
 # error.ClientTimeout
 
-The command has timed out, although the deployment is still running. To check the status of the deploy operation, run "sf deploy pipeline report".
+The command has timed out, although it is still running. To check the status of the deploy operation, run "sf deploy pipeline report".
