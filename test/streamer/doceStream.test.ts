@@ -65,7 +65,7 @@ describe('DOCeStreaming', () => {
       streamingClient = sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
     })
     .it('it correctly handles the stream creation', async () => {
-      await instance.startStreaming();
+      await instance.monitor();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(streamingClient.called).to.equal(true);
     });
@@ -77,7 +77,7 @@ describe('DOCeStreaming', () => {
     })
     .it('it correctly handles streamingClient error', async () => {
       try {
-        await instance.startStreaming();
+        await instance.monitor();
       } catch (error) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect(error.name).to.equal('BoomError');
@@ -90,7 +90,8 @@ class DOCeStreamingTest extends DOCeStreaming {
     super(org, wait);
   }
 
-  public async startStreaming(): Promise<void | AnyJson> {
+  // eslint-disable-next-line class-methods-use-this
+  public monitor(): Promise<void | AnyJson> {
     return this.startStream('event', testProcessor);
   }
 }

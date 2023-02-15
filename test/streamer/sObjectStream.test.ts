@@ -7,7 +7,7 @@
 import { expect, test } from '@oclif/test';
 import * as core from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import { AnyJson } from '@salesforce/ts-types';
+import { AnyJson, JsonMap } from '@salesforce/ts-types';
 import * as sinon from 'sinon';
 import SObjectStreaming from '../../src/streamer/sObjectStream';
 
@@ -29,6 +29,18 @@ const DOCE_ORG = {
   },
 };
 
+const channelEvent = {
+  payload: {
+    // eslint-disable-next-line camelcase
+    sf_devops__Message__c: 'Prints something in progress',
+    // eslint-disable-next-line camelcase
+    sf_devops__Status__c: 'In Progress',
+    ChangeEventHeader: { recordIds: ['testId'] },
+  },
+};
+
+const processor = (message: JsonMap) => ({ completed: true, payload: message.payload });
+
 describe('AsyncOpStreaming', () => {
   let sandbox: sinon.SinonSandbox;
   let instance: SObjectStreamingTest;
@@ -40,7 +52,8 @@ describe('AsyncOpStreaming', () => {
     instance = new SObjectStreamingTest(
       await core.Org.create({ aliasOrUsername: 'test@salesforce.com' }),
       Duration.minutes(3),
-      'testId'
+      'aorId',
+      'channel'
     );
   });
 
@@ -48,28 +61,56 @@ describe('AsyncOpStreaming', () => {
     sandbox.restore();
   });
 
-  test.it('it returns true when the id exists', async () => {
-    const result = instance.isValidIdToInspect('testId');
-    expect(result).to.be.equal(true);
+  describe('watchForSObject', () => {
+    test.it('it starts the stream', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const startStream = sandbox.stub(SObjectStreaming.prototype, 'startStream' as any);
+      await instance.watchForSObjectTest(processor);
+      expect(startStream.called).to.equal(true);
+
+      const args = startStream.getCall(0).args;
+      expect(args[0]).to.equal('channel');
+    });
   });
 
-  test.it('it returns false when the id does not exist', async () => {
-    const result = instance.isValidIdToInspect('test');
-    expect(result).to.be.equal(false);
+  describe('matchingProcessor', () => {
+    test.stdout().it('it does not call the matchProcessor', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      sandbox.stub(SObjectStreaming.prototype, 'startStream' as any);
+      await instance.watchForSObjectTest(processor);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = instance.matchingProcessorTest(channelEvent);
+      expect(result.completed).to.equal(false);
+    });
+
+    test.it('it does call the matchProcessor', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      sandbox.stub(SObjectStreaming.prototype, 'startStream' as any);
+      await instance.watchForSObjectTest(processor);
+      channelEvent.payload.ChangeEventHeader = { recordIds: ['aorId'] };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = instance.matchingProcessorTest(channelEvent);
+      expect(result.completed).to.equal(true);
+      expect(result.payload).to.equal(channelEvent.payload);
+    });
   });
 });
 
 class SObjectStreamingTest extends SObjectStreaming {
-  public constructor(org: core.Org, wait: Duration, idToInspect: string) {
-    super(org, wait, new Array(idToInspect));
-  }
-
-  public isValidIdToInspect(idToInspect: string): boolean {
-    return super.isValidIdToInspect(idToInspect);
+  public constructor(org: core.Org, wait: Duration, aorId: string, channelName: string) {
+    super(org, wait, new Array(aorId), channelName);
   }
 
   // eslint-disable-next-line class-methods-use-this
-  protected startStreaming(): Promise<void | AnyJson> {
+  public monitor(): Promise<void | AnyJson> {
     throw new Error('Method not implemented.');
+  }
+
+  public watchForSObjectTest(matchProcessor: (message: JsonMap) => core.StatusResult) {
+    return this.watchForSObject(matchProcessor);
+  }
+
+  public matchingProcessorTest(event: JsonMap) {
+    return this.matchingProcessor(event);
   }
 }

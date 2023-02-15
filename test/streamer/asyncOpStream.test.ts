@@ -59,16 +59,6 @@ const inProgressEvent = {
   },
 };
 
-const otherEvent = {
-  payload: {
-    // eslint-disable-next-line camelcase
-    sf_devops__Message__c: 'prints something in progress',
-    // eslint-disable-next-line camelcase
-    sf_devops__Status__c: 'In Progress',
-    ChangeEventHeader: { recordIds: ['otherId'] },
-  },
-};
-
 describe('AsyncOpStreaming', () => {
   let sandbox: sinon.SinonSandbox;
   let instance: AsyncOpStreamingTest;
@@ -92,7 +82,7 @@ describe('AsyncOpStreaming', () => {
     it('it calls startStream', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const startStream = sandbox.stub(AsyncOpStreamingTest.prototype, 'startStream' as any);
-      await instance.startStreaming();
+      await instance.monitor();
 
       expect(startStream.called).to.equal(true);
     });
@@ -100,7 +90,7 @@ describe('AsyncOpStreaming', () => {
 
   describe('startAsyncOpStreamProcessor', () => {
     test.stdout().it('it handles a completed event', async (ctx) => {
-      const result = instance.startAsyncOpStreamProcessorStub(completedEvent);
+      const result = instance.asyncOpStreamProcessorStub(completedEvent);
 
       expect(result.completed).to.be.equal(true);
       expect(result.payload).to.be.equal(completedEvent.payload);
@@ -108,31 +98,24 @@ describe('AsyncOpStreaming', () => {
     });
 
     test.stdout().it('it handles an inPorgress event', async (ctx) => {
-      const result = instance.startAsyncOpStreamProcessorStub(inProgressEvent);
+      const result = instance.asyncOpStreamProcessorStub(inProgressEvent);
 
       expect(result.completed).to.be.equal(false);
       expect(ctx.stdout).to.contain('prints something in progress');
     });
 
     test.stdout().it('it handles an error', async (ctx) => {
-      const result = instance.startAsyncOpStreamProcessorStub(errorEvent);
+      const result = instance.asyncOpStreamProcessorStub(errorEvent);
 
       expect(result.completed).to.be.equal(true);
       expect(result.payload).to.be.equal(errorEvent.payload);
       expect(ctx.stdout).to.contain('Error here');
     });
-
-    test.stdout().it('it handles another ID', async (ctx) => {
-      const result = instance.startAsyncOpStreamProcessorStub(otherEvent);
-
-      expect(result.completed).to.be.equal(false);
-      expect(ctx.stdout).to.equal('');
-    });
   });
 });
 
 class AsyncOpStreamingTest extends AsyncOpStreaming {
-  public startAsyncOpStreamProcessorStub(event: JsonMap) {
-    return this.startAsyncOpStreamProcessor(event);
+  public asyncOpStreamProcessorStub(event: JsonMap) {
+    return this.asyncOpStreamProcessor(event);
   }
 }

@@ -7,8 +7,12 @@
 import { Org, StreamingClient, StatusResult } from '@salesforce/core';
 import { AnyJson, JsonMap } from '@salesforce/ts-types';
 import { Duration } from '@salesforce/kit';
-import Stream from './stream';
-export default abstract class DOCeStreaming implements Stream {
+import DoceMonitor from './doceMonitor';
+
+/**
+ * Common base class for DOCe monitor that use the streaming api to listen to a streaming channel (CDC).
+ */
+export default abstract class DOCeStreaming implements DoceMonitor {
   private doceOrg: Org;
   private wait: Duration;
 
@@ -18,13 +22,13 @@ export default abstract class DOCeStreaming implements Stream {
   }
 
   /**
-   * This class creates the client and starts listening to events.
+   * This creates the streaming client and starts listening the desired streaming channel.
    *
-   * @param event The event we want to proccess (CDC)
+   * @param channel The channel we want to listen (CDC)
    * @param processor The especific processor we want to use for the event
    */
-  public async startStream(event: string, processor: (message: JsonMap) => StatusResult): Promise<void | AnyJson> {
-    const options = new StreamingClient.DefaultOptions(this.doceOrg, event, processor);
+  protected async startStream(channel: string, processor: (message: JsonMap) => StatusResult): Promise<void | AnyJson> {
+    const options = new StreamingClient.DefaultOptions(this.doceOrg, channel, processor);
     options.setSubscribeTimeout(this.wait);
 
     const streamClient = await StreamingClient.create(options);
@@ -32,8 +36,5 @@ export default abstract class DOCeStreaming implements Stream {
     await streamClient.subscribe();
   }
 
-  /**
-   * Sets the initial config for the stream
-   */
-  protected abstract startStreaming(): Promise<void | AnyJson>;
+  public abstract monitor(): Promise<void | AnyJson>;
 }

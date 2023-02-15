@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Messages, SfError } from '@salesforce/core';
+import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { PromoteCommand } from '../../common/abstractPromote';
 import { PipelineStage, PromoteOptions, PromotePipelineResult } from '../../common';
@@ -47,19 +47,5 @@ export default class DeployPipeline extends PromoteCommand<typeof SfCommand> {
    */
   protected getPromoteOptions(): Partial<PromoteOptions> {
     return { undeployedOnly: this.isUndeployedOnly };
-  }
-
-  /**
-   * Default function for catching commands errors.
-   *
-   * @param error
-   * @returns
-   */
-  protected catch(error: Error | SfError): Promise<SfCommand.Error> {
-    if (error.name.includes('GenericTimeoutError')) {
-      const err = messages.createError('error.ClientTimeout');
-      return super.catch({ ...error, name: err.name, message: err.message, code: err.code });
-    }
-    return super.catch(error);
   }
 }

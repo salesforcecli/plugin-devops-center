@@ -131,7 +131,7 @@ describe('deploy pipeline', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sandbox.stub(AsyncOpStreaming.prototype, 'startStreaming' as any).returns({ completed: true, payload: {} });
+        sandbox.stub(AsyncOpStreaming.prototype, 'monitor' as any).returns({ completed: true, payload: {} });
       })
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests', '-t=DummyTestClass'])
       .it('runs deploy pipeline with the correct flags and validation pass', (ctx) => {
@@ -156,7 +156,7 @@ describe('deploy pipeline', () => {
         requestMock = sinon.stub().resolves('mock-aor-id');
         sandbox
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .stub(AsyncOpStreaming.prototype, 'startStreaming' as any)
+          .stub(AsyncOpStreaming.prototype, 'monitor' as any)
           .throwsException({ name: 'GenericTimeoutError' });
       })
       .stdout()
@@ -164,7 +164,7 @@ describe('deploy pipeline', () => {
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '--wait=3'])
       .it('runs deploy:pipeline and handles a GenericTimeoutError', (ctx) => {
         expect(ctx.stderr).to.contain(
-          'The command has timed out, although the deployment is still running. To check the status of the deploy operation, run "sf deploy pipeline report".'
+          'The command has timed out, although it\'s still running. To check the status of the current operation, run "sf deploy:pipeline report".'
         );
       });
   });
