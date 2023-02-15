@@ -12,7 +12,6 @@ import DOCeStreaming from './doceStream';
 export default abstract class SObjectStreaming extends DOCeStreaming {
   private idsToInspect: string[];
   private channelName: string;
-  private matchProcessor: (message: JsonMap) => StatusResult;
 
   protected constructor(org: Org, wait: Duration, idsToInspect: string[], channelName: string) {
     super(org, wait);
@@ -26,9 +25,8 @@ export default abstract class SObjectStreaming extends DOCeStreaming {
    * @param matchProcessor This processor will be used in the matchingProcessor, it's provided by each implementation.
    */
   protected async watchForSObject(matchProcessor: (message: JsonMap) => StatusResult): Promise<void | AnyJson> {
-    this.matchProcessor = matchProcessor;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    return this.startStream(this.channelName, this.matchingProcessor.bind(this));
+    return this.startStream(this.channelName, (event: JsonMap) => this.matchingProcessor(event, matchProcessor));
   }
 
   /**
@@ -37,13 +35,13 @@ export default abstract class SObjectStreaming extends DOCeStreaming {
    * @param event JsonMap containing the event from the streaming channel.
    * @returns If the event is valid, the matchProcessor will handle the response. If it's not valid, we continue listening.
    */
-  protected matchingProcessor(event: JsonMap): StatusResult {
+  protected matchingProcessor(event: JsonMap, matchProcessor: (message: JsonMap) => StatusResult): StatusResult {
     const jsonPayload = ensureJsonMap(event.payload);
     const changeEventHeader = ensureJsonMap(jsonPayload.ChangeEventHeader);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     if (changeEventHeader.recordIds != null && this.idsToInspect.includes(changeEventHeader.recordIds[0])) {
-      return this.matchProcessor(jsonPayload);
+      return matchProcessor(jsonPayload);
     } else {
       return { completed: false };
     }

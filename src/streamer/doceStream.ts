@@ -25,7 +25,7 @@ export default abstract class DOCeStreaming implements DoceMonitor {
    * This creates the streaming client and starts listening the desired streaming channel.
    *
    * @param channel The channel we want to listen (CDC)
-   * @param processor The especific processor we want to use for the event
+   * @param processor The specific processor we want to use for the event
    */
   protected async startStream(channel: string, processor: (message: JsonMap) => StatusResult): Promise<void | AnyJson> {
     const options = new StreamingClient.DefaultOptions(this.doceOrg, channel, processor);
