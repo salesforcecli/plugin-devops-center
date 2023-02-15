@@ -6,7 +6,8 @@
  */
 
 export type PromotePipelineResult = {
-  status: string;
+  jobId: string;
+  status?: string;
 };
 
 export type Pipeline = {
@@ -71,4 +72,13 @@ export type ChangeBundleInstall = {
 export type ChangeBundle = {
   Id: string;
   sf_devops__Version_Name__c: string;
+};
+
+export type PromoteOptions = {
+  fullDeploy: boolean;
+  testLevel: string;
+  runTests: string;
+  undeployedOnly: boolean;
+  checkDeploy: boolean;
+  deploymentId: string;
 };

@@ -8,8 +8,8 @@
 import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { PromoteCommand } from '../../common/abstractPromote';
-import { PipelineStage, PromotePipelineResult } from '../../common';
-import { DeployPipelineCache } from '../../common/deployPipelineCache';
+import { PipelineStage, PromoteOptions, PromotePipelineResult } from '../../common';
+import { APPROVED } from '../../common/constants';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
@@ -22,25 +22,30 @@ export default class DeployPipeline extends PromoteCommand<typeof SfCommand> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly state = 'beta';
+  private readonly isUndeployedOnly = true;
 
   public async run(): Promise<PromotePipelineResult> {
-    // TODO Timeout case
-    if (this.flags.async) {
-      // TODO Get the aorId
-      const aorId = 'TODO';
-      await DeployPipelineCache.set(aorId, {});
-    }
     return this.executePromotion();
   }
 
   /**
-   * Computes the target stage Id for deployOnly promotions. If the given stage has a previous stage
-   * then the target stage is the previous stage. If not the it means this is the
-   * first stage of the pipeline and target stage Id = Approved.
+   * Computes the source stage Id for deployOnly promotions. If the given stage has a previous stage
+   * then the source stage is the previous stage. If not the it means this is the
+   * first stage of the pipeline and source stage Id = Approved.
+   *
+   * @returns: string. It is the source stage Id.
    */
-  protected computeTargetStageId(pipelineStage: PipelineStage): void {
-    this.targetStageId = pipelineStage?.sf_devops__Pipeline_Stages__r
-      ? pipelineStage.sf_devops__Pipeline_Stages__r.records[0].Id
-      : 'Approved';
+  protected getSourceStageId(): string {
+    const targetStage: PipelineStage = this.getTargetStage();
+    return targetStage.sf_devops__Pipeline_Stages__r
+      ? targetStage.sf_devops__Pipeline_Stages__r.records[0].Id
+      : APPROVED;
+  }
+
+  /**
+   * Returns the promote option necessary to performs an undeployed only promotion
+   */
+  protected getPromoteOptions(): Partial<PromoteOptions> {
+    return { undeployedOnly: this.isUndeployedOnly };
   }
 }
