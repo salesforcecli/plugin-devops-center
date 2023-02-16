@@ -78,6 +78,7 @@ describe('outputService', () => {
   test.stdout().it('handles the print of an Error aor status', (ctx) => {
     const status = 'Error';
     const errorDetails = 'This should be printed';
+    const message = 'This should also be printed';
     const aor: AsyncOperationResult = {
       Id: 'Id',
       // eslint-disable-next-line camelcase
@@ -85,10 +86,11 @@ describe('outputService', () => {
       // eslint-disable-next-line camelcase
       sf_devops__Status__c: status,
       // eslint-disable-next-line camelcase
-      sf_devops__Message__c: 'Message',
+      sf_devops__Message__c: message,
     };
     OutputService.printAorStatus(aor);
     expect(ctx.stdout).to.contain(errorDetails);
+    expect(ctx.stdout).to.contain(message);
   });
 
   test.stdout().it('ignores an invalid aor status of a deployment when asked to print', (ctx) => {

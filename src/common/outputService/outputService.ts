@@ -25,7 +25,7 @@ export abstract class OutputService {
     } else if (aor.sf_devops__Status__c === 'Completed') {
       console.log(green(aor.sf_devops__Message__c));
     } else if (aor.sf_devops__Status__c === 'Error' && aor.sf_devops__Error_Details__c) {
-      console.log(red(`Error details: ${aor.sf_devops__Error_Details__c}`));
+      console.log(red(`${aor.sf_devops__Message__c}\nError details: ${aor.sf_devops__Error_Details__c}`));
     }
   }
 
