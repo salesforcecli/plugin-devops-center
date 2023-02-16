@@ -23,9 +23,9 @@ export abstract class OutputService {
     if (aor.sf_devops__Status__c === undefined || aor.sf_devops__Status__c === 'In Progress') {
       console.log(aor.sf_devops__Message__c);
     } else if (aor.sf_devops__Status__c === 'Completed') {
-      green(console.log(aor.sf_devops__Message__c));
+      console.log(green(aor.sf_devops__Message__c));
     } else if (aor.sf_devops__Status__c === 'Error' && aor.sf_devops__Error_Details__c) {
-      red(console.log(`Error details: ${aor.sf_devops__Error_Details__c}`));
+      console.log(red(`Error details: ${aor.sf_devops__Error_Details__c}`));
     }
   }
 
