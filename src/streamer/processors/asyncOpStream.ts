@@ -40,10 +40,10 @@ export default class AsyncOpStreaming extends SObjectStreaming {
 
     // We build an aor given the payload
     const asyncOpResult: AsyncOperationResult = {
-      Id: JSON.stringify(jsonPayload.Id),
-      sf_devops__Error_Details__c: JSON.stringify(jsonPayload.sf_devops__Error_Details__c),
-      sf_devops__Status__c: JSON.stringify(jsonPayload.sf_devops__Status__c),
-      sf_devops__Message__c: JSON.stringify(jsonPayload.sf_devops__Message__c),
+      Id: jsonPayload.Id as string,
+      sf_devops__Error_Details__c: jsonPayload.sf_devops__Error_Details__c as string,
+      sf_devops__Status__c: jsonPayload.sf_devops__Status__c as string,
+      sf_devops__Message__c: jsonPayload.sf_devops__Message__c as string,
     };
 
     // Print the aor status

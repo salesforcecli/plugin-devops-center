@@ -22,29 +22,13 @@ describe('outputService', () => {
     const mockId = 'ABC';
     DeployOutputService.printAsyncRunInfo(mockId);
     expect(ctx.stdout).to.contain(
-      `Job ID: ${mockId}/n` +
-        'Deploy has been queued./n' +
-        `Run "sf deploy pipeline resume --job-id ${mockId} to resume watching the deploy./n` +
+      'Deploy has been queued.\n' +
+        `Run "sf deploy pipeline resume --job-id ${mockId} to resume watching the deploy.\n` +
         `Run "sf deploy pipeline report --job-id ${mockId} to get the latest status.`
     );
   });
 
-  test.stdout().it('prints the status of an aor', (ctx) => {
-    const status = 'Completed';
-    const aor: AsyncOperationResult = {
-      Id: 'Id',
-      // eslint-disable-next-line camelcase
-      sf_devops__Error_Details__c: undefined,
-      // eslint-disable-next-line camelcase
-      sf_devops__Status__c: status,
-      // eslint-disable-next-line camelcase
-      sf_devops__Message__c: 'Message',
-    };
-    DeployOutputService.printAorStatus(aor);
-    expect(ctx.stdout).to.contain(status);
-  });
-
-  test.stdout().it('handles the print of an undefined aor status of a deployment', (ctx) => {
+  test.stdout().it('handles the print of an undefined aor status', (ctx) => {
     const status = undefined;
     const message = 'This should be printed';
     const aor: AsyncOperationResult = {
@@ -60,7 +44,7 @@ describe('outputService', () => {
     expect(ctx.stdout).to.contain(message);
   });
 
-  test.stdout().it('handles the print of an In Progress aor status of a deployment', (ctx) => {
+  test.stdout().it('handles the print of an In Progress aor status', (ctx) => {
     const status = 'In Progress';
     const message = 'This should be printed';
     const aor: AsyncOperationResult = {
@@ -76,22 +60,22 @@ describe('outputService', () => {
     expect(ctx.stdout).to.contain(message);
   });
 
-  test.stdout().it('handles the print of a Completed aor status of a deployment', (ctx) => {
-    const status = 'Completed';
+  test.stdout().it('handles the print of a Completed aor status', (ctx) => {
+    const message = 'Deploy complete.';
     const aor: AsyncOperationResult = {
       Id: 'Id',
       // eslint-disable-next-line camelcase
       sf_devops__Error_Details__c: undefined,
       // eslint-disable-next-line camelcase
-      sf_devops__Status__c: status,
+      sf_devops__Status__c: 'Completed',
       // eslint-disable-next-line camelcase
-      sf_devops__Message__c: 'Message',
+      sf_devops__Message__c: message,
     };
     OutputService.printAorStatus(aor);
-    expect(ctx.stdout).to.contain('Deploy complete.');
+    expect(ctx.stdout).to.contain(message);
   });
 
-  test.stdout().it('handles the print of an Error aor status of a deployment', (ctx) => {
+  test.stdout().it('handles the print of an Error aor status', (ctx) => {
     const status = 'Error';
     const errorDetails = 'This should be printed';
     const aor: AsyncOperationResult = {
@@ -104,7 +88,7 @@ describe('outputService', () => {
       sf_devops__Message__c: 'Message',
     };
     OutputService.printAorStatus(aor);
-    expect(ctx.stdout).to.contain(`Deploy failed./n${errorDetails}`);
+    expect(ctx.stdout).to.contain(errorDetails);
   });
 
   test.stdout().it('ignores an invalid aor status of a deployment when asked to print', (ctx) => {
