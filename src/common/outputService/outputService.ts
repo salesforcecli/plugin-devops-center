@@ -7,6 +7,7 @@
 
 /* eslint-disable no-console */
 
+import { green, red } from 'chalk';
 import { AsyncOperationResult } from '../types';
 
 /**
@@ -19,6 +20,19 @@ export abstract class OutputService {
    * Prints the status of the given aor
    */
   public static printAorStatus(aor: AsyncOperationResult): void {
-    console.log(aor.sf_devops__Status__c);
+    if (aor.sf_devops__Status__c === undefined || aor.sf_devops__Status__c === 'In Progress') {
+      console.log(aor.sf_devops__Message__c);
+    } else if (aor.sf_devops__Status__c === 'Completed') {
+      green(console.log(aor.sf_devops__Message__c));
+    } else if (aor.sf_devops__Status__c === 'Error' && aor.sf_devops__Error_Details__c) {
+      red(console.log(`Error details: ${aor.sf_devops__Error_Details__c}`));
+    }
+  }
+
+  /**
+   * Prints the aor id
+   */
+  public static printAorId(aorId: string): void {
+    console.log(`Job ID: ${aorId}\n`);
   }
 }

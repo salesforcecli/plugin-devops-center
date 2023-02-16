@@ -29,8 +29,10 @@ import {
   wait,
 } from '../common/flags';
 import DoceMonitor from '../streamer/doceMonitor';
-// import { OutputService } from './outputService';
 import { REST_PROMOTE_BASE_URL } from './constants';
+import { OutputService } from './outputService/outputService';
+import { DeployOutputService } from './outputService/deployOutputService';
+import { OutputServiceFactory } from './outputService/outputServiceFactory';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -76,20 +78,18 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     this.sourceStageId = this.getSourceStageId();
     const asyncOperationId: string = await this.requestPromotion(doceOrg);
 
-    // TODO: move this to logger service
-    this.log(`Job ID: ${asyncOperationId}`);
+    OutputService.printAorId(asyncOperationId);
 
     if (this.flags.async) {
       await DeployPipelineCache.set(asyncOperationId, {});
-      // TODO display async message
+      DeployOutputService.printAsyncRunInfo(asyncOperationId);
     } else {
+      const outputService: DeployOutputService = OutputServiceFactory.forDeployment(doceOrg.getConnection());
+      await outputService.printProgressSummary(asyncOperationId, this.flags['branch-name']);
+
       const doceMonitor: DoceMonitor = new AsyncOpStreaming(doceOrg, this.flags.wait, asyncOperationId);
       await doceMonitor.monitor();
     }
-
-    // const aorId = 'a007d0000081OilAAE';
-    // const outputService: OutputService = new OutputService(doceOrg.getConnection());
-    // await outputService.printProgressSummary(aorId, this.flags['branch-name']);
 
     return { jobId: asyncOperationId };
   }

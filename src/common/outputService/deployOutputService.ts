@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 import { Connection } from '@salesforce/core';
-import { AsyncOperationResult, ChangeBundleInstall, WorkItemPromote } from '../types';
+import { ChangeBundleInstall, WorkItemPromote } from '../types';
 import { DeploySummaryQueryResult, selectDeployAORSummaryData } from '../selectors/deployProgressSummarySelector';
 import { selectOrgUrl } from '../selectors/endpointSelector';
 import { EnvQueryResult, selectPipelineStageByEnvironment } from '../selectors/environmentSelector';
@@ -40,27 +40,15 @@ export class DeployOutputService extends OutputService {
     this.con = con;
   }
 
-  public static printAsyncRun(aorId: string): void {
+  /**
+   * Prints this message when the user uses the async flag
+   */
+  public static printAsyncRunInfo(aorId: string): void {
     console.log(
-      `Job ID: ${aorId}/n` +
-        'Deploy has been queued./n' +
-        `Run "sf deploy pipeline resume --job-id ${aorId} to resume watching the deploy./n` +
+      'Deploy has been queued.\n' +
+        `Run "sf deploy pipeline resume --job-id ${aorId} to resume watching the deploy.\n` +
         `Run "sf deploy pipeline report --job-id ${aorId} to get the latest status.`
     );
-  }
-
-  /**
-   * Prints the completed message if the deployment is completed
-   * or prints the error message if it failed
-   */
-  public static printDeploymentStatus(aor: AsyncOperationResult): void {
-    if (aor.sf_devops__Status__c === undefined || aor.sf_devops__Status__c === 'In Progress') {
-      console.log(aor.sf_devops__Message__c);
-    } else if (aor.sf_devops__Status__c === 'Completed') {
-      console.log('Deploy complete.');
-    } else if (aor.sf_devops__Status__c === 'Error' && aor.sf_devops__Error_Details__c) {
-      console.log(`Deploy failed./n${aor.sf_devops__Error_Details__c}`);
-    }
   }
 
   /**
@@ -73,7 +61,7 @@ export class DeployOutputService extends OutputService {
       } ` +
         `${(summary.workItems as string[]).join(', ')}. Deploying metadata from ${
           summary.branchName
-        } branch to target org ${summary.orgUrl}.`
+        } branch to target org ${summary.orgUrl}.\n`
     );
   }
 
@@ -91,7 +79,7 @@ export class DeployOutputService extends OutputService {
       `DevOps Center pipeline stage ${summary.stageName} being updated with metadata associated with ` +
         `${bundlesSummary.join('; ')}. Deploying metadata from ${summary.branchName} branch to target org ${
           summary.orgUrl
-        }.`
+        }.\n`
     );
   }
 

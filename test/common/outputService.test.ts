@@ -15,11 +15,12 @@ import * as DeploySelector from '../../src/common/selectors/deployProgressSummar
 import * as EndpointSelector from '../../src/common/selectors/endpointSelector';
 import * as StageSelector from '../../src/common/selectors/environmentSelector';
 import * as ChangeBundleSelector from '../../src/common/selectors/changeBundleSelector';
+import { OutputService } from '../../src/common/outputService/outputService';
 
 describe('outputService', () => {
   test.stdout().it('prints the async deploy execution correctly', (ctx) => {
     const mockId = 'ABC';
-    DeployOutputService.printAsyncRun(mockId);
+    DeployOutputService.printAsyncRunInfo(mockId);
     expect(ctx.stdout).to.contain(
       `Job ID: ${mockId}/n` +
         'Deploy has been queued./n' +
@@ -55,7 +56,7 @@ describe('outputService', () => {
       // eslint-disable-next-line camelcase
       sf_devops__Message__c: message,
     };
-    DeployOutputService.printDeploymentStatus(aor);
+    OutputService.printAorStatus(aor);
     expect(ctx.stdout).to.contain(message);
   });
 
@@ -71,7 +72,7 @@ describe('outputService', () => {
       // eslint-disable-next-line camelcase
       sf_devops__Message__c: message,
     };
-    DeployOutputService.printDeploymentStatus(aor);
+    OutputService.printAorStatus(aor);
     expect(ctx.stdout).to.contain(message);
   });
 
@@ -86,7 +87,7 @@ describe('outputService', () => {
       // eslint-disable-next-line camelcase
       sf_devops__Message__c: 'Message',
     };
-    DeployOutputService.printDeploymentStatus(aor);
+    OutputService.printAorStatus(aor);
     expect(ctx.stdout).to.contain('Deploy complete.');
   });
 
@@ -102,7 +103,7 @@ describe('outputService', () => {
       // eslint-disable-next-line camelcase
       sf_devops__Message__c: 'Message',
     };
-    DeployOutputService.printDeploymentStatus(aor);
+    OutputService.printAorStatus(aor);
     expect(ctx.stdout).to.contain(`Deploy failed./n${errorDetails}`);
   });
 
@@ -117,7 +118,7 @@ describe('outputService', () => {
       // eslint-disable-next-line camelcase
       sf_devops__Message__c: '',
     };
-    DeployOutputService.printDeploymentStatus(aor);
+    OutputService.printAorStatus(aor);
     expect(ctx.stdout).to.be.empty;
   });
 
