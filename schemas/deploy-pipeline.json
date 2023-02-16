@@ -10,6 +10,12 @@
         },
         "status": {
           "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "errorDetails": {
+          "type": "string"
         }
       },
       "required": ["jobId"],
