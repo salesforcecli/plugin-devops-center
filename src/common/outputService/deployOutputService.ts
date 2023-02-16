@@ -8,11 +8,12 @@
 /* eslint-disable no-console */
 
 import { Connection } from '@salesforce/core';
-import { AsyncOperationResult, ChangeBundleInstall, WorkItemPromote } from './types';
-import { DeploySummaryQueryResult, selectDeployAORSummaryData } from './selectors/deployProgressSummarySelector';
-import { selectOrgUrl } from './selectors/endpointSelector';
-import { EnvQueryResult, selectPipelineStageByEnvironment } from './selectors/environmentSelector';
-import { WorkItemsQueryResult, selectWorkItemsByChangeBundles } from './selectors/changeBundleSelector';
+import { AsyncOperationResult, ChangeBundleInstall, WorkItemPromote } from '../types';
+import { DeploySummaryQueryResult, selectDeployAORSummaryData } from '../selectors/deployProgressSummarySelector';
+import { selectOrgUrl } from '../selectors/endpointSelector';
+import { EnvQueryResult, selectPipelineStageByEnvironment } from '../selectors/environmentSelector';
+import { WorkItemsQueryResult, selectWorkItemsByChangeBundles } from '../selectors/changeBundleSelector';
+import { OutputService } from './outputService';
 
 /**
  * This type is used for storing all the info needed for the deployment summary
@@ -27,14 +28,15 @@ type DeploySummary = {
 };
 
 /**
- * Service class to print the output
+ * Service class to print the deploy output
  *
  * @author JuanStenghele-sf
  */
-export class OutputService {
+export class DeployOutputService extends OutputService {
   protected con: Connection;
 
   public constructor(con: Connection) {
+    super();
     this.con = con;
   }
 
@@ -45,13 +47,6 @@ export class OutputService {
         `Run "sf deploy pipeline resume --job-id ${aorId} to resume watching the deploy./n` +
         `Run "sf deploy pipeline report --job-id ${aorId} to get the latest status.`
     );
-  }
-
-  /**
-   * Prints the status of the given aor
-   */
-  public static printAorStatus(aor: AsyncOperationResult): void {
-    console.log(aor.sf_devops__Status__c);
   }
 
   /**
@@ -113,13 +108,13 @@ export class OutputService {
       // It is an AD HOC PROMOTE
       const workItemsPromote: WorkItemPromote[] = queryResp.sf_devops__Work_Item_Promotes__r.records;
       summary = await this.processAdHocDeploy(branch, workItemsPromote);
-      OutputService.printAdHocDeploySummary(summary);
+      DeployOutputService.printAdHocDeploySummary(summary);
     } else if (queryResp.sf_devops__Change_Bundle_Installs__r !== null) {
       // It is a versioned or soup promote
       // We will treat them similarly
       const versoupQueryResp: ChangeBundleInstall[] = queryResp.sf_devops__Change_Bundle_Installs__r.records;
       summary = await this.processVersoupDeploy(branch, versoupQueryResp);
-      OutputService.printVersoupDeploySummary(summary);
+      DeployOutputService.printVersoupDeploySummary(summary);
     }
   }
 
