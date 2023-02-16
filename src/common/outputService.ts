@@ -39,10 +39,12 @@ export class OutputService {
   }
 
   public static printAsyncRun(aorId: string): void {
-    console.log(`Job ID: ${aorId}/n
-      Deploy has been queued./n
-      Run "sf deploy pipeline resume --job-id ${aorId} to resume watching the deploy./n
-      Run "sf deploy pipeline report --job-id ${aorId} to get the latest status.`);
+    console.log(
+      `Job ID: ${aorId}/n` +
+        'Deploy has been queued./n' +
+        `Run "sf deploy pipeline resume --job-id ${aorId} to resume watching the deploy./n` +
+        `Run "sf deploy pipeline report --job-id ${aorId} to get the latest status.`
+    );
   }
 
   /**
@@ -112,7 +114,7 @@ export class OutputService {
       const workItemsPromote: WorkItemPromote[] = queryResp.sf_devops__Work_Item_Promotes__r.records;
       summary = await this.processAdHocDeploy(branch, workItemsPromote);
       OutputService.printAdHocDeploySummary(summary);
-    } else {
+    } else if (queryResp.sf_devops__Change_Bundle_Installs__r !== null) {
       // It is a versioned or soup promote
       // We will treat them similarly
       const versoupQueryResp: ChangeBundleInstall[] = queryResp.sf_devops__Change_Bundle_Installs__r.records;

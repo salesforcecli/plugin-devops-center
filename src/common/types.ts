@@ -45,8 +45,8 @@ export interface ApiError extends Error {
 
 export type AsyncOperationResult = {
   Id: string;
-  sf_devops__Error_Details__c: string;
-  sf_devops__Status__c: string;
+  sf_devops__Error_Details__c: string | undefined;
+  sf_devops__Status__c: string | undefined;
   sf_devops__Message__c: string;
 };
 

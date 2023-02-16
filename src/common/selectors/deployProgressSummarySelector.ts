@@ -11,8 +11,8 @@ import { ChangeBundleInstall, WorkItemPromote } from '../types';
 
 // This type will be defined here as it is sepecific from this function
 export type DeploySummaryQueryResult = {
-  sf_devops__Work_Item_Promotes__r: QueryResult<WorkItemPromote>;
-  sf_devops__Change_Bundle_Installs__r: QueryResult<ChangeBundleInstall>;
+  sf_devops__Work_Item_Promotes__r: QueryResult<WorkItemPromote> | null;
+  sf_devops__Change_Bundle_Installs__r: QueryResult<ChangeBundleInstall> | null;
 };
 
 /**
