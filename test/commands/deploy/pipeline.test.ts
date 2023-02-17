@@ -49,6 +49,7 @@ describe('deploy pipeline', () => {
   let sandbox: sinon.SinonSandbox;
   let fetchAndValidatePipelineStageStub: sinon.SinonStub;
   let pipelineStageMock: PipelineStage;
+  const $$ = new TestContext();
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
@@ -61,6 +62,7 @@ describe('deploy pipeline', () => {
       isGlobal: () => true,
       isEnvVar: () => false,
     });
+    $$.setConfigStubContents('DeployPipelineCache', {});
   });
 
   afterEach(() => {
@@ -176,13 +178,6 @@ describe('deploy pipeline', () => {
   });
 
   describe('cache', () => {
-    const $$ = new TestContext();
-
-    beforeEach(async () => {
-      // Mock the cache
-      $$.setConfigStubContents('DeployPipelineCache', {});
-    });
-
     test
       .stdout()
       .stderr()

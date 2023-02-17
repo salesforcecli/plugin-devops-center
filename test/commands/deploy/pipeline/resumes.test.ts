@@ -31,9 +31,11 @@ describe('deploy pipeline resume', () => {
   const mockCache = {};
   let mockAorRecord: AsyncOperationResult;
   const mockAorId = 'a00DS00000Aj3AIYAZ';
+  const $$ = new TestContext();
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
+    $$.setConfigStubContents('DeployPipelineCache', mockCache);
   });
 
   afterEach(() => {
@@ -41,8 +43,6 @@ describe('deploy pipeline resume', () => {
   });
 
   describe('validate target-devops-center flag', () => {
-    const $$ = new TestContext();
-
     beforeEach(() => {
       sandbox.stub(ConfigAggregator.prototype, 'getInfo').returns({
         value: undefined,
@@ -51,7 +51,6 @@ describe('deploy pipeline resume', () => {
         isGlobal: () => true,
         isEnvVar: () => false,
       });
-      $$.setConfigStubContents('DeployPipelineCache', mockCache);
     });
 
     test
