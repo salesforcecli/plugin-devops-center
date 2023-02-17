@@ -89,3 +89,36 @@ export async function fetchAsyncOperationResult(con: Connection, aorId: string):
 export function getAsyncOperationStreamer(org: Org, waitTime: Duration, idToInspect: string): AsyncOpStreaming {
   return new AsyncOpStreaming(org, waitTime, idToInspect);
 }
+
+/**
+ *
+ * Helper to inspect an array of SF ids to check if it contains the given Id,
+ * independently if it is a 15 or 18 characters long.
+ *
+ * @param idsToInspect array of ids which might contain the given id
+ * @param idToFind id to look for
+ * @returns true is the array contains the given id
+ */
+export function containsSfId(idsToInspect: string[], idToFind: string): boolean {
+  let shortId: string;
+  if (idToFind.length === 18) {
+    shortId = idToFind.substring(0, 15);
+  } else if (idToFind.length === 15) {
+    shortId = idToFind;
+  } else {
+    return false;
+  }
+  return idsToInspect.some((k) => k.startsWith(shortId));
+}
+
+/**
+ *
+ * Helper to compare to SF Ids independently if they are 15 or 18 characters long.
+ *
+ * @param firstId
+ * @param secondId
+ * @returns true is the Ids match
+ */
+export function matchesSfId(firstId: string, secondId: string): boolean {
+  return containsSfId([firstId], secondId);
+}

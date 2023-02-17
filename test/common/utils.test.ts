@@ -9,7 +9,7 @@
 import { assert, expect } from 'chai';
 import * as sinon from 'sinon';
 import { Connection, Org, SfError } from '@salesforce/core';
-import { fetchAndValidatePipelineStage } from '../../src/common/utils';
+import { containsSfId, fetchAndValidatePipelineStage, matchesSfId } from '../../src/common/utils';
 import { fetchAsyncOperationResult } from '../../src/common/utils';
 import { AsyncOperationResult, AsyncOperationStatus, PipelineStage } from '../../src/common';
 import * as PipelineSelector from '../../src/common/selectors/pipelineStageSelector';
@@ -181,6 +181,48 @@ describe('utils', () => {
         const error = err as SfError;
         expect(error.name).to.contain('unexpected error');
       }
+    });
+
+    it('compares a 15 character Id with the same 15 chars Id', async () => {
+      const id1 = '001000000000001';
+      const id2 = '001000000000001';
+      const matchResult = matchesSfId(id1, id2);
+      expect(matchResult).to.be.ok;
+    });
+
+    it('compares a 15 character Id with a different 15 chars Id', async () => {
+      const id1 = '001000000000001';
+      const id2 = '001000000000002';
+      const matchResult = matchesSfId(id1, id2);
+      expect(matchResult).to.not.be.ok;
+    });
+
+    it('compares a 15 character Id with the same Id in  18 chars', async () => {
+      const id1 = '001000000000001';
+      const id2 = '001000000000001AAA';
+      const matchResult = matchesSfId(id1, id2);
+      expect(matchResult).to.be.ok;
+    });
+
+    it('compares a 15 character Id with a different 18 chars Id', async () => {
+      const id1 = '001000000000001';
+      const id2 = '001000000000002AAA';
+      const matchResult = matchesSfId(id1, id2);
+      expect(matchResult).to.not.be.ok;
+    });
+
+    it('find a 15 character Id in an array of 18 chars arrays', async () => {
+      const ids = ['001000000000001AAA', '001000000000002AAB', '001000000000003AAc'];
+      const id2 = '001000000000001';
+      const matchResult = containsSfId(ids, id2);
+      expect(matchResult).to.be.ok;
+    });
+
+    it('find a 18 character Id in an array of 18 chars arrays', async () => {
+      const ids = ['001000000000001AAA', '001000000000002AAB', '001000000000003AAc'];
+      const id2 = '001000000000001AAA';
+      const matchResult = containsSfId(ids, id2);
+      expect(matchResult).to.be.ok;
     });
   });
 });

@@ -7,6 +7,7 @@
 import { Org, StatusResult } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { AnyJson, JsonMap, ensureJsonMap } from '@salesforce/ts-types';
+import { containsSfId } from '../common/utils';
 import DOCeStreaming from './doceStream';
 
 export default abstract class SObjectStreaming extends DOCeStreaming {
@@ -40,7 +41,7 @@ export default abstract class SObjectStreaming extends DOCeStreaming {
     const changeEventHeader = ensureJsonMap(jsonPayload.ChangeEventHeader);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    if (changeEventHeader.recordIds != null && this.idsToInspect.includes(changeEventHeader.recordIds[0])) {
+    if (changeEventHeader.recordIds != null && containsSfId(this.idsToInspect, changeEventHeader.recordIds[0])) {
       return matchProcessor(jsonPayload);
     } else {
       return { completed: false };
