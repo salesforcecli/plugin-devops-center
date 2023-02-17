@@ -72,6 +72,28 @@ Number of minutes to wait for command to complete and display results.
 
 Username or alias of the target org.
 
+# flags.job-id.summary
+
+Job ID of the async operation you want to resume.
+
+# flags.job-id.description
+
+These commands return a job ID if they time out or you specified the --async flag:
+
+- sf deploy pipeline
+- sf deploy pipeline validate
+- sf deploy pipeline quick
+
+The job ID is valid for 10 days from when you started the deploy operation.
+
+# flags.use-most-recent.summary
+
+Use the job ID of the most recent deploy operation.
+
+# flags.use-most-recent.description
+
+For performance reasons, this flag uses job IDs for deploy operations that started only in the past 3 days or less. If your most recent operation was more than 3 days ago, this flag won't find a job ID.
+
 # errors.NoDefaultDoceEnv
 
 You must specify the DevOps Center org username by indicating the -c flag on the command line or by setting the target-devops-center configuration variable.

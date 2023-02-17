@@ -64,7 +64,7 @@ describe('AsyncOpStreaming', () => {
     instance = new SObjectStreamingTest(
       await core.Org.create({ aliasOrUsername: 'test@salesforce.com' }),
       Duration.minutes(3),
-      'aorId',
+      '001000000000001',
       'channel'
     );
   });
@@ -114,7 +114,7 @@ describe('AsyncOpStreaming', () => {
     });
 
     test.it('it does call the matchProcessor', async () => {
-      channelEvent.payload.ChangeEventHeader = { recordIds: ['aorId'] };
+      channelEvent.payload.ChangeEventHeader = { recordIds: ['001000000000001'] };
       const result = instance.matchingProcessorTest(channelEvent, processorSpy);
       expect(result.completed).to.equal(true);
       expect(result.payload).to.equal(channelEvent.payload);

@@ -30,6 +30,8 @@ import {
 } from '../common/flags';
 import DoceMonitor from '../streamer/doceMonitor';
 import { REST_PROMOTE_BASE_URL } from './constants';
+import { AsyncOperationResult, AsyncOperationStatus } from './types';
+import { fetchAsyncOperationResult } from './utils';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -77,16 +79,26 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
 
     // TODO: move this to logger service
     this.log(`Job ID: ${asyncOperationId}`);
+    await DeployPipelineCache.set(asyncOperationId, {});
 
     if (this.flags.async) {
-      await DeployPipelineCache.set(asyncOperationId, {});
       // TODO display async message
-    } else {
-      const doceMonitor: DoceMonitor = new AsyncOpStreaming(doceOrg, this.flags.wait, asyncOperationId);
-      await doceMonitor.monitor();
+      return {
+        jobId: asyncOperationId,
+        status: AsyncOperationStatus.InProgress,
+      };
     }
+    const doceMonitor: DoceMonitor = new AsyncOpStreaming(doceOrg, this.flags.wait, asyncOperationId);
+    await doceMonitor.monitor();
 
-    return { jobId: asyncOperationId };
+    // get final state of the async job
+    const asyncJob: AsyncOperationResult = await fetchAsyncOperationResult(doceOrg.getConnection(), asyncOperationId);
+    return {
+      jobId: asyncOperationId,
+      status: asyncJob.sf_devops__Status__c,
+      message: asyncJob.sf_devops__Message__c,
+      errorDetails: asyncJob.sf_devops__Error_Details__c,
+    };
   }
 
   protected getTargetStage(): PipelineStage {
