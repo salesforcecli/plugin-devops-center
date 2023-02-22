@@ -112,7 +112,7 @@ describe('deploy progress sumary selector', () => {
     expect(builderArgs[0]).to.contain(
       'SELECT sf_devops__Change_Bundle__r.Id, sf_devops__Change_Bundle__r.sf_devops__Version_Name__c, sf_devops__Environment__r.Id FROM sf_devops__Change_Bundle_Installs__r'
     );
-    expect(builderArgs[0]).to.contain('SELECT Name from sf_devops__Work_Items__r');
+    expect(builderArgs[0]).to.contain('SELECT Name FROM sf_devops__Work_Items__r');
 
     // Verify we used the correct filter
     expect(builderArgs[0]).to.contain("WHERE Id = 'AAA'");
