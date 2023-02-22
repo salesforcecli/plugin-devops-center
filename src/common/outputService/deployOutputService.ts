@@ -114,7 +114,7 @@ export class DeployOutputService extends OutputService {
         workItems,
         summary.branchName,
         summary.orgUrl,
-      ])
+      ]) + '\n'
     );
   }
 
@@ -139,7 +139,7 @@ export class DeployOutputService extends OutputService {
         bundlesSummary.join('; '),
         summary.branchName,
         summary.orgUrl,
-      ])
+      ]) + '\n'
     );
   }
 
