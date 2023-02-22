@@ -9,7 +9,7 @@ import { QueryResult } from 'jsforce';
 import { Connection } from '@salesforce/core';
 import { WorkItem } from '../types';
 
-// This type will be defined here as it is sepecific from this function
+// This type will be defined here as it is specific for this function
 export type WorkItemsQueryResult = {
   Id: string;
   sf_devops__Work_Items__r: QueryResult<WorkItem>;
