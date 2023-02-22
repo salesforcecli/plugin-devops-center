@@ -8,3 +8,4 @@
 export const APPROVED = 'Approved';
 export const ASYNC_OPERATION_CDC = '/data/Async_Operation_Result__ChangeEvent';
 export const REST_PROMOTE_BASE_URL = '/services/apexrest/sf_devops/pipeline/promote/v1/';
+export const HTTP_CONFLICT_CODE = 'CONFLICT';

@@ -29,7 +29,7 @@ import {
   wait,
 } from '../common/flags';
 import DoceMonitor from '../streamer/doceMonitor';
-import { REST_PROMOTE_BASE_URL } from './constants';
+import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from './constants';
 import { AsyncOperationResult, AsyncOperationStatus } from './types';
 import { fetchAsyncOperationResult } from './utils';
 
@@ -76,7 +76,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       this.flags['branch-name']
     );
     this.sourceStageId = this.getSourceStageId();
-    const asyncOperationId: string = await this.retryEnabledRequestPromotion(doceOrg, this.numRetries409);
+    const asyncOperationId: string = await this.requestPromotionFlow(doceOrg, this.numRetries409);
 
     // TODO: move this to logger service
     this.log(`Job ID: ${asyncOperationId}`);
@@ -102,20 +102,35 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     };
   }
 
-  protected async retryEnabledRequestPromotion(doceOrg: Org, numRetries: number): Promise<string> {
+  protected async requestPromotionFlow(doceOrg: Org, numRetries: number): Promise<string> {
+    let asyncOperationId: string;
+    try {
+      asyncOperationId = await this.requestPromotion(doceOrg);
+    } catch (error) {
+      const err = error as HttpResponse;
+      // if we get anything besides a 409 we rethrow the error
+      if (err['errorCode'] !== HTTP_CONFLICT_CODE) {
+        throw error;
+      }
+      this.spinner.start('Sync of VCS Events In-Progress');
+      asyncOperationId = await this.retryRequestPromotion(doceOrg, numRetries);
+      this.spinner.stop();
+    }
+    return asyncOperationId;
+  }
+
+  protected async retryRequestPromotion(doceOrg: Org, numRetries: number): Promise<string> {
     try {
       const asyncOperationId: string = await this.requestPromotion(doceOrg);
       return asyncOperationId;
     } catch (error) {
       const err = error as HttpResponse;
       // if we get anything besdies a 409 or run out of retries we throw an error
-      if (err['errorCode'] !== 'CONFLICT' || numRetries < 1) {
+      if (err['errorCode'] !== HTTP_CONFLICT_CODE || numRetries < 1) {
         this.spinner.stop();
         throw error;
       }
-      // we only start the spinner the first time we pass through here
-      if (numRetries === this.numRetries409) this.spinner.start('Sync of VCS Events In-Progress');
-      return this.retryEnabledRequestPromotion(doceOrg, numRetries - 1);
+      return this.retryRequestPromotion(doceOrg, numRetries - 1);
     }
   }
 

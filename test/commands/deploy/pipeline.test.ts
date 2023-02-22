@@ -702,10 +702,8 @@ describe('deploy pipeline', () => {
         expect(requestArgument.body).to.contain('"changeBundleName":"DummyChangeBundleName"');
       });
 
-    test
-      .stdout()
-      .stderr()
-      .do(() => {
+    describe('Processing VCS event flow', () => {
+      beforeEach(() => {
         // mock the pipeline stage record
         pipelineStageMock = {
           Id: 'mock-id',
@@ -720,28 +718,62 @@ describe('deploy pipeline', () => {
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
           .resolves(pipelineStageMock);
-        // throw 409 errors 50 times
-        requestMock = sinon.stub().throws({ name: 'CONFLICT', errorCode: 'CONFLICT' });
-        // on the 50th try we want to throw a diff error so that we can catch it and show to the user
-        requestMock
-          .onCall(49)
-          .throws({ name: 'NON_CONFLICT', errorCode: 'ERROR_NON_CONFLICT', message: 'ERROR_NON_CONFLICT' });
-
-        // stub the spinner such that it doesn't show up for jests
-        spinnerStartStub = stubMethod(sandbox, Spinner.prototype, 'start');
-        spinnerStopStub = stubMethod(sandbox, Spinner.prototype, 'stop');
-      })
-      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
-      .it('Retries the request when the http response code is 409', (ctx) => {
-        // make sure we tried 50 times to get the response
-        expect(requestMock.callCount).to.equal(50);
-        // make sure that we show the error to the user
-        expect(ctx.stderr).to.contain('ERROR_NON_CONFLICT');
-        // make sure that we called the spinner and stopped it as well
-        expect(spinnerStartStub.called).to.equal(true);
-        expect(spinnerStopStub.called).to.equal(true);
       });
-
+      test
+        .stdout()
+        .stderr()
+        .do(() => {
+          // throw 409 errors 50 times
+          requestMock = sinon.stub().throws({ name: 'CONFLICT', errorCode: 'CONFLICT', message: 'CONFLICT' });
+          // on the 50th try we want to throw a diff error so that we can catch it and show to the user
+          requestMock
+            .onCall(49)
+            .throws({ name: 'NON_CONFLICT', errorCode: 'ERROR_NON_CONFLICT', message: 'ERROR_NON_CONFLICT' });
+          // stub the spinner such that it doesn't show up for jests
+          spinnerStartStub = stubMethod(sandbox, Spinner.prototype, 'start');
+          spinnerStopStub = stubMethod(sandbox, Spinner.prototype, 'stop');
+        })
+        .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+        .it('Retries the request when the http response code is 409', (ctx) => {
+          // make sure we tried 50 times to get the response
+          expect(requestMock.callCount).to.equal(50);
+          // make sure that we show the error to the user
+          expect(ctx.stderr).to.contain('ERROR_NON_CONFLICT');
+          // make sure that we called the spinner and stopped it as well
+          expect(spinnerStartStub.called).to.equal(true);
+          expect(spinnerStopStub.called).to.equal(true);
+        });
+      test
+        .stdout()
+        .stderr()
+        .do(() => {
+          // throw non-409 errors the first time
+          requestMock = sinon.stub().throws({ name: 'ERROR', errorCode: 'ERROR', message: 'ERROR' });
+        })
+        .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+        .it('Fails the request when the http response code is some non-409 error', (ctx) => {
+          // make sure we tried at least once to get the response
+          expect(requestMock.called).to.equal(true);
+          // make sure that we show the error to the user
+          expect(ctx.stderr).to.contain('ERROR');
+        });
+      test
+        .stdout()
+        .stderr()
+        .do(() => {
+          // throw non-409 errors the first few times
+          requestMock = sinon.stub().throws({ name: 'CONFLICT', errorCode: 'CONFLICT', message: 'CONFLICT' });
+          // on the 4th try we want to complete the VCS event processing and return an AOR Id to the user
+          requestMock.onCall(4).resolves('mock-aor-id');
+        })
+        .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+        .it('Succeeds the request after processing some VCS Events', (ctx) => {
+          // make sure we made the callout the right number of times
+          expect(requestMock.callCount).to.equal(5);
+          // make sure that we show the returned aor id to the user
+          expect(ctx.stdout).to.contain('mock-aor-id');
+        });
+    });
     describe('compute source stage', () => {
       test
         .stdout()
