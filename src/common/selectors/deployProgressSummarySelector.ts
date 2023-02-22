@@ -24,7 +24,7 @@ export async function selectDeployAORSummaryData(con: Connection, aorId: string)
   const queryStr = `SELECT Id, sf_devops__Operation__c,
                     (SELECT sf_devops__Pipeline_Stage__r.Name, sf_devops__Pipeline_Stage__r.sf_devops__Environment__r.sf_devops__Named_Credential__c, sf_devops__Work_Item__r.Name FROM sf_devops__Work_Item_Promotes__r),
                     (SELECT sf_devops__Change_Bundle__r.Id, sf_devops__Change_Bundle__r.sf_devops__Version_Name__c, sf_devops__Environment__r.Id FROM sf_devops__Change_Bundle_Installs__r),
-                    (SELECT Name from sf_devops__Work_Items__r)
+                    (SELECT Name FROM sf_devops__Work_Items__r)
                     FROM sf_devops__Async_Operation_Result__c 
                     WHERE Id = '${aorId}'`;
   const resp: QueryResult<DeploySummaryQueryResult> = await con.query(queryStr);

@@ -23,7 +23,6 @@ export async function selectPipelineStageByEnvironment(con: Connection, envId: s
                     (SELECT Name FROM sf_devops__Pipeline_Stages__r)
                     FROM sf_devops__Environment__c 
                     WHERE Id = '${envId}'`;
-  // TODO Handle error
   const resp: QueryResult<EnvQueryResult> = await con.query(queryStr);
   return resp.records[0];
 }

@@ -12,7 +12,7 @@ import { ChangeBundle, ChangeBundleInstall, WorkItem, WorkItemPromote } from '..
 import { DeploySummaryQueryResult, selectDeployAORSummaryData } from '../selectors/deployProgressSummarySelector';
 import { selectOrgUrl } from '../selectors/endpointSelector';
 import { EnvQueryResult, selectPipelineStageByEnvironment } from '../selectors/environmentSelector';
-import { WorkItemsQueryResult, selectWorkItemsByChangeBundles } from '../selectors/changeBundleSelector';
+import { WorkItemsQueryResult, selectWorkItemsByChangeBundles } from '../selectors/workItemSelector';
 import { AsyncOperationType } from '../constants';
 import { OutputService } from './outputService';
 
@@ -28,6 +28,14 @@ type DeploySummary = {
   // It is an array of strings if it is an ad hoc promote
   workItems: Map<string, string[]> | string[];
   branchName: string;
+  orgUrl: string;
+};
+
+/**
+ * Inner type to avoid duplicated code
+ */
+type VersionedOrSoupDeploySummary = {
+  stageName: string;
   orgUrl: string;
 };
 
@@ -156,13 +164,12 @@ export class DeployOutputService extends OutputService {
   }
 
   /**
-   * Builds a DeploySummary for a versioned deploy
+   * Builds a VersionedOrSoupDeploySummary for a versioned or soup deploy
    */
-  private async processVersionedDeploy(
-    branchName: string,
+  private async processVersionedOrSoupDeploy(
     changeBundleInstalls: ChangeBundleInstall[]
-  ): Promise<DeploySummary> {
-    // We need to get the stage name and the org url first
+  ): Promise<VersionedOrSoupDeploySummary> {
+    // We get the stage name and the org url first
     const envId: string = changeBundleInstalls[changeBundleInstalls.length - 1].sf_devops__Environment__r.Id;
     const envQueryResp: EnvQueryResult = await selectPipelineStageByEnvironment(this.con, envId);
 
@@ -170,6 +177,24 @@ export class DeployOutputService extends OutputService {
 
     const namedCredential: string = envQueryResp.sf_devops__Named_Credential__c;
     const orgUrl: string = await selectOrgUrl(this.con, namedCredential);
+
+    return {
+      stageName,
+      orgUrl,
+    };
+  }
+
+  /**
+   * Builds a DeploySummary for a versioned deploy
+   */
+  private async processVersionedDeploy(
+    branchName: string,
+    changeBundleInstalls: ChangeBundleInstall[]
+  ): Promise<DeploySummary> {
+    // We need to get the stage name and the org url first
+    const commonProcessing: VersionedOrSoupDeploySummary = await this.processVersionedOrSoupDeploy(
+      changeBundleInstalls
+    );
 
     // Then we need to get the WIs for every CB
     // We will create a map that stores CB.Id -> CB.versionName
@@ -197,10 +222,10 @@ export class DeployOutputService extends OutputService {
     }
 
     return {
-      stageName,
+      stageName: commonProcessing.stageName,
       workItems,
       branchName,
-      orgUrl,
+      orgUrl: commonProcessing.orgUrl,
     };
   }
 
@@ -213,13 +238,9 @@ export class DeployOutputService extends OutputService {
     workItemsParam: WorkItem[]
   ): Promise<DeploySummary> {
     // We need to get the stage name and the org url first
-    const envId: string = changeBundleInstalls[changeBundleInstalls.length - 1].sf_devops__Environment__r.Id;
-    const envQueryResp: EnvQueryResult = await selectPipelineStageByEnvironment(this.con, envId);
-
-    const stageName: string = envQueryResp.sf_devops__Pipeline_Stages__r.records[0].Name;
-
-    const namedCredential: string = envQueryResp.sf_devops__Named_Credential__c;
-    const orgUrl: string = await selectOrgUrl(this.con, namedCredential);
+    const commonProcessing: VersionedOrSoupDeploySummary = await this.processVersionedOrSoupDeploy(
+      changeBundleInstalls
+    );
 
     const changeBundle: ChangeBundle = changeBundleInstalls[0].sf_devops__Change_Bundle__r;
 
@@ -231,10 +252,10 @@ export class DeployOutputService extends OutputService {
     );
 
     return {
-      stageName,
+      stageName: commonProcessing.stageName,
       workItems,
       branchName,
-      orgUrl,
+      orgUrl: commonProcessing.orgUrl,
     };
   }
 }

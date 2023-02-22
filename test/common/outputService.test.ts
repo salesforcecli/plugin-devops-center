@@ -16,7 +16,7 @@ import { AsyncOperationResult, ChangeBundleInstall, WorkItem, WorkItemPromote } 
 import * as DeploySelector from '../../src/common/selectors/deployProgressSummarySelector';
 import * as EndpointSelector from '../../src/common/selectors/endpointSelector';
 import * as StageSelector from '../../src/common/selectors/environmentSelector';
-import * as ChangeBundleSelector from '../../src/common/selectors/changeBundleSelector';
+import * as WorkItemSelector from '../../src/common/selectors/workItemSelector';
 import { AsyncOperationType } from '../../src/common/constants';
 
 describe('outputService', () => {
@@ -347,7 +347,7 @@ describe('outputService', () => {
         const workItems1 = [workItem1, workItem2];
         const workItems2 = [workItem3];
         const workItems3 = [workItem4];
-        sandbox.stub(ChangeBundleSelector, 'selectWorkItemsByChangeBundles').resolves([
+        sandbox.stub(WorkItemSelector, 'selectWorkItemsByChangeBundles').resolves([
           {
             Id: changeBundleInstall1Id,
             sf_devops__Work_Items__r: {

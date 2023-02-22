@@ -11,10 +11,7 @@ import { expect } from '@oclif/test';
 import { Connection } from '@salesforce/core';
 import { QueryResult } from 'jsforce';
 import sinon = require('sinon');
-import {
-  selectWorkItemsByChangeBundles,
-  WorkItemsQueryResult,
-} from '../../../src/common/selectors/changeBundleSelector';
+import { selectWorkItemsByChangeBundles, WorkItemsQueryResult } from '../../../src/common/selectors/workItemSelector';
 import { WorkItem } from '../../../src/common/types';
 
 const MOCK_WORK_ITEM_1: WorkItem = {

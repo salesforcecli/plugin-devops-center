@@ -26,7 +26,6 @@ export async function selectWorkItemsByChangeBundles(
                     (SELECT Name FROM sf_devops__Work_Items__r)
                     FROM sf_devops__Change_Bundle__c
                     WHERE Id IN (${changeBundles.map((id) => "'" + id + "'").join(', ')})`;
-  // TODO Handle error
   const resp: QueryResult<WorkItemsQueryResult> = await con.query(queryStr);
   return resp.records;
 }
