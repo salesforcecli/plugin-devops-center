@@ -77,10 +77,6 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     );
     this.sourceStageId = this.getSourceStageId();
     const asyncOperationId: string = await this.retryEnabledRequestPromotion(doceOrg, this.numRetries409);
-    this.spinner.stop();
-    if (asyncOperationId?.includes('errorCode')) {
-      throw new Error(JSON.stringify(asyncOperationId)); // Is this the type of error we want to throw here?
-    }
 
     // TODO: move this to logger service
     this.log(`Job ID: ${asyncOperationId}`);
@@ -113,12 +109,12 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     } catch (error) {
       const err = error as HttpResponse;
       // if we get anything besdies a 409 or run out of retries we throw an error
-      if (err['errorCode'] !== 'ERROR_HTTP_409' || numRetries < 1) {
-        return JSON.stringify(err); // we can't throw the error from this promise because then it doesn't surface to the user
+      if (err['errorCode'] !== 'CONFLICT' || numRetries < 1) {
+        this.spinner.stop();
+        throw error;
       }
-      if (numRetries === this.numRetries409)
-        // we only start the spinner the first time we pass through here
-        this.spinner.start('Sync of VCS Events In-Progress');
+      // we only start the spinner the first time we pass through here
+      if (numRetries === this.numRetries409) this.spinner.start('Sync of VCS Events In-Progress');
       return this.retryEnabledRequestPromotion(doceOrg, numRetries - 1);
     }
   }

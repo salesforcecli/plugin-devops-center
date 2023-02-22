@@ -721,9 +721,11 @@ describe('deploy pipeline', () => {
           .stub(Utils, 'fetchAndValidatePipelineStage')
           .resolves(pipelineStageMock);
         // throw 409 errors 50 times
-        requestMock = sinon.stub().throws({ errorCode: 'ERROR_HTTP_409' });
+        requestMock = sinon.stub().throws({ name: 'CONFLICT', errorCode: 'CONFLICT' });
         // on the 50th try we want to throw a diff error so that we can catch it and show to the user
-        requestMock.onCall(49).throws({ errorCode: 'ERROR_HTTP_410' });
+        requestMock
+          .onCall(49)
+          .throws({ name: 'NON_CONFLICT', errorCode: 'ERROR_NON_CONFLICT', message: 'ERROR_NON_CONFLICT' });
 
         // stub the spinner such that it doesn't show up for jests
         spinnerStartStub = stubMethod(sandbox, Spinner.prototype, 'start');
@@ -734,8 +736,7 @@ describe('deploy pipeline', () => {
         // make sure we tried 50 times to get the response
         expect(requestMock.callCount).to.equal(50);
         // make sure that we show the error to the user
-        expect(ctx.stderr).to.contain('Error: "{\\"errorCode\\":\\"ERROR_HTTP_410\\"}"');
-        expect(requestMock.called).to.equal(true);
+        expect(ctx.stderr).to.contain('ERROR_NON_CONFLICT');
         // make sure that we called the spinner and stopped it as well
         expect(spinnerStartStub.called).to.equal(true);
         expect(spinnerStopStub.called).to.equal(true);
