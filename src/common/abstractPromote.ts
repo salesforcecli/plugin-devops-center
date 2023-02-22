@@ -86,7 +86,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     this.log(`Job ID: ${asyncOperationId}`);
     await DeployPipelineCache.set(asyncOperationId, {});
 
-    if (this.flags['async']) {
+    if (this.flags.async) {
       // TODO display async message
       return {
         jobId: asyncOperationId,
@@ -116,8 +116,6 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       if (err['errorCode'] !== 'ERROR_HTTP_409' || numRetries < 1) {
         return JSON.stringify(err); // we can't throw the error from this promise because then it doesn't surface to the user
       }
-      // this.log('Number of Retries Remaining: ' + numRetries.toString()); // todo: do we want to remove this for users since we won't tell them how many times we are trying/failing ??
-      // await new Promise((f) => setTimeout(f, 1000)); // this is a sleep for 1 second between 409 failure reattempts.
       if (numRetries === this.numRetries409)
         // we only start the spinner the first time we pass through here
         this.spinner.start('Sync of VCS Events In-Progress');
@@ -155,19 +153,6 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
         promoteOptions: this.deployOptions,
       }),
     };
-    /* 
-    const req: HttpRequest = {
-      method: 'GET',
-      url: 'http://localhost:8081/throw409' ,
-      body: JSON.stringify({
-        oldURL: `${REST_PROMOTE_BASE_URL as string}${
-          this.targetStage.sf_devops__Pipeline__r.sf_devops__Project__c
-        }/pipelineName/${this.sourceStageId}`,
-        changeBundleName: this.flags['bundle-version-name'],
-        promoteOptions: this.deployOptions,
-      }),
-    };*/
-
     return targetOrg.getConnection().request(req);
   }
 
