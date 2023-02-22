@@ -25,7 +25,7 @@ describe('deployPipelineCache', () => {
 
     // Retrieve the key set
     const cache = await DeployPipelineCache.create();
-    const key = cache.resolveLatest();
+    const key = cache.getLatestKeyOrThrow();
     expect(key).to.equal('ABC');
   });
 
@@ -102,7 +102,7 @@ describe('deployPipelineCache', () => {
 
     let excThrown = false;
     try {
-      cache.resolveLatest();
+      cache.getLatestKeyOrThrow();
     } catch (err) {
       excThrown = true;
     }

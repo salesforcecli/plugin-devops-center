@@ -9,8 +9,9 @@ import { assert, expect } from 'chai';
 import * as sinon from 'sinon';
 import { Parser } from '@oclif/core';
 import { ConfigAggregator, Org } from '@salesforce/core';
+import { Duration } from '@salesforce/kit';
 import { ConfigVars } from '../../src/configMeta';
-import { requiredDoceOrgFlag } from '../../src/common/flags';
+import { requiredDoceOrgFlag, wait, async } from '../../src/common/flags';
 
 const TARGET_DEVOPS_CENTER_ALIAS = 'target-devops-center';
 const MOCK_TARGET_DEVOPS_CENTER = {
@@ -152,6 +153,46 @@ describe('requiredDoceOrgFlag', () => {
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.message).to.include(`No authorization information found for ${invalidTargetDevopsCenter}`);
+    }
+  });
+});
+
+describe('waitFlag', () => {
+  it('errors when input value < min value(3)', async () => {
+    try {
+      // wrong value provided < 3
+      await Parser.parse(['--wait=0'], {
+        flags: { wait },
+      });
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(err.message).to.include('The value must be between 3 and undefined (inclusive).');
+    }
+  });
+
+  it('returns the correct value ', async () => {
+    const out = await Parser.parse(['--wait=4'], {
+      flags: { wait },
+    });
+    expect(out.flags.wait).to.deep.equal(Duration.minutes(4));
+  });
+
+  it('returns the default value ', async () => {
+    const out = await Parser.parse([], {
+      flags: { wait },
+    });
+    expect(out.flags.wait).to.deep.equal(wait.default);
+  });
+
+  it('wait and async flags are mutually exclusive', async () => {
+    try {
+      // wrong value provided < 3
+      await Parser.parse(['--wait=4', '--async'], {
+        flags: { wait, async },
+      });
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(err.message).to.include('--async=true cannot also be provided when using --wait');
     }
   });
 });

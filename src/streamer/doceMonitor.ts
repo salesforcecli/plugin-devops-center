@@ -5,6 +5,11 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-export const APPROVED = 'Approved';
-export const ASYNC_OPERATION_CDC = '/data/Async_Operation_Result__ChangeEvent';
-export const REST_PROMOTE_BASE_URL = '/services/apexrest/sf_devops/pipeline/promote/v1/';
+import { AnyJson } from '@salesforce/ts-types';
+
+/**
+ * Common interface used to monitor the progress of something in the DevOps Center.
+ **/
+export default interface DoceMonitor {
+  monitor(): Promise<void | AnyJson>;
+}

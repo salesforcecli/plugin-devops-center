@@ -6,6 +6,7 @@
  */
 
 import { ConfigAggregator, Messages, Org } from '@salesforce/core';
+import { Duration } from '@salesforce/kit';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Flags as OclifFlags } from '@oclif/core';
 import { TestLevel } from '../common';
@@ -63,6 +64,22 @@ export const async = Flags.boolean({
 });
 
 /**
+ * Wait flag
+ * This is used to determine how many minutes we are going to stream results before giving back the control of the terminal to the user.
+ */
+export const wait = Flags.duration({
+  unit: 'minutes',
+  char: 'w',
+  summary: messages.getMessage('promote.wait.summary'),
+  description: messages.getMessage('promote.wait.description'),
+  defaultValue: 33,
+  default: Duration.minutes(33),
+  helpValue: '<minutes>',
+  min: 3,
+  exclusive: ['async'],
+});
+
+/**
  * Custom flag for the target devops center org.
  * Makes this flag required and validates that passed in alias/username corresponds to an authenticated org.
  * If no value is passed in, then it looks for the alias/username set in the --target-devops-center config variable.
@@ -74,6 +91,20 @@ export const requiredDoceOrgFlag = OclifFlags.custom({
   default: async () => getOrgOrThrow(),
   defaultHelp: async () => (await getOrgOrThrow())?.getUsername(),
   required: true,
+});
+
+export const jobId = Flags.salesforceId({
+  char: 'i',
+  description: messages.getMessage('flags.job-id.description'),
+  summary: messages.getMessage('flags.job-id.summary'),
+  exactlyOne: ['use-most-recent', 'job-id'],
+});
+
+export const useMostRecent = Flags.boolean({
+  char: 'r',
+  description: messages.getMessage('flags.use-most-recent.description'),
+  summary: messages.getMessage('flags.use-most-recent.summary'),
+  exactlyOne: ['use-most-recent', 'job-id'],
 });
 
 /**
