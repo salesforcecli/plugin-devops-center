@@ -5,15 +5,19 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-/* eslint-disable no-console */
+/* eslint-disable no-console, class-methods-use-this , no-case-declarations */
 
-import { Connection } from '@salesforce/core';
-import { ChangeBundleInstall, WorkItemPromote } from '../types';
+import { Connection, Messages } from '@salesforce/core';
+import { ChangeBundle, ChangeBundleInstall, WorkItem, WorkItemPromote } from '../types';
 import { DeploySummaryQueryResult, selectDeployAORSummaryData } from '../selectors/deployProgressSummarySelector';
 import { selectOrgUrl } from '../selectors/endpointSelector';
 import { EnvQueryResult, selectPipelineStageByEnvironment } from '../selectors/environmentSelector';
 import { WorkItemsQueryResult, selectWorkItemsByChangeBundles } from '../selectors/changeBundleSelector';
+import { AsyncOperationType } from '../constants';
 import { OutputService } from './outputService';
+
+Messages.importMessagesDirectory(__dirname);
+const output = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.output');
 
 /**
  * This type is used for storing all the info needed for the deployment summary
@@ -43,44 +47,8 @@ export class DeployOutputService extends OutputService {
   /**
    * Prints this message when the user uses the async flag
    */
-  public static printAsyncRunInfo(aorId: string): void {
-    console.log(
-      'Deploy has been queued.\n' +
-        `Run "sf deploy pipeline resume --job-id ${aorId} to resume watching the deploy.\n` +
-        `Run "sf deploy pipeline report --job-id ${aorId} to get the latest status.`
-    );
-  }
-
-  /**
-   * Prints an adHoc deploy summary
-   */
-  private static printAdHocDeploySummary(summary: DeploySummary): void {
-    console.log(
-      `DevOps Center pipeline stage ${summary.stageName} being updated with metadata associated with work ${
-        (summary.workItems as string[]).length === 1 ? 'item' : 'items'
-      } ` +
-        `${(summary.workItems as string[]).join(', ')}. Deploying metadata from ${
-          summary.branchName
-        } branch to target org ${summary.orgUrl}.\n`
-    );
-  }
-
-  /**
-   * Prints a versioned or soup deploy summary
-   */
-  private static printVersoupDeploySummary(summary: DeploySummary): void {
-    const bundlesSummary: string[] = [];
-    (summary.workItems as Map<string, string[]>).forEach((workItems: string[], bundleVersionName: string) => {
-      bundlesSummary.push(
-        `work ${workItems.length === 1 ? 'item' : 'items'} ${workItems.join(', ')} in bundle ${bundleVersionName}`
-      );
-    });
-    console.log(
-      `DevOps Center pipeline stage ${summary.stageName} being updated with metadata associated with ` +
-        `${bundlesSummary.join('; ')}. Deploying metadata from ${summary.branchName} branch to target org ${
-          summary.orgUrl
-        }.\n`
-    );
+  public printAsyncRunInfo(aorId: string): void {
+    console.log(output.getMessage('output.async-run-info', [aorId, aorId]));
   }
 
   /**
@@ -92,22 +60,79 @@ export class DeployOutputService extends OutputService {
     const queryResp: DeploySummaryQueryResult = await selectDeployAORSummaryData(this.con, aorId);
 
     let summary: DeploySummary;
-    if (queryResp.sf_devops__Work_Item_Promotes__r !== null) {
-      // It is an AD HOC PROMOTE
-      const workItemsPromote: WorkItemPromote[] = queryResp.sf_devops__Work_Item_Promotes__r.records;
-      summary = await this.processAdHocDeploy(branch, workItemsPromote);
-      DeployOutputService.printAdHocDeploySummary(summary);
-    } else if (queryResp.sf_devops__Change_Bundle_Installs__r !== null) {
-      // It is a versioned or soup promote
-      // We will treat them similarly
-      const versoupQueryResp: ChangeBundleInstall[] = queryResp.sf_devops__Change_Bundle_Installs__r.records;
-      summary = await this.processVersoupDeploy(branch, versoupQueryResp);
-      DeployOutputService.printVersoupDeploySummary(summary);
+    switch (queryResp.sf_devops__Operation__c) {
+      case AsyncOperationType.AD_HOC_PROMOTE:
+        summary = await this.processAdHocDeploy(branch, queryResp.sf_devops__Work_Item_Promotes__r!.records);
+        this.printAdHocDeploySummary(summary);
+        break;
+
+      case AsyncOperationType.VERSIONED_PROMOTE:
+        summary = await this.processVersionDeploy(branch, queryResp.sf_devops__Change_Bundle_Installs__r!.records);
+        this.printVersionOrSoupDeploySummary(summary);
+        break;
+
+      case AsyncOperationType.SOUP_PROMOTE:
+        summary = await this.processSoupDeploy(
+          branch,
+          queryResp.sf_devops__Change_Bundle_Installs__r!.records,
+          queryResp.sf_devops__Work_Items__r!.records
+        );
+        this.printVersionOrSoupDeploySummary(summary);
+        break;
+
+      default:
+        // Error here
+        break;
     }
   }
 
   /**
-   * Builds a DeploySummary knowing it is an adHoc deploy case
+   * Prints an adHoc deploy summary
+   */
+  private printAdHocDeploySummary(summary: DeploySummary): void {
+    const itemsLabel =
+      (summary.workItems as string[]).length === 1
+        ? output.getMessage('output.item')
+        : output.getMessage('output.items');
+    const workItems = (summary.workItems as string[]).join(', ');
+    console.log(
+      output.getMessage('output.adhoc-deploy-summary', [
+        summary.stageName,
+        itemsLabel,
+        workItems,
+        summary.branchName,
+        summary.orgUrl,
+      ])
+    );
+  }
+
+  /**
+   * Prints a versioned or soup deploy summary
+   */
+  private printVersionOrSoupDeploySummary(summary: DeploySummary): void {
+    const bundlesSummary: string[] = [];
+    (summary.workItems as Map<string, string[]>).forEach((workItems: string[], bundleVersionName: string) => {
+      const itemsLabel = workItems.length === 1 ? output.getMessage('output.item') : output.getMessage('output.items');
+      bundlesSummary.push(
+        output.getMessage('output.version-or-soup-deploy-summary-wis', [
+          itemsLabel,
+          workItems.join(', '),
+          bundleVersionName,
+        ])
+      );
+    });
+    console.log(
+      output.getMessage('output.version-or-soup-deploy-summary', [
+        summary.stageName,
+        bundlesSummary.join('; '),
+        summary.branchName,
+        summary.orgUrl,
+      ])
+    );
+  }
+
+  /**
+   * Builds a DeploySummary for an adHoc deploy
    */
   private async processAdHocDeploy(branchName: string, workItemsPromotes: WorkItemPromote[]): Promise<DeploySummary> {
     const stageName: string = workItemsPromotes[0].sf_devops__Pipeline_Stage__r.Name;
@@ -127,9 +152,9 @@ export class DeployOutputService extends OutputService {
   }
 
   /**
-   * Builds a DeploySummary knowing it is a versioned or soup deploy case
+   * Builds a DeploySummary for a versioned deploy
    */
-  private async processVersoupDeploy(
+  private async processVersionDeploy(
     branchName: string,
     changeBundleInstalls: ChangeBundleInstall[]
   ): Promise<DeploySummary> {
@@ -166,6 +191,39 @@ export class DeployOutputService extends OutputService {
         );
       }
     }
+
+    return {
+      stageName,
+      workItems,
+      branchName,
+      orgUrl,
+    };
+  }
+
+  /**
+   * Builds a DeploySummary for a versioned deploy
+   */
+  private async processSoupDeploy(
+    branchName: string,
+    changeBundleInstalls: ChangeBundleInstall[],
+    workItemsParam: WorkItem[]
+  ): Promise<DeploySummary> {
+    // We need to get the stage name and the org url first
+    const envId: string = changeBundleInstalls[changeBundleInstalls.length - 1].sf_devops__Environment__r.Id;
+    const envQueryResp: EnvQueryResult = await selectPipelineStageByEnvironment(this.con, envId);
+
+    const stageName: string = envQueryResp.sf_devops__Pipeline_Stages__r.records[0].Name;
+
+    const namedCredential: string = envQueryResp.sf_devops__Named_Credential__c;
+    const orgUrl: string = await selectOrgUrl(this.con, namedCredential);
+
+    const changeBundle: ChangeBundle = changeBundleInstalls[0].sf_devops__Change_Bundle__r;
+
+    const workItems: Map<string, string[]> = new Map();
+    workItems.set(
+      changeBundle.sf_devops__Version_Name__c,
+      workItemsParam.map((wi) => wi.Name)
+    );
 
     return {
       stageName,

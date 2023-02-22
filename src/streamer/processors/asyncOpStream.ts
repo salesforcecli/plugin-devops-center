@@ -16,8 +16,11 @@ import { AsyncOperationResult } from '../../common/types';
 import { OutputService } from '../../common/outputService/outputService';
 
 export default class AsyncOpStreaming extends SObjectStreaming {
-  public constructor(org: Org, wait: Duration, idToInspect: string) {
+  private outputService: OutputService;
+
+  public constructor(org: Org, wait: Duration, idToInspect: string, outputService: OutputService) {
     super(org, wait, new Array(idToInspect), ASYNC_OPERATION_CDC);
+    this.outputService = outputService;
   }
 
   /**
@@ -47,7 +50,7 @@ export default class AsyncOpStreaming extends SObjectStreaming {
     };
 
     // Print the aor status
-    OutputService.printAorStatus(asyncOpResult);
+    this.outputService.printAorStatus(asyncOpResult);
 
     // In a future we want to test !Is_Completed__c instead of Status != In Progress
     if (asyncOpResult.sf_devops__Status__c && asyncOpResult.sf_devops__Status__c !== 'In Progress') {

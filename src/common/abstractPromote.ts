@@ -31,7 +31,6 @@ import {
 import DoceMonitor from '../streamer/doceMonitor';
 import { REST_PROMOTE_BASE_URL } from './constants';
 import { OutputService } from './outputService/outputService';
-import { DeployOutputService } from './outputService/deployOutputService';
 import { OutputServiceFactory } from './outputService/outputServiceFactory';
 
 Messages.importMessagesDirectory(__dirname);
@@ -78,16 +77,16 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     this.sourceStageId = this.getSourceStageId();
     const asyncOperationId: string = await this.requestPromotion(doceOrg);
 
-    OutputService.printAorId(asyncOperationId);
+    const outputService: OutputService = OutputServiceFactory.forDeployment(doceOrg.getConnection());
+    outputService.printAorId(asyncOperationId);
 
     if (this.flags.async) {
       await DeployPipelineCache.set(asyncOperationId, {});
-      DeployOutputService.printAsyncRunInfo(asyncOperationId);
+      outputService.printAsyncRunInfo(asyncOperationId);
     } else {
-      const outputService: DeployOutputService = OutputServiceFactory.forDeployment(doceOrg.getConnection());
       await outputService.printProgressSummary(asyncOperationId, this.flags['branch-name']);
 
-      const doceMonitor: DoceMonitor = new AsyncOpStreaming(doceOrg, this.flags.wait, asyncOperationId);
+      const doceMonitor: DoceMonitor = new AsyncOpStreaming(doceOrg, this.flags.wait, asyncOperationId, outputService);
       await doceMonitor.monitor();
     }
 
