@@ -83,6 +83,8 @@ describe('deploy progress sumary selector', () => {
             totalSize: WORK_ITEMS.length,
           },
           sf_devops__Change_Bundle_Installs__r: null,
+          sf_devops__Operation__c: null,
+          sf_devops__Work_Items__r: null,
         },
       ],
       totalSize: 1,
