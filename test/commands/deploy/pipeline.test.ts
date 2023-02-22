@@ -9,8 +9,10 @@
 import { expect, test } from '@oclif/test';
 import { TestContext } from '@salesforce/core/lib/testSetup';
 import * as sinon from 'sinon';
+import { stubMethod } from '@salesforce/ts-sinon';
 import { ConfigAggregator, Org } from '@salesforce/core';
 import { HttpRequest } from 'jsforce';
+import { Spinner } from '@salesforce/sf-plugins-core/lib/ux';
 import { ConfigVars } from '../../../src/configMeta';
 import { DeployPipelineCache } from '../../../src/common/deployPipelineCache';
 import { PipelineStage } from '../../../src/common';
@@ -38,6 +40,8 @@ describe('deploy pipeline', () => {
   let sandbox: sinon.SinonSandbox;
   let fetchAndValidatePipelineStageStub: sinon.SinonStub;
   let pipelineStageMock: PipelineStage;
+  let spinnerStartStub: sinon.SinonStub;
+  let spinnerStopStub: sinon.SinonStub;
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
@@ -249,6 +253,45 @@ describe('deploy pipeline', () => {
         expect(requestArgument.body).to.contain('"testLevel":"RunSpecifiedTests"');
         expect(requestArgument.body).to.contain('"runTests":"DummyTest_1,DummyTest_2,DummyTest_3"');
         expect(requestArgument.body).to.contain('"changeBundleName":"DummyChangeBundleName"');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        // mock the pipeline stage record
+        pipelineStageMock = {
+          Id: 'mock-id',
+          sf_devops__Branch__r: {
+            sf_devops__Name__c: 'mockBranchName',
+          },
+          sf_devops__Pipeline__r: {
+            sf_devops__Project__c: 'mockProjectId',
+          },
+          sf_devops__Pipeline_Stages__r: undefined,
+        };
+        fetchAndValidatePipelineStageStub = sandbox
+          .stub(Utils, 'fetchAndValidatePipelineStage')
+          .resolves(pipelineStageMock);
+        // throw 409 errors 50 times
+        requestMock = sinon.stub().throws({ errorCode: 'ERROR_HTTP_409' });
+        // on the 50th try we want to throw a diff error so that we can catch it and show to the user
+        requestMock.onCall(49).throws({ errorCode: 'ERROR_HTTP_410' });
+
+        // stub the spinner such that it doesn't show up for jests
+        spinnerStartStub = stubMethod(sandbox, Spinner.prototype, 'start');
+        spinnerStopStub = stubMethod(sandbox, Spinner.prototype, 'stop');
+      })
+      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+      .it('Retries the request when the http response code is 409', (ctx) => {
+        // make sure we tried 50 times to get the response
+        expect(requestMock.callCount).to.equal(50);
+        // make sure that we show the error to the user
+        expect(ctx.stderr).to.contain('Error: "{\\"errorCode\\":\\"ERROR_HTTP_410\\"}"');
+        expect(requestMock.called).to.equal(true);
+        // make sure that we called the spinner and stopped it as well
+        expect(spinnerStartStub.called).to.equal(true);
+        expect(spinnerStopStub.called).to.equal(true);
       });
 
     describe('compute source stage', () => {

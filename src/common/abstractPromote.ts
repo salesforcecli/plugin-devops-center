@@ -7,7 +7,7 @@
 import { Org } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
-import { HttpRequest } from 'jsforce';
+import { HttpRequest, HttpResponse } from 'jsforce';
 import { DeployPipelineCache } from '../common/deployPipelineCache';
 import {
   fetchAndValidatePipelineStage,
@@ -48,6 +48,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
   private targetStage: PipelineStage;
   private sourceStageId: string;
   private deployOptions: Partial<PromoteOptions>;
+  private numRetries409 = 50; // this is the number of times we retry if we get a http-409-Conflict response
 
   public async init(): Promise<void> {
     await super.init();
@@ -66,17 +67,41 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       this.flags['branch-name']
     );
     this.sourceStageId = this.getSourceStageId();
-    const asyncOperationId: string = await this.requestPromotion(doceOrg);
+    const asyncOperationId: string = await this.retryEnabledRequestPromotion(doceOrg, this.numRetries409);
+    this.spinner.stop();
+    if (asyncOperationId?.includes('errorCode')) {
+      throw new Error(JSON.stringify(asyncOperationId)); // Is this the type of error we want to throw here?
+    }
 
-    if (this.flags.async) {
+    if (this.flags['async']) {
       await DeployPipelineCache.set(asyncOperationId, {});
       // TODO display async message
+      this.logSuccess('Async message TBD');
     }
 
     // TODO: move this to logger service
     this.log(`Job ID: ${asyncOperationId}`);
 
     return { jobId: asyncOperationId };
+  }
+
+  protected async retryEnabledRequestPromotion(doceOrg: Org, numRetries: number): Promise<string> {
+    try {
+      const asyncOperationId: string = await this.requestPromotion(doceOrg);
+      return asyncOperationId;
+    } catch (error) {
+      const err = error as HttpResponse;
+      // if we get anything besdies a 409 or run out of retries we throw an error
+      if (err['errorCode'] !== 'ERROR_HTTP_409' || numRetries < 1) {
+        return JSON.stringify(err); // we can't throw the error from this promise because then it doesn't surface to the user
+      }
+      // this.log('Number of Retries Remaining: ' + numRetries.toString()); // todo: do we want to remove this for users since we won't tell them how many times we are trying/failing ??
+      // await new Promise((f) => setTimeout(f, 1000)); // this is a sleep for 1 second between 409 failure reattempts.
+      if (numRetries === this.numRetries409)
+        // we only start the spinner the first time we pass through here
+        this.spinner.start('Sync of VCS Events In-Progress');
+      return this.retryEnabledRequestPromotion(doceOrg, numRetries - 1);
+    }
   }
 
   protected getTargetStage(): PipelineStage {
@@ -95,6 +120,19 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
         promoteOptions: this.deployOptions,
       }),
     };
+    /* 
+    const req: HttpRequest = {
+      method: 'GET',
+      url: 'http://localhost:8081/throw409' ,
+      body: JSON.stringify({
+        oldURL: `${REST_PROMOTE_BASE_URL as string}${
+          this.targetStage.sf_devops__Pipeline__r.sf_devops__Project__c
+        }/pipelineName/${this.sourceStageId}`,
+        changeBundleName: this.flags['bundle-version-name'],
+        promoteOptions: this.deployOptions,
+      }),
+    };*/
+
     return targetOrg.getConnection().request(req);
   }
 
