@@ -15,5 +15,11 @@
       "wait"
     ],
     "alias": []
+  },
+  {
+    "command": "deploy:pipeline:resume",
+    "plugin": "@salesforce/plugin-devops-center",
+    "flags": ["devops-center-username", "job-id", "json", "use-most-recent", "wait"],
+    "alias": []
   }
 ]

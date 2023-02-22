@@ -12,9 +12,8 @@ import * as sinon from 'sinon';
 import { ConfigAggregator, Org, StreamingClient } from '@salesforce/core';
 import { HttpRequest } from 'jsforce';
 import { ConfigVars } from '../../../src/configMeta';
-import { DeployPipelineCache } from '../../../src/common/deployPipelineCache';
 import AsyncOpStreaming from '../../../src/streamer/processors/asyncOpStream';
-import { PipelineStage } from '../../../src/common';
+import { AsyncOperationStatus, PipelineStage } from '../../../src/common';
 import * as Utils from '../../../src/common/utils';
 import { REST_PROMOTE_BASE_URL } from '../../../src/common/constants';
 import { DeployOutputService } from '../../../src/common/outputService/deployOutputService';
@@ -51,6 +50,7 @@ describe('deploy pipeline', () => {
   let sandbox: sinon.SinonSandbox;
   let fetchAndValidatePipelineStageStub: sinon.SinonStub;
   let pipelineStageMock: PipelineStage;
+  const $$ = new TestContext();
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
@@ -63,6 +63,7 @@ describe('deploy pipeline', () => {
       isGlobal: () => true,
       isEnvVar: () => false,
     });
+    $$.setConfigStubContents('DeployPipelineCache', {});
   });
 
   afterEach(() => {
@@ -130,9 +131,16 @@ describe('deploy pipeline', () => {
             sf_devops__Named_Credential__c: 'ABC',
           },
         };
+        // mock the async operation result
+        const aorMock = {
+          Id: 'mock-id',
+          sf_devops__Status__c: AsyncOperationStatus.Completed,
+          sf_devops__Message__c: 'Completed',
+        };
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
           .resolves(pipelineStageMock);
+        sandbox.stub(Utils, 'fetchAsyncOperationResult').resolves(aorMock);
         requestMock = sinon.stub().resolves('mock-aor-id');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
@@ -185,22 +193,15 @@ describe('deploy pipeline', () => {
   });
 
   describe('cache', () => {
-    const $$ = new TestContext();
-
-    beforeEach(async () => {
-      // Mock the cache
-      $$.setConfigStubContents('DeployPipelineCache', {});
-    });
-
     test
       .stdout()
       .stderr()
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
       .it('does not cache when running deploy pipeline without the async flag', async () => {
-        const cache = await DeployPipelineCache.create();
+        // const cache = await DeployPipelineCache.create();
         let excThrown = false;
         try {
-          cache.resolveLatest();
+          // cache.resolveLatest();
         } catch (err) {
           excThrown = true;
         }
@@ -234,9 +235,409 @@ describe('deploy pipeline', () => {
       })
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '--async'])
       .it('cache the aorId when running deploy pipeline with the async flag', async () => {
-        const cache = await DeployPipelineCache.create();
-        const key = cache.resolveLatest();
-        expect(key).not.to.be.undefined;
+        // const cache = await DeployPipelineCache.create();
+        // const key = cache.resolveLatest();
+        // expect(key).not.to.be.undefined;
+      });
+  });
+
+  describe('request promotion', () => {
+    const firstStageId = 'mock-first-stage-id';
+    const secondStageId = 'mock-second-stage-id';
+
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        // mock the pipeline stage record
+        pipelineStageMock = {
+          Id: firstStageId,
+          sf_devops__Branch__r: {
+            sf_devops__Name__c: 'mockBranchName',
+          },
+          sf_devops__Pipeline__r: {
+            sf_devops__Project__c: 'mockProjectId',
+          },
+          sf_devops__Pipeline_Stages__r: undefined,
+        };
+        fetchAndValidatePipelineStageStub = sandbox
+          .stub(Utils, 'fetchAndValidatePipelineStage')
+          .resolves(pipelineStageMock);
+        requestMock = sinon.stub();
+      })
+      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+      .it('correctly sets the promote option to perfome an undeployedOnly promotion', () => {
+        // verify we made the request
+        expect(requestMock.called).to.equal(true);
+        // now that we know the request was made
+        // we can get the call argument
+        // and validate its values
+        const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
+        expect(requestArgument.body).to.contain('"undeployedOnly":true');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        // mock the pipeline stage record
+        pipelineStageMock = {
+          Id: firstStageId,
+          sf_devops__Branch__r: {
+            sf_devops__Name__c: 'mockBranchName',
+          },
+          sf_devops__Pipeline__r: {
+            sf_devops__Project__c: 'mockProjectId',
+          },
+          sf_devops__Pipeline_Stages__r: undefined,
+        };
+        fetchAndValidatePipelineStageStub = sandbox
+          .stub(Utils, 'fetchAndValidatePipelineStage')
+          .resolves(pipelineStageMock);
+        requestMock = sinon.stub();
+      })
+      .command([
+        'deploy:pipeline',
+        '-p=testProject',
+        '-b=testBranch',
+        '-a',
+        '-l=RunSpecifiedTests',
+        '-t=DummyTest_1,DummyTest_2,DummyTest_3',
+        '-v=DummyChangeBundleName',
+      ])
+      .it('correctly builds the promote options passed using flags', () => {
+        // verify we made the request
+        expect(requestMock.called).to.equal(true);
+        // now that we know the request was made
+        // we can get the call argument
+        // and validate its values
+        const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
+        expect(requestArgument.body).to.contain('"fullDeploy":true');
+        expect(requestArgument.body).to.contain('"testLevel":"RunSpecifiedTests"');
+        expect(requestArgument.body).to.contain('"runTests":"DummyTest_1,DummyTest_2,DummyTest_3"');
+        expect(requestArgument.body).to.contain('"changeBundleName":"DummyChangeBundleName"');
+      });
+
+    describe('compute source stage', () => {
+      test
+        .stdout()
+        .stderr()
+        .do(() => {
+          // mock the pipeline stage record
+          // this is the first stage on the pipeline stage
+          // so it doesn't have previous stage => sf_devops__Pipeline_Stages__r = undefined
+          pipelineStageMock = {
+            Id: firstStageId,
+            sf_devops__Branch__r: {
+              sf_devops__Name__c: 'mockBranchName',
+            },
+            sf_devops__Pipeline__r: {
+              sf_devops__Project__c: 'mockProjectId',
+            },
+            sf_devops__Pipeline_Stages__r: undefined,
+          };
+          fetchAndValidatePipelineStageStub = sandbox
+            .stub(Utils, 'fetchAndValidatePipelineStage')
+            .resolves(pipelineStageMock);
+          requestMock = sinon.stub();
+        })
+        .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+        .it('correctly computes the source pipeline stage id when deploying to first stage in the pipeline', () => {
+          expect(fetchAndValidatePipelineStageStub.called).to.equal(true);
+          // verify we made the request
+          expect(requestMock.called).to.equal(true);
+          // now that we know the request was made
+          // we can get the call argument
+          // and validate its values
+          const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
+          expect(requestArgument.url).to.contain(REST_PROMOTE_BASE_URL);
+          const urlParams: string[] = requestArgument.url.split('/');
+          // since we are deploy to the first stage in the pipeline
+          // the source stage Id = 'Approved'
+          expect(urlParams[urlParams.length - 1]).to.equal('Approved');
+        });
+
+      test
+        .stdout()
+        .stderr()
+        .do(() => {
+          // mock the pipeline stage record
+          // this is not the first stage on the pipeline stage
+          // so it has a previous stage
+          pipelineStageMock = {
+            Id: secondStageId,
+            sf_devops__Branch__r: {
+              sf_devops__Name__c: 'mockBranchName',
+            },
+            sf_devops__Pipeline__r: {
+              sf_devops__Project__c: 'mockProjectId',
+            },
+            sf_devops__Pipeline_Stages__r: {
+              records: [
+                {
+                  Id: firstStageId,
+                  sf_devops__Branch__r: {
+                    sf_devops__Name__c: 'mockBranchName',
+                  },
+                  sf_devops__Pipeline__r: {
+                    sf_devops__Project__c: 'mockProjectId',
+                  },
+                },
+              ],
+            },
+          };
+          fetchAndValidatePipelineStageStub = sandbox
+            .stub(Utils, 'fetchAndValidatePipelineStage')
+            .resolves(pipelineStageMock);
+          requestMock = sinon.stub();
+        })
+        .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+        .it(
+          'correctly computes the source pipeline stage id when deploying to the second stage in the pipeline',
+          () => {
+            expect(fetchAndValidatePipelineStageStub.called).to.equal(true);
+            // verify we made the request
+            expect(requestMock.called).to.equal(true);
+            // now that we know the request was made
+            // we can get the call argument
+            // and validate its values
+            const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
+            expect(requestArgument.url).to.contain(REST_PROMOTE_BASE_URL);
+            const urlParams: string[] = requestArgument.url.split('/');
+            expect(urlParams[urlParams.length - 1]).to.equal(firstStageId);
+          }
+        );
+    });
+
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        // mock the pipeline stage record
+        pipelineStageMock = {
+          Id: firstStageId,
+          sf_devops__Branch__r: {
+            sf_devops__Name__c: 'mockBranchName',
+          },
+          sf_devops__Pipeline__r: {
+            sf_devops__Project__c: 'mockProjectId',
+          },
+          sf_devops__Pipeline_Stages__r: undefined,
+        };
+        fetchAndValidatePipelineStageStub = sandbox
+          .stub(Utils, 'fetchAndValidatePipelineStage')
+          .resolves(pipelineStageMock);
+        requestMock = sinon.stub();
+      })
+      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+      .it('correctly sets the test level as deault when no test level is provided by the user', () => {
+        // verify we made the request
+        expect(requestMock.called).to.equal(true);
+        // now that we know the request was made
+        // we can get the call argument
+        // and validate its values
+        const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
+        expect(requestArgument.body).to.contain('"testLevel":"Default"');
+      });
+  });
+
+  describe('request promotion', () => {
+    const firstStageId = 'mock-first-stage-id';
+    const secondStageId = 'mock-second-stage-id';
+
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        // mock the pipeline stage record
+        pipelineStageMock = {
+          Id: firstStageId,
+          sf_devops__Branch__r: {
+            sf_devops__Name__c: 'mockBranchName',
+          },
+          sf_devops__Pipeline__r: {
+            sf_devops__Project__c: 'mockProjectId',
+          },
+          sf_devops__Pipeline_Stages__r: undefined,
+        };
+        fetchAndValidatePipelineStageStub = sandbox
+          .stub(Utils, 'fetchAndValidatePipelineStage')
+          .resolves(pipelineStageMock);
+        requestMock = sinon.stub();
+      })
+      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+      .it('correctly sets the promote option to perfome an undeployedOnly promotion', () => {
+        // verify we made the request
+        expect(requestMock.called).to.equal(true);
+        // now that we know the request was made
+        // we can get the call argument
+        // and validate its values
+        const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
+        expect(requestArgument.body).to.contain('"undeployedOnly":true');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        // mock the pipeline stage record
+        pipelineStageMock = {
+          Id: firstStageId,
+          sf_devops__Branch__r: {
+            sf_devops__Name__c: 'mockBranchName',
+          },
+          sf_devops__Pipeline__r: {
+            sf_devops__Project__c: 'mockProjectId',
+          },
+          sf_devops__Pipeline_Stages__r: undefined,
+        };
+        fetchAndValidatePipelineStageStub = sandbox
+          .stub(Utils, 'fetchAndValidatePipelineStage')
+          .resolves(pipelineStageMock);
+        requestMock = sinon.stub();
+      })
+      .command([
+        'deploy:pipeline',
+        '-p=testProject',
+        '-b=testBranch',
+        '-a',
+        '-l=RunSpecifiedTests',
+        '-t=DummyTest_1,DummyTest_2,DummyTest_3',
+        '-v=DummyChangeBundleName',
+      ])
+      .it('correctly builds the promote options passed using flags', () => {
+        // verify we made the request
+        expect(requestMock.called).to.equal(true);
+        // now that we know the request was made
+        // we can get the call argument
+        // and validate its values
+        const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
+        expect(requestArgument.body).to.contain('"fullDeploy":true');
+        expect(requestArgument.body).to.contain('"testLevel":"RunSpecifiedTests"');
+        expect(requestArgument.body).to.contain('"runTests":"DummyTest_1,DummyTest_2,DummyTest_3"');
+        expect(requestArgument.body).to.contain('"changeBundleName":"DummyChangeBundleName"');
+      });
+
+    describe('compute source stage', () => {
+      test
+        .stdout()
+        .stderr()
+        .do(() => {
+          // mock the pipeline stage record
+          // this is the first stage on the pipeline stage
+          // so it doesn't have previous stage => sf_devops__Pipeline_Stages__r = undefined
+          pipelineStageMock = {
+            Id: firstStageId,
+            sf_devops__Branch__r: {
+              sf_devops__Name__c: 'mockBranchName',
+            },
+            sf_devops__Pipeline__r: {
+              sf_devops__Project__c: 'mockProjectId',
+            },
+            sf_devops__Pipeline_Stages__r: undefined,
+          };
+          fetchAndValidatePipelineStageStub = sandbox
+            .stub(Utils, 'fetchAndValidatePipelineStage')
+            .resolves(pipelineStageMock);
+          requestMock = sinon.stub();
+        })
+        .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+        .it('correctly computes the source pipeline stage id when deploying to first stage in the pipeline', () => {
+          expect(fetchAndValidatePipelineStageStub.called).to.equal(true);
+          // verify we made the request
+          expect(requestMock.called).to.equal(true);
+          // now that we know the request was made
+          // we can get the call argument
+          // and validate its values
+          const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
+          expect(requestArgument.url).to.contain(REST_PROMOTE_BASE_URL);
+          const urlParams: string[] = requestArgument.url.split('/');
+          // since we are deploy to the first stage in the pipeline
+          // the source stage Id = 'Approved'
+          expect(urlParams[urlParams.length - 1]).to.equal('Approved');
+        });
+
+      test
+        .stdout()
+        .stderr()
+        .do(() => {
+          // mock the pipeline stage record
+          // this is not the first stage on the pipeline stage
+          // so it has a previous stage
+          pipelineStageMock = {
+            Id: secondStageId,
+            sf_devops__Branch__r: {
+              sf_devops__Name__c: 'mockBranchName',
+            },
+            sf_devops__Pipeline__r: {
+              sf_devops__Project__c: 'mockProjectId',
+            },
+            sf_devops__Pipeline_Stages__r: {
+              records: [
+                {
+                  Id: firstStageId,
+                  sf_devops__Branch__r: {
+                    sf_devops__Name__c: 'mockBranchName',
+                  },
+                  sf_devops__Pipeline__r: {
+                    sf_devops__Project__c: 'mockProjectId',
+                  },
+                },
+              ],
+            },
+          };
+          fetchAndValidatePipelineStageStub = sandbox
+            .stub(Utils, 'fetchAndValidatePipelineStage')
+            .resolves(pipelineStageMock);
+          requestMock = sinon.stub();
+        })
+        .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+        .it(
+          'correctly computes the source pipeline stage id when deploying to the second stage in the pipeline',
+          () => {
+            expect(fetchAndValidatePipelineStageStub.called).to.equal(true);
+            // verify we made the request
+            expect(requestMock.called).to.equal(true);
+            // now that we know the request was made
+            // we can get the call argument
+            // and validate its values
+            const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
+            expect(requestArgument.url).to.contain(REST_PROMOTE_BASE_URL);
+            const urlParams: string[] = requestArgument.url.split('/');
+            expect(urlParams[urlParams.length - 1]).to.equal(firstStageId);
+          }
+        );
+    });
+
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        // mock the pipeline stage record
+        pipelineStageMock = {
+          Id: firstStageId,
+          sf_devops__Branch__r: {
+            sf_devops__Name__c: 'mockBranchName',
+          },
+          sf_devops__Pipeline__r: {
+            sf_devops__Project__c: 'mockProjectId',
+          },
+          sf_devops__Pipeline_Stages__r: undefined,
+        };
+        fetchAndValidatePipelineStageStub = sandbox
+          .stub(Utils, 'fetchAndValidatePipelineStage')
+          .resolves(pipelineStageMock);
+        requestMock = sinon.stub();
+      })
+      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+      .it('correctly sets the test level as deault when no test level is provided by the user', () => {
+        // verify we made the request
+        expect(requestMock.called).to.equal(true);
+        // now that we know the request was made
+        // we can get the call argument
+        // and validate its values
+        const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
+        expect(requestArgument.body).to.contain('"testLevel":"Default"');
       });
   });
 

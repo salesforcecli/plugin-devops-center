@@ -8,6 +8,8 @@
 export type PromotePipelineResult = {
   jobId: string;
   status?: string;
+  message?: string;
+  errorDetails?: string;
 };
 
 export type Pipeline = {
@@ -82,3 +84,34 @@ export type PromoteOptions = {
   checkDeploy: boolean;
   deploymentId: string;
 };
+
+export type DeploymentResult = {
+  sf_devops__Full_Deploy__c: string;
+  sf_devops__Check_Deploy__c: string;
+  sf_devops__Test_Level__c: string;
+  sf_devops__Run_Tests__c: string;
+  sf_devops__Status__r: AsyncOperationResult;
+};
+
+export type AsyncOperationResult = {
+  Id: string;
+  CreatedDate?: string;
+  CreatedById?: string;
+  CreatedBy?: User;
+  LastModifiedDate?: string;
+  sf_devops__Message__c: string;
+  sf_devops__Status__c: AsyncOperationStatus;
+  sf_devops__Error_Details__c?: string;
+};
+
+export type User = {
+  Id: string;
+  Name: string;
+};
+
+export enum AsyncOperationStatus {
+  Error = 'Error',
+  Completed = 'Completed',
+  Ignored = 'Ignored',
+  InProgress = 'In Progress',
+}

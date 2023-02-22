@@ -77,12 +77,13 @@ export class DeployPipelineCache extends TTLConfig<TTLConfig.Options, AsyncOpera
   }
 
   /**
-   * Returns the latest data cached
+   * Returns the latest data cached or throws if can't find any.
    */
-  public resolveLatest(): string {
+  public getLatestKeyOrThrow(): string {
     const aorId = this.getLatestKey();
-    if (!aorId) throw cacheMessages.createError('error.NoRecentAorId');
-
+    if (!aorId) {
+      throw cacheMessages.createError('error.NoRecentAorId');
+    }
     return aorId;
   }
 }
