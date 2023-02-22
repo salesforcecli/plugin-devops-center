@@ -62,22 +62,26 @@ export class DeployOutputService extends OutputService {
     let summary: DeploySummary;
     switch (queryResp.sf_devops__Operation__c) {
       case AsyncOperationType.AD_HOC_PROMOTE:
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         summary = await this.processAdHocDeploy(branch, queryResp.sf_devops__Work_Item_Promotes__r!.records);
         this.printAdHocDeploySummary(summary);
         break;
 
       case AsyncOperationType.VERSIONED_PROMOTE:
-        summary = await this.processVersionDeploy(branch, queryResp.sf_devops__Change_Bundle_Installs__r!.records);
-        this.printVersionOrSoupDeploySummary(summary);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        summary = await this.processVersionedDeploy(branch, queryResp.sf_devops__Change_Bundle_Installs__r!.records);
+        this.printVersionedOrSoupDeploySummary(summary);
         break;
 
       case AsyncOperationType.SOUP_PROMOTE:
         summary = await this.processSoupDeploy(
           branch,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           queryResp.sf_devops__Change_Bundle_Installs__r!.records,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           queryResp.sf_devops__Work_Items__r!.records
         );
-        this.printVersionOrSoupDeploySummary(summary);
+        this.printVersionedOrSoupDeploySummary(summary);
         break;
 
       default:
@@ -109,7 +113,7 @@ export class DeployOutputService extends OutputService {
   /**
    * Prints a versioned or soup deploy summary
    */
-  private printVersionOrSoupDeploySummary(summary: DeploySummary): void {
+  private printVersionedOrSoupDeploySummary(summary: DeploySummary): void {
     const bundlesSummary: string[] = [];
     (summary.workItems as Map<string, string[]>).forEach((workItems: string[], bundleVersionName: string) => {
       const itemsLabel = workItems.length === 1 ? output.getMessage('output.item') : output.getMessage('output.items');
@@ -154,7 +158,7 @@ export class DeployOutputService extends OutputService {
   /**
    * Builds a DeploySummary for a versioned deploy
    */
-  private async processVersionDeploy(
+  private async processVersionedDeploy(
     branchName: string,
     changeBundleInstalls: ChangeBundleInstall[]
   ): Promise<DeploySummary> {
@@ -219,6 +223,7 @@ export class DeployOutputService extends OutputService {
 
     const changeBundle: ChangeBundle = changeBundleInstalls[0].sf_devops__Change_Bundle__r;
 
+    // Then we build a map with the version name -> WIs to match the versioned case
     const workItems: Map<string, string[]> = new Map();
     workItems.set(
       changeBundle.sf_devops__Version_Name__c,

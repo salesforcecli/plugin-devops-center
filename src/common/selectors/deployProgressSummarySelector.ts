@@ -27,7 +27,6 @@ export async function selectDeployAORSummaryData(con: Connection, aorId: string)
                     (SELECT Name from sf_devops__Work_Items__r)
                     FROM sf_devops__Async_Operation_Result__c 
                     WHERE Id = '${aorId}'`;
-  // TODO Handle error
   const resp: QueryResult<DeploySummaryQueryResult> = await con.query(queryStr);
   return resp.records[0];
 }

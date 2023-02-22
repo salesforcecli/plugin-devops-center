@@ -102,6 +102,9 @@ describe('deploy progress sumary selector', () => {
     const builderArgs = mockConnection.query.getCall(0).args;
     expect(builderArgs[0]).to.contain('FROM sf_devops__Async_Operation_Result__c');
 
+    // Verify we queried the correct fields
+    expect(builderArgs[0]).to.contain('sf_devops__Operation__c');
+
     // Verify we queried the correct references
     expect(builderArgs[0]).to.contain(
       'SELECT sf_devops__Pipeline_Stage__r.Name, sf_devops__Pipeline_Stage__r.sf_devops__Environment__r.sf_devops__Named_Credential__c, sf_devops__Work_Item__r.Name FROM sf_devops__Work_Item_Promotes__r'
@@ -109,6 +112,7 @@ describe('deploy progress sumary selector', () => {
     expect(builderArgs[0]).to.contain(
       'SELECT sf_devops__Change_Bundle__r.Id, sf_devops__Change_Bundle__r.sf_devops__Version_Name__c, sf_devops__Environment__r.Id FROM sf_devops__Change_Bundle_Installs__r'
     );
+    expect(builderArgs[0]).to.contain('SELECT Name from sf_devops__Work_Items__r');
 
     // Verify we used the correct filter
     expect(builderArgs[0]).to.contain("WHERE Id = 'AAA'");

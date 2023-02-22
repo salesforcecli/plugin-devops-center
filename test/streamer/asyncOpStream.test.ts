@@ -120,12 +120,12 @@ class OutputServiceTest extends OutputService {
   public constructor() {
     super();
   }
-  // eslint-disable-next-line class-methods-use-this
-  public printAsyncRunInfo(aorId: string): void {
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+  public printAsyncRunInfo(_aorId: string): void {
     throw new Error('Method not implemented.');
   }
-  // eslint-disable-next-line class-methods-use-this
-  public printProgressSummary(aorId: string, branch: string): Promise<void> {
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+  public printProgressSummary(_aorId: string, _branch: string): Promise<void> {
     throw new Error('Method not implemented.');
   }
 }

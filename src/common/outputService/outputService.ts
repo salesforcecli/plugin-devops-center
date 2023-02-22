@@ -36,7 +36,13 @@ export abstract class OutputService {
     console.log(`Job ID: ${aorId}\n`);
   }
 
+  /**
+   * Prints a summary for an async run
+   */
   public abstract printAsyncRunInfo(aorId: string): void;
 
+  /**
+   * Prints the progress summary
+   */
   public abstract printProgressSummary(aorId: string, branch: string): Promise<void>;
 }
