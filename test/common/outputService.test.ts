@@ -33,11 +33,9 @@ describe('outputService', () => {
   test.stdout().it('prints the async deploy execution correctly', (ctx) => {
     const mockId = 'ABC';
     outputService.printAsyncRunInfo(mockId);
-    expect(ctx.stdout).to.contain(
-      'Deploy has been queued.\n' +
-        `Run "sf deploy pipeline resume --job-id ${mockId} to resume watching the deploy.\n` +
-        `Run "sf deploy pipeline report --job-id ${mockId} to get the latest status.`
-    );
+    expect(ctx.stdout).to.contain('Deploy has been queued.');
+    expect(ctx.stdout).to.contain(`Run "sf deploy pipeline resume --job-id ${mockId} to resume watching the deploy.`);
+    expect(ctx.stdout).to.contain(`Run "sf deploy pipeline report --job-id ${mockId} to get the latest status.`);
   });
 
   test.stdout().it('handles the print of an undefined aor status', (ctx) => {
