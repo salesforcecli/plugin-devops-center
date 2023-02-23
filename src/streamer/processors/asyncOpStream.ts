@@ -12,7 +12,7 @@ import { Duration } from '@salesforce/kit';
 import { AnyJson, JsonMap, ensureJsonMap } from '@salesforce/ts-types';
 import SObjectStreaming from '../sObjectStream';
 import { ASYNC_OPERATION_CDC } from '../../common/constants';
-import { AsyncOperationResult } from '../../common/types';
+import { AsyncOperationResult, AsyncOperationStatus } from '../../common/types';
 import { OutputService } from '../../common/outputService/outputService';
 
 export default class AsyncOpStreaming extends SObjectStreaming {
@@ -45,7 +45,7 @@ export default class AsyncOpStreaming extends SObjectStreaming {
     const asyncOpResult: AsyncOperationResult = {
       Id: jsonPayload.Id as string,
       sf_devops__Error_Details__c: jsonPayload.sf_devops__Error_Details__c as string,
-      sf_devops__Status__c: jsonPayload.sf_devops__Status__c as string,
+      sf_devops__Status__c: jsonPayload.sf_devops__Status__c as AsyncOperationStatus,
       sf_devops__Message__c: jsonPayload.sf_devops__Message__c as string,
     };
 

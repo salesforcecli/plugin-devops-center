@@ -12,7 +12,13 @@ import * as sinon from 'sinon';
 import { Org } from '@salesforce/core';
 import { DeployOutputService } from '../../src/common/outputService/deployOutputService';
 import { OutputServiceFactory } from '../../src/common/outputService/outputServiceFactory';
-import { AsyncOperationResult, ChangeBundleInstall, WorkItem, WorkItemPromote } from '../../src/common/types';
+import {
+  AsyncOperationResult,
+  AsyncOperationStatus,
+  ChangeBundleInstall,
+  WorkItem,
+  WorkItemPromote,
+} from '../../src/common/types';
 import * as DeploySelector from '../../src/common/selectors/deployProgressSummarySelector';
 import * as EndpointSelector from '../../src/common/selectors/endpointSelector';
 import * as StageSelector from '../../src/common/selectors/environmentSelector';
@@ -48,7 +54,7 @@ describe('outputService', () => {
   });
 
   test.stdout().it('handles the print of an In Progress aor status', (ctx) => {
-    const status = 'In Progress';
+    const status = AsyncOperationStatus.InProgress;
     const message = 'This should be printed';
     const aor: AsyncOperationResult = {
       Id: 'Id',
@@ -65,7 +71,7 @@ describe('outputService', () => {
     const aor: AsyncOperationResult = {
       Id: 'Id',
       sf_devops__Error_Details__c: undefined,
-      sf_devops__Status__c: 'Completed',
+      sf_devops__Status__c: AsyncOperationStatus.Completed,
       sf_devops__Message__c: message,
     };
     outputService.printAorStatus(aor);
@@ -73,7 +79,7 @@ describe('outputService', () => {
   });
 
   test.stdout().it('handles the print of an Error aor status', (ctx) => {
-    const status = 'Error';
+    const status = AsyncOperationStatus.Error;
     const errorDetails = 'This should be printed';
     const message = 'This should also be printed';
     const aor: AsyncOperationResult = {
@@ -87,13 +93,14 @@ describe('outputService', () => {
     expect(ctx.stdout).to.contain(message);
   });
 
-  test.stdout().it('ignores an invalid aor status of a deployment when asked to print', (ctx) => {
-    const status = 'Invalid';
+  test.stdout().it('handles the print of an Error aor status without an error message', (ctx) => {
+    const status = AsyncOperationStatus.Error;
+    const message = 'This should not be printed';
     const aor: AsyncOperationResult = {
       Id: 'Id',
       sf_devops__Error_Details__c: undefined,
       sf_devops__Status__c: status,
-      sf_devops__Message__c: '',
+      sf_devops__Message__c: message,
     };
     outputService.printAorStatus(aor);
     expect(ctx.stdout).to.be.empty;

@@ -45,13 +45,6 @@ export interface ApiError extends Error {
   name: string;
 }
 
-export type AsyncOperationResult = {
-  Id: string;
-  sf_devops__Error_Details__c: string | undefined;
-  sf_devops__Status__c: string | undefined;
-  sf_devops__Message__c: string;
-};
-
 export type WorkItem = {
   Name: string;
 };
@@ -100,8 +93,8 @@ export type AsyncOperationResult = {
   CreatedBy?: User;
   LastModifiedDate?: string;
   sf_devops__Message__c: string;
-  sf_devops__Status__c: AsyncOperationStatus;
-  sf_devops__Error_Details__c?: string;
+  sf_devops__Status__c: AsyncOperationStatus | undefined;
+  sf_devops__Error_Details__c?: string | undefined;
 };
 
 export type User = {

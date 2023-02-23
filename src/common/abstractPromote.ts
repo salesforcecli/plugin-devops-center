@@ -97,7 +97,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       await doceMonitor.monitor();
     }
 
-    const doceMonitor: DoceMonitor = new AsyncOpStreaming(doceOrg, this.flags.wait, asyncOperationId);
+    const doceMonitor: DoceMonitor = new AsyncOpStreaming(doceOrg, this.flags.wait, asyncOperationId, outputService);
     await doceMonitor.monitor();
 
     // get final state of the async job

@@ -18,6 +18,7 @@ import {
 import { jobId, requiredDoceOrgFlag, useMostRecent, wait } from '../common/flags';
 import DoceMonitor from '../streamer/doceMonitor';
 import { DeployPipelineCache } from './deployPipelineCache';
+import { OutputServiceFactory } from './outputService/outputServiceFactory';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -69,14 +70,19 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
     // get the latest state of the async job and validate that it's resumable
     const doceOrg: Org = this.flags['devops-center-username'] as Org;
     let asyncJob: AsyncOperationResult = await fetchAsyncOperationResult(doceOrg.getConnection(), asyncJobId);
-    if (isNotResumable(asyncJob.sf_devops__Status__c)) {
+    if (asyncJob.sf_devops__Status__c && isNotResumable(asyncJob.sf_devops__Status__c)) {
       throw messages.createError('error.JobNotResumable', [asyncJobId, asyncJob.sf_devops__Status__c]);
     }
 
     // it is resumable so we can start monitoring the operation
     this.log(`*** Resuming ${this.operationType} ***`);
     this.log(`Job ID: ${bold(asyncJobId)}`);
-    const streamer: DoceMonitor = getAsyncOperationStreamer(doceOrg, this.flags.wait, asyncJobId);
+    const streamer: DoceMonitor = getAsyncOperationStreamer(
+      doceOrg,
+      this.flags.wait,
+      asyncJobId,
+      OutputServiceFactory.forDeployment(doceOrg.getConnection())
+    );
     await streamer.monitor();
 
     // get final state of the async job

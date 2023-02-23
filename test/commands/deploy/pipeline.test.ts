@@ -259,6 +259,11 @@ describe('deploy pipeline', () => {
             sf_devops__Project__c: 'mockProjectId',
           },
           sf_devops__Pipeline_Stages__r: undefined,
+          Name: 'mock',
+          sf_devops__Environment__r: {
+            Id: 'envId',
+            sf_devops__Named_Credential__c: 'ABC',
+          },
         };
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
@@ -290,6 +295,11 @@ describe('deploy pipeline', () => {
             sf_devops__Project__c: 'mockProjectId',
           },
           sf_devops__Pipeline_Stages__r: undefined,
+          Name: 'mock',
+          sf_devops__Environment__r: {
+            Id: 'envId',
+            sf_devops__Named_Credential__c: 'ABC',
+          },
         };
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
@@ -335,6 +345,11 @@ describe('deploy pipeline', () => {
               sf_devops__Project__c: 'mockProjectId',
             },
             sf_devops__Pipeline_Stages__r: undefined,
+            Name: 'mock',
+            sf_devops__Environment__r: {
+              Id: 'envId',
+              sf_devops__Named_Credential__c: 'ABC',
+            },
           };
           fetchAndValidatePipelineStageStub = sandbox
             .stub(Utils, 'fetchAndValidatePipelineStage')
@@ -372,6 +387,11 @@ describe('deploy pipeline', () => {
             sf_devops__Pipeline__r: {
               sf_devops__Project__c: 'mockProjectId',
             },
+            Name: 'mock',
+            sf_devops__Environment__r: {
+              Id: 'envId',
+              sf_devops__Named_Credential__c: 'ABC',
+            },
             sf_devops__Pipeline_Stages__r: {
               records: [
                 {
@@ -381,6 +401,11 @@ describe('deploy pipeline', () => {
                   },
                   sf_devops__Pipeline__r: {
                     sf_devops__Project__c: 'mockProjectId',
+                  },
+                  Name: 'mock',
+                  sf_devops__Environment__r: {
+                    Id: 'envId',
+                    sf_devops__Named_Credential__c: 'ABC',
                   },
                 },
               ],
@@ -423,6 +448,11 @@ describe('deploy pipeline', () => {
             sf_devops__Project__c: 'mockProjectId',
           },
           sf_devops__Pipeline_Stages__r: undefined,
+          Name: 'mock',
+          sf_devops__Environment__r: {
+            Id: 'envId',
+            sf_devops__Named_Credential__c: 'ABC',
+          },
         };
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
@@ -459,6 +489,11 @@ describe('deploy pipeline', () => {
             sf_devops__Project__c: 'mockProjectId',
           },
           sf_devops__Pipeline_Stages__r: undefined,
+          Name: 'mock',
+          sf_devops__Environment__r: {
+            Id: 'envId',
+            sf_devops__Named_Credential__c: 'ABC',
+          },
         };
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
@@ -490,6 +525,11 @@ describe('deploy pipeline', () => {
             sf_devops__Project__c: 'mockProjectId',
           },
           sf_devops__Pipeline_Stages__r: undefined,
+          Name: 'mock',
+          sf_devops__Environment__r: {
+            Id: 'envId',
+            sf_devops__Named_Credential__c: 'ABC',
+          },
         };
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
@@ -535,6 +575,11 @@ describe('deploy pipeline', () => {
               sf_devops__Project__c: 'mockProjectId',
             },
             sf_devops__Pipeline_Stages__r: undefined,
+            Name: 'mock',
+            sf_devops__Environment__r: {
+              Id: 'envId',
+              sf_devops__Named_Credential__c: 'ABC',
+            },
           };
           fetchAndValidatePipelineStageStub = sandbox
             .stub(Utils, 'fetchAndValidatePipelineStage')
@@ -572,6 +617,11 @@ describe('deploy pipeline', () => {
             sf_devops__Pipeline__r: {
               sf_devops__Project__c: 'mockProjectId',
             },
+            Name: 'mock',
+            sf_devops__Environment__r: {
+              Id: 'envId',
+              sf_devops__Named_Credential__c: 'ABC',
+            },
             sf_devops__Pipeline_Stages__r: {
               records: [
                 {
@@ -581,6 +631,11 @@ describe('deploy pipeline', () => {
                   },
                   sf_devops__Pipeline__r: {
                     sf_devops__Project__c: 'mockProjectId',
+                  },
+                  Name: 'mock',
+                  sf_devops__Environment__r: {
+                    Id: 'envId',
+                    sf_devops__Named_Credential__c: 'ABC',
                   },
                 },
               ],
@@ -623,6 +678,11 @@ describe('deploy pipeline', () => {
             sf_devops__Project__c: 'mockProjectId',
           },
           sf_devops__Pipeline_Stages__r: undefined,
+          Name: 'mock',
+          sf_devops__Environment__r: {
+            Id: 'envId',
+            sf_devops__Named_Credential__c: 'ABC',
+          },
         };
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
