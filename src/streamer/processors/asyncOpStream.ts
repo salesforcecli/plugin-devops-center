@@ -42,12 +42,7 @@ export default class AsyncOpStreaming extends SObjectStreaming {
     const jsonPayload = ensureJsonMap(payload);
 
     // We build an aor given the payload
-    const asyncOpResult: AsyncOperationResult = {
-      Id: jsonPayload.Id as string,
-      sf_devops__Error_Details__c: jsonPayload.sf_devops__Error_Details__c as string,
-      sf_devops__Status__c: jsonPayload.sf_devops__Status__c as AsyncOperationStatus,
-      sf_devops__Message__c: jsonPayload.sf_devops__Message__c as string,
-    };
+    const asyncOpResult: AsyncOperationResult = jsonPayload as AsyncOperationResult;
 
     // Print the aor status
     this.outputService.printAorStatus(asyncOpResult);

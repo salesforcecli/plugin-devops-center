@@ -5,6 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+/* eslint-disable class-methods-use-this */
+
 import { Connection } from '@salesforce/core';
 import { DeployOutputService } from './deployOutputService';
 
@@ -13,11 +15,11 @@ import { DeployOutputService } from './deployOutputService';
  *
  * @author JuanStenghele-sf
  */
-export abstract class OutputServiceFactory {
+export class OutputServiceFactory {
   /**
    * Create a service to print the deployment info.
    */
-  public static forDeployment(con: Connection): DeployOutputService {
+  public forDeployment(con: Connection): DeployOutputService {
     return new DeployOutputService(con);
   }
 }

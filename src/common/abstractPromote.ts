@@ -79,7 +79,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     this.sourceStageId = this.getSourceStageId();
     const asyncOperationId: string = await this.requestPromotion(doceOrg);
 
-    const outputService: OutputService = OutputServiceFactory.forDeployment(doceOrg.getConnection());
+    const outputService: OutputService = new OutputServiceFactory().forDeployment(doceOrg.getConnection());
     outputService.printAorId(asyncOperationId);
 
     if (this.flags.async) {

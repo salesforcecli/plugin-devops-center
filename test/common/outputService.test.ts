@@ -29,7 +29,7 @@ import { AsyncOperationType } from '../../src/common/constants';
 describe('outputService', () => {
   let sandbox: sinon.SinonSandbox;
   const stubOrg = sinon.createStubInstance(Org);
-  const outputService: DeployOutputService = OutputServiceFactory.forDeployment(stubOrg.getConnection());
+  const outputService: DeployOutputService = new OutputServiceFactory().forDeployment(stubOrg.getConnection());
 
   test.stdout().it('prints the async deploy execution correctly', (ctx) => {
     const mockId = 'ABC';

@@ -81,7 +81,7 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
       doceOrg,
       this.flags.wait,
       asyncJobId,
-      OutputServiceFactory.forDeployment(doceOrg.getConnection())
+      new OutputServiceFactory().forDeployment(doceOrg.getConnection())
     );
     await streamer.monitor();
 
