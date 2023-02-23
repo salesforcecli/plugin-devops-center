@@ -10,9 +10,12 @@
 import { expect } from '@oclif/test';
 import { Connection } from '@salesforce/core';
 import sinon = require('sinon');
-import { selectOrgUrl } from '../../../src/common/selectors/endpointSelector';
+import { selectNamedCredentialByName } from '../../../src/common/selectors/namedCredentialSelector';
+import { NamedCredential } from '../../../src/common/types';
 
-const ORG_URL = 'www.example.com';
+const MOCK_NAMED_CREDENTIAL: NamedCredential = {
+  Endpoint: 'www.example.com',
+};
 
 describe('endpoint selector', () => {
   let sandbox: sinon.SinonSandbox;
@@ -29,19 +32,15 @@ describe('endpoint selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves({
       done: true,
-      records: [
-        {
-          Endpoint: ORG_URL,
-        },
-      ],
+      records: [MOCK_NAMED_CREDENTIAL],
       totalSize: 1,
     });
 
-    const result = await selectOrgUrl(mockConnection, 'ABC');
+    const result = await selectNamedCredentialByName(mockConnection, 'ABC');
 
     // Verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);
-    expect(result).to.equal(ORG_URL);
+    expect(result).to.equal(MOCK_NAMED_CREDENTIAL);
 
     // Verify we queried the correct object
     const builderArgs = mockConnection.query.getCall(0).args;

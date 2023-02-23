@@ -7,21 +7,18 @@
 
 import { QueryResult } from 'jsforce';
 import { Connection } from '@salesforce/core';
-
-type OrgUrlQueryResult = {
-  Endpoint: string;
-};
+import { NamedCredential } from '../types';
 
 /**
  * Given a named credential it returns the org url (endpoint) associated with it
  */
-export async function selectOrgUrl(con: Connection, namedCredential: string): Promise<string> {
+export async function selectNamedCredentialByName(con: Connection, name: string): Promise<NamedCredential> {
   const queryStr = `
     SELECT Endpoint
     FROM NamedCredential
-    WHERE DeveloperName = '${namedCredential}'
+    WHERE DeveloperName = '${name}'
     AND NamespacePrefix = 'sf_devops'
     LIMIT 1`;
-  const resp: QueryResult<OrgUrlQueryResult> = await con.query(queryStr);
-  return resp.records[0].Endpoint;
+  const resp: QueryResult<NamedCredential> = await con.query(queryStr);
+  return resp.records[0];
 }

@@ -108,3 +108,7 @@ export enum AsyncOperationStatus {
   Ignored = 'Ignored',
   InProgress = 'In Progress',
 }
+
+export type NamedCredential = {
+  Endpoint: string;
+};

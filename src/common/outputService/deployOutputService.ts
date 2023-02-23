@@ -10,7 +10,7 @@
 import { Connection, Messages } from '@salesforce/core';
 import { ChangeBundle, ChangeBundleInstall, WorkItem, WorkItemPromote } from '../types';
 import { DeploySummaryQueryResult, selectDeployAORSummaryData } from '../selectors/deployProgressSummarySelector';
-import { selectOrgUrl } from '../selectors/endpointSelector';
+import { selectNamedCredentialByName } from '../selectors/namedCredentialSelector';
 import { EnvQueryResult, selectPipelineStageByEnvironment } from '../selectors/environmentSelector';
 import { WorkItemsQueryResult, selectWorkItemsByChangeBundles } from '../selectors/workItemSelector';
 import { AsyncOperationType } from '../constants';
@@ -114,7 +114,7 @@ export class DeployOutputService extends OutputService {
         workItems,
         summary.branchName,
         summary.orgUrl,
-      ]) + '\n'
+      ])
     );
   }
 
@@ -139,7 +139,7 @@ export class DeployOutputService extends OutputService {
         bundlesSummary.join('; '),
         summary.branchName,
         summary.orgUrl,
-      ]) + '\n'
+      ])
     );
   }
 
@@ -153,7 +153,7 @@ export class DeployOutputService extends OutputService {
 
     const namedCredential: string =
       workItemsPromotes[0].sf_devops__Pipeline_Stage__r.sf_devops__Environment__r.sf_devops__Named_Credential__c;
-    const orgUrl: string = await selectOrgUrl(this.con, namedCredential);
+    const orgUrl: string = (await selectNamedCredentialByName(this.con, namedCredential)).Endpoint;
 
     return {
       stageName,
@@ -176,7 +176,7 @@ export class DeployOutputService extends OutputService {
     const stageName: string = envQueryResp.sf_devops__Pipeline_Stages__r.records[0].Name;
 
     const namedCredential: string = envQueryResp.sf_devops__Named_Credential__c;
-    const orgUrl: string = await selectOrgUrl(this.con, namedCredential);
+    const orgUrl: string = (await selectNamedCredentialByName(this.con, namedCredential)).Endpoint;
 
     return {
       stageName,

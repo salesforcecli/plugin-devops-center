@@ -16,11 +16,12 @@ import {
   AsyncOperationResult,
   AsyncOperationStatus,
   ChangeBundleInstall,
+  NamedCredential,
   WorkItem,
   WorkItemPromote,
 } from '../../src/common/types';
 import * as DeploySelector from '../../src/common/selectors/deployProgressSummarySelector';
-import * as EndpointSelector from '../../src/common/selectors/endpointSelector';
+import * as EndpointSelector from '../../src/common/selectors/namedCredentialSelector';
 import * as StageSelector from '../../src/common/selectors/environmentSelector';
 import * as WorkItemSelector from '../../src/common/selectors/workItemSelector';
 import { AsyncOperationType } from '../../src/common/constants';
@@ -119,6 +120,10 @@ describe('outputService', () => {
     const branchName = 'testing';
     const orgUrl = 'www.example.com';
 
+    const namedCredential: NamedCredential = {
+      Endpoint: orgUrl,
+    };
+
     test
       .stdout()
       .it('ignores a print deploy summary with a deployment that is not soup, versioned or ad hoc', async (ctx) => {
@@ -173,7 +178,7 @@ describe('outputService', () => {
           sf_devops__Operation__c: AsyncOperationType.AD_HOC_PROMOTE,
         });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sandbox.stub(EndpointSelector, 'selectOrgUrl').resolves(orgUrl);
+        sandbox.stub(EndpointSelector, 'selectNamedCredentialByName').resolves(namedCredential);
         await outputService.printProgressSummary('1234', branchName);
       }
 
@@ -181,18 +186,18 @@ describe('outputService', () => {
         const workItemsPromote: WorkItemPromote[] = [mockWorkItemPromote1];
         await adHocDeploy(workItemsPromote);
         expect(ctx.stdout).to.contain(
-          `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work item ` +
-            `${workItem1Name}. Deploying metadata from ${branchName} branch to target org ${orgUrl}.`
+          `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work item ${workItem1Name}.`
         );
+        expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${orgUrl}.`);
       });
 
       test.stdout().it('prints the correct message for a multiple WIs ad hoc deployment', async (ctx) => {
         const workItemsPromote: WorkItemPromote[] = [mockWorkItemPromote1, mockWorkItemPromote2];
         await adHocDeploy(workItemsPromote);
         expect(ctx.stdout).to.contain(
-          `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work items ` +
-            `${workItem1Name}, ${workItem2Name}. Deploying metadata from ${branchName} branch to target org ${orgUrl}.`
+          `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work items ${workItem1Name}, ${workItem2Name}.`
         );
+        expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${orgUrl}.`);
       });
     });
 
@@ -251,7 +256,7 @@ describe('outputService', () => {
         });
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sandbox.stub(EndpointSelector, 'selectOrgUrl').resolves(orgUrl);
+        sandbox.stub(EndpointSelector, 'selectNamedCredentialByName').resolves(namedCredential);
 
         sandbox.stub(StageSelector, 'selectPipelineStageByEnvironment').resolves({
           sf_devops__Named_Credential__c: 'ABC',
@@ -280,9 +285,9 @@ describe('outputService', () => {
 
         await outputService.printProgressSummary('1234', branchName);
         expect(ctx.stdout).to.contain(
-          `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work items ` +
-            `${workItem1Name}, ${workItem2Name} in bundle ${changeBundleInstall1VersionName}. Deploying metadata from ${branchName} branch to target org ${orgUrl}.`
+          `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work items ${workItem1Name}, ${workItem2Name} in bundle ${changeBundleInstall1VersionName}.`
         );
+        expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${orgUrl}.`);
       });
     });
 
@@ -322,7 +327,7 @@ describe('outputService', () => {
         });
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sandbox.stub(EndpointSelector, 'selectOrgUrl').resolves(orgUrl);
+        sandbox.stub(EndpointSelector, 'selectNamedCredentialByName').resolves(namedCredential);
 
         sandbox.stub(StageSelector, 'selectPipelineStageByEnvironment').resolves({
           sf_devops__Named_Credential__c: 'ABC',
@@ -381,10 +386,9 @@ describe('outputService', () => {
 
         await outputService.printProgressSummary('1234', branchName);
         expect(ctx.stdout).to.contain(
-          `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work items ` +
-            `${workItem1Name}, ${workItem2Name} in bundle ${changeBundleInstall1VersionName}; work item ${workItem3Name} in bundle ${changeBundleInstall2VersionName}. ` +
-            `Deploying metadata from ${branchName} branch to target org ${orgUrl}.`
+          `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work items ${workItem1Name}, ${workItem2Name} in bundle ${changeBundleInstall1VersionName}; work item ${workItem3Name} in bundle ${changeBundleInstall2VersionName}.`
         );
+        expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${orgUrl}.`);
       });
     });
   });
