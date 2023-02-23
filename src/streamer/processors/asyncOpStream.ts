@@ -12,7 +12,7 @@ import { Duration } from '@salesforce/kit';
 import { AnyJson, JsonMap, ensureJsonMap } from '@salesforce/ts-types';
 import SObjectStreaming from '../sObjectStream';
 import { ASYNC_OPERATION_CDC } from '../../common/constants';
-import { AsyncOperationResult, AsyncOperationStatus } from '../../common/types';
+import { AsyncOperationResult } from '../../common/types';
 import { OutputService } from '../../common/outputService/outputService';
 
 export default class AsyncOpStreaming extends SObjectStreaming {
