@@ -112,7 +112,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       if (err['errorCode'] !== HTTP_CONFLICT_CODE) {
         throw error;
       }
-      this.spinner.start('Sync of VCS Events In-Progress');
+      this.spinner.start('Synchronization of source control system events in progress');
       asyncOperationId = await this.retryRequestPromotion(doceOrg, numRetries);
       this.spinner.stop();
     }
