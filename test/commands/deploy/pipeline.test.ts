@@ -702,7 +702,8 @@ describe('deploy pipeline', () => {
         expect(requestArgument.body).to.contain('"changeBundleName":"DummyChangeBundleName"');
       });
 
-    describe('Processing VCS event flow', () => {
+    describe('Retry promotion request on 409 error', () => {
+      const mockError = new Error();
       beforeEach(() => {
         // mock the pipeline stage record
         pipelineStageMock = {
@@ -719,36 +720,54 @@ describe('deploy pipeline', () => {
           .stub(Utils, 'fetchAndValidatePipelineStage')
           .resolves(pipelineStageMock);
       });
+
+      // Test case: Test case: promotion request returns a valid AOR Id the first time so we don't have to retry.
       test
         .stdout()
         .stderr()
         .do(() => {
-          // throw 409 errors 50 times
-          requestMock = sinon.stub().throws({ name: 'CONFLICT', errorCode: 'CONFLICT', message: 'CONFLICT' });
-          // on the 50th try we want to throw a diff error so that we can catch it and show to the user
-          requestMock
-            .onCall(49)
-            .throws({ name: 'NON_CONFLICT', errorCode: 'ERROR_NON_CONFLICT', message: 'ERROR_NON_CONFLICT' });
-          // stub the spinner such that it doesn't show up for jests
+          requestMock = sinon.stub().resolves('mock-aor-id');
+        })
+        .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+        .it('Succeeds the request after few retries', (ctx) => {
+          // make sure we made the callout one time
+          expect(requestMock.callCount).to.equal(1);
+          // make sure that we show the returned aor id to the user
+          expect(ctx.stdout).to.contain('mock-aor-id');
+        });
+
+      // Test case: promotion request returns 409 error so we retry the request till it reaches the limit.
+      test
+        .stdout()
+        .stderr()
+        .do(() => {
+          // throw 409 error
+          mockError.message = 'CONFLICT';
+          mockError['errorCode'] = 'CONFLICT';
+          requestMock = sinon.stub().throws(mockError);
           spinnerStartStub = stubMethod(sandbox, Spinner.prototype, 'start');
           spinnerStopStub = stubMethod(sandbox, Spinner.prototype, 'stop');
         })
         .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
         .it('Retries the request when the http response code is 409', (ctx) => {
-          // make sure we tried 50 times to get the response
-          expect(requestMock.callCount).to.equal(50);
+          // make sure we retried the maximum amount of times plus the initial requests
+          expect(requestMock.callCount).to.equal(52);
           // make sure that we show the error to the user
-          expect(ctx.stderr).to.contain('ERROR_NON_CONFLICT');
+          expect(ctx.stderr).to.contain('CONFLICT');
           // make sure that we called the spinner and stopped it as well
           expect(spinnerStartStub.called).to.equal(true);
           expect(spinnerStopStub.called).to.equal(true);
         });
+
+      // Test case: promotion request returns a non-409 error so we don't retry and display the error.
       test
         .stdout()
         .stderr()
         .do(() => {
           // throw non-409 errors the first time
-          requestMock = sinon.stub().throws({ name: 'ERROR', errorCode: 'ERROR', message: 'ERROR' });
+          mockError.message = 'ERROR';
+          mockError['errorCode'] = 'ERROR';
+          requestMock = sinon.stub().throws(mockError);
         })
         .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
         .it('Fails the request when the http response code is some non-409 error', (ctx) => {
@@ -757,23 +776,28 @@ describe('deploy pipeline', () => {
           // make sure that we show the error to the user
           expect(ctx.stderr).to.contain('ERROR');
         });
+
+      // Test case: Test case: promotion request returns 409 error and after few retries it returns a valid AOR Id.
       test
         .stdout()
         .stderr()
         .do(() => {
-          // throw non-409 errors the first few times
-          requestMock = sinon.stub().throws({ name: 'CONFLICT', errorCode: 'CONFLICT', message: 'CONFLICT' });
+          // throw 409 errors the first few times
+          mockError.message = 'CONFLICT';
+          mockError['errorCode'] = 'CONFLICT';
+          requestMock = sinon.stub().throws(mockError);
           // on the 4th try we want to complete the VCS event processing and return an AOR Id to the user
           requestMock.onCall(4).resolves('mock-aor-id');
         })
         .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
-        .it('Succeeds the request after processing some VCS Events', (ctx) => {
+        .it('Succeeds the request after few retries', (ctx) => {
           // make sure we made the callout the right number of times
           expect(requestMock.callCount).to.equal(5);
           // make sure that we show the returned aor id to the user
           expect(ctx.stdout).to.contain('mock-aor-id');
         });
     });
+
     describe('compute source stage', () => {
       test
         .stdout()
