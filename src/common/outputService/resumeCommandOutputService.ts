@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-/* eslint-disable no-console, class-methods-use-this, @typescript-eslint/require-await */
+/* eslint-disable no-console, @typescript-eslint/require-await */
 
 import { Messages } from '@salesforce/core';
 import { AbstractAorOutputService, AorOutputFlags } from './aorOutputService';
@@ -15,7 +15,7 @@ Messages.importMessagesDirectory(__dirname);
 const output = Messages.loadMessages('@salesforce/plugin-devops-center', 'resume.output');
 
 /**
- * Service class to print the deploy output
+ * Service class to print the resume output
  *
  * @author JuanStenghele-sf
  */
@@ -30,9 +30,6 @@ export class ResumeCommandOutputService
     this.operationType = operationType;
   }
 
-  /**
-   * Prints a message indicating the resume is going on
-   */
   public async printOpSummary(): Promise<void> {
     console.log(output.getMessage('output.summary', [this.operationType]));
   }

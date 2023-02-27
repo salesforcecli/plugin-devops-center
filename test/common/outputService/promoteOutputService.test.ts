@@ -76,7 +76,7 @@ describe('promoteOutputService', () => {
       .stdout()
       .it('ignores a print deploy summary with a deployment that is not soup, versioned or ad hoc', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sandbox.stub(DeploySelector, 'selectDeployAORSummaryData').resolves({
+        sandbox.stub(DeploySelector, 'selectDeployAORSummaryDataById').resolves({
           sf_devops__Work_Item_Promotes__r: null,
           sf_devops__Change_Bundle_Installs__r: null,
           sf_devops__Work_Items__r: null,
@@ -115,7 +115,7 @@ describe('promoteOutputService', () => {
 
       async function adHocDeploy(workItemsPromote: WorkItemPromote[]): Promise<void> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sandbox.stub(DeploySelector, 'selectDeployAORSummaryData').resolves({
+        sandbox.stub(DeploySelector, 'selectDeployAORSummaryDataById').resolves({
           sf_devops__Work_Item_Promotes__r: {
             done: true,
             totalSize: workItemsPromote.length,
@@ -188,7 +188,7 @@ describe('promoteOutputService', () => {
         const changeBundleInstalls: ChangeBundleInstall[] = [mockChangeBunldeInstall1, mockChangeBunldeInstall2];
         const workItems: WorkItem[] = [workItem1, workItem2];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sandbox.stub(DeploySelector, 'selectDeployAORSummaryData').resolves({
+        sandbox.stub(DeploySelector, 'selectDeployAORSummaryDataById').resolves({
           sf_devops__Work_Item_Promotes__r: null,
           sf_devops__Change_Bundle_Installs__r: {
             done: true,
@@ -262,7 +262,7 @@ describe('promoteOutputService', () => {
       test.stdout().it('prints the correct message for a versioned deployment', async (ctx) => {
         const changeBundleInstalls: ChangeBundleInstall[] = [mockChangeBunldeInstall1, mockChangeBunldeInstall3];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sandbox.stub(DeploySelector, 'selectDeployAORSummaryData').resolves({
+        sandbox.stub(DeploySelector, 'selectDeployAORSummaryDataById').resolves({
           sf_devops__Work_Item_Promotes__r: null,
           sf_devops__Change_Bundle_Installs__r: {
             done: true,

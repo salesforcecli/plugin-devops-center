@@ -35,9 +35,17 @@ export interface AorOutputService extends OutputService {
    */
   printAorId(): void;
 
+  /**
+   * Sets the aor id
+   */
   setAorId(aorId: string): void;
 }
 
+/**
+ * Abstract class that implements AorOutputService interface
+ *
+ * @author JuanStenghele-sf
+ */
 export abstract class AbstractAorOutputService<T extends AorOutputFlags>
   extends AbstractOutputService<T>
   implements AorOutputService
@@ -49,9 +57,6 @@ export abstract class AbstractAorOutputService<T extends AorOutputFlags>
     this.aorId = aorId;
   }
 
-  /**
-   * Prints the status of the given aor
-   */
   public printAorStatus(aor: AsyncOperationResult): void {
     if (aor.sf_devops__Status__c === undefined || aor.sf_devops__Status__c === AsyncOperationStatus.InProgress) {
       console.log(aor.sf_devops__Message__c);
@@ -64,9 +69,6 @@ export abstract class AbstractAorOutputService<T extends AorOutputFlags>
     }
   }
 
-  /**
-   * Prints the aor id
-   */
   public printAorId(): void {
     console.log(output.getMessage('output.aor-id', [this.aorId]));
   }
@@ -75,8 +77,5 @@ export abstract class AbstractAorOutputService<T extends AorOutputFlags>
     this.aorId = aorId;
   }
 
-  /**
-   * Prints a summary about the operation done
-   */
   public abstract printOpSummary(): Promise<void>;
 }

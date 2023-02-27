@@ -21,14 +21,14 @@ export type PromoteOutputFlags = {
 } & AorOutputFlags;
 
 /**
- * Interface for output methods for deploy operations
+ * Interface for output methods for promote (and only deploy) operations
  *
  * @author JuanStenghele-sf
  */
 export interface PromoteOutputService extends ResumeOutputService {}
 
 /**
- * Interface for output methods for deploy operations
+ * Abstract class that implements PromoteOutputService interface
  *
  * @author JuanStenghele-sf
  */
@@ -43,14 +43,12 @@ export abstract class AbstractPromoteOutputService
     this.summaryBuilder = summaryBuilder;
   }
 
-  /**
-   * Given an aorId prints the deployment wanted to be done summary
-   * We also receive the branch as it is a command's param
-   */
   public async printOpSummary(): Promise<void> {
     if (this.flags.async) {
+      // If the async flag is used we print an specific message
       console.log(output.getMessage('output.async-run-info', [this.aorId, this.aorId]));
     } else {
+      // We build a summary output service
       const deploySummaryOutputService: OutputService | undefined = await this.summaryBuilder.build(
         this.flags.branch,
         this.aorId
@@ -59,6 +57,7 @@ export abstract class AbstractPromoteOutputService
         return;
       }
 
+      // We print the summary
       await deploySummaryOutputService.printOpSummary();
     }
   }

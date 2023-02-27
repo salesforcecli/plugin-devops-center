@@ -16,6 +16,11 @@ import { AbstractAorOutputService, AorOutputFlags, AorOutputService } from './ao
  */
 export interface ResumeOutputService extends AorOutputService {}
 
+/**
+ * Abstract class that implements ResumeOutputService interface
+ *
+ * @author JuanStenghele-sf
+ */
 export abstract class AbstractResumeOutputService<T extends AorOutputFlags>
   extends AbstractAorOutputService<T>
   implements ResumeOutputService {}

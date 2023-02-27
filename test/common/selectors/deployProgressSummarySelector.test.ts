@@ -13,7 +13,7 @@ import { QueryResult } from 'jsforce';
 import sinon = require('sinon');
 import {
   DeploySummaryQueryResult,
-  selectDeployAORSummaryData,
+  selectDeployAORSummaryDataById,
 } from '../../../src/common/selectors/deployProgressSummarySelector';
 import { WorkItemPromote } from '../../../src/common/types';
 
@@ -92,7 +92,7 @@ describe('deploy progress sumary selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
-    const result = await selectDeployAORSummaryData(mockConnection, 'AAA');
+    const result = await selectDeployAORSummaryDataById(mockConnection, 'AAA');
 
     // Verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);

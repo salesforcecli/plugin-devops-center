@@ -9,7 +9,7 @@
 
 import { Connection, Messages } from '@salesforce/core';
 import { AsyncOperationType } from '../constants';
-import { DeploySummaryQueryResult, selectDeployAORSummaryData } from '../selectors/deployProgressSummarySelector';
+import { DeploySummaryQueryResult, selectDeployAORSummaryDataById } from '../selectors/deployProgressSummarySelector';
 import { EnvQueryResult, selectPipelineStageByEnvironment } from '../selectors/environmentSelector';
 import { selectNamedCredentialByName } from '../selectors/namedCredentialSelector';
 import { selectWorkItemsByChangeBundles, WorkItemsQueryResult } from '../selectors/workItemSelector';
@@ -20,7 +20,7 @@ Messages.importMessagesDirectory(__dirname);
 const output = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.output');
 
 /**
- * Builds the appropiate DeploySummaryProvider
+ * Builds the appropiate DeploySummaryOutputService
  *
  * @author JuanStenghele-sf
  */
@@ -32,11 +32,11 @@ export class DeploySummaryBuilder {
   }
 
   /**
-   * Builds the DeploySummaryProvider
+   * Builds the appropiate DeploySummaryOutputService
    */
   public async build(branch: string, aorId: string): Promise<OutputService | undefined> {
     // We get the operation from this query
-    const queryResp: DeploySummaryQueryResult = await selectDeployAORSummaryData(this.con, aorId);
+    const queryResp: DeploySummaryQueryResult = await selectDeployAORSummaryDataById(this.con, aorId);
 
     switch (queryResp.sf_devops__Operation__c) {
       case AsyncOperationType.AD_HOC_PROMOTE:
@@ -62,7 +62,6 @@ export class DeploySummaryBuilder {
         );
 
       default:
-        // Error here
         break;
     }
   }
@@ -85,12 +84,23 @@ export abstract class DeploySummaryOutputService implements OutputService {
     this.printSummary();
   }
 
+  /**
+   * Gets all the attributes needed to call printSummary()
+   */
   protected abstract buildSummary(): Promise<void>;
 
+  /**
+   * Prints the specific summary for this deploy type
+   */
   protected abstract printSummary(): void;
 }
 
-export class AdHocDeploySummaryOutputService extends DeploySummaryOutputService {
+/**
+ * Service class used to print the operation summary of an Ad Hoc deploy
+ *
+ * @author JuanStenghele-sf
+ */
+class AdHocDeploySummaryOutputService extends DeploySummaryOutputService {
   private workItemsPromote: WorkItemPromote[];
   private workItems: string[];
 
@@ -125,7 +135,12 @@ export class AdHocDeploySummaryOutputService extends DeploySummaryOutputService 
   }
 }
 
-export abstract class VersionedOrSoupSummaryOutputService extends DeploySummaryOutputService {
+/**
+ * Abstract class with some common logic for versioned and soup summary output services
+ *
+ * @author JuanStenghele-sf
+ */
+abstract class VersionedOrSoupSummaryOutputService extends DeploySummaryOutputService {
   protected changeBundleInstalls: ChangeBundleInstall[];
   protected workItems: Map<string, string[]>;
 
@@ -134,8 +149,11 @@ export abstract class VersionedOrSoupSummaryOutputService extends DeploySummaryO
     this.changeBundleInstalls = changeBundleInstalls;
   }
 
+  /**
+   * Common logic for soup and versioned deploy output services
+   */
   protected async buildCommonSummary(): Promise<void> {
-    // We get the stage name and the org url first
+    // We get the stage name and the org url
     const envId: string = this.changeBundleInstalls[this.changeBundleInstalls.length - 1].sf_devops__Environment__r.Id;
     const envQueryResp: EnvQueryResult = await selectPipelineStageByEnvironment(this.con, envId);
 
@@ -170,7 +188,12 @@ export abstract class VersionedOrSoupSummaryOutputService extends DeploySummaryO
   protected abstract buildSummary(): Promise<void>;
 }
 
-export class VersionedDeploySummaryOutputService extends VersionedOrSoupSummaryOutputService {
+/**
+ * Service class used to print the operation summary of a Versioned deploy
+ *
+ * @author JuanStenghele-sf
+ */
+class VersionedDeploySummaryOutputService extends VersionedOrSoupSummaryOutputService {
   protected async buildSummary(): Promise<void> {
     // We need to get the stage name and the org url first
     await this.buildCommonSummary();
@@ -203,7 +226,12 @@ export class VersionedDeploySummaryOutputService extends VersionedOrSoupSummaryO
   }
 }
 
-export class SoupDeploySummaryOutputService extends VersionedOrSoupSummaryOutputService {
+/**
+ * Service class used to print the operation summary of a soup deploy
+ *
+ * @author JuanStenghele-sf
+ */
+class SoupDeploySummaryOutputService extends VersionedOrSoupSummaryOutputService {
   private rawWorkItems: WorkItem[];
 
   public constructor(

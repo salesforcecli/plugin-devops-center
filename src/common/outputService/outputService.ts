@@ -28,6 +28,7 @@ export interface OutputService {
  * @author JuanStenghele-sf
  */
 export abstract class AbstractOutputService<T extends OutputFlags> implements OutputService {
+  // We will store here the command flags
   protected flags: T;
 
   public constructor(flags: T) {
