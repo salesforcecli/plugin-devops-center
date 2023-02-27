@@ -38,7 +38,7 @@ export abstract class AbstractPromoteOutputService
 {
   private summaryBuilder: DeploySummaryBuilder;
 
-  public constructor(flags: Partial<PromoteOutputFlags>, summaryBuilder: DeploySummaryBuilder) {
+  public constructor(flags: PromoteOutputFlags, summaryBuilder: DeploySummaryBuilder) {
     super(flags, '');
     this.summaryBuilder = summaryBuilder;
   }
@@ -51,13 +51,9 @@ export abstract class AbstractPromoteOutputService
     if (this.flags.async) {
       console.log(output.getMessage('output.async-run-info', [this.aorId, this.aorId]));
     } else {
-      if (this.flags.branch === undefined) {
-        return;
-      }
-
       const deploySummaryOutputService: OutputService | undefined = await this.summaryBuilder.build(
-        this.aorId,
-        this.flags.branch
+        this.flags.branch,
+        this.aorId
       );
       if (deploySummaryOutputService === undefined) {
         return;

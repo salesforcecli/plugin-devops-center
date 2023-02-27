@@ -16,7 +16,7 @@ Messages.importMessagesDirectory(__dirname);
 const output = Messages.loadMessages('@salesforce/plugin-devops-center', 'aorOperations.output');
 
 export type AorOutputFlags = {
-  async: boolean;
+  async?: boolean;
 } & OutputFlags;
 
 /**
@@ -44,7 +44,7 @@ export abstract class AbstractAorOutputService<T extends AorOutputFlags>
 {
   protected aorId: string;
 
-  public constructor(flags: Partial<T>, aorId: string) {
+  public constructor(flags: T, aorId: string) {
     super(flags);
     this.aorId = aorId;
   }

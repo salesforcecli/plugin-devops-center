@@ -6,8 +6,8 @@
  */
 
 export type OutputFlags = {
-  verbosity: boolean;
-  consice: boolean;
+  verbosity?: boolean;
+  consice?: boolean;
 };
 
 /**
@@ -28,9 +28,9 @@ export interface OutputService {
  * @author JuanStenghele-sf
  */
 export abstract class AbstractOutputService<T extends OutputFlags> implements OutputService {
-  protected flags: Partial<T>;
+  protected flags: T;
 
-  public constructor(flags: Partial<T>) {
+  public constructor(flags: T) {
     this.flags = flags;
   }
 

@@ -22,6 +22,7 @@ export class DeployCommandOutputService extends AbstractPromoteOutputService {
     super(
       {
         async: flags['async'],
+        branch: flags['branch-name'],
       },
       summaryBuilder
     );
