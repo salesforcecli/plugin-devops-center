@@ -11,7 +11,7 @@ import { getString, Nullable } from '@salesforce/ts-types';
 import { ApiError, PipelineStage, TestLevel } from '../common';
 import { selectPipelineStagesByProject } from '../common/selectors/pipelineStageSelector';
 import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
-import { OutputService } from './outputService/outputService';
+import { AorOutputService } from './outputService/aorOutputService';
 import { selectAsyncOperationResultById } from './selectors/asyncOperationResultsSelector';
 import { AsyncOperationResult } from './types';
 
@@ -91,7 +91,7 @@ export function getAsyncOperationStreamer(
   org: Org,
   waitTime: Duration,
   idToInspect: string,
-  outputService: OutputService
+  outputService: AorOutputService
 ): AsyncOpStreaming {
   return new AsyncOpStreaming(org, waitTime, idToInspect, outputService);
 }

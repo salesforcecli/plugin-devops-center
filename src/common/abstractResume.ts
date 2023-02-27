@@ -7,7 +7,6 @@
 import { Messages, Org, SfError } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
-import { bold } from 'chalk';
 import {
   AsyncOperationResult,
   AsyncOperationStatus,
@@ -19,6 +18,7 @@ import { jobId, requiredDoceOrgFlag, useMostRecent, wait } from '../common/flags
 import DoceMonitor from '../streamer/doceMonitor';
 import { DeployPipelineCache } from './deployPipelineCache';
 import { OutputServiceFactory } from './outputService/outputServiceFactory';
+import { ResumeCommandOutputService } from './outputService/resumeCommandOutputService';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -63,7 +63,7 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
   }
 
   protected async resumeOperation(): Promise<PromotePipelineResult> {
-    const asyncJobId = this.flags['use-most-recent']
+    const asyncJobId: string = this.flags['use-most-recent']
       ? (await DeployPipelineCache.create()).getLatestKeyOrThrow()
       : (this.flags['job-id'] as string);
 
@@ -75,14 +75,13 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
     }
 
     // it is resumable so we can start monitoring the operation
-    this.log(`*** Resuming ${this.operationType} ***`);
-    this.log(`Job ID: ${bold(asyncJobId)}`);
-    const streamer: DoceMonitor = getAsyncOperationStreamer(
-      doceOrg,
-      this.flags.wait,
-      asyncJobId,
-      new OutputServiceFactory().forDeployment(doceOrg.getConnection())
-    );
+    const outputService: ResumeCommandOutputService = new OutputServiceFactory().forResume(this.operationType);
+    outputService.setAorId(asyncJobId);
+
+    await outputService.printOpSummary();
+    outputService.printAorId();
+
+    const streamer: DoceMonitor = getAsyncOperationStreamer(doceOrg, this.flags.wait, asyncJobId, outputService);
     await streamer.monitor();
 
     // get final state of the async job

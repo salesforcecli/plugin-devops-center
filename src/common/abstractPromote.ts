@@ -30,10 +30,10 @@ import {
 } from '../common/flags';
 import DoceMonitor from '../streamer/doceMonitor';
 import { REST_PROMOTE_BASE_URL } from './constants';
-import { OutputService } from './outputService/outputService';
 import { OutputServiceFactory } from './outputService/outputServiceFactory';
 import { AsyncOperationResult, AsyncOperationStatus } from './types';
 import { fetchAsyncOperationResult } from './utils';
+import { PromoteOutputService } from './outputService/promoteOutputService';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -60,12 +60,18 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
   private sourceStageId: string;
   private deployOptions: Partial<PromoteOptions>;
 
+  private outputService: PromoteOutputService;
+
   public async init(): Promise<void> {
     await super.init();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { flags } = await this.parse(this.constructor as Interfaces.Command.Class);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags;
+    this.outputService = new OutputServiceFactory().forDeployment(
+      this.flags,
+      (this.flags['devops-center-username'] as Org).getConnection()
+    );
   }
 
   protected async executePromotion(): Promise<PromotePipelineResult> {
@@ -79,12 +85,13 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     this.sourceStageId = this.getSourceStageId();
     const asyncOperationId: string = await this.requestPromotion(doceOrg);
 
-    const outputService: OutputService = new OutputServiceFactory().forDeployment(doceOrg.getConnection());
-    outputService.printAorId(asyncOperationId);
+    this.outputService.setAorId(asyncOperationId);
+
+    this.outputService.printAorId();
+    await this.outputService.printOpSummary();
 
     if (this.flags.async) {
       await DeployPipelineCache.set(asyncOperationId, {});
-      outputService.printAsyncRunInfo(asyncOperationId);
 
       return {
         jobId: asyncOperationId,
@@ -92,9 +99,12 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       };
     }
 
-    await outputService.printProgressSummary(asyncOperationId, this.flags['branch-name']);
-
-    const doceMonitor: DoceMonitor = new AsyncOpStreaming(doceOrg, this.flags.wait, asyncOperationId, outputService);
+    const doceMonitor: DoceMonitor = new AsyncOpStreaming(
+      doceOrg,
+      this.flags.wait,
+      asyncOperationId,
+      this.outputService
+    );
     await doceMonitor.monitor();
 
     // get final state of the async job

@@ -13,12 +13,12 @@ import { AnyJson, JsonMap, ensureJsonMap } from '@salesforce/ts-types';
 import SObjectStreaming from '../sObjectStream';
 import { ASYNC_OPERATION_CDC } from '../../common/constants';
 import { AsyncOperationResult } from '../../common/types';
-import { OutputService } from '../../common/outputService/outputService';
+import { AorOutputService } from '../../common/outputService/aorOutputService';
 
 export default class AsyncOpStreaming extends SObjectStreaming {
-  private outputService: OutputService;
+  private outputService: AorOutputService;
 
-  public constructor(org: Org, wait: Duration, idToInspect: string, outputService: OutputService) {
+  public constructor(org: Org, wait: Duration, idToInspect: string, outputService: AorOutputService) {
     super(org, wait, new Array(idToInspect), ASYNC_OPERATION_CDC);
     this.outputService = outputService;
   }

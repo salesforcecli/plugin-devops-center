@@ -8,7 +8,11 @@
 /* eslint-disable class-methods-use-this */
 
 import { Connection } from '@salesforce/core';
-import { DeployOutputService } from './deployOutputService';
+import { SfCommand } from '@salesforce/sf-plugins-core';
+import * as Promote from '../abstractPromote';
+import { DeployCommandOutputService } from './deployCommandOutputService';
+import { DeploySummaryBuilder } from './deploySummaryBuilder';
+import { ResumeCommandOutputService } from './resumeCommandOutputService';
 
 /**
  * Factory service for creating output services
@@ -19,7 +23,14 @@ export class OutputServiceFactory {
   /**
    * Create a service to print the deployment info.
    */
-  public forDeployment(con: Connection): DeployOutputService {
-    return new DeployOutputService(con);
+  public forDeployment(flags: Promote.Flags<typeof SfCommand>, con: Connection): DeployCommandOutputService {
+    return new DeployCommandOutputService(flags, new DeploySummaryBuilder(con));
+  }
+
+  /**
+   * Create a service to print the resume info.
+   */
+  public forResume(operationType: string): ResumeCommandOutputService {
+    return new ResumeCommandOutputService(operationType);
   }
 }
