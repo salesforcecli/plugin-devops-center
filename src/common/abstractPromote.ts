@@ -7,7 +7,7 @@
 import { Messages, Org, SfError } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
-import { HttpRequest, HttpResponse } from 'jsforce';
+import { HttpRequest } from 'jsforce';
 import { DeployPipelineCache } from '../common/deployPipelineCache';
 import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
 import {
@@ -30,7 +30,7 @@ import {
 } from '../common/flags';
 import DoceMonitor from '../streamer/doceMonitor';
 import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from './constants';
-import { AsyncOperationResult, AsyncOperationStatus } from './types';
+import { ApiError, AsyncOperationResult, AsyncOperationStatus } from './types';
 import { fetchAsyncOperationResult } from './utils';
 
 Messages.importMessagesDirectory(__dirname);
@@ -76,7 +76,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       this.flags['branch-name']
     );
     this.sourceStageId = this.getSourceStageId();
-    const asyncOperationId: string = await this.requestPromotionFlow(doceOrg, this.numRetries409);
+    const asyncOperationId: string = await this.requestPromotionFlow(doceOrg);
 
     // TODO: move this to logger service
     this.log(`Job ID: ${asyncOperationId}`);
@@ -102,35 +102,49 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     };
   }
 
-  protected async requestPromotionFlow(doceOrg: Org, numRetries: number): Promise<string> {
-    let asyncOperationId: string;
+  /**
+   *
+   * Sends an Http request to the target org to initiate a promotion.
+   *
+   * @param doceOrg target org.
+   * @returns Aor Id of promote operation.
+   */
+  protected async requestPromotionFlow(doceOrg: Org): Promise<string> {
     try {
-      asyncOperationId = await this.requestPromotion(doceOrg);
+      return await this.requestPromotion(doceOrg);
     } catch (error) {
-      const err = error as HttpResponse;
-      // if we get anything besides a 409 we rethrow the error
-      if (err['errorCode'] !== HTTP_CONFLICT_CODE) {
-        throw error;
+      const err = error as ApiError;
+      // if we get a 409 error then call the retry flow
+      if (err.errorCode === HTTP_CONFLICT_CODE) {
+        this.spinner.start('Synchronization of source control system events in progress');
+        return await this.retryRequestPromotion(doceOrg, this.numRetries409);
       }
-      this.spinner.start('Synchronization of source control system events in progress');
-      asyncOperationId = await this.retryRequestPromotion(doceOrg, numRetries);
+      throw error;
+    } finally {
       this.spinner.stop();
     }
-    return asyncOperationId;
   }
 
+  /**
+   *
+   * Sends an Http request to the target org to initiate a promotion.
+   * If it gets a 409/Conflict it will retry till the request successes,
+   * gets a differenct error or run out of retry attempts.
+   *
+   * @param doceOrg target org.
+   * @param numRetries Amount of remaining retry attempts.
+   * @returns Aor Id of promote operation
+   */
   protected async retryRequestPromotion(doceOrg: Org, numRetries: number): Promise<string> {
     try {
-      const asyncOperationId: string = await this.requestPromotion(doceOrg);
-      return asyncOperationId;
+      return await this.requestPromotion(doceOrg);
     } catch (error) {
-      const err = error as HttpResponse;
-      // if we get anything besdies a 409 or run out of retries we throw an error
-      if (err['errorCode'] !== HTTP_CONFLICT_CODE || numRetries < 1) {
-        this.spinner.stop();
-        throw error;
+      const err = error as ApiError;
+      // if we still get a 409 error and haven't run out of retry attempts then retry again
+      if (err.errorCode === HTTP_CONFLICT_CODE && numRetries > 1) {
+        return this.retryRequestPromotion(doceOrg, numRetries - 1);
       }
-      return this.retryRequestPromotion(doceOrg, numRetries - 1);
+      throw error;
     }
   }
 

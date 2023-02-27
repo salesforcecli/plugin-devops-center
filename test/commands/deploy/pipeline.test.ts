@@ -729,7 +729,7 @@ describe('deploy pipeline', () => {
           requestMock = sinon.stub().resolves('mock-aor-id');
         })
         .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
-        .it('Succeeds the request after few retries', (ctx) => {
+        .it('Succeeds the request after first request', (ctx) => {
           // make sure we made the callout one time
           expect(requestMock.callCount).to.equal(1);
           // make sure that we show the returned aor id to the user
@@ -751,7 +751,7 @@ describe('deploy pipeline', () => {
         .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
         .it('Retries the request when the http response code is 409', (ctx) => {
           // make sure we retried the maximum amount of times plus the initial requests
-          expect(requestMock.callCount).to.equal(52);
+          expect(requestMock.callCount).to.equal(51);
           // make sure that we show the error to the user
           expect(ctx.stderr).to.contain('CONFLICT');
           // make sure that we called the spinner and stopped it as well
