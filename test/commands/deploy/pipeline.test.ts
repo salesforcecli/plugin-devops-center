@@ -147,7 +147,7 @@ describe('deploy pipeline', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(AsyncOpStreaming.prototype, 'monitor' as any).returns({ completed: true, payload: {} });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sandbox.stub(DeployCommandOutputService.prototype, 'printOpSummary ' as any).returns({});
+        sandbox.stub(DeployCommandOutputService.prototype, 'printOpSummary' as any).returns({});
       })
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests', '-t=DummyTestClass'])
       .it('runs deploy pipeline with the correct flags and validation pass', (ctx) => {
@@ -180,7 +180,7 @@ describe('deploy pipeline', () => {
           .stub(AsyncOpStreaming.prototype, 'monitor' as any)
           .throwsException({ name: 'GenericTimeoutError' });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sandbox.stub(DeployCommandOutputService.prototype, 'printOpSummary ' as any).returns({});
+        sandbox.stub(DeployCommandOutputService.prototype, 'printOpSummary' as any).returns({});
       })
       .stdout()
       .stderr()

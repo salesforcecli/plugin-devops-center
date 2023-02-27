@@ -159,7 +159,7 @@ describe('deploy pipeline resume', () => {
       .command(['deploy pipeline resume', `-i=${mockAorId}`])
       .it('correclty streams the status of the async operation', (ctx) => {
         // verify output
-        expect(ctx.stdout).to.contain('*** Resuming Deployment ***');
+        expect(ctx.stdout).to.contain('Resuming Deployment');
         expect(ctx.stdout).to.contain(`Job ID: ${mockAorId}`);
         // verify we instanciated the streamer correctly
         expect(spyStreamerBuilder.called).to.equal(true);

@@ -9,8 +9,7 @@ import * as core from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { JsonMap } from '@salesforce/ts-types';
 import * as sinon from 'sinon';
-import { AsyncOperationResult } from '../../src/common';
-import { AorOutputService } from '../../src/common/outputService/aorOutputService';
+import { AbstractAorOutputService, AorOutputFlags } from '../../src/common/outputService/aorOutputService';
 import AsyncOpStreaming from '../../src/streamer/processors/asyncOpStream';
 
 const DOCE_ORG = {
@@ -117,24 +116,13 @@ class AsyncOpStreamingTest extends AsyncOpStreaming {
   }
 }
 
-class OutputServiceTest implements AorOutputService {
-  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
-  public printAorStatus(_aor: AsyncOperationResult): void {
-    throw new Error('Method not implemented.');
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  public printAorId(): void {
-    throw new Error('Method not implemented.');
+class OutputServiceTest extends AbstractAorOutputService<AorOutputFlags> {
+  public constructor() {
+    super({}, '');
   }
 
   // eslint-disable-next-line class-methods-use-this
   public printOpSummary(): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-
-  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
-  public setAorId(_aorId: string): void {
     throw new Error('Method not implemented.');
   }
 }

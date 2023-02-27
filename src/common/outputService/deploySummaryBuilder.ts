@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-/* eslint-disable no-console */
+/* eslint-disable no-console, @typescript-eslint/no-non-null-assertion */
 
 import { Connection, Messages } from '@salesforce/core';
 import { AsyncOperationType } from '../constants';
@@ -40,7 +40,6 @@ export class DeploySummaryBuilder {
 
     switch (queryResp.sf_devops__Operation__c) {
       case AsyncOperationType.AD_HOC_PROMOTE:
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return new AdHocDeploySummaryOutputService(
           queryResp.sf_devops__Work_Item_Promotes__r!.records,
           this.con,
@@ -48,7 +47,6 @@ export class DeploySummaryBuilder {
         );
 
       case AsyncOperationType.VERSIONED_PROMOTE:
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return new VersionedDeploySummaryOutputService(
           queryResp.sf_devops__Change_Bundle_Installs__r!.records,
           this.con,
@@ -56,7 +54,6 @@ export class DeploySummaryBuilder {
         );
 
       case AsyncOperationType.SOUP_PROMOTE:
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return new SoupDeploySummaryOutputService(
           queryResp.sf_devops__Change_Bundle_Installs__r!.records,
           queryResp.sf_devops__Work_Items__r!.records,

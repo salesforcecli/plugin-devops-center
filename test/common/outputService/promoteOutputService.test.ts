@@ -29,10 +29,16 @@ describe('promoteOutputService', () => {
 
   describe('async output', () => {
     const summaryBuilder: DeploySummaryBuilder = new DeploySummaryBuilder(stubOrg.getConnection());
-    const outputService: PromoteOutputServiceTest = new PromoteOutputServiceTest({}, summaryBuilder);
+    const outputService: PromoteOutputServiceTest = new PromoteOutputServiceTest(
+      {
+        async: true,
+      },
+      summaryBuilder
+    );
 
     test.stdout().it('prints the async deploy execution correctly', async (ctx) => {
       const mockId = 'ABC';
+      outputService.setAorId(mockId);
       await outputService.printOpSummary();
       expect(ctx.stdout).to.contain('Deploy has been queued.');
       expect(ctx.stdout).to.contain(`Run "sf deploy pipeline resume --job-id ${mockId} to resume watching the deploy.`);

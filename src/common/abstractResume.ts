@@ -50,7 +50,11 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
     'use-most-recent': useMostRecent,
     wait,
   };
+
   protected flags!: Flags<T>;
+
+  private outputService: ResumeCommandOutputService;
+
   protected abstract operationType: string;
   protected abstract baseCommand: string;
 
@@ -60,6 +64,7 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
     const { flags } = await this.parse(this.constructor as Interfaces.Command.Class);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags;
+    this.outputService = new OutputServiceFactory().forResume(this.operationType);
   }
 
   protected async resumeOperation(): Promise<PromotePipelineResult> {
@@ -75,13 +80,12 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
     }
 
     // it is resumable so we can start monitoring the operation
-    const outputService: ResumeCommandOutputService = new OutputServiceFactory().forResume(this.operationType);
-    outputService.setAorId(asyncJobId);
+    this.outputService.setAorId(asyncJobId);
 
-    await outputService.printOpSummary();
-    outputService.printAorId();
+    await this.outputService.printOpSummary();
+    this.outputService.printAorId();
 
-    const streamer: DoceMonitor = getAsyncOperationStreamer(doceOrg, this.flags.wait, asyncJobId, outputService);
+    const streamer: DoceMonitor = getAsyncOperationStreamer(doceOrg, this.flags.wait, asyncJobId, this.outputService);
     await streamer.monitor();
 
     // get final state of the async job
