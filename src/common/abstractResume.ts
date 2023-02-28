@@ -17,8 +17,7 @@ import {
 import { jobId, requiredDoceOrgFlag, useMostRecent, wait } from '../common/flags';
 import DoceMonitor from '../streamer/doceMonitor';
 import { DeployPipelineCache } from './deployPipelineCache';
-import { OutputServiceFactory } from './outputService/outputServiceFactory';
-import { ResumeCommandOutputService } from './outputService/resumeCommandOutputService';
+import { OutputServiceFactory, ResumeCommandOutputService } from './outputService';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');

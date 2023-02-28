@@ -8,7 +8,7 @@
 /* eslint-disable camelcase */
 
 import { expect, test } from '@oclif/test';
-import { AbstractAorOutputService, AorOutputFlags } from '../../../src/common/outputService/aorOutputService';
+import { AbstractAorOutputService, AorOutputFlags } from '../../../src/common/outputService';
 import { AsyncOperationResult, AsyncOperationStatus } from '../../../src/common/types';
 
 class AorOutputServiceTest extends AbstractAorOutputService<AorOutputFlags> {

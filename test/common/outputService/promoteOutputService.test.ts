@@ -10,14 +10,13 @@
 import { expect, test } from '@oclif/test';
 import * as sinon from 'sinon';
 import { Org } from '@salesforce/core';
-import { AbstractPromoteOutputService } from '../../../src/common/outputService/promoteOutputService';
-import { DeploySummaryBuilder } from '../../../src/common/outputService/deploySummaryBuilder';
 import { ChangeBundleInstall, NamedCredential, WorkItem, WorkItemPromote } from '../../../src/common/types';
 import * as DeploySelector from '../../../src/common/selectors/deployProgressSummarySelector';
 import { AsyncOperationType } from '../../../src/common/constants';
 import * as EndpointSelector from '../../../src/common/selectors/namedCredentialSelector';
 import * as StageSelector from '../../../src/common/selectors/environmentSelector';
 import * as WorkItemSelector from '../../../src/common/selectors/workItemSelector';
+import { AbstractPromoteOutputService, DeploySummaryBuilder } from '../../../src/common/outputService';
 
 class PromoteOutputServiceTest extends AbstractPromoteOutputService {}
 

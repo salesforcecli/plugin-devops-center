@@ -9,7 +9,7 @@ import * as core from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { JsonMap } from '@salesforce/ts-types';
 import * as sinon from 'sinon';
-import { AbstractAorOutputService, AorOutputFlags } from '../../src/common/outputService/aorOutputService';
+import { AbstractAorOutputService, AorOutputFlags } from '../../src/common/outputService';
 import AsyncOpStreaming from '../../src/streamer/processors/asyncOpStream';
 
 const DOCE_ORG = {

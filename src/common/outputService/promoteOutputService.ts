@@ -9,7 +9,7 @@ import { Messages } from '@salesforce/core';
 import { AorOutputFlags } from './aorOutputService';
 import { DeploySummaryBuilder } from './deploySummaryBuilder';
 import { OutputService } from './outputService';
-import { AbstractResumeOutputService, ResumeOutputService } from './resumeOutputService';
+import { ResumeOutputService, AbstractResumeOutputService } from './resumeOutputService';
 
 /* eslint-disable @typescript-eslint/no-empty-interface, no-console */
 

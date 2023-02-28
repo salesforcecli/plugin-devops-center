@@ -9,8 +9,8 @@
 
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags } from '../abstractPromote';
-import { AbstractPromoteOutputService } from './promoteOutputService';
 import { DeploySummaryBuilder } from './deploySummaryBuilder';
+import { AbstractPromoteOutputService } from './promoteOutputService';
 
 /**
  * Service class to print the deploy output

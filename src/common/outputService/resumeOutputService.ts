@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { AbstractAorOutputService, AorOutputFlags, AorOutputService } from './aorOutputService';
+import { AorOutputService, AorOutputFlags, AbstractAorOutputService } from './aorOutputService';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 

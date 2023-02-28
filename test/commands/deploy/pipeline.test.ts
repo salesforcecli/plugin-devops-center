@@ -16,7 +16,7 @@ import AsyncOpStreaming from '../../../src/streamer/processors/asyncOpStream';
 import { AsyncOperationStatus, PipelineStage } from '../../../src/common';
 import * as Utils from '../../../src/common/utils';
 import { REST_PROMOTE_BASE_URL } from '../../../src/common/constants';
-import { DeployCommandOutputService } from '../../../src/common/outputService/deployCommandOutputService';
+import { DeployCommandOutputService } from '../../../src/common/outputService';
 
 let requestMock: sinon.SinonStub;
 

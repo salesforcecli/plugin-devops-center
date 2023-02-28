@@ -30,10 +30,9 @@ import {
 } from '../common/flags';
 import DoceMonitor from '../streamer/doceMonitor';
 import { REST_PROMOTE_BASE_URL } from './constants';
-import { OutputServiceFactory } from './outputService/outputServiceFactory';
 import { AsyncOperationResult, AsyncOperationStatus } from './types';
 import { fetchAsyncOperationResult } from './utils';
-import { PromoteOutputService } from './outputService/promoteOutputService';
+import { OutputServiceFactory, PromoteOutputService } from './outputService';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -90,9 +89,9 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     this.outputService.printAorId();
     await this.outputService.printOpSummary();
 
-    if (this.flags.async) {
-      await DeployPipelineCache.set(asyncOperationId, {});
+    await DeployPipelineCache.set(asyncOperationId, {});
 
+    if (this.flags.async) {
       return {
         jobId: asyncOperationId,
         status: AsyncOperationStatus.InProgress,
