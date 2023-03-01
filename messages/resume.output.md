@@ -1,3 +1,3 @@
 # output.summary
 
-`*** Resuming %s ***`
+**_ Resuming %s _**

@@ -7,7 +7,7 @@
 
 export type OutputFlags = {
   verbosity?: boolean;
-  consice?: boolean;
+  concise?: boolean;
 };
 
 /**
