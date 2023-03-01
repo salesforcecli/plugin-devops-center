@@ -9,6 +9,7 @@ import * as core from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { JsonMap } from '@salesforce/ts-types';
 import * as sinon from 'sinon';
+import { AbstractAorOutputService, AorOutputFlags } from '../../src/common/outputService';
 import AsyncOpStreaming from '../../src/streamer/processors/asyncOpStream';
 
 const DOCE_ORG = {
@@ -64,7 +65,8 @@ describe('AsyncOpStreaming', () => {
     instance = new AsyncOpStreamingTest(
       await core.Org.create({ aliasOrUsername: 'test@salesforce.com' }),
       Duration.minutes(3),
-      'testId'
+      'testId',
+      new OutputServiceTest()
     );
   });
 
@@ -111,5 +113,16 @@ describe('AsyncOpStreaming', () => {
 class AsyncOpStreamingTest extends AsyncOpStreaming {
   public asyncOpStreamProcessorStub(event: JsonMap) {
     return this.asyncOpStreamProcessor(event);
+  }
+}
+
+class OutputServiceTest extends AbstractAorOutputService<AorOutputFlags> {
+  public constructor() {
+    super({}, '');
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  public printOpSummary(): Promise<void> {
+    throw new Error('Method not implemented.');
   }
 }

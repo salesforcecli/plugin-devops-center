@@ -9,3 +9,8 @@ export const APPROVED = 'Approved';
 export const ASYNC_OPERATION_CDC = '/data/Async_Operation_Result__ChangeEvent';
 export const REST_PROMOTE_BASE_URL = '/services/apexrest/sf_devops/pipeline/promote/v1/';
 export const HTTP_CONFLICT_CODE = 'CONFLICT';
+export enum AsyncOperationType {
+  AD_HOC_PROMOTE = 'AD_HOC_PROMOTE',
+  VERSIONED_PROMOTE = 'VERSIONED_PROMOTE',
+  SOUP_PROMOTE = 'SOUP_PROMOTE',
+}

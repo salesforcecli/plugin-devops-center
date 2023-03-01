@@ -27,6 +27,11 @@ const mockRecord1: PipelineStage = {
   sf_devops__Pipeline__r: {
     sf_devops__Project__c: PROJECT_NAME,
   },
+  Name: 'uat',
+  sf_devops__Environment__r: {
+    Id: 'Dummy env',
+    sf_devops__Named_Credential__c: 'abc',
+  },
 };
 const mockRecord2: PipelineStage = {
   Id: '2',
@@ -35,6 +40,11 @@ const mockRecord2: PipelineStage = {
   },
   sf_devops__Pipeline__r: {
     sf_devops__Project__c: PROJECT_NAME,
+  },
+  Name: 'uat',
+  sf_devops__Environment__r: {
+    Id: 'Dummy env',
+    sf_devops__Named_Credential__c: 'abc',
   },
 };
 

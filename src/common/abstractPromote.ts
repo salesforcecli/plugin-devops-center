@@ -32,6 +32,7 @@ import DoceMonitor from '../streamer/doceMonitor';
 import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from './constants';
 import { ApiError, AsyncOperationResult, AsyncOperationStatus } from './types';
 import { fetchAsyncOperationResult } from './utils';
+import { OutputServiceFactory, PromoteOutputService } from './outputService';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -59,12 +60,18 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
   private deployOptions: Partial<PromoteOptions>;
   private numRetries409 = 50; // this is the number of times we retry if we get a http-409-Conflict response
 
+  private outputService: PromoteOutputService;
+
   public async init(): Promise<void> {
     await super.init();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { flags } = await this.parse(this.constructor as Interfaces.Command.Class);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags;
+    this.outputService = new OutputServiceFactory().forDeployment(
+      this.flags,
+      (this.flags['devops-center-username'] as Org).getConnection()
+    );
   }
 
   protected async executePromotion(): Promise<PromotePipelineResult> {
@@ -78,18 +85,27 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     this.sourceStageId = this.getSourceStageId();
     const asyncOperationId: string = await this.requestPromotionFlow(doceOrg);
 
-    // TODO: move this to logger service
-    this.log(`Job ID: ${asyncOperationId}`);
+    this.outputService.setAorId(asyncOperationId);
+
+    this.outputService.printAorId();
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    await this.outputService.printOpSummary();
+
     await DeployPipelineCache.set(asyncOperationId, {});
 
     if (this.flags.async) {
-      // TODO display async message
       return {
         jobId: asyncOperationId,
         status: AsyncOperationStatus.InProgress,
       };
     }
-    const doceMonitor: DoceMonitor = new AsyncOpStreaming(doceOrg, this.flags.wait, asyncOperationId);
+
+    const doceMonitor: DoceMonitor = new AsyncOpStreaming(
+      doceOrg,
+      this.flags.wait,
+      asyncOperationId,
+      this.outputService
+    );
     await doceMonitor.monitor();
 
     // get final state of the async job
