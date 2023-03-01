@@ -9,8 +9,10 @@
 import { expect, test } from '@oclif/test';
 import { TestContext } from '@salesforce/core/lib/testSetup';
 import * as sinon from 'sinon';
+import { stubMethod } from '@salesforce/ts-sinon';
 import { ConfigAggregator, Org, StreamingClient } from '@salesforce/core';
 import { HttpRequest } from 'jsforce';
+import { Spinner } from '@salesforce/sf-plugins-core/lib/ux';
 import { ConfigVars } from '../../../src/configMeta';
 import AsyncOpStreaming from '../../../src/streamer/processors/asyncOpStream';
 import { AsyncOperationStatus, PipelineStage } from '../../../src/common';
@@ -50,6 +52,8 @@ describe('deploy pipeline', () => {
   let sandbox: sinon.SinonSandbox;
   let fetchAndValidatePipelineStageStub: sinon.SinonStub;
   let pipelineStageMock: PipelineStage;
+  let spinnerStartStub: sinon.SinonStub;
+  let spinnerStopStub: sinon.SinonStub;
   const $$ = new TestContext();
 
   beforeEach(() => {
@@ -787,6 +791,107 @@ describe('deploy pipeline', () => {
         expect(requestArgument.body).to.contain('"runTests":"DummyTest_1,DummyTest_2,DummyTest_3"');
         expect(requestArgument.body).to.contain('"changeBundleName":"DummyChangeBundleName"');
       });
+
+    describe('Retry promotion request on 409 error', () => {
+      const mockError = new Error();
+      beforeEach(() => {
+        // mock the pipeline stage record
+        pipelineStageMock = {
+          Id: 'mock-id',
+          Name: 'mock',
+          sf_devops__Branch__r: {
+            sf_devops__Name__c: 'mockBranchName',
+          },
+          sf_devops__Pipeline__r: {
+            sf_devops__Project__c: 'mockProjectId',
+          },
+          sf_devops__Pipeline_Stages__r: undefined,
+          sf_devops__Environment__r: {
+            Id: 'envId',
+            sf_devops__Named_Credential__c: 'ABC',
+          },
+        };
+        fetchAndValidatePipelineStageStub = sandbox
+          .stub(Utils, 'fetchAndValidatePipelineStage')
+          .resolves(pipelineStageMock);
+      });
+
+      // Test case: Test case: promotion request returns a valid AOR Id the first time so we don't have to retry.
+      test
+        .stdout()
+        .stderr()
+        .do(() => {
+          requestMock = sinon.stub().resolves('mock-aor-id');
+        })
+        .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+        .it('Succeeds the request after first request', (ctx) => {
+          // make sure we made the callout one time
+          expect(requestMock.callCount).to.equal(1);
+          // make sure that we show the returned aor id to the user
+          expect(ctx.stdout).to.contain('mock-aor-id');
+        });
+
+      // Test case: promotion request returns 409 error so we retry the request till it reaches the limit.
+      test
+        .stdout()
+        .stderr()
+        .do(() => {
+          // throw 409 error
+          mockError.message = 'CONFLICT';
+          mockError['errorCode'] = 'CONFLICT';
+          requestMock = sinon.stub().throws(mockError);
+          spinnerStartStub = stubMethod(sandbox, Spinner.prototype, 'start');
+          spinnerStopStub = stubMethod(sandbox, Spinner.prototype, 'stop');
+        })
+        .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+        .it('Retries the request when the http response code is 409', (ctx) => {
+          // make sure we retried the maximum amount of times plus the initial requests
+          expect(requestMock.callCount).to.equal(51);
+          // make sure that we show the error to the user
+          expect(ctx.stderr).to.contain('CONFLICT');
+          // make sure that we called the spinner and stopped it as well
+          expect(spinnerStartStub.called).to.equal(true);
+          expect(spinnerStopStub.called).to.equal(true);
+        });
+
+      // Test case: promotion request returns a non-409 error so we don't retry and display the error.
+      test
+        .stdout()
+        .stderr()
+        .do(() => {
+          // throw non-409 errors the first time
+          mockError.message = 'ERROR';
+          mockError['errorCode'] = 'ERROR';
+          requestMock = sinon.stub().throws(mockError);
+        })
+        .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+        .it('Fails the request when the http response code is some non-409 error', (ctx) => {
+          // make sure we tried at least once to get the response
+          expect(requestMock.called).to.equal(true);
+          // make sure that we show the error to the user
+          expect(ctx.stderr).to.contain('ERROR');
+        });
+
+      // Test case: Test case: promotion request returns 409 error and after few retries it returns a valid AOR Id.
+      test
+        .stdout()
+        .stderr()
+        .do(() => {
+          // throw 409 errors the first few times
+          mockError.message = 'CONFLICT';
+          mockError['errorCode'] = 'CONFLICT';
+          requestMock = sinon.stub().throws(mockError);
+          // on the 4th try we want to complete the VCS event processing and return an AOR Id to the user
+          requestMock.onCall(4).resolves('mock-aor-id');
+        })
+        .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+        .it('Succeeds the request after few retries', (ctx) => {
+          // make sure we made the callout the right number of times
+          expect(requestMock.callCount).to.equal(5);
+          // make sure that we show the returned aor id to the user
+          expect(ctx.stdout).to.contain('mock-aor-id');
+        });
+    });
 
     describe('compute source stage', () => {
       test
