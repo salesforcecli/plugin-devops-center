@@ -17,7 +17,7 @@ import {
 import { jobId, requiredDoceOrgFlag, useMostRecent, wait } from '../common/flags';
 import DoceMonitor from '../streamer/doceMonitor';
 import { DeployPipelineCache } from './deployPipelineCache';
-import { OutputServiceFactory, ResumeCommandOutputService } from './outputService';
+import { OutputServiceFactory, ResumeOutputService } from './outputService';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -52,7 +52,7 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
 
   protected flags!: Flags<T>;
 
-  private outputService: ResumeCommandOutputService;
+  private outputService: ResumeOutputService;
 
   protected abstract operationType: string;
   protected abstract baseCommand: string;
@@ -81,7 +81,7 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
     // it is resumable so we can start monitoring the operation
     this.outputService.setAorId(asyncJobId);
 
-    await this.outputService.printOpSummary();
+    this.outputService.printOpSummary();
     this.outputService.printAorId();
 
     const streamer: DoceMonitor = getAsyncOperationStreamer(doceOrg, this.flags.wait, asyncJobId, this.outputService);

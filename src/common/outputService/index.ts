@@ -14,4 +14,4 @@ export { OutputServiceFactory } from './outputServiceFactory';
 
 export { PromoteOutputService, AbstractPromoteOutputService } from './promoteOutputService';
 
-export { ResumeCommandOutputService } from './resumeCommandOutputService';
+export { ResumeOutputService } from './resumeOutputService';

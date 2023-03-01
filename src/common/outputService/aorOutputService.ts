@@ -77,5 +77,5 @@ export abstract class AbstractAorOutputService<T extends AorOutputFlags>
     this.aorId = aorId;
   }
 
-  public abstract printOpSummary(): Promise<void>;
+  public abstract printOpSummary(): void;
 }

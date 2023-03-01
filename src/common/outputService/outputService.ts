@@ -19,7 +19,7 @@ export interface OutputService {
   /**
    * Prints a summary of the operation being done
    */
-  printOpSummary(): Promise<void>;
+  printOpSummary(): void;
 }
 
 /**
@@ -35,5 +35,5 @@ export abstract class AbstractOutputService<T extends OutputFlags> implements Ou
     this.flags = flags;
   }
 
-  public abstract printOpSummary(): Promise<void>;
+  public abstract printOpSummary(): void;
 }

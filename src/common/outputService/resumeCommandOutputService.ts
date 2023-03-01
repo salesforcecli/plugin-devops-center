@@ -30,7 +30,7 @@ export class ResumeCommandOutputService
     this.operationType = operationType;
   }
 
-  public async printOpSummary(): Promise<void> {
+  public printOpSummary(): void {
     console.log(output.getMessage('output.summary', [this.operationType]));
   }
 }

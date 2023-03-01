@@ -87,6 +87,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     this.outputService.setAorId(asyncOperationId);
 
     this.outputService.printAorId();
+    // eslint-disable-next-line @typescript-eslint/await-thenable
     await this.outputService.printOpSummary();
 
     await DeployPipelineCache.set(asyncOperationId, {});

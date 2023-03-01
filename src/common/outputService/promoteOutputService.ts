@@ -58,6 +58,7 @@ export abstract class AbstractPromoteOutputService
       }
 
       // We print the summary
+      // eslint-disable-next-line @typescript-eslint/await-thenable
       await deploySummaryOutputService.printOpSummary();
     }
   }
