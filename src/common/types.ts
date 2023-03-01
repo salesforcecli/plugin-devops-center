@@ -79,8 +79,8 @@ export type PromoteOptions = {
 };
 
 export type DeploymentResult = {
-  sf_devops__Full_Deploy__c: string;
-  sf_devops__Check_Deploy__c: string;
+  sf_devops__Full_Deploy__c: boolean;
+  sf_devops__Check_Deploy__c: boolean;
   sf_devops__Test_Level__c: string;
   sf_devops__Run_Tests__c: string;
   sf_devops__Status__r: AsyncOperationResult;
