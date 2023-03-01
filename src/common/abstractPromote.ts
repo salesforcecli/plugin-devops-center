@@ -110,6 +110,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
    * @returns Aor Id of promote operation.
    */
   protected async requestPromotionFlow(doceOrg: Org): Promise<string> {
+    let spinnerStarted = false;
     try {
       return await this.requestPromotion(doceOrg);
     } catch (error) {
@@ -117,11 +118,12 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       // if we get a 409 error then call the retry flow
       if (err.errorCode === HTTP_CONFLICT_CODE) {
         this.spinner.start('Synchronization of source control system events in progress');
+        spinnerStarted = true;
         return await this.retryRequestPromotion(doceOrg, this.numRetries409);
       }
       throw error;
     } finally {
-      this.spinner.stop();
+      if (spinnerStarted) this.spinner.stop();
     }
   }
 
