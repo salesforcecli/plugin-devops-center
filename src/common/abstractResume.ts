@@ -7,7 +7,6 @@
 import { Messages, Org, SfError } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
-import { bold } from 'chalk';
 import {
   AsyncOperationResult,
   AsyncOperationStatus,
@@ -18,6 +17,7 @@ import {
 import { jobId, requiredDoceOrgFlag, useMostRecent, wait } from '../common/flags';
 import DoceMonitor from '../streamer/doceMonitor';
 import { DeployPipelineCache } from './deployPipelineCache';
+import { OutputServiceFactory, ResumeOutputService } from './outputService';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -49,7 +49,11 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
     'use-most-recent': useMostRecent,
     wait,
   };
+
   protected flags!: Flags<T>;
+
+  private outputService: ResumeOutputService;
+
   protected abstract operationType: string;
   protected abstract baseCommand: string;
 
@@ -59,24 +63,28 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
     const { flags } = await this.parse(this.constructor as Interfaces.Command.Class);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags;
+    this.outputService = new OutputServiceFactory().forResume(this.operationType);
   }
 
   protected async resumeOperation(): Promise<PromotePipelineResult> {
-    const asyncJobId = this.flags['use-most-recent']
+    const asyncJobId: string = this.flags['use-most-recent']
       ? (await DeployPipelineCache.create()).getLatestKeyOrThrow()
       : (this.flags['job-id'] as string);
 
     // get the latest state of the async job and validate that it's resumable
     const doceOrg: Org = this.flags['devops-center-username'] as Org;
     let asyncJob: AsyncOperationResult = await fetchAsyncOperationResult(doceOrg.getConnection(), asyncJobId);
-    if (isNotResumable(asyncJob.sf_devops__Status__c)) {
+    if (asyncJob.sf_devops__Status__c && isNotResumable(asyncJob.sf_devops__Status__c)) {
       throw messages.createError('error.JobNotResumable', [asyncJobId, asyncJob.sf_devops__Status__c]);
     }
 
     // it is resumable so we can start monitoring the operation
-    this.log(`*** Resuming ${this.operationType} ***`);
-    this.log(`Job ID: ${bold(asyncJobId)}`);
-    const streamer: DoceMonitor = getAsyncOperationStreamer(doceOrg, this.flags.wait, asyncJobId);
+    this.outputService.setAorId(asyncJobId);
+
+    this.outputService.printOpSummary();
+    this.outputService.printAorId();
+
+    const streamer: DoceMonitor = getAsyncOperationStreamer(doceOrg, this.flags.wait, asyncJobId, this.outputService);
     await streamer.monitor();
 
     // get final state of the async job

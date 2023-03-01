@@ -90,7 +90,6 @@ class DOCeStreamingTest extends DOCeStreaming {
     super(org, wait);
   }
 
-  // eslint-disable-next-line class-methods-use-this
   public monitor(): Promise<void | AnyJson> {
     return this.startStream('event', testProcessor);
   }
