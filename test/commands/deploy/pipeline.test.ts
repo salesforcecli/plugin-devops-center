@@ -798,6 +798,7 @@ describe('deploy pipeline', () => {
         // mock the pipeline stage record
         pipelineStageMock = {
           Id: 'mock-id',
+          Name: 'mock',
           sf_devops__Branch__r: {
             sf_devops__Name__c: 'mockBranchName',
           },
@@ -805,6 +806,10 @@ describe('deploy pipeline', () => {
             sf_devops__Project__c: 'mockProjectId',
           },
           sf_devops__Pipeline_Stages__r: undefined,
+          sf_devops__Environment__r: {
+            Id: 'envId',
+            sf_devops__Named_Credential__c: 'ABC',
+          },
         };
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
