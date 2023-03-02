@@ -9,11 +9,6 @@ import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { PromotePipelineResult } from '../../../common';
 import { ReportOnPromoteCommand } from '../../../common/base/abstractReportOnPromote';
 
-export type par = {
-  key: string;
-  value: unknown;
-};
-
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline.report');
 
