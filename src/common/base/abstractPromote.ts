@@ -8,15 +8,15 @@ import { Messages, Org, SfError } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
 import { HttpRequest } from 'jsforce';
-import { DeployPipelineCache } from '../common/deployPipelineCache';
-import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
+import { DeployPipelineCache } from '../deployPipelineCache';
+import AsyncOpStreaming from '../../streamer/processors/asyncOpStream';
 import {
   fetchAndValidatePipelineStage,
   PipelineStage,
   PromoteOptions,
   PromotePipelineResult,
   validateTestFlags,
-} from '../common';
+} from '..';
 import {
   branchName,
   bundleVersionName,
@@ -27,12 +27,12 @@ import {
   testLevel,
   async,
   wait,
-} from '../common/flags';
-import DoceMonitor from '../streamer/doceMonitor';
-import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from './constants';
-import { ApiError, AsyncOperationResult, AsyncOperationStatus } from './types';
-import { fetchAsyncOperationResult } from './utils';
-import { OutputServiceFactory, PromoteOutputService } from './outputService';
+} from '../flags';
+import DoceMonitor from '../../streamer/doceMonitor';
+import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from '../constants';
+import { ApiError, AsyncOperationResult, AsyncOperationStatus } from '../types';
+import { fetchAsyncOperationResult } from '../utils';
+import { OutputServiceFactory, PromoteOutputService } from '../outputService';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');

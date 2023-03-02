@@ -8,7 +8,7 @@
 /* eslint-disable no-console, class-methods-use-this , no-case-declarations */
 
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { Flags } from '../abstractPromote';
+import { Flags } from '../base/abstractPromote';
 import { DeploySummaryBuilder } from './deploySummaryBuilder';
 import { AbstractPromoteOutputService } from './promoteOutputService';
 
