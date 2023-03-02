@@ -9,8 +9,8 @@ import { ConfigAggregator, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Flags as OclifFlags } from '@oclif/core';
-import { TestLevel } from '../common';
-import ConfigMeta, { ConfigVars } from '../configMeta';
+import { TestLevel } from '..';
+import ConfigMeta, { ConfigVars } from '../../configMeta';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonFlags');

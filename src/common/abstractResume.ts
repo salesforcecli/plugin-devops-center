@@ -15,8 +15,8 @@ import {
   getAsyncOperationStreamer,
   PromotePipelineResult,
 } from '../common';
-import { jobId, requiredDoceOrgFlag, useMostRecent, wait } from '../common/flags';
 import DoceMonitor from '../streamer/doceMonitor';
+import { jobId, requiredDoceOrgFlag, useMostRecent, wait } from '../common/flags/flags';
 import { DeployPipelineCache } from './deployPipelineCache';
 
 Messages.importMessagesDirectory(__dirname);

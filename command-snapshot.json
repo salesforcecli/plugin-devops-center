@@ -6,12 +6,14 @@
       "async",
       "branch-name",
       "bundle-version-name",
+      "concise",
       "deploy-all",
       "devops-center-project-name",
       "devops-center-username",
       "json",
       "test-level",
       "tests",
+      "verbose",
       "wait"
     ],
     "alias": []
@@ -19,7 +21,7 @@
   {
     "command": "deploy:pipeline:resume",
     "plugin": "@salesforce/plugin-devops-center",
-    "flags": ["devops-center-username", "job-id", "json", "use-most-recent", "wait"],
+    "flags": ["concise", "devops-center-username", "job-id", "json", "use-most-recent", "verbose", "wait"],
     "alias": []
   }
 ]

@@ -10,6 +10,7 @@ import { SfCommand } from '@salesforce/sf-plugins-core';
 import { PromoteCommand } from '../../common/abstractPromote';
 import { PipelineStage, PromoteOptions, PromotePipelineResult } from '../../common';
 import { APPROVED } from '../../common/constants';
+import { verbose, concise } from '../../common/flags/deploy/deployFlags';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
@@ -18,6 +19,11 @@ const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'depl
  * Contains the logic to execute the sf deploy pipeline command.
  */
 export default class DeployPipeline extends PromoteCommand<typeof SfCommand> {
+  public static flags = {
+    verbose,
+    concise,
+  };
+
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');

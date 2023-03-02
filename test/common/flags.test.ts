@@ -11,7 +11,7 @@ import { Parser } from '@oclif/core';
 import { ConfigAggregator, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { ConfigVars } from '../../src/configMeta';
-import { requiredDoceOrgFlag, wait, async } from '../../src/common/flags';
+import { requiredDoceOrgFlag, wait, async } from '../../src/common/flags/flags';
 
 const TARGET_DEVOPS_CENTER_ALIAS = 'target-devops-center';
 const MOCK_TARGET_DEVOPS_CENTER = {

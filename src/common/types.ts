@@ -82,3 +82,11 @@ export enum AsyncOperationStatus {
   Ignored = 'Ignored',
   InProgress = 'In Progress',
 }
+
+export type DeployComponent = {
+  sf_devops__Source_Component__c: string;
+  sf_devops__Operation__c: string;
+  sf_devops__File_Path__c: string;
+  Type?: string;
+  Name?: string;
+};

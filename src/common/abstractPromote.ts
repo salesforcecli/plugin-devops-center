@@ -17,6 +17,7 @@ import {
   PromotePipelineResult,
   validateTestFlags,
 } from '../common';
+import DoceMonitor from '../streamer/doceMonitor';
 import {
   branchName,
   bundleVersionName,
@@ -27,8 +28,7 @@ import {
   testLevel,
   async,
   wait,
-} from '../common/flags';
-import DoceMonitor from '../streamer/doceMonitor';
+} from '../common/flags/flags';
 import { REST_PROMOTE_BASE_URL } from './constants';
 import { AsyncOperationResult, AsyncOperationStatus } from './types';
 import { fetchAsyncOperationResult } from './utils';
