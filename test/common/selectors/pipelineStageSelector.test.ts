@@ -20,6 +20,11 @@ const MOCK_PIPELINE_STAGE: PipelineStage = {
   sf_devops__Pipeline__r: {
     sf_devops__Project__c: 'mock-project-name',
   },
+  Name: 'stage',
+  sf_devops__Environment__r: {
+    Id: 'ABC',
+    sf_devops__Named_Credential__c: 'AAA',
+  },
 };
 
 describe('AOR selector', () => {

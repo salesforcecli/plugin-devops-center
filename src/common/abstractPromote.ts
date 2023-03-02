@@ -17,7 +17,6 @@ import {
   PromotePipelineResult,
   validateTestFlags,
 } from '../common';
-import DoceMonitor from '../streamer/doceMonitor';
 import {
   branchName,
   bundleVersionName,
@@ -29,9 +28,11 @@ import {
   async,
   wait,
 } from '../common/flags/flags';
-import { REST_PROMOTE_BASE_URL } from './constants';
-import { AsyncOperationResult, AsyncOperationStatus } from './types';
+import DoceMonitor from '../streamer/doceMonitor';
+import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from './constants';
+import { ApiError, AsyncOperationResult, AsyncOperationStatus } from './types';
 import { fetchAsyncOperationResult } from './utils';
+import { OutputServiceFactory, PromoteOutputService } from './outputService';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -57,6 +58,9 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
   private targetStage: PipelineStage;
   private sourceStageId: string;
   private deployOptions: Partial<PromoteOptions>;
+  private numRetries409 = 50; // this is the number of times we retry if we get a http-409-Conflict response
+
+  private outputService: PromoteOutputService;
 
   public async init(): Promise<void> {
     await super.init();
@@ -64,6 +68,10 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     const { flags } = await this.parse(this.constructor as Interfaces.Command.Class);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags;
+    this.outputService = new OutputServiceFactory().forDeployment(
+      this.flags,
+      (this.flags['devops-center-username'] as Org).getConnection()
+    );
   }
 
   protected async executePromotion(): Promise<PromotePipelineResult> {
@@ -75,20 +83,29 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       this.flags['branch-name']
     );
     this.sourceStageId = this.getSourceStageId();
-    const asyncOperationId: string = await this.requestPromotion(doceOrg);
+    const asyncOperationId: string = await this.requestPromotionFlow(doceOrg);
 
-    // TODO: move this to logger service
-    this.log(`Job ID: ${asyncOperationId}`);
+    this.outputService.setAorId(asyncOperationId);
+
+    this.outputService.printAorId();
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    await this.outputService.printOpSummary();
+
     await DeployPipelineCache.set(asyncOperationId, {});
 
     if (this.flags.async) {
-      // TODO display async message
       return {
         jobId: asyncOperationId,
         status: AsyncOperationStatus.InProgress,
       };
     }
-    const doceMonitor: DoceMonitor = new AsyncOpStreaming(doceOrg, this.flags.wait, asyncOperationId);
+
+    const doceMonitor: DoceMonitor = new AsyncOpStreaming(
+      doceOrg,
+      this.flags.wait,
+      asyncOperationId,
+      this.outputService
+    );
     await doceMonitor.monitor();
 
     // get final state of the async job
@@ -99,6 +116,54 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       message: asyncJob.sf_devops__Message__c,
       errorDetails: asyncJob.sf_devops__Error_Details__c,
     };
+  }
+
+  /**
+   *
+   * Sends an Http request to the target org to initiate a promotion.
+   *
+   * @param doceOrg target org.
+   * @returns Aor Id of promote operation.
+   */
+  protected async requestPromotionFlow(doceOrg: Org): Promise<string> {
+    let spinnerStarted = false;
+    try {
+      return await this.requestPromotion(doceOrg);
+    } catch (error) {
+      const err = error as ApiError;
+      // if we get a 409 error then call the retry flow
+      if (err.errorCode === HTTP_CONFLICT_CODE) {
+        this.spinner.start('Synchronization of source control system events in progress');
+        spinnerStarted = true;
+        return await this.retryRequestPromotion(doceOrg, this.numRetries409);
+      }
+      throw error;
+    } finally {
+      if (spinnerStarted) this.spinner.stop();
+    }
+  }
+
+  /**
+   *
+   * Sends an Http request to the target org to initiate a promotion.
+   * If it gets a 409/Conflict it will retry till the request successes,
+   * gets a differenct error or run out of retry attempts.
+   *
+   * @param doceOrg target org.
+   * @param numRetries Amount of remaining retry attempts.
+   * @returns Aor Id of promote operation
+   */
+  protected async retryRequestPromotion(doceOrg: Org, numRetries: number): Promise<string> {
+    try {
+      return await this.requestPromotion(doceOrg);
+    } catch (error) {
+      const err = error as ApiError;
+      // if we still get a 409 error and haven't run out of retry attempts then retry again
+      if (err.errorCode === HTTP_CONFLICT_CODE && numRetries > 1) {
+        return this.retryRequestPromotion(doceOrg, numRetries - 1);
+      }
+      throw error;
+    }
   }
 
   protected getTargetStage(): PipelineStage {
