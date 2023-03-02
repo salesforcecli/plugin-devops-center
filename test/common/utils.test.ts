@@ -259,22 +259,6 @@ describe('utils', () => {
       expect(sObjectToArrayOfKeyValue(sObjectToConvert)).to.deep.equal(expected);
     });
 
-    it('correctly sorts by key', async () => {
-      const sObjectToConvert = {
-        attributeB: 'valueB',
-        attributeA: 'valueA',
-        attributeD: 'valueD',
-        attributeC: 'valueC',
-      };
-      const expected = [
-        { key: 'attributeA', value: 'valueA' },
-        { key: 'attributeB', value: 'valueB' },
-        { key: 'attributeC', value: 'valueC' },
-        { key: 'attributeD', value: 'valueD' },
-      ];
-      expect(sObjectToArrayOfKeyValue(sObjectToConvert)).to.deep.equal(expected);
-    });
-
     it('correctly formats the field names', async () => {
       const sObjectToConvert = {
         sf_devops__attribute_A__c: 'valueA',

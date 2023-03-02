@@ -8,9 +8,9 @@
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { CliUx } from '@oclif/core';
 import { Flags } from '../abstractReportOnPromote';
-import { tableHeader } from '../outputUtils';
-import { DeploymentResult } from '../types';
 import { sObjectToArrayOfKeyValue } from '../utils';
+import { DeploymentResult } from '../types';
+import { tableHeader } from './outputUtils';
 import { AbstractDeploymentResultOutputService, DeploymentResultOutputService } from './deploymentResultOutputService';
 import { OutputFlags } from './outputService';
 

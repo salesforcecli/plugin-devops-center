@@ -6,7 +6,7 @@
  */
 import { StandardColors } from '@salesforce/sf-plugins-core';
 import { blue, bold } from 'chalk';
-import { AsyncOperationStatus } from './types';
+import { AsyncOperationStatus } from '../types';
 
 export function tableHeader(message: string): string {
   return blue(bold(message));

@@ -11,7 +11,7 @@ import { getString, Nullable } from '@salesforce/ts-types';
 import { ApiError, PipelineStage, TestLevel } from '../common';
 import { selectPipelineStagesByProject } from '../common/selectors/pipelineStageSelector';
 import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
-import { colorStatus } from './outputUtils';
+import { colorStatus } from './outputService/outputUtils';
 import { AorOutputService } from './outputService/aorOutputService';
 import { selectAsyncOperationResultById } from './selectors/asyncOperationResultsSelector';
 import { AsyncOperationResult, AsyncOperationStatus } from './types';

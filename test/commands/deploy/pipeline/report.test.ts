@@ -124,32 +124,40 @@ describe('deploy pipeline report', () => {
       .do(() => {
         mockDeploymentResult = {
           sf_devops__Full_Deploy__c: false,
+          sf_devops__Completion_Date__c: '2023-03-01T13:56:02.000+0000',
           sf_devops__Check_Deploy__c: false,
           sf_devops__Test_Level__c: 'mock-test-level',
           sf_devops__Run_Tests__c: 'mock-tests',
           sf_devops__Status__r: {
             Id: mockAorId,
-            sf_devops__Message__c: 'mock-message',
+            sf_devops__Message__c: 'Deploy complete',
             sf_devops__Status__c: AsyncOperationStatus.Completed,
+            CreatedById: 'mock-user-id',
+            CreatedBy: {
+              Name: 'mock-user-name',
+            },
           },
         };
         sandbox.stub(DeploymentResultSelector, 'selectOneDeploymentResultByAsyncJobId').resolves(mockDeploymentResult);
       })
       .command(['deploy pipeline report', `-i=${mockAorId}`])
-      .it('correctly displays the deploy operation status in table format', (ctx) => {
+      .it('correctly displays the deploy operation status of a success promotion in table format', (ctx) => {
         expect(vacuum(ctx.stdout)).to.contain(
           vacuum(`
-            Deploy Info
-            ================================
-            | Key         Value              
-            | ─────────── ────────────────── 
-            | CheckDeploy false              
-            | FullDeploy  false              
-            | Id          ${mockAorId} 
-            | Message     mock-message       
-            | RunTests    mock-tests         
-            | Status      Completed          
-            | TestLevel   mock-test-level  
+          Deploy Info
+          =============================================
+          | Key            Value                        
+          | ────────────── ──────────────────────────── 
+          | CheckDeploy    false                        
+          | CompletionDate 2023-03-01T13:56:02.000+0000 
+          | CreatedById    mock-user-id                 
+          | CreatedByName  mock-user-name               
+          | FullDeploy     false                        
+          | Id             ${mockAorId}           
+          | Message        Deploy complete              
+          | RunTests       mock-tests                   
+          | Status         Completed                    
+          | TestLevel      mock-test-level  
             `)
         );
       });
@@ -160,6 +168,97 @@ describe('deploy pipeline report', () => {
       .do(() => {
         mockDeploymentResult = {
           sf_devops__Full_Deploy__c: false,
+          sf_devops__Completion_Date__c: '',
+          sf_devops__Check_Deploy__c: false,
+          sf_devops__Test_Level__c: 'mock-test-level',
+          sf_devops__Run_Tests__c: 'mock-tests',
+          sf_devops__Status__r: {
+            Id: mockAorId,
+            sf_devops__Error_Details__c: 'mock-error-details',
+            sf_devops__Message__c: 'mock-fail-message',
+            sf_devops__Status__c: AsyncOperationStatus.Error,
+            CreatedById: 'mock-user-id',
+            CreatedBy: {
+              Name: 'mock-user-name',
+            },
+          },
+        };
+        sandbox.stub(DeploymentResultSelector, 'selectOneDeploymentResultByAsyncJobId').resolves(mockDeploymentResult);
+      })
+      .command(['deploy pipeline report', `-i=${mockAorId}`])
+      .it('correctly displays the deploy operation status of a failed promotion in table format', (ctx) => {
+        expect(vacuum(ctx.stdout)).to.contain(
+          vacuum(`
+          Deploy Info
+          ===================================
+          | Key            Value              
+          | ────────────── ────────────────── 
+          | CheckDeploy    false              
+          | CompletionDate                    
+          | CreatedById    mock-user-id       
+          | CreatedByName  mock-user-name     
+          | ErrorDetails   mock-error-details 
+          | FullDeploy     false              
+          | Id             ${mockAorId} 
+          | Message        mock-fail-message  
+          | RunTests       mock-tests         
+          | Status         Error              
+          | TestLevel      mock-test-level  
+            `)
+        );
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        mockDeploymentResult = {
+          sf_devops__Full_Deploy__c: false,
+          sf_devops__Completion_Date__c: '',
+          sf_devops__Check_Deploy__c: false,
+          sf_devops__Test_Level__c: 'mock-test-level',
+          sf_devops__Run_Tests__c: 'mock-tests',
+          sf_devops__Status__r: {
+            Id: mockAorId,
+            sf_devops__Message__c: 'mock-message',
+            sf_devops__Status__c: AsyncOperationStatus.InProgress,
+            CreatedById: 'mock-user-id',
+            CreatedBy: {
+              Name: 'mock-user-name',
+            },
+          },
+        };
+        sandbox.stub(DeploymentResultSelector, 'selectOneDeploymentResultByAsyncJobId').resolves(mockDeploymentResult);
+      })
+      .command(['deploy pipeline report', `-i=${mockAorId}`])
+      .it('correctly displays the deploy operation status of an In Progress promotion in table format', (ctx) => {
+        expect(vacuum(ctx.stdout)).to.contain(
+          vacuum(`
+            Deploy Info
+            ===================================
+            | Key            Value              
+            | ────────────── ────────────────── 
+            | CheckDeploy    false              
+            | CompletionDate                    
+            | CreatedById    mock-user-id       
+            | CreatedByName  mock-user-name     
+            | FullDeploy     false              
+            | Id             a00DS00000Aj3AIYAZ 
+            | Message        mock-message       
+            | RunTests       mock-tests         
+            | Status         In Progress        
+            | TestLevel      mock-test-level  
+              `)
+        );
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        mockDeploymentResult = {
+          sf_devops__Full_Deploy__c: false,
+          sf_devops__Completion_Date__c: '',
           sf_devops__Check_Deploy__c: false,
           sf_devops__Test_Level__c: 'mock-test-level',
           sf_devops__Run_Tests__c: 'mock-tests',
@@ -203,7 +302,7 @@ describe('deploy pipeline report', () => {
       .do(() => {
         sandbox
           .stub(DeploymentResultSelector, 'selectOneDeploymentResultByAsyncJobId')
-          .throws({ errorMessage: 'unexpected error' });
+          .throws({ message: 'unexpected error' });
       })
       .command(['deploy pipeline report', `-i=${mockAorId}`])
       .it('displays an error message when we get an unexpected error', (ctx) => {
