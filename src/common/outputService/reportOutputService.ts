@@ -7,7 +7,7 @@
 
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { CliUx } from '@oclif/core';
-import { Flags } from '../abstractReportOnPromote';
+import { Flags } from '../base/abstractReportOnPromote';
 import { sObjectToArrayOfKeyValue } from '../utils';
 import { DeploymentResult } from '../types';
 import { tableHeader } from './outputUtils';

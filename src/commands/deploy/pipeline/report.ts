@@ -7,7 +7,7 @@
 import { Messages } from '@salesforce/core';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { PromotePipelineResult } from '../../../common';
-import { ReportOnPromoteCommand } from '../../../common/abstractReportOnPromote';
+import { ReportOnPromoteCommand } from '../../../common/base/abstractReportOnPromote';
 
 export type par = {
   key: string;

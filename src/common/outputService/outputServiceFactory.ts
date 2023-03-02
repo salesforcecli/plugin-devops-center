@@ -9,9 +9,9 @@
 
 import { Connection } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import * as Promote from '../abstractPromote';
+import * as Promote from '../base/abstractPromote';
 import { DeploymentResult } from '../types';
-import { Flags } from '../abstractReportOnPromote';
+import { Flags } from '../base/abstractReportOnPromote';
 import { DeployCommandOutputService } from './deployCommandOutputService';
 import { DeploySummaryBuilder } from './deploySummaryBuilder';
 import { PromoteReportOutputService } from './reportOutputService';

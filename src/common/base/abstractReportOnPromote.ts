@@ -7,13 +7,13 @@
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
-import { DeployPipelineCache } from '../common/deployPipelineCache';
-import { PromotePipelineResult } from '../common';
-import { requiredDoceOrgFlag } from '../common/flags';
-import { DeploymentResult } from './types';
-import { selectOneDeploymentResultByAsyncJobId } from './selectors/deploymentResultsSelector';
-import { OutputService } from './outputService/outputService';
-import { OutputServiceFactory } from './outputService/outputServiceFactory';
+import { DeployPipelineCache } from '../../common/deployPipelineCache';
+import { PromotePipelineResult } from '../../common';
+import { requiredDoceOrgFlag } from '../../common/flags';
+import { DeploymentResult } from './../types';
+import { selectOneDeploymentResultByAsyncJobId } from './../selectors/deploymentResultsSelector';
+import { OutputService } from './../outputService/outputService';
+import { OutputServiceFactory } from './../outputService/outputServiceFactory';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');

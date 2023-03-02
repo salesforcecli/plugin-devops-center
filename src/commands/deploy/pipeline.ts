@@ -7,7 +7,7 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { PromoteCommand } from '../../common/abstractPromote';
+import { PromoteCommand } from '../../common/base/abstractPromote';
 import { PipelineStage, PromoteOptions, PromotePipelineResult } from '../../common';
 import { APPROVED } from '../../common/constants';
 

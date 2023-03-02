@@ -8,7 +8,7 @@
 import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { PromotePipelineResult } from '../../../common';
-import { ResumeCommand } from '../../../common/abstractResume';
+import { ResumeCommand } from '../../../common/base/abstractResume';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline.resume');
