@@ -60,9 +60,9 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
   public async init(): Promise<void> {
     await super.init();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { flags } = await this.parse(this.constructor as Interfaces.Command.Class);
+    const { flags } = await this.parse({ flags: this.ctor.flags });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    this.flags = flags;
+    this.flags = flags as Flags<T>;
     this.outputService = new OutputServiceFactory().forResume(this.operationType);
   }
 
@@ -84,7 +84,7 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
     this.outputService.printOpSummary();
     this.outputService.printAorId();
 
-    const streamer: DoceMonitor = getAsyncOperationStreamer(doceOrg, this.flags.wait, asyncJobId, this.outputService);
+    const streamer: DoceMonitor = getAsyncOperationStreamer(doceOrg, this.flags['wait'], asyncJobId, this.outputService);
     await streamer.monitor();
 
     // get final state of the async job

@@ -38,12 +38,12 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
-  (typeof PromoteCommand)['globalFlags'] & T['flags']
+  typeof PromoteCommand['baseFlags'] & T['flags']
 >;
 
 export abstract class PromoteCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
   // common flags that can be inherited by any command that extends PromoteCommand
-  public static globalFlags = {
+  public static baseFlags = {
     'branch-name': branchName,
     'bundle-version-name': bundleVersionName,
     'deploy-all': deployAll,
@@ -54,6 +54,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     async,
     wait,
   };
+
   protected flags!: Flags<T>;
   private targetStage: PipelineStage;
   private sourceStageId: string;
@@ -65,9 +66,10 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
   public async init(): Promise<void> {
     await super.init();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { flags } = await this.parse(this.constructor as Interfaces.Command.Class);
+    const { flags } = await this.parse({ flags: this.ctor.flags });
+    // await this.parse(this.constructor as Interfaces.Command.Class);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    this.flags = flags;
+    this.flags = flags as Flags<T>;
     this.outputService = new OutputServiceFactory().forDeployment(
       this.flags,
       (this.flags['devops-center-username'] as Org).getConnection()
@@ -75,7 +77,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
   }
 
   protected async executePromotion(): Promise<PromotePipelineResult> {
-    validateTestFlags(this.flags['test-level'], this.flags.tests);
+    validateTestFlags(this.flags['test-level'], this.flags['tests']);
     const doceOrg: Org = this.flags['devops-center-username'] as Org;
     this.targetStage = await fetchAndValidatePipelineStage(
       doceOrg,
@@ -93,7 +95,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
 
     await DeployPipelineCache.set(asyncOperationId, {});
 
-    if (this.flags.async) {
+    if (this.flags['async']) {
       return {
         jobId: asyncOperationId,
         status: AsyncOperationStatus.InProgress,
@@ -102,7 +104,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
 
     const doceMonitor: DoceMonitor = new AsyncOpStreaming(
       doceOrg,
-      this.flags.wait,
+      this.flags['wait'],
       asyncOperationId,
       this.outputService
     );
