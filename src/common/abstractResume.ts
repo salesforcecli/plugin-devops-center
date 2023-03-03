@@ -33,7 +33,7 @@ export function isNotResumable(status: AsyncOperationStatus): boolean {
 }
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
-  (typeof ResumeCommand)['globalFlags'] & T['flags']
+  (typeof ResumeCommand)['baseFlags'] & T['flags']
 >;
 
 /**
@@ -43,7 +43,7 @@ export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
 
 export abstract class ResumeCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
   // common flags that can be inherited by any command that extends ResumeCommand
-  public static globalFlags = {
+  public static baseFlags = {
     'devops-center-username': requiredDoceOrgFlag(),
     'job-id': jobId,
     'use-most-recent': useMostRecent,
@@ -60,8 +60,12 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
   public async init(): Promise<void> {
     await super.init();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { flags } = await this.parse({ flags: this.ctor.flags });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { flags } = await this.parse({
+      flags: this.ctor.flags,
+      baseFlags: (super.ctor as typeof ResumeCommand).baseFlags,
+      args: this.ctor.args,
+      strict: this.ctor.strict,
+    }); // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags as Flags<T>;
     this.outputService = new OutputServiceFactory().forResume(this.operationType);
   }
@@ -84,7 +88,7 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
     this.outputService.printOpSummary();
     this.outputService.printAorId();
 
-    const streamer: DoceMonitor = getAsyncOperationStreamer(doceOrg, this.flags['wait'], asyncJobId, this.outputService);
+    const streamer: DoceMonitor = getAsyncOperationStreamer(doceOrg, this.flags.wait, asyncJobId, this.outputService);
     await streamer.monitor();
 
     // get final state of the async job

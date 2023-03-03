@@ -38,7 +38,7 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
-  typeof PromoteCommand['baseFlags'] & T['flags']
+  (typeof PromoteCommand)['baseFlags'] & T['flags']
 >;
 
 export abstract class PromoteCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
@@ -66,7 +66,12 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
   public async init(): Promise<void> {
     await super.init();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { flags } = await this.parse({ flags: this.ctor.flags });
+    const { flags } = await this.parse({
+      flags: this.ctor.flags,
+      baseFlags: (super.ctor as typeof PromoteCommand).baseFlags,
+      args: this.ctor.args,
+      strict: this.ctor.strict,
+    });
     // await this.parse(this.constructor as Interfaces.Command.Class);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags as Flags<T>;
@@ -77,7 +82,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
   }
 
   protected async executePromotion(): Promise<PromotePipelineResult> {
-    validateTestFlags(this.flags['test-level'], this.flags['tests']);
+    validateTestFlags(this.flags['test-level'], this.flags.tests);
     const doceOrg: Org = this.flags['devops-center-username'] as Org;
     this.targetStage = await fetchAndValidatePipelineStage(
       doceOrg,
@@ -95,7 +100,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
 
     await DeployPipelineCache.set(asyncOperationId, {});
 
-    if (this.flags['async']) {
+    if (this.flags.async) {
       return {
         jobId: asyncOperationId,
         status: AsyncOperationStatus.InProgress,
@@ -104,7 +109,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
 
     const doceMonitor: DoceMonitor = new AsyncOpStreaming(
       doceOrg,
-      this.flags['wait'],
+      this.flags.wait,
       asyncOperationId,
       this.outputService
     );
@@ -205,7 +210,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     this.deployOptions = {
       fullDeploy: this.flags['deploy-all'],
       testLevel: this.flags['test-level'] ?? 'Default',
-      runTests: this.flags['tests'] ? this.flags['tests'].join(',') : undefined,
+      runTests: this.flags.tests ? this.flags.tests.join(',') : undefined,
       // get more promote options from the concrete implementation if needed
       ...this.getPromoteOptions(),
     };
