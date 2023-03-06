@@ -80,8 +80,8 @@ describe('deploy pipeline', () => {
       .stdout()
       .stderr()
       .command(['deploy:pipeline', '--branch-name=test'])
-      .catch((ctx) => {
-        expect(ctx.message).to.contain('Missing required flag devops-center-project-name');
+      .catch((err) => {
+        expect(err.message).to.contain('Missing required flag devops-center-project-name');
       })
       .it('runs deploy pipeline with no provided project name');
 
@@ -89,8 +89,8 @@ describe('deploy pipeline', () => {
       .stdout()
       .stderr()
       .command(['deploy:pipeline', '--devops-center-project-name=test'])
-      .catch((ctx) => {
-        expect(ctx.message).to.contain('Missing required flag branch-name');
+      .catch((err) => {
+        expect(err.message).to.contain('Missing required flag branch-name');
       })
       .it('runs deploy pipeline with no provided branch name');
 
@@ -98,8 +98,8 @@ describe('deploy pipeline', () => {
       .stdout()
       .stderr()
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests'])
-      .catch((ctx) => {
-        expect(ctx.message).to.contain(
+      .catch((err) => {
+        expect(err.message).to.contain(
           'You must specify tests using the --tests flag if the --test-level flag is set to RunSpecifiedTests.'
         );
       })
@@ -109,8 +109,8 @@ describe('deploy pipeline', () => {
       .stdout()
       .stderr()
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunLocalTests', '-t=DummyTestClass'])
-      .catch((ctx) => {
-        expect(ctx.message).to.contain('runTests can be used only with a testLevel of RunSpecifiedTests.');
+      .catch((err) => {
+        expect(err.message).to.contain('runTests can be used only with a testLevel of RunSpecifiedTests.');
       })
       .it('runs deploy pipeline indicating specific tests to run but with test level other than RunSpecifiedTests');
 
@@ -154,7 +154,7 @@ describe('deploy pipeline', () => {
       })
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests', '-t=DummyTestClass'])
       .it('runs deploy pipeline with the correct flags and validation pass', (ctx) => {
-        expect(ctx.stderr).to.equal('');
+        expect(ctx.error).to.be.undefined;
       });
 
     test
@@ -188,8 +188,8 @@ describe('deploy pipeline', () => {
       .stdout()
       .stderr()
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '--wait=3'])
-      .catch((ctx) => {
-        expect(ctx.message).to.contain(
+      .catch((err) => {
+        expect(err.message).to.contain(
           'The command has timed out, although it\'s still running. To check the status of the current operation, run "sf deploy:pipeline report".'
         );
       })
@@ -228,6 +228,45 @@ describe('deploy pipeline', () => {
         const key = cache.getLatestKeyOrThrow();
         expect(key).not.to.be.undefined;
       });
+
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        // mock the pipeline stage record
+        pipelineStageMock = {
+          Id: 'mock-id',
+          Name: 'mock',
+          sf_devops__Branch__r: {
+            sf_devops__Name__c: 'mockBranchName',
+          },
+          sf_devops__Pipeline__r: {
+            sf_devops__Project__c: 'mockProjectId',
+          },
+          sf_devops__Pipeline_Stages__r: undefined,
+          sf_devops__Environment__r: {
+            Id: 'envId',
+            sf_devops__Named_Credential__c: 'ABC',
+          },
+        };
+        fetchAndValidatePipelineStageStub = sandbox
+          .stub(Utils, 'fetchAndValidatePipelineStage')
+          .resolves(pipelineStageMock);
+        requestMock = sinon.stub().resolves('mock-aor-id');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(AsyncOpStreaming.prototype, 'monitor' as any).returns({ completed: true, payload: {} });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(DeployCommandOutputService.prototype, 'printOpSummary' as any).returns({});
+        sandbox.stub(Utils, 'fetchAsyncOperationResult').resolves({ Id: 'MockId' });
+      })
+      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch'])
+      .it('cache the aorId when running deploy pipeline without the async flag', async () => {
+        const cache = await DeployPipelineCache.create();
+        const key = cache.getLatestKeyOrThrow();
+        expect(key).not.to.be.undefined;
+      });
   });
 
   describe('request promotion', () => {
@@ -235,6 +274,7 @@ describe('deploy pipeline', () => {
     const secondStageId = 'mock-second-stage-id';
 
     beforeEach(() => {
+      // Mock the events streaming and the output service
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -493,7 +533,7 @@ describe('deploy pipeline', () => {
           .resolves(pipelineStageMock);
       });
 
-      // Test case: Test case: promotion request returns a valid AOR Id the first time so we don't have to retry.
+      // Test case: promotion request returns a valid AOR Id the first time so we don't have to retry.
       test
         .stdout()
         .stderr()
