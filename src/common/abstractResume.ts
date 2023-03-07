@@ -63,8 +63,6 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
     const { flags } = await this.parse({
       flags: this.ctor.flags,
       baseFlags: (super.ctor as typeof ResumeCommand).baseFlags,
-      args: this.ctor.args,
-      strict: this.ctor.strict,
     }); // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags as Flags<T>;
     this.outputService = new OutputServiceFactory().forResume(this.operationType);
