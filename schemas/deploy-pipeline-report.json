@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/PromotePipelineResult",
+  "definitions": {
+    "PromotePipelineResult": {
+      "type": "object",
+      "properties": {
+        "jobId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "errorDetails": {
+          "type": "string"
+        }
+      },
+      "required": ["jobId"],
+      "additionalProperties": false
+    }
+  }
+}
