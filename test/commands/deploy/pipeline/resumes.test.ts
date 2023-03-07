@@ -57,12 +57,12 @@ describe('deploy pipeline resume', () => {
       .stdout()
       .stderr()
       .command(['deploy pipeline resume'])
-      .catch((err) => {
-        expect(err.message).to.contain(
+      .catch(() => {})
+      .it('runs deploy pipeline resume without specifying any target Devops Center org', (ctx) => {
+        expect(ctx.stderr).to.contain(
           'You must specify the DevOps Center org username by indicating the -c flag on the command line or by setting the target-devops-center configuration variable.'
         );
-      })
-      .it('runs deploy pipeline resume without specifying any target Devops Center org');
+      });
   });
 
   describe('validate flags', () => {
@@ -82,29 +82,29 @@ describe('deploy pipeline resume', () => {
       .stdout()
       .stderr()
       .command(['deploy pipeline resume'])
-      .catch((err) => {
-        expect(err.message).to.contain('Exactly one of the following must be provided: --job-id, --use-most-recent');
-      })
-      .it('runs deploy pipeline resume without any fo the required flags');
+      .catch(() => {})
+      .it('runs deploy pipeline resume without any fo the required flags', (ctx) => {
+        expect(ctx.stderr).to.contain('Exactly one of the following must be provided: --job-id, --use-most-recent');
+      });
 
     test
       .stdout()
       .stderr()
       .command(['deploy pipeline resume', '-r', `-i=${mockAorId}`])
-      .catch((err) => {
-        expect(err.message).to.contain('--job-id cannot also be provided when using --use-most-recent');
-        expect(err.message).to.contain('--use-most-recent cannot also be provided when using --job-id');
-      })
-      .it('runs deploy pipeline resume specifying both -r and -i flags');
+      .catch(() => {})
+      .it('runs deploy pipeline resume specifying both -r and -i flags', (ctx) => {
+        expect(ctx.stderr).to.contain('--job-id cannot also be provided when using --use-most-recent');
+        expect(ctx.stderr).to.contain('--use-most-recent cannot also be provided when using --job-id');
+      });
 
     test
       .stdout()
       .stderr()
       .command(['deploy pipeline resume', '-r'])
-      .catch((err) => {
-        expect(err.message).to.contain('No job ID could be found. Verify that a pipeline promotion has been started');
-      })
-      .it('runs deploy pipeline resume specifying -r when there are no Ids in cache');
+      .catch(() => {})
+      .it('runs deploy pipeline resume specifying -r when there are no Ids in cache', (ctx) => {
+        expect(ctx.stderr).to.contain('No job ID could be found. Verify that a pipeline promotion has been started');
+      });
   });
 
   describe('stream aor status', () => {
@@ -140,12 +140,12 @@ describe('deploy pipeline resume', () => {
         sandbox.stub(AorSelector, 'selectAsyncOperationResultById').resolves(mockAorRecord);
       })
       .command(['deploy pipeline resume', `-i=${mockAorId}`])
-      .catch((err) => {
-        expect(err.message).to.contain(
+      .catch(() => {})
+      .it('fails because the async job is not resumable due to error state', (ctx) => {
+        expect(ctx.stderr).to.contain(
           `Job ID ${mockAorId} is not resumable with status ${mockAorRecord.sf_devops__Status__c}.`
         );
-      })
-      .it('fails because the async job is not resumable due to error state');
+      });
 
     test
       .stdout()

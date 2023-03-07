@@ -80,39 +80,45 @@ describe('deploy pipeline', () => {
       .stdout()
       .stderr()
       .command(['deploy:pipeline', '--branch-name=test'])
-      .catch((err) => {
-        expect(err.message).to.contain('Missing required flag devops-center-project-name');
-      })
-      .it('runs deploy pipeline with no provided project name');
+      .catch(() => {})
+      .it('runs deploy pipeline with no provided project name', (ctx) => {
+        expect(ctx.stderr).to.contain('Missing required flag devops-center-project-name');
+      });
 
     test
       .stdout()
       .stderr()
       .command(['deploy:pipeline', '--devops-center-project-name=test'])
-      .catch((err) => {
-        expect(err.message).to.contain('Missing required flag branch-name');
-      })
-      .it('runs deploy pipeline with no provided branch name');
+      .catch(() => {})
+      .it('runs deploy pipeline with no provided branch name', (ctx) => {
+        expect(ctx.stderr).to.contain('Missing required flag branch-name');
+      });
 
     test
       .stdout()
       .stderr()
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests'])
-      .catch((err) => {
-        expect(err.message).to.contain(
-          'You must specify tests using the --tests flag if the --test-level flag is set to RunSpecifiedTests.'
-        );
-      })
-      .it('runs deploy pipeline with test level RunSpecifiedTests but does not indicate specific tests with flag -t');
+      .catch(() => {})
+      .it(
+        'runs deploy pipeline with test level RunSpecifiedTests but does not indicate specific tests with flag -t',
+        (ctx) => {
+          expect(ctx.stderr).to.contain(
+            'You must specify tests using the --tests flag if the --test-level flag is set to RunSpecifiedTests.'
+          );
+        }
+      );
 
     test
       .stdout()
       .stderr()
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '-l=RunLocalTests', '-t=DummyTestClass'])
-      .catch((err) => {
-        expect(err.message).to.contain('runTests can be used only with a testLevel of RunSpecifiedTests.');
-      })
-      .it('runs deploy pipeline indicating specific tests to run but with test level other than RunSpecifiedTests');
+      .catch(() => {})
+      .it(
+        'runs deploy pipeline indicating specific tests to run but with test level other than RunSpecifiedTests',
+        (ctx) => {
+          expect(ctx.stderr).to.contain('runTests can be used only with a testLevel of RunSpecifiedTests.');
+        }
+      );
 
     test
       .stdout()
@@ -188,12 +194,12 @@ describe('deploy pipeline', () => {
       .stdout()
       .stderr()
       .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '--wait=3'])
-      .catch((err) => {
-        expect(err.message).to.contain(
+      .catch(() => {})
+      .it('runs deploy:pipeline and handles a GenericTimeoutError', (ctx) => {
+        expect(ctx.stderr).to.contain(
           'The command has timed out, although it\'s still running. To check the status of the current operation, run "sf deploy:pipeline report".'
         );
-      })
-      .it('runs deploy:pipeline and handles a GenericTimeoutError');
+      });
   });
 
   describe('cache', () => {
