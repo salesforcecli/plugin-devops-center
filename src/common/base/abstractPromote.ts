@@ -8,16 +8,16 @@ import { Messages, Org, SfError } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
 import { HttpRequest } from 'jsforce';
-import { DeployPipelineCache } from '../common/deployPipelineCache';
-import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
+import { DeployPipelineCache } from '../deployPipelineCache';
+import AsyncOpStreaming from '../../streamer/processors/asyncOpStream';
 import {
   fetchAndValidatePipelineStage,
   PipelineStage,
   PromoteOptions,
   PromotePipelineResult,
   validateTestFlags,
-} from '../common';
-import { devopsCenterProjectName, requiredDoceOrgFlag, wait, verbose, concise } from '../common/flags/flags';
+} from '..';
+import { devopsCenterProjectName, requiredDoceOrgFlag, wait, verbose, concise } from '../flags/flags';
 import {
   branchName,
   bundleVersionName,
@@ -25,13 +25,13 @@ import {
   specificTests,
   testLevel,
   async,
-} from '../common/flags/promote/promoteFlags';
+} from '../flags/promote/promoteFlags';
 
-import DoceMonitor from '../streamer/doceMonitor';
-import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from './constants';
-import { ApiError, AsyncOperationResult, AsyncOperationStatus } from './types';
-import { fetchAsyncOperationResult } from './utils';
-import { OutputServiceFactory, PromoteOutputService } from './outputService';
+import DoceMonitor from '../../streamer/doceMonitor';
+import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from '../constants';
+import { ApiError, AsyncOperationResult, AsyncOperationStatus } from '../types';
+import { fetchAsyncOperationResult } from '../utils';
+import { OutputServiceFactory, PromoteOutputService } from '../outputService';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');

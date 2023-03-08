@@ -8,6 +8,7 @@ export {
   ApiError,
   AsyncOperationResult,
   AsyncOperationStatus,
+  DeploymentResult,
   PipelineStage,
   PromoteOptions,
   PromotePipelineResult,

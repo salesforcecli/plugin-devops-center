@@ -11,9 +11,10 @@ import { getString, Nullable } from '@salesforce/ts-types';
 import { ApiError, PipelineStage, TestLevel } from '../common';
 import { selectPipelineStagesByProject } from '../common/selectors/pipelineStageSelector';
 import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
+import { colorStatus } from './outputService/outputUtils';
 import { AorOutputService } from './outputService/aorOutputService';
 import { selectAsyncOperationResultById } from './selectors/asyncOperationResultsSelector';
-import { AsyncOperationResult } from './types';
+import { AsyncOperationResult, AsyncOperationStatus } from './types';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -127,4 +128,37 @@ export function containsSfId(idsToInspect: string[], idToFind: string): boolean 
  */
 export function matchesSfId(firstId: string, secondId: string): boolean {
   return containsSfId([firstId], secondId);
+}
+
+/**
+ * Helper to convert an sObject into an array of {key : value}
+ * and format the keys.
+ *
+ * @param sObj sObject to convert.
+ * @returns an array of {key : value}
+ */
+export function sObjectToArrayOfKeyValue(sObj: object): Array<{ key: string; value: unknown }> {
+  const acumulator = [];
+  return Object.entries(sObj).reduce<Array<{ key: string; value: unknown }>>((res, [key, value]) => {
+    if (key !== 'attributes') {
+      if (typeof value === 'object' && value !== null) {
+        return res.concat(sObjectToArrayOfKeyValue(value as object));
+      } else if (key === 'sf_devops__Status__c') {
+        return res.concat({ key: formatFieldName(key), value: colorStatus(value as AsyncOperationStatus) });
+      } else {
+        return res.concat({ key: formatFieldName(key), value: value as string | number | boolean });
+      }
+    }
+    return res;
+  }, acumulator);
+}
+
+/**
+ * Helper to remove the prefix, sufix and underscores in a DOCe sObject field name.
+ *
+ * @param fieldName DOCe field name.
+ * @returns formatted field name.
+ */
+export function formatFieldName(fieldName: string): string {
+  return fieldName.replace('sf_devops__', '').replace('__c', '').replace('_', '');
 }

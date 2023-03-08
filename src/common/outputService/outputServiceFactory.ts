@@ -9,8 +9,11 @@
 
 import { Connection } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import * as Promote from '../abstractPromote';
+import * as Promote from '../base/abstractPromote';
+import { DeploymentResult } from '../types';
+import { Flags } from '../base/abstractReportOnPromote';
 import { DeployCommandOutputService } from './deployCommandOutputService';
+import { PromoteReportOutputService } from './reportOutputService';
 import { ResumeCommandOutputService } from './resumeCommandOutputService';
 
 /**
@@ -31,5 +34,16 @@ export class OutputServiceFactory {
    */
   public forResume(operationType: string): ResumeCommandOutputService {
     return new ResumeCommandOutputService(operationType);
+  }
+
+  /**
+   * Create a service to print the report info.
+   */
+  public forPromotionReport(
+    flags: Flags<typeof SfCommand>,
+    operationResult: DeploymentResult,
+    operationName: string
+  ): PromoteReportOutputService {
+    return new PromoteReportOutputService(flags, operationResult, operationName);
   }
 }

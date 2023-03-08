@@ -13,11 +13,11 @@ import {
   fetchAsyncOperationResult,
   getAsyncOperationStreamer,
   PromotePipelineResult,
-} from '../common';
-import DoceMonitor from '../streamer/doceMonitor';
-import { jobId, requiredDoceOrgFlag, useMostRecent, wait } from '../common/flags/flags';
-import { DeployPipelineCache } from './deployPipelineCache';
-import { OutputServiceFactory, ResumeOutputService } from './outputService';
+} from '../../common';
+import { jobId, requiredDoceOrgFlag, useMostRecent, wait } from '../../common/flags/flags';
+import DoceMonitor from '../../streamer/doceMonitor';
+import { DeployPipelineCache } from './../deployPipelineCache';
+import { OutputServiceFactory, ResumeOutputService } from './../outputService';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
