@@ -35,7 +35,7 @@ export class PromoteReportOutputService extends AbstractReportOutputService<Outp
     super(
       {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        verbosity: flags['verbosity'],
+        verbose: flags['verbose'],
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         concise: flags['concise'],
       },
