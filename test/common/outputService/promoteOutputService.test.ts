@@ -9,14 +9,26 @@
 
 import { expect, test } from '@oclif/test';
 import * as sinon from 'sinon';
-import { Org } from '@salesforce/core';
-import { ChangeBundleInstall, NamedCredential, WorkItem, WorkItemPromote } from '../../../src/common/types';
+import { Messages, Org } from '@salesforce/core';
+import { CliUx } from '@oclif/core';
+import { Optional } from '@salesforce/ts-types';
+import {
+  ChangeBundleInstall,
+  NamedCredential,
+  WorkItem,
+  WorkItemPromote,
+  DeployComponent,
+} from '../../../src/common/types';
 import * as DeploySelector from '../../../src/common/selectors/deployProgressSummarySelector';
 import { AsyncOperationType } from '../../../src/common/constants';
 import * as EndpointSelector from '../../../src/common/selectors/namedCredentialSelector';
 import * as StageSelector from '../../../src/common/selectors/environmentSelector';
 import * as WorkItemSelector from '../../../src/common/selectors/workItemSelector';
 import { AbstractPromoteOutputService, DeploySummaryBuilder } from '../../../src/common/outputService';
+import * as deployComponentsSelector from '../../../src/common/selectors/deployComponentsSelector';
+
+Messages.importMessagesDirectory(__dirname);
+const tableElements = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
 
 class PromoteOutputServiceTest extends AbstractPromoteOutputService {}
 
@@ -33,7 +45,8 @@ describe('promoteOutputService', () => {
         async: true,
         branch: branchName,
       },
-      summaryBuilder
+      summaryBuilder,
+      stubOrg.getConnection()
     );
 
     test.stdout().it('prints the async deploy execution correctly', async (ctx) => {
@@ -46,16 +59,64 @@ describe('promoteOutputService', () => {
     });
   });
 
-  describe('deployment', () => {
+  describe('displayEndResults', () => {
     const outputService: PromoteOutputServiceTest = new PromoteOutputServiceTest(
       {
         branch: branchName,
+        verbose: true,
       },
-      summaryBuilder
+      summaryBuilder,
+      stubOrg.getConnection()
     );
 
     beforeEach(() => {
       sandbox = sinon.createSandbox();
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    test.it('prints a table when verbose flag exists', async () => {
+      const deployed: DeployComponent = {
+        sf_devops__Source_Component__c: 'ApexClass:foo',
+        sf_devops__Operation__c: 'add',
+        sf_devops__File_Path__c: 'path',
+        Type: 'ApexClass',
+        Name: 'foo',
+      };
+
+      const deployedComponents: DeployComponent[] = new Array(deployed);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      sandbox.stub(deployComponentsSelector, 'selectDeployComponentsByAsyncOpId').resolves(deployedComponents);
+
+      const logSpy = sandbox.spy(CliUx.ux, 'log');
+
+      // As styleHeader and table are readonly properties we need to stub them if a different way
+      let styledHeaderRetVal: Optional<string>;
+      const styledHeaderGetter = () => (x: string) => (styledHeaderRetVal = x);
+      sandbox.stub(CliUx.ux, 'styledHeader').get(styledHeaderGetter);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let tableRetVal: any = {};
+      const tableGetter = () => (x: Record<string, unknown>) => (tableRetVal = x);
+      sandbox.stub(CliUx.ux, 'table').get(tableGetter);
+
+      outputService.setAorId('aorID');
+      await outputService.displayEndResults();
+      expect(logSpy.called).to.equal(true);
+      expect(styledHeaderRetVal).to.deep.equal(tableElements.getMessage('deployComponent.table.title'));
+      expect(tableRetVal).to.deep.equal(deployedComponents);
+    });
+  });
+
+  describe('deployment', () => {
+    let outputService: PromoteOutputServiceTest;
+
+    beforeEach(() => {
+      sandbox = sinon.createSandbox();
+      outputService = getOutputService(false);
     });
 
     afterEach(() => {
@@ -112,7 +173,10 @@ describe('promoteOutputService', () => {
       const mockWorkItemPromote1: WorkItemPromote = mockWorkItemPromote(workItem1Name, stageName, 'ABC');
       const mockWorkItemPromote2: WorkItemPromote = mockWorkItemPromote(workItem2Name, stageName, 'ABC');
 
-      async function adHocDeploy(workItemsPromote: WorkItemPromote[]): Promise<void> {
+      async function adHocDeploy(
+        workItemsPromote: WorkItemPromote[],
+        outputServiceParam: PromoteOutputServiceTest
+      ): Promise<void> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(DeploySelector, 'selectDeployAORSummaryDataById').resolves({
           sf_devops__Work_Item_Promotes__r: {
@@ -126,12 +190,12 @@ describe('promoteOutputService', () => {
         });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(EndpointSelector, 'selectNamedCredentialByName').resolves(namedCredential);
-        await outputService.printOpSummary();
+        await outputServiceParam.printOpSummary();
       }
 
       test.stdout().it('prints the correct message for a single WI ad hoc deployment', async (ctx) => {
         const workItemsPromote: WorkItemPromote[] = [mockWorkItemPromote1];
-        await adHocDeploy(workItemsPromote);
+        await adHocDeploy(workItemsPromote, outputService);
         expect(ctx.stdout).to.contain(
           `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work item ${workItem1Name}.`
         );
@@ -140,11 +204,20 @@ describe('promoteOutputService', () => {
 
       test.stdout().it('prints the correct message for a multiple WIs ad hoc deployment', async (ctx) => {
         const workItemsPromote: WorkItemPromote[] = [mockWorkItemPromote1, mockWorkItemPromote2];
-        await adHocDeploy(workItemsPromote);
+        await adHocDeploy(workItemsPromote, outputService);
         expect(ctx.stdout).to.contain(
           `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work items ${workItem1Name}, ${workItem2Name}.`
         );
         expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${orgUrl}.`);
+      });
+
+      test.stdout().it('prints the correct message for concise flag for adHoc', async (ctx) => {
+        outputService = getOutputService(true);
+        const workItemsPromote: WorkItemPromote[] = [mockWorkItemPromote1, mockWorkItemPromote2];
+        await adHocDeploy(workItemsPromote, outputService);
+        expect(ctx.stdout).to.contain(
+          `DevOps Center pipeline stage ${stageName} being updated. Deploying metadata from ${branchName} branch to target org ${orgUrl}.`
+        );
       });
     });
 
@@ -183,9 +256,10 @@ describe('promoteOutputService', () => {
     };
 
     describe('soup deployment', () => {
-      test.stdout().it('prints the correct message for a soup deployment', async (ctx) => {
-        const changeBundleInstalls: ChangeBundleInstall[] = [mockChangeBunldeInstall1, mockChangeBunldeInstall2];
-        const workItems: WorkItem[] = [workItem1, workItem2];
+      const changeBundleInstalls: ChangeBundleInstall[] = [mockChangeBunldeInstall1, mockChangeBunldeInstall2];
+      const workItems: WorkItem[] = [workItem1, workItem2];
+
+      beforeEach(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(DeploySelector, 'selectDeployAORSummaryDataById').resolves({
           sf_devops__Work_Item_Promotes__r: null,
@@ -229,12 +303,22 @@ describe('promoteOutputService', () => {
             ],
           },
         });
+      });
 
+      test.stdout().it('prints the correct message for a soup deployment', async (ctx) => {
         await outputService.printOpSummary();
         expect(ctx.stdout).to.contain(
           `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work items ${workItem1Name}, ${workItem2Name} in bundle ${changeBundleInstall1VersionName}.`
         );
         expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${orgUrl}.`);
+      });
+
+      test.stdout().it('prints the correct message for concise flag for soup', async (ctx) => {
+        outputService = getOutputService(true);
+        await outputService.printOpSummary();
+        expect(ctx.stdout).to.contain(
+          `DevOps Center pipeline stage ${stageName} being updated. Deploying metadata from ${branchName} branch to target org ${orgUrl}.`
+        );
       });
     });
 
@@ -258,8 +342,13 @@ describe('promoteOutputService', () => {
         Name: workItem4Name,
       };
 
-      test.stdout().it('prints the correct message for a versioned deployment', async (ctx) => {
-        const changeBundleInstalls: ChangeBundleInstall[] = [mockChangeBunldeInstall1, mockChangeBunldeInstall3];
+      const changeBundleInstalls: ChangeBundleInstall[] = [mockChangeBunldeInstall1, mockChangeBunldeInstall3];
+
+      const workItems1 = [workItem1, workItem2];
+      const workItems2 = [workItem3];
+      const workItems3 = [workItem4];
+
+      beforeEach(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(DeploySelector, 'selectDeployAORSummaryDataById').resolves({
           sf_devops__Work_Item_Promotes__r: null,
@@ -301,9 +390,6 @@ describe('promoteOutputService', () => {
           },
         });
 
-        const workItems1 = [workItem1, workItem2];
-        const workItems2 = [workItem3];
-        const workItems3 = [workItem4];
         sandbox.stub(WorkItemSelector, 'selectWorkItemsByChangeBundles').resolves([
           {
             Id: changeBundleInstall1Id,
@@ -330,13 +416,34 @@ describe('promoteOutputService', () => {
             },
           },
         ]);
+      });
 
+      test.stdout().it('prints the correct message for a versioned deployment', async (ctx) => {
         await outputService.printOpSummary();
         expect(ctx.stdout).to.contain(
           `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work items ${workItem1Name}, ${workItem2Name} in bundle ${changeBundleInstall1VersionName}; work item ${workItem3Name} in bundle ${changeBundleInstall2VersionName}.`
         );
         expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${orgUrl}.`);
       });
+
+      test.stdout().it('prints the correct message for concise flag for versioned', async (ctx) => {
+        outputService = getOutputService(true);
+        await outputService.printOpSummary();
+        expect(ctx.stdout).to.contain(
+          `DevOps Center pipeline stage ${stageName} being updated. Deploying metadata from ${branchName} branch to target org ${orgUrl}.`
+        );
+      });
     });
   });
+
+  function getOutputService(concise: boolean): PromoteOutputServiceTest {
+    return new PromoteOutputServiceTest(
+      {
+        branch: branchName,
+        concise,
+      },
+      summaryBuilder,
+      stubOrg.getConnection()
+    );
+  }
 });

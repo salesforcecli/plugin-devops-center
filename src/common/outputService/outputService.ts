@@ -5,8 +5,10 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+import { CliUx } from '@oclif/core';
+
 export type OutputFlags = {
-  verbosity?: boolean;
+  verbose?: boolean;
   concise?: boolean;
 };
 
@@ -20,6 +22,17 @@ export interface OutputService {
    * Prints a summary of the operation being done
    */
   printOpSummary(): void;
+
+  /**
+   * Displays a table
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  displayTable(
+    rows: any[],
+    title: string,
+    columns: CliUx.Table.table.Columns<any>,
+    options?: CliUx.Table.table.Options
+  ): void;
 }
 
 /**
@@ -33,6 +46,14 @@ export abstract class AbstractOutputService<T extends OutputFlags> implements Ou
 
   public constructor(flags: T) {
     this.flags = flags;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, class-methods-use-this
+  public displayTable(rows: any[], title: string, columns: CliUx.Table.table.Columns<any>): void {
+    CliUx.ux.log();
+    CliUx.ux.styledHeader(title);
+    CliUx.ux.table(rows, columns);
+    CliUx.ux.log();
   }
 
   public abstract printOpSummary(): void;

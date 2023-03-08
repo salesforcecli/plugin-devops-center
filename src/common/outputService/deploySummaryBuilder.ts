@@ -14,7 +14,7 @@ import { EnvQueryResult, selectPipelineStageByEnvironment } from '../selectors/e
 import { selectNamedCredentialByName } from '../selectors/namedCredentialSelector';
 import { selectWorkItemsByChangeBundles, WorkItemsQueryResult } from '../selectors/workItemSelector';
 import { ChangeBundle, ChangeBundleInstall, WorkItem, WorkItemPromote } from '../types';
-import { OutputService } from './outputService';
+import { AbstractOutputService, OutputFlags, OutputService } from './outputService';
 
 Messages.importMessagesDirectory(__dirname);
 const output = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.output');
@@ -34,7 +34,7 @@ export class DeploySummaryBuilder {
   /**
    * Builds the appropiate DeploySummaryOutputService
    */
-  public async build(branch: string, aorId: string): Promise<OutputService | undefined> {
+  public async build(branch: string, aorId: string, flags: OutputFlags): Promise<OutputService | undefined> {
     // We get the operation from this query
     const queryResp: DeploySummaryQueryResult = await selectDeployAORSummaryDataById(this.con, aorId);
 
@@ -43,14 +43,16 @@ export class DeploySummaryBuilder {
         return new AdHocDeploySummaryOutputService(
           queryResp.sf_devops__Work_Item_Promotes__r!.records,
           this.con,
-          branch
+          branch,
+          flags
         );
 
       case AsyncOperationType.VERSIONED_PROMOTE:
         return new VersionedDeploySummaryOutputService(
           queryResp.sf_devops__Change_Bundle_Installs__r!.records,
           this.con,
-          branch
+          branch,
+          flags
         );
 
       case AsyncOperationType.SOUP_PROMOTE:
@@ -58,7 +60,8 @@ export class DeploySummaryBuilder {
           queryResp.sf_devops__Change_Bundle_Installs__r!.records,
           queryResp.sf_devops__Work_Items__r!.records,
           this.con,
-          branch
+          branch,
+          flags
         );
 
       default:
@@ -67,21 +70,31 @@ export class DeploySummaryBuilder {
   }
 }
 
-export abstract class DeploySummaryOutputService implements OutputService {
+export abstract class DeploySummaryOutputService<T extends OutputFlags> extends AbstractOutputService<T> {
   protected con: Connection;
 
   protected branch: string;
   protected stageName: string;
   protected orgUrl: string;
 
-  public constructor(con: Connection, branch: string) {
+  public constructor(con: Connection, branch: string, flags: T) {
+    super(flags);
     this.con = con;
     this.branch = branch;
   }
 
   public async printOpSummary(): Promise<void> {
     await this.buildSummary();
-    this.printSummary();
+    if (this.flags.concise) {
+      this.printConciseSummary();
+    } else {
+      this.printSummary();
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  protected printConciseSummary(): void {
+    console.log(output.getMessage('output.concise.summary', [this.stageName, this.branch, this.orgUrl]));
   }
 
   /**
@@ -100,12 +113,12 @@ export abstract class DeploySummaryOutputService implements OutputService {
  *
  * @author JuanStenghele-sf
  */
-class AdHocDeploySummaryOutputService extends DeploySummaryOutputService {
+class AdHocDeploySummaryOutputService<T extends OutputFlags> extends DeploySummaryOutputService<T> {
   private workItemsPromote: WorkItemPromote[];
   private workItems: string[];
 
-  public constructor(workItemsPromote: WorkItemPromote[], con: Connection, branch: string) {
-    super(con, branch);
+  public constructor(workItemsPromote: WorkItemPromote[], con: Connection, branch: string, flags: T) {
+    super(con, branch, flags);
     this.workItemsPromote = workItemsPromote;
   }
 
@@ -140,12 +153,12 @@ class AdHocDeploySummaryOutputService extends DeploySummaryOutputService {
  *
  * @author JuanStenghele-sf
  */
-abstract class VersionedOrSoupSummaryOutputService extends DeploySummaryOutputService {
+abstract class VersionedOrSoupSummaryOutputService<T extends OutputFlags> extends DeploySummaryOutputService<T> {
   protected changeBundleInstalls: ChangeBundleInstall[];
   protected workItems: Map<string, string[]>;
 
-  public constructor(changeBundleInstalls: ChangeBundleInstall[], con: Connection, branch: string) {
-    super(con, branch);
+  public constructor(changeBundleInstalls: ChangeBundleInstall[], con: Connection, branch: string, flags: T) {
+    super(con, branch, flags);
     this.changeBundleInstalls = changeBundleInstalls;
   }
 
@@ -193,7 +206,7 @@ abstract class VersionedOrSoupSummaryOutputService extends DeploySummaryOutputSe
  *
  * @author JuanStenghele-sf
  */
-class VersionedDeploySummaryOutputService extends VersionedOrSoupSummaryOutputService {
+class VersionedDeploySummaryOutputService<T extends OutputFlags> extends VersionedOrSoupSummaryOutputService<T> {
   protected async buildSummary(): Promise<void> {
     // We need to get the stage name and the org url first
     await this.buildCommonSummary();
@@ -231,16 +244,17 @@ class VersionedDeploySummaryOutputService extends VersionedOrSoupSummaryOutputSe
  *
  * @author JuanStenghele-sf
  */
-class SoupDeploySummaryOutputService extends VersionedOrSoupSummaryOutputService {
+class SoupDeploySummaryOutputService<T extends OutputFlags> extends VersionedOrSoupSummaryOutputService<T> {
   private rawWorkItems: WorkItem[];
 
   public constructor(
     changeBundleInstalls: ChangeBundleInstall[],
     workItems: WorkItem[],
     con: Connection,
-    branch: string
+    branch: string,
+    flags: T
   ) {
-    super(changeBundleInstalls, con, branch);
+    super(changeBundleInstalls, con, branch, flags);
     this.rawWorkItems = workItems;
   }
 

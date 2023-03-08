@@ -13,8 +13,7 @@ import { selectPipelineStagesByProject } from '../common/selectors/pipelineStage
 import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
 import { AorOutputService } from './outputService/aorOutputService';
 import { selectAsyncOperationResultById } from './selectors/asyncOperationResultsSelector';
-import { AsyncOperationResult, DeployComponent } from './types';
-import { selectDeployComponentsByAsyncOpId } from './selectors/deployComponentsSelector';
+import { AsyncOperationResult } from './types';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -128,18 +127,4 @@ export function containsSfId(idsToInspect: string[], idToFind: string): boolean 
  */
 export function matchesSfId(firstId: string, secondId: string): boolean {
   return containsSfId([firstId], secondId);
-}
-
-export async function getDeployComponentsByAsyncOpId(con: Connection, aorId: string): Promise<DeployComponent[]> {
-  let components: DeployComponent[];
-  try {
-    components = await selectDeployComponentsByAsyncOpId(con, aorId);
-  } catch (err) {
-    const error = err as Error;
-    if (error.name === 'SingleRecordQuery_NoRecords') {
-      throw messages.createError('error.InvalidAorId', [aorId]);
-    }
-    throw err;
-  }
-  return components;
 }

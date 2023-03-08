@@ -9,17 +9,11 @@ import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { PromotePipelineResult } from '../../../common';
 import { ResumeCommand } from '../../../common/abstractResume';
-import { verbose, concise } from '../../../common/flags/deploy/deployFlags';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline.resume');
 
 export default class DeployPipelineResume extends ResumeCommand<typeof SfCommand> {
-  public static flags = {
-    verbose,
-    concise,
-  };
-
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');

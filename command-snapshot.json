@@ -21,7 +21,7 @@
   {
     "command": "deploy:pipeline:resume",
     "plugin": "@salesforce/plugin-devops-center",
-    "flags": ["concise", "devops-center-username", "job-id", "json", "use-most-recent", "verbose", "wait"],
+    "flags": ["devops-center-username", "job-id", "json", "use-most-recent", "wait"],
     "alias": []
   }
 ]

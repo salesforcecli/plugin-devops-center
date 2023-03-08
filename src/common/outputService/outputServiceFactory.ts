@@ -11,7 +11,6 @@ import { Connection } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import * as Promote from '../abstractPromote';
 import { DeployCommandOutputService } from './deployCommandOutputService';
-import { DeploySummaryBuilder } from './deploySummaryBuilder';
 import { ResumeCommandOutputService } from './resumeCommandOutputService';
 
 /**
@@ -24,7 +23,7 @@ export class OutputServiceFactory {
    * Create a service to print the deployment info.
    */
   public forDeployment(flags: Promote.Flags<typeof SfCommand>, con: Connection): DeployCommandOutputService {
-    return new DeployCommandOutputService(flags, new DeploySummaryBuilder(con));
+    return new DeployCommandOutputService(flags, con);
   }
 
   /**

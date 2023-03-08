@@ -5,7 +5,10 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Messages } from '@salesforce/core';
+import { Connection, Messages } from '@salesforce/core';
+import { DeployComponentsTable } from '../outputColumns';
+import { selectDeployComponentsByAsyncOpId } from '../selectors/deployComponentsSelector';
+import { DeployComponent } from '../types';
 import { AorOutputFlags } from './aorOutputService';
 import { DeploySummaryBuilder } from './deploySummaryBuilder';
 import { OutputService } from './outputService';
@@ -25,7 +28,9 @@ export type PromoteOutputFlags = {
  *
  * @author JuanStenghele-sf
  */
-export interface PromoteOutputService extends ResumeOutputService {}
+export interface PromoteOutputService extends ResumeOutputService {
+  displayEndResults(): Promise<void>;
+}
 
 /**
  * Abstract class that implements PromoteOutputService interface
@@ -37,10 +42,12 @@ export abstract class AbstractPromoteOutputService
   implements PromoteOutputService
 {
   private summaryBuilder: DeploySummaryBuilder;
+  private con: Connection;
 
-  public constructor(flags: PromoteOutputFlags, summaryBuilder: DeploySummaryBuilder) {
+  public constructor(flags: PromoteOutputFlags, summaryBuilder: DeploySummaryBuilder, con: Connection) {
     super(flags, '');
     this.summaryBuilder = summaryBuilder;
+    this.con = con;
   }
 
   public async printOpSummary(): Promise<void> {
@@ -51,7 +58,8 @@ export abstract class AbstractPromoteOutputService
       // We build a summary output service
       const deploySummaryOutputService: OutputService | undefined = await this.summaryBuilder.build(
         this.flags.branch,
-        this.aorId
+        this.aorId,
+        this.flags
       );
       if (deploySummaryOutputService === undefined) {
         return;
@@ -61,5 +69,13 @@ export abstract class AbstractPromoteOutputService
       // eslint-disable-next-line @typescript-eslint/await-thenable
       await deploySummaryOutputService.printOpSummary();
     }
+  }
+
+  /**
+   * This method will print a table of the deployed components for the current AOR
+   */
+  public async displayEndResults(): Promise<void> {
+    const components: DeployComponent[] = await selectDeployComponentsByAsyncOpId(this.con, this.aorId);
+    this.displayTable(components, DeployComponentsTable.title, DeployComponentsTable.columns);
   }
 }

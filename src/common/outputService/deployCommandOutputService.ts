@@ -7,6 +7,7 @@
 
 /* eslint-disable no-console, class-methods-use-this , no-case-declarations */
 
+import { Connection } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags } from '../abstractPromote';
 import { DeploySummaryBuilder } from './deploySummaryBuilder';
@@ -18,13 +19,16 @@ import { AbstractPromoteOutputService } from './promoteOutputService';
  * @author JuanStenghele-sf
  */
 export class DeployCommandOutputService extends AbstractPromoteOutputService {
-  public constructor(flags: Flags<typeof SfCommand>, summaryBuilder: DeploySummaryBuilder) {
+  public constructor(flags: Flags<typeof SfCommand>, con: Connection) {
     super(
       {
         async: flags['async'],
         branch: flags['branch-name'],
+        concise: flags['concise'],
+        verbose: flags['verbose'],
       },
-      summaryBuilder
+      new DeploySummaryBuilder(con),
+      con
     );
   }
 }

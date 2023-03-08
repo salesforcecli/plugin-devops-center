@@ -39,6 +39,11 @@ export interface AorOutputService extends OutputService {
    * Sets the aor id
    */
   setAorId(aorId: string): void;
+
+  /**
+   * Sets the aor id
+   */
+  getStatus(): AsyncOperationStatus | undefined;
 }
 
 /**
@@ -51,6 +56,7 @@ export abstract class AbstractAorOutputService<T extends AorOutputFlags>
   implements AorOutputService
 {
   protected aorId: string;
+  protected status: AsyncOperationStatus | undefined;
 
   public constructor(flags: T, aorId: string) {
     super(flags);
@@ -67,6 +73,8 @@ export abstract class AbstractAorOutputService<T extends AorOutputFlags>
         red(output.getMessage('output.aor-error-status', [aor.sf_devops__Message__c, aor.sf_devops__Error_Details__c]))
       );
     }
+
+    this.status = aor.sf_devops__Status__c;
   }
 
   public printAorId(): void {
@@ -75,6 +83,10 @@ export abstract class AbstractAorOutputService<T extends AorOutputFlags>
 
   public setAorId(aorId: string): void {
     this.aorId = aorId;
+  }
+
+  public getStatus(): AsyncOperationStatus | undefined {
+    return this.status;
   }
 
   public abstract printOpSummary(): void;

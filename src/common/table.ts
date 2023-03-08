@@ -11,8 +11,8 @@ import { CliUx } from '@oclif/core';
 
 export function displayTable(
   rows: any[],
-  columns: CliUx.Table.table.Columns<any>,
   title: string,
+  columns: CliUx.Table.table.Columns<any>,
   options?: CliUx.Table.table.Options
 ): void {
   CliUx.ux.log();

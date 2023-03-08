@@ -19,5 +19,4 @@ export {
   fetchAsyncOperationResult,
   getAsyncOperationStreamer,
   validateTestFlags,
-  getDeployComponentsByAsyncOpId,
 } from './utils';
