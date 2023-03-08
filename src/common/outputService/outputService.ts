@@ -5,6 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { CliUx } from '@oclif/core';
 
 export type OutputFlags = {
@@ -26,7 +28,6 @@ export interface OutputService {
   /**
    * Displays a table
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   displayTable(
     rows: any[],
     title: string,
