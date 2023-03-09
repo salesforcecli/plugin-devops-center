@@ -17,10 +17,5 @@ export async function selectDeployComponentsByAsyncOpId(
                     FROM sf_devops__Deploy_Component__c  
                     WHERE sf_devops__Deployment_Result__r.sf_devops__Status__c = '${asyncOpId}'`;
   const resp: QueryResult<DeployComponent> = await con.query(queryStr);
-
-  resp.records.forEach((record) => {
-    record.Type = record.sf_devops__Source_Component__c.split(':')[0];
-    record.Name = record.sf_devops__Source_Component__c.split(':')[1];
-  });
   return resp.records;
 }

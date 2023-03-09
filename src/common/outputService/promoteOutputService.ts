@@ -7,8 +7,8 @@
 
 import { Connection, Messages } from '@salesforce/core';
 import { DeployComponentsTable } from '../outputColumns';
-import { selectDeployComponentsByAsyncOpId } from '../selectors/deployComponentsSelector';
 import { DeployComponent } from '../types';
+import { getFormattedDeployComponentsByAyncOpId } from '../utils';
 import { AorOutputFlags } from './aorOutputService';
 import { DeploySummaryBuilder } from './deploySummaryBuilder';
 import { OutputService } from './outputService';
@@ -75,7 +75,7 @@ export abstract class AbstractPromoteOutputService
    * This method will print a table of the deployed components for the current AOR
    */
   public async displayEndResults(): Promise<void> {
-    const components: DeployComponent[] = await selectDeployComponentsByAsyncOpId(this.con, this.aorId);
+    const components: DeployComponent[] = await getFormattedDeployComponentsByAyncOpId(this.con, this.aorId);
     this.displayTable(components, DeployComponentsTable.title, DeployComponentsTable.columns);
   }
 }

@@ -40,12 +40,12 @@ describe('endpoint selector', () => {
 
     const result = await selectDeployComponentsByAsyncOpId(mockConnection, 'ABC');
 
-    // We verify we add these fields after the query
-    MOCK_DEPLOY_COMPONENT.Name = 'foo';
-    MOCK_DEPLOY_COMPONENT.Type = 'apexClass';
     // Verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);
-    expect(result[0]).to.equal(MOCK_DEPLOY_COMPONENT);
+    expect(result[0]).to.deep.equal(MOCK_DEPLOY_COMPONENT);
+
+    expect(result[0].Name).to.deep.equal(undefined);
+    expect(result[0].Type).to.deep.equal(undefined);
 
     // Verify we queried the correct object
     const builderArgs = mockConnection.query.getCall(0).args;

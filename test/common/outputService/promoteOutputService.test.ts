@@ -25,7 +25,7 @@ import * as EndpointSelector from '../../../src/common/selectors/namedCredential
 import * as StageSelector from '../../../src/common/selectors/environmentSelector';
 import * as WorkItemSelector from '../../../src/common/selectors/workItemSelector';
 import { AbstractPromoteOutputService, DeploySummaryBuilder } from '../../../src/common/outputService';
-import * as deployComponentsSelector from '../../../src/common/selectors/deployComponentsSelector';
+import * as Utils from '../../../src/common/utils';
 
 Messages.importMessagesDirectory(__dirname);
 const tableElements = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
@@ -89,7 +89,7 @@ describe('promoteOutputService', () => {
       const deployedComponents: DeployComponent[] = new Array(deployed);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      sandbox.stub(deployComponentsSelector, 'selectDeployComponentsByAsyncOpId').resolves(deployedComponents);
+      sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves(deployedComponents);
 
       const logSpy = sandbox.spy(CliUx.ux, 'log');
 

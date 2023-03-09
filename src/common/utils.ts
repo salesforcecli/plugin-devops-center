@@ -14,7 +14,8 @@ import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
 import { colorStatus } from './outputService/outputUtils';
 import { AorOutputService } from './outputService/aorOutputService';
 import { selectAsyncOperationResultById } from './selectors/asyncOperationResultsSelector';
-import { AsyncOperationResult, AsyncOperationStatus } from './types';
+import { AsyncOperationResult, AsyncOperationStatus, DeployComponent } from './types';
+import { selectDeployComponentsByAsyncOpId } from './selectors/deployComponentsSelector';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -161,4 +162,25 @@ export function sObjectToArrayOfKeyValue(sObj: object): Array<{ key: string; val
  */
 export function formatFieldName(fieldName: string): string {
   return fieldName.replace('sf_devops__', '').replace('__c', '').replace('_', '');
+}
+
+/**
+ * Helper to return a formatted DeployComponent list (Type/Name filled).
+ *
+ * @param con The connection needed for the query
+ * @param asyncOpId The Id of the AsyncOperation
+ * @returns A list of DeployComponent
+ */
+export async function getFormattedDeployComponentsByAyncOpId(
+  con: Connection,
+  asyncOpId: string
+): Promise<DeployComponent[]> {
+  const components: DeployComponent[] = await selectDeployComponentsByAsyncOpId(con, asyncOpId);
+
+  components.forEach((component) => {
+    component.Type = component.sf_devops__Source_Component__c.split(':')[0];
+    component.Name = component.sf_devops__Source_Component__c.split(':')[1];
+  });
+
+  return components;
 }
