@@ -57,6 +57,7 @@ describe('deploy pipeline resume', () => {
       .stdout()
       .stderr()
       .command(['deploy pipeline resume'])
+      .catch(() => {})
       .it('runs deploy pipeline resume without specifying any target Devops Center org', (ctx) => {
         expect(ctx.stderr).to.contain(
           'You must specify the DevOps Center org username by indicating the -c flag on the command line or by setting the target-devops-center configuration variable.'
@@ -81,6 +82,7 @@ describe('deploy pipeline resume', () => {
       .stdout()
       .stderr()
       .command(['deploy pipeline resume'])
+      .catch(() => {})
       .it('runs deploy pipeline resume without any fo the required flags', (ctx) => {
         expect(ctx.stderr).to.contain('Exactly one of the following must be provided: --job-id, --use-most-recent');
       });
@@ -89,6 +91,7 @@ describe('deploy pipeline resume', () => {
       .stdout()
       .stderr()
       .command(['deploy pipeline resume', '-r', `-i=${mockAorId}`])
+      .catch(() => {})
       .it('runs deploy pipeline resume specifying both -r and -i flags', (ctx) => {
         expect(ctx.stderr).to.contain('--job-id cannot also be provided when using --use-most-recent');
         expect(ctx.stderr).to.contain('--use-most-recent cannot also be provided when using --job-id');
@@ -98,6 +101,7 @@ describe('deploy pipeline resume', () => {
       .stdout()
       .stderr()
       .command(['deploy pipeline resume', '-r'])
+      .catch(() => {})
       .it('runs deploy pipeline resume specifying -r when there are no Ids in cache', (ctx) => {
         expect(ctx.stderr).to.contain('No job ID could be found. Verify that a pipeline promotion has been started');
       });
@@ -136,6 +140,7 @@ describe('deploy pipeline resume', () => {
         sandbox.stub(AorSelector, 'selectAsyncOperationResultById').resolves(mockAorRecord);
       })
       .command(['deploy pipeline resume', `-i=${mockAorId}`])
+      .catch(() => {})
       .it('fails because the async job is not resumable due to error state', (ctx) => {
         expect(ctx.stderr).to.contain(
           `Job ID ${mockAorId} is not resumable with status ${mockAorRecord.sf_devops__Status__c}.`
@@ -188,6 +193,7 @@ describe('deploy pipeline resume', () => {
           .throwsException({ name: 'GenericTimeoutError' });
       })
       .command(['deploy pipeline resume', `-i=${mockAorId}`])
+      .catch(() => {})
       .it('catches a timeout exception from the monitor service and displays proper error message', (ctx) => {
         // verify output error message
         expect(ctx.stderr).to.contain('The command has timed out');

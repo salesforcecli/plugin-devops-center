@@ -38,12 +38,12 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
-  (typeof PromoteCommand)['globalFlags'] & T['flags']
+  (typeof PromoteCommand)['baseFlags'] & T['flags']
 >;
 
 export abstract class PromoteCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
   // common flags that can be inherited by any command that extends PromoteCommand
-  public static globalFlags = {
+  public static baseFlags = {
     'branch-name': branchName,
     'bundle-version-name': bundleVersionName,
     'deploy-all': deployAll,
@@ -54,6 +54,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     async,
     wait,
   };
+
   protected flags!: Flags<T>;
   private targetStage: PipelineStage;
   private sourceStageId: string;
@@ -65,9 +66,12 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
   public async init(): Promise<void> {
     await super.init();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { flags } = await this.parse(this.constructor as Interfaces.Command.Class);
+    const { flags } = await this.parse({
+      flags: this.ctor.flags,
+      baseFlags: (super.ctor as typeof PromoteCommand).baseFlags,
+    });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    this.flags = flags;
+    this.flags = flags as Flags<T>;
     this.outputService = new OutputServiceFactory().forDeployment(
       this.flags,
       (this.flags['devops-center-username'] as Org).getConnection()
@@ -203,7 +207,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     this.deployOptions = {
       fullDeploy: this.flags['deploy-all'],
       testLevel: this.flags['test-level'] ?? 'Default',
-      runTests: this.flags['tests'] ? this.flags['tests'].join(',') : undefined,
+      runTests: this.flags.tests ? this.flags.tests.join(',') : undefined,
       // get more promote options from the concrete implementation if needed
       ...this.getPromoteOptions(),
     };

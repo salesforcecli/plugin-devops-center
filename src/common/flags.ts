@@ -9,19 +9,20 @@ import { ConfigAggregator, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Flags as OclifFlags } from '@oclif/core';
+import { BooleanFlag, OptionFlag } from '@oclif/core/lib/interfaces';
 import { TestLevel } from '../common';
 import ConfigMeta, { ConfigVars } from '../configMeta';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonFlags');
 
-export const devopsCenterProjectName = Flags.string({
+export const devopsCenterProjectName: OptionFlag<string> = Flags.string({
   char: 'p',
   summary: messages.getMessage('promote.devops-center-project-name.summary'),
   required: true,
 });
 
-export const branchName = Flags.string({
+export const branchName: OptionFlag<string> = Flags.string({
   char: 'b',
   summary: messages.getMessage('promote.branch-name.summary'),
   required: true,
@@ -39,26 +40,26 @@ export const testLevel = OclifFlags.custom<TestLevel>({
   summary: messages.getMessage('promote.test-level.summary'),
 });
 
-export const specificTests = Flags.string({
+export const specificTests: OptionFlag<string[] | undefined> = Flags.string({
   char: 't',
   multiple: true,
   description: messages.getMessage('promote.tests.description'),
   summary: messages.getMessage('promote.tests.summary'),
 });
 
-export const deployAll = Flags.boolean({
+export const deployAll: BooleanFlag<boolean> = Flags.boolean({
   char: 'a',
   description: messages.getMessage('promote.deploy-all.description'),
   summary: messages.getMessage('promote.deploy-all.summary'),
 });
 
-export const bundleVersionName = Flags.string({
+export const bundleVersionName: OptionFlag<string | undefined> = Flags.string({
   char: 'v',
   summary: messages.getMessage('promote.bundle-version-name.summary'),
   description: messages.getMessage('promote.bundle-version-name.description'),
 });
 
-export const async = Flags.boolean({
+export const async: BooleanFlag<boolean> = Flags.boolean({
   description: messages.getMessage('promote.async.description'),
   summary: messages.getMessage('promote.async.summary'),
 });
@@ -67,7 +68,7 @@ export const async = Flags.boolean({
  * Wait flag
  * This is used to determine how many minutes we are going to stream results before giving back the control of the terminal to the user.
  */
-export const wait = Flags.duration({
+export const wait: OptionFlag<Duration> = Flags.duration({
   unit: 'minutes',
   char: 'w',
   summary: messages.getMessage('promote.wait.summary'),
@@ -93,14 +94,14 @@ export const requiredDoceOrgFlag = OclifFlags.custom({
   required: true,
 });
 
-export const jobId = Flags.salesforceId({
+export const jobId: OptionFlag<string | undefined> = Flags.salesforceId({
   char: 'i',
   description: messages.getMessage('flags.job-id.description'),
   summary: messages.getMessage('flags.job-id.summary'),
   exactlyOne: ['use-most-recent', 'job-id'],
 });
 
-export const useMostRecent = Flags.boolean({
+export const useMostRecent: BooleanFlag<boolean> = Flags.boolean({
   char: 'r',
   description: messages.getMessage('flags.use-most-recent.description'),
   summary: messages.getMessage('flags.use-most-recent.summary'),
