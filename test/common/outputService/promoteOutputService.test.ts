@@ -60,14 +60,7 @@ describe('promoteOutputService', () => {
   });
 
   describe('displayEndResults', () => {
-    const outputService: PromoteOutputServiceTest = new PromoteOutputServiceTest(
-      {
-        branch: branchName,
-        verbose: true,
-      },
-      summaryBuilder,
-      stubOrg.getConnection()
-    );
+    let outputService: PromoteOutputServiceTest;
 
     beforeEach(() => {
       sandbox = sinon.createSandbox();
@@ -78,6 +71,7 @@ describe('promoteOutputService', () => {
     });
 
     test.it('prints a table when verbose flag exists', async () => {
+      outputService = getOutputService(false, true);
       const deployed: DeployComponent = {
         sf_devops__Source_Component__c: 'ApexClass:foo',
         sf_devops__Operation__c: 'add',
@@ -109,6 +103,18 @@ describe('promoteOutputService', () => {
       expect(styledHeaderRetVal).to.deep.equal(tableElements.getMessage('deployComponent.table.title'));
       expect(tableRetVal).to.deep.equal(deployedComponents);
     });
+
+    test.it('does nothing if the verbose flag does not exist', async () => {
+      outputService = getOutputService(false, false);
+      const formatterStub = sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves([]);
+      const displayTableStub = sandbox.stub(AbstractPromoteOutputService.prototype, 'displayTable');
+
+      outputService.setAorId('aorID');
+      await outputService.displayEndResults();
+
+      expect(formatterStub.called).to.equal(false);
+      expect(displayTableStub.called).to.equal(false);
+    });
   });
 
   describe('deployment', () => {
@@ -116,7 +122,7 @@ describe('promoteOutputService', () => {
 
     beforeEach(() => {
       sandbox = sinon.createSandbox();
-      outputService = getOutputService(false);
+      outputService = getOutputService(false, false);
     });
 
     afterEach(() => {
@@ -212,7 +218,7 @@ describe('promoteOutputService', () => {
       });
 
       test.stdout().it('prints the correct message for concise flag for adHoc', async (ctx) => {
-        outputService = getOutputService(true);
+        outputService = getOutputService(true, false);
         const workItemsPromote: WorkItemPromote[] = [mockWorkItemPromote1, mockWorkItemPromote2];
         await adHocDeploy(workItemsPromote, outputService);
         expect(ctx.stdout).to.contain(
@@ -314,7 +320,7 @@ describe('promoteOutputService', () => {
       });
 
       test.stdout().it('prints the correct message for concise flag for soup', async (ctx) => {
-        outputService = getOutputService(true);
+        outputService = getOutputService(true, false);
         await outputService.printOpSummary();
         expect(ctx.stdout).to.contain(
           `DevOps Center pipeline stage ${stageName} being updated. Deploying metadata from ${branchName} branch to target org ${orgUrl}.`
@@ -427,7 +433,7 @@ describe('promoteOutputService', () => {
       });
 
       test.stdout().it('prints the correct message for concise flag for versioned', async (ctx) => {
-        outputService = getOutputService(true);
+        outputService = getOutputService(true, false);
         await outputService.printOpSummary();
         expect(ctx.stdout).to.contain(
           `DevOps Center pipeline stage ${stageName} being updated. Deploying metadata from ${branchName} branch to target org ${orgUrl}.`
@@ -436,11 +442,12 @@ describe('promoteOutputService', () => {
     });
   });
 
-  function getOutputService(concise: boolean): PromoteOutputServiceTest {
+  function getOutputService(concise: boolean, verbose: boolean): PromoteOutputServiceTest {
     return new PromoteOutputServiceTest(
       {
         branch: branchName,
         concise,
+        verbose,
       },
       summaryBuilder,
       stubOrg.getConnection()

@@ -75,7 +75,9 @@ export abstract class AbstractPromoteOutputService
    * This method will print a table of the deployed components for the current AOR
    */
   public async displayEndResults(): Promise<void> {
-    const components: DeployComponent[] = await getFormattedDeployComponentsByAyncOpId(this.con, this.aorId);
-    this.displayTable(components, DeployComponentsTable.title, DeployComponentsTable.columns);
+    if (this.flags.verbose) {
+      const components: DeployComponent[] = await getFormattedDeployComponentsByAyncOpId(this.con, this.aorId);
+      this.displayTable(components, DeployComponentsTable.title, DeployComponentsTable.columns);
+    }
   }
 }

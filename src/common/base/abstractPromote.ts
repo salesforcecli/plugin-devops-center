@@ -108,7 +108,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       this.outputService
     );
     await doceMonitor.monitor();
-    if (this.outputService.getStatus() === AsyncOperationStatus.Completed && this.flags.verbose) {
+    if (this.outputService.getStatus() === AsyncOperationStatus.Completed) {
       await this.outputService.displayEndResults();
     }
 

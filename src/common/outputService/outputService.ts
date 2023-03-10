@@ -24,16 +24,6 @@ export interface OutputService {
    * Prints a summary of the operation being done
    */
   printOpSummary(): void;
-
-  /**
-   * Displays a table
-   */
-  displayTable(
-    rows: any[],
-    title: string,
-    columns: CliUx.Table.table.Columns<any>,
-    options?: CliUx.Table.table.Options
-  ): void;
 }
 
 /**
