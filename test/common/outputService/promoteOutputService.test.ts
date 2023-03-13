@@ -10,7 +10,7 @@
 import { expect, test } from '@oclif/test';
 import * as sinon from 'sinon';
 import { Messages, Org } from '@salesforce/core';
-import { CliUx } from '@oclif/core';
+import { ux } from '@oclif/core';
 import { Optional } from '@salesforce/ts-types';
 import {
   ChangeBundleInstall,
@@ -85,17 +85,17 @@ describe('promoteOutputService', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves(deployedComponents);
 
-      const logSpy = sandbox.spy(CliUx.ux, 'log');
+      const logSpy = sandbox.spy(ux, 'log');
 
       // As styleHeader and table are readonly properties we need to stub them if a different way
       let styledHeaderRetVal: Optional<string>;
       const styledHeaderGetter = () => (x: string) => (styledHeaderRetVal = x);
-      sandbox.stub(CliUx.ux, 'styledHeader').get(styledHeaderGetter);
+      sandbox.stub(ux, 'styledHeader').get(styledHeaderGetter);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let tableRetVal: any = {};
       const tableGetter = () => (x: Record<string, unknown>) => (tableRetVal = x);
-      sandbox.stub(CliUx.ux, 'table').get(tableGetter);
+      sandbox.stub(ux, 'table').get(tableGetter);
 
       outputService.setAorId('aorID');
       await outputService.displayEndResults();

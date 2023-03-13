@@ -8,12 +8,13 @@
 import { Messages } from '@salesforce/core';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Flags as OclifFlags } from '@oclif/core';
+import { BooleanFlag, OptionFlag } from '@oclif/core/lib/interfaces';
 import { TestLevel } from '../..';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'promoteFlags');
 
-export const branchName = Flags.string({
+export const branchName: OptionFlag<string> = Flags.string({
   char: 'b',
   summary: messages.getMessage('promote.branch-name.summary'),
   required: true,
@@ -31,26 +32,26 @@ export const testLevel = OclifFlags.custom<TestLevel>({
   summary: messages.getMessage('promote.test-level.summary'),
 });
 
-export const specificTests = Flags.string({
+export const specificTests: OptionFlag<string[] | undefined> = Flags.string({
   char: 't',
   multiple: true,
   description: messages.getMessage('promote.tests.description'),
   summary: messages.getMessage('promote.tests.summary'),
 });
 
-export const deployAll = Flags.boolean({
+export const deployAll: BooleanFlag<boolean> = Flags.boolean({
   char: 'a',
   description: messages.getMessage('promote.deploy-all.description'),
   summary: messages.getMessage('promote.deploy-all.summary'),
 });
 
-export const bundleVersionName = Flags.string({
+export const bundleVersionName: OptionFlag<string | undefined> = Flags.string({
   char: 'v',
   summary: messages.getMessage('promote.bundle-version-name.summary'),
   description: messages.getMessage('promote.bundle-version-name.description'),
 });
 
-export const async = Flags.boolean({
+export const async: BooleanFlag<boolean> = Flags.boolean({
   description: messages.getMessage('promote.async.description'),
   summary: messages.getMessage('promote.async.summary'),
 });

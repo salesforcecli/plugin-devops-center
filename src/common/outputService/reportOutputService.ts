@@ -6,7 +6,7 @@
  */
 
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { CliUx } from '@oclif/core';
+import { ux } from '@oclif/core';
 import { Flags } from '../base/abstractReportOnPromote';
 import { sObjectToArrayOfKeyValue } from '../utils';
 import { DeploymentResult } from '../types';
@@ -62,6 +62,6 @@ export class PromoteReportOutputService extends AbstractReportOutputService<Outp
     const options = { title: tableHeader(`${this.operationName} Info`) };
     const columns = { key: { header: 'Key' }, value: { header: 'Value' } };
 
-    CliUx.ux.table(formattedDeploymentResult, columns, options);
+    ux.table(formattedDeploymentResult, columns, options);
   }
 }

@@ -55,6 +55,7 @@ describe('deploy pipeline report', () => {
         });
       })
       .command(['deploy pipeline report'])
+      .catch(() => {})
       .it('runs deploy pipeline report without specifying any target Devops Center org', (ctx) => {
         expect(ctx.stderr).to.contain(
           'You must specify the DevOps Center org username by indicating the -c flag on the command line or by setting the target-devops-center configuration variable.'
@@ -83,6 +84,7 @@ describe('deploy pipeline report', () => {
       .stdout()
       .stderr()
       .command(['deploy pipeline report'])
+      .catch(() => {})
       .it('runs deploy pipeline report without any fo the required flags', (ctx) => {
         expect(ctx.stderr).to.contain('Exactly one of the following must be provided: --job-id, --use-most-recent');
       });
@@ -91,6 +93,7 @@ describe('deploy pipeline report', () => {
       .stdout()
       .stderr()
       .command(['deploy pipeline report', '-r', `-i=${mockAorId}`])
+      .catch(() => {})
       .it('runs deploy pipeline report specifying both -r and -i flags', (ctx) => {
         expect(ctx.stderr).to.contain('--job-id cannot also be provided when using --use-most-recent');
         expect(ctx.stderr).to.contain('--use-most-recent cannot also be provided when using --job-id');
@@ -100,6 +103,7 @@ describe('deploy pipeline report', () => {
       .stdout()
       .stderr()
       .command(['deploy pipeline report', '-r'])
+      .catch(() => {})
       .it('runs deploy pipeline report specifying -r when there are no Ids in cache', (ctx) => {
         expect(ctx.stderr).to.contain('No job ID could be found. Verify that a pipeline promotion has been started');
       });
@@ -292,6 +296,7 @@ describe('deploy pipeline report', () => {
           .throwsException({ name: 'SingleRecordQuery_NoRecords' });
       })
       .command(['deploy pipeline report', `-i=${mockAorId}`])
+      .catch(() => {})
       .it('displays an error message when we can not find a deployment result for the given aorId', (ctx) => {
         expect(ctx.stderr).to.contains(`No job found for ID: ${mockAorId}.`);
       });
@@ -305,6 +310,7 @@ describe('deploy pipeline report', () => {
           .throws({ message: 'unexpected error' });
       })
       .command(['deploy pipeline report', `-i=${mockAorId}`])
+      .catch(() => {})
       .it('displays an error message when we get an unexpected error', (ctx) => {
         expect(ctx.stderr).to.contains('unexpected error');
       });

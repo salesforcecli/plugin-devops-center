@@ -9,12 +9,13 @@ import { ConfigAggregator, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Flags as OclifFlags } from '@oclif/core';
+import { BooleanFlag, OptionFlag } from '@oclif/core/lib/interfaces';
 import ConfigMeta, { ConfigVars } from '../../configMeta';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonFlags');
 
-export const devopsCenterProjectName = Flags.string({
+export const devopsCenterProjectName: OptionFlag<string> = Flags.string({
   char: 'p',
   summary: messages.getMessage('flags.devops-center-project-name.summary'),
   required: true,
@@ -24,7 +25,7 @@ export const devopsCenterProjectName = Flags.string({
  * Wait flag
  * This is used to determine how many minutes we are going to stream results before giving back the control of the terminal to the user.
  */
-export const wait = Flags.duration({
+export const wait: OptionFlag<Duration> = Flags.duration({
   unit: 'minutes',
   char: 'w',
   summary: messages.getMessage('flags.wait.summary'),
@@ -50,25 +51,25 @@ export const requiredDoceOrgFlag = OclifFlags.custom({
   required: true,
 });
 
-export const jobId = Flags.salesforceId({
+export const jobId: OptionFlag<string | undefined> = Flags.salesforceId({
   char: 'i',
   description: messages.getMessage('flags.job-id.description'),
   summary: messages.getMessage('flags.job-id.summary'),
   exactlyOne: ['use-most-recent', 'job-id'],
 });
 
-export const useMostRecent = Flags.boolean({
+export const useMostRecent: BooleanFlag<boolean> = Flags.boolean({
   char: 'r',
   description: messages.getMessage('flags.use-most-recent.description'),
   summary: messages.getMessage('flags.use-most-recent.summary'),
   exactlyOne: ['use-most-recent', 'job-id'],
 });
 
-export const verbose = Flags.boolean({
+export const verbose: BooleanFlag<boolean> = Flags.boolean({
   summary: messages.getMessage('flags.verbose.summary'),
 });
 
-export const concise = Flags.boolean({
+export const concise: BooleanFlag<boolean> = Flags.boolean({
   summary: messages.getMessage('flags.concise.summary'),
   exclusive: ['verbose'],
 });

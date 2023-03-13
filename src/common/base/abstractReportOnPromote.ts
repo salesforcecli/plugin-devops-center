@@ -19,11 +19,11 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
-  (typeof ReportOnPromoteCommand)['globalFlags'] & T['flags']
+  (typeof ReportOnPromoteCommand)['baseFlags'] & T['flags']
 >;
 
 export abstract class ReportOnPromoteCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
-  public static globalFlags = {
+  public static baseFlags = {
     'devops-center-username': requiredDoceOrgFlag(),
   };
   protected flags!: Flags<T>;
@@ -32,9 +32,12 @@ export abstract class ReportOnPromoteCommand<T extends typeof SfCommand> extends
   public async init(): Promise<void> {
     await super.init();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { flags } = await this.parse(this.constructor as Interfaces.Command.Class);
+    const { flags } = await this.parse({
+      flags: this.ctor.flags,
+      baseFlags: (super.ctor as typeof ReportOnPromoteCommand).baseFlags,
+    });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    this.flags = flags;
+    this.flags = flags as Flags<T>;
   }
 
   /**

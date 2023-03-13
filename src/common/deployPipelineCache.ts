@@ -10,7 +10,7 @@ import { Duration } from '@salesforce/kit';
 import { JsonMap } from '@salesforce/ts-types';
 
 Messages.importMessagesDirectory(__dirname);
-const cacheMessages = Messages.load('@salesforce/plugin-devops-center', 'cache', ['error.NoRecentAorId']);
+const cacheMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'cache');
 
 // For the moment we will just store the timestamp
 export type AsyncOperationData = Record<string, never>;
