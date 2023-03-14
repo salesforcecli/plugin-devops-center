@@ -88,11 +88,11 @@ Before you run this command, changes in the branch must be merged in the source 
 EXAMPLES
 Deploy changes in the Staging branch to the Staging environment (sandbox), if the previous stage is the bundling stage:
 
-  $ sf deploy pipeline —devops-center-project-name “Recruiting App” —branch-name staging —devops-center-username MyStagingSandbox —bundle-version-name 1.0
+  $ sf deploy pipeline —-devops-center-project-name “Recruiting App” —-branch-name staging —-devops-center-username MyStagingSandbox —-bundle-version-name 1.0
 
 Deploy all changes in the main branch to the release environment:
 
-  $ sf deploy pipeline —devops-center-project-name “Recruiting App” —branch-name main —devops-center-username MyReleaseOrg —deploy-all
+  $ sf deploy pipeline —-devops-center-project-name “Recruiting App” —-branch-name main —-devops-center-username MyReleaseOrg —-deploy-all
 
 FLAG DESCRIPTIONS
 -a, --deploy-all  Deploy all metadata in the branch
