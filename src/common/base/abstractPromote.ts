@@ -69,7 +69,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { flags } = await this.parse({
       flags: this.ctor.flags,
-      baseFlags: (this.ctor as typeof PromoteCommand).baseFlags,
+      baseFlags: (super.ctor as typeof PromoteCommand).baseFlags,
     });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags as Flags<T>;
