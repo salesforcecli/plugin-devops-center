@@ -16,7 +16,7 @@ Version name of the bundle.
 
 # promote.bundle-version-name.description
 
-You must indicate the bundle version if deploying to the environment that correspond to the first stage after the bundling stage.
+You must indicate the bundle version if deploying to the environment that corresponds to the first stage after the bundling stage.
 
 # promote.tests.summary
 
@@ -24,7 +24,7 @@ Apex tests to run when --test-level is RunSpecifiedTests.
 
 # promote.tests.description
 
-Separate multiple test names with commas, and enclose the entire flag value in double quotes if a test contains a space.
+Separate multiple test names with commas, and enclose the entire flag value in double quotes if a test name contains a space.
 
 # promote.test-level.summary
 

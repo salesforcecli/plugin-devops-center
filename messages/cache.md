@@ -1,3 +1,3 @@
 # error.NoRecentAorId
 
-No job ID could be found. Verify that a pipeline promotion has been started.
+Can't find the job ID. Verify that a pipeline promotion has been started.
