@@ -22,6 +22,7 @@ import { DeployCommandOutputService } from '../../../src/common/outputService';
 import { DeployPipelineCache } from '../../../src/common/deployPipelineCache';
 
 let requestMock: sinon.SinonStub;
+let stubDisplayEndResults: sinon.SinonStub;
 
 const DOCE_ORG = {
   id: '1',
@@ -199,6 +200,46 @@ describe('deploy pipeline', () => {
         expect(ctx.stderr).to.contain(
           'The command has timed out, although it\'s still running. To check the status of the current operation, run "sf deploy:pipeline report".'
         );
+      });
+
+    test
+      .do(() => {
+        pipelineStageMock = {
+          Id: 'mock-id',
+          Name: 'mock',
+          sf_devops__Branch__r: {
+            sf_devops__Name__c: 'mockBranchName',
+          },
+          sf_devops__Pipeline__r: {
+            sf_devops__Project__c: 'mockProjectId',
+          },
+          sf_devops__Pipeline_Stages__r: undefined,
+          sf_devops__Environment__r: {
+            Id: 'envId',
+            sf_devops__Named_Credential__c: 'ABC',
+          },
+        };
+        fetchAndValidatePipelineStageStub = sandbox
+          .stub(Utils, 'fetchAndValidatePipelineStage')
+          .resolves(pipelineStageMock);
+        requestMock = sinon.stub().resolves('mock-aor-id');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(AsyncOpStreaming.prototype, 'monitor' as any).returns({ completed: true, payload: {} });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(DeployCommandOutputService.prototype, 'printOpSummary' as any).returns({});
+
+        sandbox.stub(DeployCommandOutputService.prototype, 'getStatus').returns(AsyncOperationStatus.Completed);
+
+        stubDisplayEndResults = sandbox.stub(DeployCommandOutputService.prototype, 'displayEndResults');
+
+        sandbox.stub(Utils, 'fetchAsyncOperationResult').resolves({ Id: 'mock-aor-id' });
+      })
+      .stdout()
+      .stderr()
+      .command(['deploy:pipeline', '-p=testProject', '-b=testBranch', '--wait=3', '--verbose'])
+      .it('runs deploy:pipeline and handles the verbose flag correctly ', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        expect(stubDisplayEndResults.called).to.equal(true);
       });
   });
 

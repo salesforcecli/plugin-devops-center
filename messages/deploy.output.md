@@ -25,3 +25,7 @@ work %s %s in bundle %s
 
 DevOps Center pipeline stage %s being updated with metadata associated with %s.
 Deploying metadata from %s branch to target org %s.
+
+# output.concise.summary
+
+DevOps Center pipeline stage %s being updated. Deploying metadata from %s branch to target org %s.

@@ -5,8 +5,12 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { ux } from '@oclif/core';
+
 export type OutputFlags = {
-  verbosity?: boolean;
+  verbose?: boolean;
   concise?: boolean;
 };
 
@@ -33,6 +37,14 @@ export abstract class AbstractOutputService<T extends OutputFlags> implements Ou
 
   public constructor(flags: T) {
     this.flags = flags;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  public displayTable(rows: any[], title: string, columns: ux.Table.table.Columns<any>): void {
+    ux.log();
+    ux.styledHeader(title);
+    ux.table(rows, columns);
+    ux.log();
   }
 
   public abstract printOpSummary(): void;

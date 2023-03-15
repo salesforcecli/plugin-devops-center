@@ -10,58 +10,15 @@ import { Duration } from '@salesforce/kit';
 import { Flags } from '@salesforce/sf-plugins-core';
 import { Flags as OclifFlags } from '@oclif/core';
 import { BooleanFlag, OptionFlag } from '@oclif/core/lib/interfaces';
-import { TestLevel } from '../common';
-import ConfigMeta, { ConfigVars } from '../configMeta';
+import ConfigMeta, { ConfigVars } from '../../configMeta';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonFlags');
 
 export const devopsCenterProjectName: OptionFlag<string> = Flags.string({
   char: 'p',
-  summary: messages.getMessage('promote.devops-center-project-name.summary'),
+  summary: messages.getMessage('flags.devops-center-project-name.summary'),
   required: true,
-});
-
-export const branchName: OptionFlag<string> = Flags.string({
-  char: 'b',
-  summary: messages.getMessage('promote.branch-name.summary'),
-  required: true,
-});
-
-/**
- * Custom flag for the test level.
- * Validates that the passed in value is a valid test level.
- */
-export const testLevel = OclifFlags.custom<TestLevel>({
-  char: 'l',
-  parse: (input) => Promise.resolve(input as TestLevel),
-  options: Object.values(TestLevel),
-  description: messages.getMessage('promote.test-level.description'),
-  summary: messages.getMessage('promote.test-level.summary'),
-});
-
-export const specificTests: OptionFlag<string[] | undefined> = Flags.string({
-  char: 't',
-  multiple: true,
-  description: messages.getMessage('promote.tests.description'),
-  summary: messages.getMessage('promote.tests.summary'),
-});
-
-export const deployAll: BooleanFlag<boolean> = Flags.boolean({
-  char: 'a',
-  description: messages.getMessage('promote.deploy-all.description'),
-  summary: messages.getMessage('promote.deploy-all.summary'),
-});
-
-export const bundleVersionName: OptionFlag<string | undefined> = Flags.string({
-  char: 'v',
-  summary: messages.getMessage('promote.bundle-version-name.summary'),
-  description: messages.getMessage('promote.bundle-version-name.description'),
-});
-
-export const async: BooleanFlag<boolean> = Flags.boolean({
-  description: messages.getMessage('promote.async.description'),
-  summary: messages.getMessage('promote.async.summary'),
 });
 
 /**
@@ -71,8 +28,8 @@ export const async: BooleanFlag<boolean> = Flags.boolean({
 export const wait: OptionFlag<Duration> = Flags.duration({
   unit: 'minutes',
   char: 'w',
-  summary: messages.getMessage('promote.wait.summary'),
-  description: messages.getMessage('promote.wait.description'),
+  summary: messages.getMessage('flags.wait.summary'),
+  description: messages.getMessage('flags.wait.description'),
   defaultValue: 33,
   default: Duration.minutes(33),
   helpValue: '<minutes>',
@@ -106,6 +63,15 @@ export const useMostRecent: BooleanFlag<boolean> = Flags.boolean({
   description: messages.getMessage('flags.use-most-recent.description'),
   summary: messages.getMessage('flags.use-most-recent.summary'),
   exactlyOne: ['use-most-recent', 'job-id'],
+});
+
+export const verbose: BooleanFlag<boolean> = Flags.boolean({
+  summary: messages.getMessage('flags.verbose.summary'),
+});
+
+export const concise: BooleanFlag<boolean> = Flags.boolean({
+  summary: messages.getMessage('flags.concise.summary'),
+  exclusive: ['verbose'],
 });
 
 /**

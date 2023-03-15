@@ -14,11 +14,13 @@ import {
   fetchAndValidatePipelineStage,
   matchesSfId,
   sObjectToArrayOfKeyValue,
+  getFormattedDeployComponentsByAyncOpId,
 } from '../../src/common/utils';
 import { fetchAsyncOperationResult } from '../../src/common/utils';
-import { AsyncOperationResult, AsyncOperationStatus, PipelineStage } from '../../src/common';
+import { AsyncOperationResult, AsyncOperationStatus, DeployComponent, PipelineStage } from '../../src/common';
 import * as PipelineSelector from '../../src/common/selectors/pipelineStageSelector';
 import * as AorSelector from '../../src/common/selectors/asyncOperationResultsSelector';
+import * as deployComponentsSelector from '../../src/common/selectors/deployComponentsSelector';
 
 const PROJECT_NAME = 'Dummy Project Name';
 const BRANCH_NAME_1 = 'Dummy Branch Name 1';
@@ -269,6 +271,26 @@ describe('utils', () => {
         { key: 'attributeB', value: 'valueB' },
       ];
       expect(sObjectToArrayOfKeyValue(sObjectToConvert)).to.deep.equal(expected);
+    });
+  });
+
+  describe('getFormattedDeployComponentsByAyncOpId', () => {
+    it('formats the DeployComponent adding Type and Name', async () => {
+      const stubConnection = sinon.createStubInstance(Connection);
+
+      const MOCK_DEPLOY_COMPONENT: DeployComponent = {
+        sf_devops__Source_Component__c: 'apexClass:foo',
+        sf_devops__Operation__c: 'ADD',
+        sf_devops__File_Path__c: 'path',
+      };
+
+      sandbox.stub(deployComponentsSelector, 'selectDeployComponentsByAsyncOpId').resolves([MOCK_DEPLOY_COMPONENT]);
+
+      const result: DeployComponent[] = await getFormattedDeployComponentsByAyncOpId(stubConnection, 'ID');
+
+      expect(result[0]).to.deep.equal(MOCK_DEPLOY_COMPONENT);
+      expect(result[0].Name).to.deep.equal('foo');
+      expect(result[0].Type).to.deep.equal('apexClass');
     });
   });
 });

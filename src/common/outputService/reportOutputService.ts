@@ -6,7 +6,7 @@
  */
 
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { ux } from '@oclif/core';
+import { Messages } from '@salesforce/core';
 import { Flags } from '../base/abstractReportOnPromote';
 import { sObjectToArrayOfKeyValue } from '../utils';
 import { DeploymentResult } from '../types';
@@ -15,6 +15,9 @@ import { AbstractDeploymentResultOutputService, DeploymentResultOutputService } 
 import { OutputFlags } from './outputService';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
+
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline.report');
 
 /**
  * Interface for output methods for report operations.
@@ -35,7 +38,7 @@ export class PromoteReportOutputService extends AbstractReportOutputService<Outp
     super(
       {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        verbosity: flags['verbosity'],
+        verbose: flags['verbose'],
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         concise: flags['concise'],
       },
@@ -53,15 +56,21 @@ export class PromoteReportOutputService extends AbstractReportOutputService<Outp
     const formattedDeploymentResult = sObjectToArrayOfKeyValue(this.deploymentResult)
       // rename User.Name field.
       .map((x) => {
-        x.key = x.key === 'Name' ? 'CreatedByName' : x.key;
+        x.key = x.key === 'Name' ? messages.getMessage('report.key.created-by-name') : x.key;
         return x;
       })
       // sort by key.
       .sort((a, b) => (a.key < b.key ? -1 : 1));
 
-    const options = { title: tableHeader(`${this.operationName} Info`) };
-    const columns = { key: { header: 'Key' }, value: { header: 'Value' } };
+    const columns = {
+      key: { header: messages.getMessage('report.key.column') },
+      value: { header: messages.getMessage('report.value.column') },
+    };
 
-    ux.table(formattedDeploymentResult, columns, options);
+    this.displayTable(
+      formattedDeploymentResult,
+      tableHeader(`${this.operationName} ${messages.getMessage('report.info.header')}`),
+      columns
+    );
   }
 }

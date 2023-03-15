@@ -14,7 +14,7 @@ import {
   getAsyncOperationStreamer,
   PromotePipelineResult,
 } from '../../common';
-import { jobId, requiredDoceOrgFlag, useMostRecent, wait } from '../../common/flags';
+import { jobId, requiredDoceOrgFlag, useMostRecent, wait } from '../../common/flags/flags';
 import DoceMonitor from '../../streamer/doceMonitor';
 import { DeployPipelineCache } from './../deployPipelineCache';
 import { OutputServiceFactory, ResumeOutputService } from './../outputService';

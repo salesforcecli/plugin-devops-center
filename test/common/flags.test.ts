@@ -11,7 +11,8 @@ import { Parser } from '@oclif/core';
 import { ConfigAggregator, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { ConfigVars } from '../../src/configMeta';
-import { requiredDoceOrgFlag, wait, async } from '../../src/common/flags';
+import { requiredDoceOrgFlag, wait, verbose, concise } from '../../src/common/flags/flags';
+import { async } from '../../src/common/flags/promote/promoteFlags';
 
 const TARGET_DEVOPS_CENTER_ALIAS = 'target-devops-center';
 const MOCK_TARGET_DEVOPS_CENTER = {
@@ -193,6 +194,18 @@ describe('waitFlag', () => {
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.message).to.include('--async=true cannot also be provided when using --wait');
+    }
+  });
+
+  it('verbose and concise flags are mutually exclusive', async () => {
+    try {
+      // wrong value provided < 3
+      await Parser.parse(['--verbose', '--concise'], {
+        flags: { verbose, concise },
+      });
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(err.message).to.include('--verbose=true cannot also be provided when using --concise');
     }
   });
 });

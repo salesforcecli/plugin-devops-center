@@ -113,3 +113,11 @@ export enum AsyncOperationStatus {
 export type NamedCredential = {
   Endpoint: string;
 };
+
+export type DeployComponent = {
+  sf_devops__Source_Component__c: string;
+  sf_devops__Operation__c: string;
+  sf_devops__File_Path__c: string;
+  Type?: string;
+  Name?: string;
+};

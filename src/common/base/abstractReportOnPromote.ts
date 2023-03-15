@@ -9,7 +9,7 @@ import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
 import { DeployPipelineCache } from '../../common/deployPipelineCache';
 import { PromotePipelineResult } from '../../common';
-import { requiredDoceOrgFlag } from '../../common/flags';
+import { requiredDoceOrgFlag } from '../../common/flags/flags';
 import { DeploymentResult } from './../types';
 import { selectOneDeploymentResultByAsyncJobId } from './../selectors/deploymentResultsSelector';
 import { OutputService } from './../outputService/outputService';

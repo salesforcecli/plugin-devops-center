@@ -13,7 +13,6 @@ import * as Promote from '../base/abstractPromote';
 import { DeploymentResult } from '../types';
 import { Flags } from '../base/abstractReportOnPromote';
 import { DeployCommandOutputService } from './deployCommandOutputService';
-import { DeploySummaryBuilder } from './deploySummaryBuilder';
 import { PromoteReportOutputService } from './reportOutputService';
 import { ResumeCommandOutputService } from './resumeCommandOutputService';
 
@@ -27,7 +26,7 @@ export class OutputServiceFactory {
    * Create a service to print the deployment info.
    */
   public forDeployment(flags: Promote.Flags<typeof SfCommand>, con: Connection): DeployCommandOutputService {
-    return new DeployCommandOutputService(flags, new DeploySummaryBuilder(con));
+    return new DeployCommandOutputService(flags, con);
   }
 
   /**

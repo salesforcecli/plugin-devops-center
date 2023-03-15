@@ -13,6 +13,7 @@ export {
   PromoteOptions,
   PromotePipelineResult,
   TestLevel,
+  DeployComponent,
 } from './types';
 export {
   fetchAndValidatePipelineStage,

@@ -17,17 +17,16 @@ import {
   PromotePipelineResult,
   validateTestFlags,
 } from '..';
+import { devopsCenterProjectName, requiredDoceOrgFlag, wait, verbose, concise } from '../flags/flags';
 import {
   branchName,
   bundleVersionName,
   deployAll,
-  devopsCenterProjectName,
-  requiredDoceOrgFlag,
   specificTests,
   testLevel,
   async,
-  wait,
-} from '../flags';
+} from '../flags/promote/promoteFlags';
+
 import DoceMonitor from '../../streamer/doceMonitor';
 import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from '../constants';
 import { ApiError, AsyncOperationResult, AsyncOperationStatus } from '../types';
@@ -53,6 +52,8 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     'test-level': testLevel(),
     async,
     wait,
+    verbose,
+    concise,
   };
 
   protected flags!: Flags<T>;
@@ -111,6 +112,9 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
       this.outputService
     );
     await doceMonitor.monitor();
+    if (this.outputService.getStatus() === AsyncOperationStatus.Completed) {
+      await this.outputService.displayEndResults();
+    }
 
     // get final state of the async job
     const asyncJob: AsyncOperationResult = await fetchAsyncOperationResult(doceOrg.getConnection(), asyncOperationId);
