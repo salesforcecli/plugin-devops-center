@@ -31,3 +31,19 @@ Use the job ID of the most recent deploy operation.
 # flags.use-most-recent.description
 
 For performance reasons, this flag uses job IDs for deploy operations that started only in the past 3 days or less. If your most recent operation was more than 3 days ago, this flag won't find a job ID.
+
+# report.key.created-by-name
+
+CreatedByName
+
+# report.key.column
+
+Key
+
+# report.value.column
+
+Value
+
+# report.info.header
+
+Info

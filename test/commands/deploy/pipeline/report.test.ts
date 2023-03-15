@@ -148,20 +148,20 @@ describe('deploy pipeline report', () => {
       .it('correctly displays the deploy operation status of a success promotion in table format', (ctx) => {
         expect(vacuum(ctx.stdout)).to.contain(
           vacuum(`
-          Deploy Info
-          =============================================
-          | Key            Value                        
-          | ────────────── ──────────────────────────── 
-          | CheckDeploy    false                        
-          | CompletionDate 2023-03-01T13:56:02.000+0000 
-          | CreatedById    mock-user-id                 
-          | CreatedByName  mock-user-name               
-          | FullDeploy     false                        
-          | Id             ${mockAorId}           
-          | Message        Deploy complete              
-          | RunTests       mock-tests                   
-          | Status         Completed                    
-          | TestLevel      mock-test-level  
+          === Deploy Info
+
+          Key            Value                    
+          ────────────── ──────────────────────────── 
+          CheckDeploy    false                        
+          CompletionDate 2023-03-01T13:56:02.000+0000 
+          CreatedById    mock-user-id                 
+          CreatedByName  mock-user-name               
+          FullDeploy     false                        
+          Id             ${mockAorId}           
+          Message        Deploy complete              
+          RunTests       mock-tests                   
+          Status         Completed                    
+          TestLevel      mock-test-level  
             `)
         );
       });
@@ -193,21 +193,21 @@ describe('deploy pipeline report', () => {
       .it('correctly displays the deploy operation status of a failed promotion in table format', (ctx) => {
         expect(vacuum(ctx.stdout)).to.contain(
           vacuum(`
-          Deploy Info
-          ===================================
-          | Key            Value              
-          | ────────────── ────────────────── 
-          | CheckDeploy    false              
-          | CompletionDate                    
-          | CreatedById    mock-user-id       
-          | CreatedByName  mock-user-name     
-          | ErrorDetails   mock-error-details 
-          | FullDeploy     false              
-          | Id             ${mockAorId} 
-          | Message        mock-fail-message  
-          | RunTests       mock-tests         
-          | Status         Error              
-          | TestLevel      mock-test-level  
+          === Deploy Info
+
+          Key            Value             
+          ────────────── ────────────────── 
+          CheckDeploy    false              
+          CompletionDate                    
+          CreatedById    mock-user-id       
+          CreatedByName  mock-user-name     
+          ErrorDetails   mock-error-details 
+          FullDeploy     false              
+          Id             ${mockAorId} 
+          Message        mock-fail-message  
+          RunTests       mock-tests         
+          Status         Error              
+          TestLevel      mock-test-level  
             `)
         );
       });
@@ -238,20 +238,20 @@ describe('deploy pipeline report', () => {
       .it('correctly displays the deploy operation status of an In Progress promotion in table format', (ctx) => {
         expect(vacuum(ctx.stdout)).to.contain(
           vacuum(`
-            Deploy Info
-            ===================================
-            | Key            Value              
-            | ────────────── ────────────────── 
-            | CheckDeploy    false              
-            | CompletionDate                    
-            | CreatedById    mock-user-id       
-            | CreatedByName  mock-user-name     
-            | FullDeploy     false              
-            | Id             a00DS00000Aj3AIYAZ 
-            | Message        mock-message       
-            | RunTests       mock-tests         
-            | Status         In Progress        
-            | TestLevel      mock-test-level  
+            === Deploy Info
+
+            Key            Value                
+            ────────────── ────────────────── 
+            CheckDeploy    false              
+            CompletionDate                    
+            CreatedById    mock-user-id       
+            CreatedByName  mock-user-name     
+            FullDeploy     false              
+            Id             a00DS00000Aj3AIYAZ 
+            Message        mock-message       
+            RunTests       mock-tests         
+            Status         In Progress        
+            TestLevel      mock-test-level  
               `)
         );
       });
