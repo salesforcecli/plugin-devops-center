@@ -56,6 +56,8 @@ sf plugins
 <!-- commands -->
 
 - [`sf deploy pipeline`](#sf-deploy-pipeline)
+- [`sf deploy pipeline report`](#sf-deploy-pipeline-report)
+- [`sf deploy pipeline resume`](#sf-deploy-pipeline-resume)
 
 ## `sf deploy pipeline`
 
@@ -66,6 +68,7 @@ USAGE
 $ sf deploy pipeline [--json] [-c <value>] [-p <value>] [-b <value>] [-v <value>] [-a] [--async | -w <value>] [--concise | --verbose]
     [-t <value>] [-l NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg]
 
+FLAGS
   -a, --deploy-all                                Deploy all metadata in the branch.
   -b, --branch-name=<value>                       Name of the branch in the source control repository from which to deploy changes to the stage’s org.
   -c, --devops-center-username=<value>            Username or alias for the DevOps Center org.
@@ -80,7 +83,7 @@ $ sf deploy pipeline [--json] [-c <value>] [-p <value>] [-b <value>] [-v <value>
   --verbose                                       Show verbose output of the deploy result.
 
 GLOBAL FLAGS
-  --json  Format output as json
+  --json  Format output as json.
 
 DESCRIPTION
 Before you run this command, changes in the branch must be merged in the source control repository.
@@ -144,4 +147,99 @@ FLAG DESCRIPTIONS
 
   The command immediately returns the job ID and control of the terminal to you. This way, you can continue to use the CLI. To resume the deployment,
   run "sf deploy pipeline resume". To check the status of the deployment, run "sf deploy pipeline report".
+```
+
+## `sf deploy pipeline report`
+
+Check the status of a pipeline deploy operation.
+
+```
+USAGE
+  $ sf deploy pipeline report [--json] [-c <value>] [-i <value>] [-r]
+
+FLAGS
+  -c, --devops-center-username=<value>  Username or alias for the DevOps Center org.
+  -i, --job-id=<value>                  Job ID of the pipeline deployment you want to check the status of.
+  -r, --use-most-recent                 Use the job ID of the most recent deploy operation.
+
+GLOBAL FLAGS
+  --json  Format output as json.
+
+DESCRIPTION
+  Check the status of a pipeline deploy operation.
+
+  Run this command by either passing it a job ID or specifying the —use-most-recent flag to use the job ID of the most recent deploy operation.
+
+EXAMPLES
+  Check the status using a job ID:
+
+    $ sf deploy pipeline report --devops-center-username MyStagingSandbox --job-id 0Af0x000017yLUFCA2
+
+  Check the status of the most recent deploy operation:
+
+    $ sf deploy pipeline report --devops-center-username MyStagingSandbox --use-most-recent
+
+FLAG DESCRIPTIONS
+  -c, --devops-center-username=<value> Username or alias for the DevOps Center org.
+
+  -i, --job-id=<value>  Job ID of the pipeline deployment you want to check the status of.
+
+      The job ID is valid for 10 days from when you started the deploy operation.
+
+  -r, --use-most-recent  Use the job ID of the most recent deploy operation.
+
+      For performance reasons, this flag uses job IDs for deploy operations that started in the past 3 days or fewer. If your most recent operation was longer than 3 days ago, this flag won't find a job ID.
+
+```
+
+## `sf deploy pipeline resume`
+
+Resume watching a pipeline deploy operation.
+
+```
+  USAGE
+    $ sf deploy pipeline resume -c <value> [--json] [-i <value>] [-r] [-w <value>]
+
+  FLAGS
+    -c, --devops-center-username=<value>  (required) [default: test-cubxekhq4e2c@example.com] Username or alias of the DevOps Center org.
+    -i, --job-id=<value>                  Job ID of the pipeline deploy operation you want to resume.
+    -r, --use-most-recent                 Use the job ID of the most recent deploy operation.
+    -w, --wait=<minutes>                  [default: 33 minutes] Number of minutes to wait for command to complete and display results.
+
+  GLOBAL FLAGS
+    --json  Format output as json.
+
+  DESCRIPTION
+    Resume watching a pipeline deploy operation.
+
+    Use this command to resume watching a pipeline deploy operation if the original command times out or you specified the --async flag.
+    Run this command by either passing it a job ID or specifying the --use-most-recent flag to use the job ID of the most recent deploy operation.
+
+  EXAMPLES
+    Resume watching a deploy operation using a job ID:
+
+      $ sf deploy pipeline resume --job-id 0Af0x000017yLUFCA2
+
+    Resume watching the most recent deploy operation:
+
+      $ sf deploy pipeline resume --use-most-recent
+
+  FLAG DESCRIPTIONS
+    -i, --job-id=<value>  Job ID of the pipeline deploy operation you want to resume.
+
+      These commands return a job ID if they time out or you specified the --async flag:
+
+      - sf deploy pipeline
+      - sf deploy pipeline validate
+      - sf deploy pipeline quick
+
+      The job ID is valid for 10 days from when you started the deploy operation.
+
+    -r, --use-most-recent  Use the job ID of the most recent deploy operation.
+
+      For performance reasons, this flag uses job IDs for operations that started in the past 3 days or fewer. If your most recent operation was longer than 3 days ago, this flag won't find a job ID.
+
+    -w, --wait=<minutes>  Number of minutes to wait for command to complete and display results.
+
+      If the command continues to run after the wait period, the CLI returns control of the terminal window to you and returns the job ID. To check the status of the operation, run "sf deploy pipeline resume report".
 ```
