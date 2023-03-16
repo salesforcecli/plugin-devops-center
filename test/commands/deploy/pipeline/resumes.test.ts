@@ -103,7 +103,7 @@ describe('deploy pipeline resume', () => {
       .command(['deploy pipeline resume', '-r'])
       .catch(() => {})
       .it('runs deploy pipeline resume specifying -r when there are no Ids in cache', (ctx) => {
-        expect(ctx.stderr).to.contain('No job ID could be found. Verify that a pipeline promotion has been started');
+        expect(ctx.stderr).to.contain("Can't find the job ID. Verify that a pipeline promotion has been started");
       });
   });
 

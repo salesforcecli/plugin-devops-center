@@ -30,7 +30,7 @@ Use the job ID of the most recent deploy operation.
 
 # flags.use-most-recent.description
 
-For performance reasons, this flag uses job IDs for deploy operations that started only in the past 3 days or less. If your most recent operation was more than 3 days ago, this flag won't find a job ID.
+For performance reasons, this flag uses job IDs for deploy operations that started in the past 3 days or fewer. If your most recent operation was longer than 3 days ago, this flag won't find a job ID.
 
 # report.key.created-by-name
 

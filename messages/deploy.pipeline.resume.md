@@ -4,7 +4,7 @@ Resume watching a deploy pipeline operation.
 
 # description
 
-Use this command to resume watching a deploy pipeline operation if the original command times out or you specified the --async flag. Deploy pipeline operations include standard deploys, quick deploys and deploy validations.
+Use this command to resume watching a deploy pipeline operation if the original command times out or you specified the --async flag. Deploy pipeline operations include standard deployments, quick deployments and deployment validations.
 
 Run this command by either passing it a job ID or specifying the --use-most-recent flag to use the job ID of the most recent deploy operation.
 
