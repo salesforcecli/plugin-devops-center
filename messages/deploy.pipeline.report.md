@@ -1,6 +1,6 @@
 # summary
 
-Check the status of a deploy operation.
+Check the status of a pipeline deploy operation.
 
 # description
 
@@ -18,7 +18,7 @@ Run this command by either passing it a job ID or specifying the —use-most-rec
 
 # flags.job-id.summary
 
-Job ID of the deploy operation you want to check the status of.
+Job ID of the pipeline deployment you want to check the status of.
 
 # flags.job-id.description
 
