@@ -16,11 +16,11 @@ Number of minutes to wait for command to complete and display results.
 
 # flags.targetDoceOrg.summary
 
-Username or alias of the target org.
+Username or alias of the DevOps Center org.
 
 # flags.job-id.summary
 
-Job ID of the async operation you want to resume.
+Job ID of the pipeline deploy operation you want to resume.
 
 # flags.job-id.description
 
