@@ -5,7 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Messages } from '@salesforce/core';
+import { spawnSync } from 'child_process';
+import { ConfigValue, Messages } from '@salesforce/core';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'config');
@@ -23,5 +24,13 @@ export default [
     key: ConfigVars.TARGET_DEVOPS_CENTER,
     description: messages.getMessage(ConfigVars.TARGET_DEVOPS_CENTER),
     hidden: false,
+    input: {
+      validator: (value: ConfigValue): boolean => {
+        const result = spawnSync('sf', ['force:org:display', '-u', value as string]);
+        return result.status === 0;
+      },
+      failedMessage: (value: ConfigValue): string =>
+        messages.getMessage('error.OrgNotAuthenticated', [value as string]),
+    },
   },
 ];
