@@ -81,7 +81,7 @@ export async function fetchAsyncOperationResult(con: Connection, aorId: string):
     aor = await selectAsyncOperationResultById(con, aorId);
   } catch (err) {
     const error = err as Error;
-    if (error.name === 'SingleRecordQuery_NoRecords') {
+    if (error.name === 'No-results-foundError') {
       throw messages.createError('error.InvalidAorId', [aorId]);
     }
     throw err;

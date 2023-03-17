@@ -172,9 +172,7 @@ describe('utils', () => {
         sf_devops__Message__c: 'mock-message',
         sf_devops__Status__c: AsyncOperationStatus.Completed,
       };
-      sandbox
-        .stub(AorSelector, 'selectAsyncOperationResultById')
-        .throwsException({ name: 'SingleRecordQuery_NoRecords' });
+      sandbox.stub(AorSelector, 'selectAsyncOperationResultById').throwsException({ name: 'No-results-foundError' });
 
       try {
         await fetchAsyncOperationResult(stubConnection, 'mock-id');

@@ -72,7 +72,7 @@ export abstract class ReportOnPromoteCommand<T extends typeof SfCommand> extends
       };
     } catch (err) {
       const error = err as Error;
-      if (error.name === 'SingleRecordQuery_NoRecords') {
+      if (error.name === 'No-results-foundError') {
         throw messages.createError('error.InvalidAorId', [asyncJobId]);
       }
       throw err;

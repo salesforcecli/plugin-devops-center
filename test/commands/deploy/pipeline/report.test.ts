@@ -293,7 +293,7 @@ describe('deploy pipeline report', () => {
       .do(() => {
         sandbox
           .stub(DeploymentResultSelector, 'selectOneDeploymentResultByAsyncJobId')
-          .throwsException({ name: 'SingleRecordQuery_NoRecords' });
+          .throwsException({ name: 'No-results-foundError' });
       })
       .command(['deploy pipeline report', `-i=${mockAorId}`])
       .catch(() => {})
