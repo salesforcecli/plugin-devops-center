@@ -106,11 +106,13 @@ describe('utils', () => {
     });
 
     it('fails when Devop Center is not installed in the target org', async () => {
-      sandbox.stub(PipelineSelector, 'selectPipelineStagesByProject').throws({
+      const mockConnection = sandbox.createStubInstance(Connection);
+      mockConnection.query.throws({
         errorCode: 'INVALID_TYPE',
         name: 'INVALID_TYPE',
       });
       mockPipelineStageRecords = [];
+      stubOrg.getConnection.returns(mockConnection);
 
       try {
         await fetchAndValidatePipelineStage(stubOrg, PROJECT_NAME, BRANCH_NAME_1);
@@ -125,7 +127,7 @@ describe('utils', () => {
 
     it('fails when Devop Center is not installed in the target org', async () => {
       sandbox.stub(PipelineSelector, 'selectPipelineStagesByProject').throws({
-        errorMessage: 'NOT_FOUND',
+        name: 'NOT_FOUND',
         errorStatusCode: 404,
       });
       mockPipelineStageRecords = [];
@@ -135,7 +137,7 @@ describe('utils', () => {
         assert(false);
       } catch (err) {
         const error = err as SfError;
-        expect(error.message).to.contain('NOT_FOUND');
+        expect(error.name).to.contain('NOT_FOUND');
       }
     });
   });

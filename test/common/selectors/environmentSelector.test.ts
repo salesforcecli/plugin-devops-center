@@ -13,6 +13,7 @@ import { QueryResult } from 'jsforce';
 import sinon = require('sinon');
 import { EnvQueryResult, selectPipelineStageByEnvironment } from '../../../src/common/selectors/environmentSelector';
 import { PipelineStage } from '../../../src/common/types';
+import * as SelectorUtils from '../../../src/common/selectors/selectorUtils';
 
 const MOCK_PIPELINE_STAGE: PipelineStage = {
   Id: 'mock-Id',
@@ -58,7 +59,11 @@ describe('environment selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
+    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
+
     const result = await selectPipelineStageByEnvironment(mockConnection, 'AAA');
+
+    expect(runSafeQuerySpy.called).to.equal(true);
 
     // Verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);

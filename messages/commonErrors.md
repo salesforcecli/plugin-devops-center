@@ -29,3 +29,19 @@ Job ID %s is not resumable with status %s.
 # error.ClientTimeout
 
 The command has timed out, although it's still running. To check the status of the current operation, run "%s %s report".
+
+# error.no-results-found
+
+No results found
+
+# error.query-failed
+
+Query failed
+
+# error.connection-required
+
+Connection is required
+
+# error.query-string-required
+
+Query string is required and must be a non-empty string

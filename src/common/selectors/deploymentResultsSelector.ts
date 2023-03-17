@@ -6,7 +6,9 @@
  */
 
 import { Connection } from '@salesforce/core';
+import { QueryResult } from 'jsforce';
 import { DeploymentResult } from '../types';
+import { runSafeQuery } from './selectorUtils';
 
 /**
  *
@@ -22,5 +24,7 @@ export async function selectOneDeploymentResultByAsyncJobId(
                       sf_devops__Status__r.sf_devops__Status__c, sf_devops__Status__r.sf_devops__Error_Details__c                      
                     FROM sf_devops__Deployment_Result__c  
                     WHERE sf_devops__Status__r.Id = '${asyncJobId}'`;
-  return con.singleRecordQuery(queryStr);
+
+  const resp: QueryResult<DeploymentResult> = await runSafeQuery(con, queryStr);
+  return resp.records[0];
 }

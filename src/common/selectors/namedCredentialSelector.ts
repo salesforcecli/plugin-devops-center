@@ -8,6 +8,7 @@
 import { QueryResult } from 'jsforce';
 import { Connection } from '@salesforce/core';
 import { NamedCredential } from '../types';
+import { runSafeQuery } from './selectorUtils';
 
 /**
  * Given a named credential it returns the org url (endpoint) associated with it
@@ -19,6 +20,7 @@ export async function selectNamedCredentialByName(con: Connection, name: string)
     WHERE DeveloperName = '${name}'
     AND NamespacePrefix = 'sf_devops'
     LIMIT 1`;
-  const resp: QueryResult<NamedCredential> = await con.query(queryStr);
+
+  const resp: QueryResult<NamedCredential> = await runSafeQuery(con, queryStr);
   return resp.records[0];
 }

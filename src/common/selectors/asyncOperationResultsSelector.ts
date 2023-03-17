@@ -6,7 +6,9 @@
  */
 
 import { Connection } from '@salesforce/core';
+import { QueryResult } from 'jsforce';
 import { AsyncOperationResult } from '../types';
+import { runSafeQuery } from './selectorUtils';
 
 /**
  *
@@ -16,5 +18,7 @@ export async function selectAsyncOperationResultById(con: Connection, aorId: str
   const queryStr = `SELECT sf_devops__Status__c, sf_devops__Message__c, sf_devops__Error_Details__c
                     FROM sf_devops__Async_Operation_Result__c  
                     WHERE Id = '${aorId}'`;
-  return con.singleRecordQuery(queryStr);
+
+  const resp: QueryResult<AsyncOperationResult> = await runSafeQuery(con, queryStr);
+  return resp.records[0];
 }

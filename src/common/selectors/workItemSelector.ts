@@ -8,6 +8,7 @@
 import { QueryResult } from 'jsforce';
 import { Connection } from '@salesforce/core';
 import { WorkItem } from '../types';
+import { runSafeQuery } from './selectorUtils';
 
 // This type will be defined here as it is specific for this function
 export type WorkItemsQueryResult = {
@@ -26,6 +27,7 @@ export async function selectWorkItemsByChangeBundles(
                     (SELECT Name FROM sf_devops__Work_Items__r)
                     FROM sf_devops__Change_Bundle__c
                     WHERE Id IN (${changeBundles.map((id) => "'" + id + "'").join(', ')})`;
-  const resp: QueryResult<WorkItemsQueryResult> = await con.query(queryStr);
+
+  const resp: QueryResult<WorkItemsQueryResult> = await runSafeQuery(con, queryStr);
   return resp.records;
 }

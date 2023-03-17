@@ -12,6 +12,7 @@ import { Connection } from '@salesforce/core';
 import sinon = require('sinon');
 import { selectNamedCredentialByName } from '../../../src/common/selectors/namedCredentialSelector';
 import { NamedCredential } from '../../../src/common/types';
+import * as SelectorUtils from '../../../src/common/selectors/selectorUtils';
 
 const MOCK_NAMED_CREDENTIAL: NamedCredential = {
   Endpoint: 'www.example.com',
@@ -36,7 +37,11 @@ describe('endpoint selector', () => {
       totalSize: 1,
     });
 
+    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
+
     const result = await selectNamedCredentialByName(mockConnection, 'ABC');
+
+    expect(runSafeQuerySpy.called).to.equal(true);
 
     // Verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);

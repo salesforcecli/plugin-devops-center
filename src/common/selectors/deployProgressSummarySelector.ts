@@ -8,6 +8,7 @@
 import { QueryResult } from 'jsforce';
 import { Connection } from '@salesforce/core';
 import { ChangeBundleInstall, WorkItemPromote, WorkItem } from '../types';
+import { runSafeQuery } from './selectorUtils';
 
 // This type will be defined here as it is sepecific from this function
 export type DeploySummaryQueryResult = {
@@ -30,6 +31,7 @@ export async function selectDeployAORSummaryDataById(
                     (SELECT Name FROM sf_devops__Work_Items__r)
                     FROM sf_devops__Async_Operation_Result__c 
                     WHERE Id = '${aorId}'`;
-  const resp: QueryResult<DeploySummaryQueryResult> = await con.query(queryStr);
+
+  const resp: QueryResult<DeploySummaryQueryResult> = await runSafeQuery(con, queryStr);
   return resp.records[0];
 }

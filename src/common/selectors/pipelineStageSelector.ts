@@ -8,6 +8,7 @@
 import { Connection } from '@salesforce/core';
 import { QueryResult } from 'jsforce';
 import { PipelineStage } from '../types';
+import { runSafeQuery } from './selectorUtils';
 
 /**
  *
@@ -17,6 +18,7 @@ export async function selectPipelineStagesByProject(con: Connection, projectName
   const queryStr = `SELECT Id, sf_devops__Pipeline__r.sf_devops__Project__c, sf_devops__Branch__r.sf_devops__Name__c, (SELECT Id FROM sf_devops__Pipeline_Stages__r)
                     FROM sf_devops__Pipeline_Stage__c  
                     WHERE sf_devops__Pipeline__r.sf_devops__Project__r.Name = '${projectName}'`;
-  const resp: QueryResult<PipelineStage> = await con.query(queryStr);
+
+  const resp: QueryResult<PipelineStage> = await runSafeQuery(con, queryStr);
   return resp.records;
 }

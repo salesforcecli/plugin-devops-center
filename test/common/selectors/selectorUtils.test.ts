@@ -1,0 +1,80 @@
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * Licensed under the BSD 3-Clause license.
+ * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ */
+
+import { Connection, Messages } from '@salesforce/core';
+import { expect } from 'chai';
+import * as sinon from 'sinon';
+import { runSafeQuery } from '../../../src/common/selectors/selectorUtils';
+
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
+
+describe('selectorUtils', () => {
+  let sandbox: sinon.SinonSandbox;
+
+  beforeEach(async () => {
+    sandbox = sinon.createSandbox();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  describe('runSafeQuery', () => {
+    it('it handles missing connection', async () => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await runSafeQuery(null as any as Connection, 'queryString');
+      } catch (err) {
+        const error = err as Error;
+        expect(error.name).to.equal('Connection-requiredError');
+        expect(error.message).to.equal(messages.getMessage('error.connection-required'));
+      }
+    });
+
+    it('it handles missing query string', async () => {
+      const mockConnection = sandbox.createStubInstance(Connection);
+      try {
+        await runSafeQuery(mockConnection, '');
+      } catch (err) {
+        const error = err as Error;
+        expect(error.name).to.equal('Query-string-requiredError');
+        expect(error.message).to.equal(messages.getMessage('error.query-string-required'));
+      }
+    });
+
+    it('it handles no results found', async () => {
+      const mockConnection = sandbox.createStubInstance(Connection);
+      mockConnection.query.resolves({
+        done: true,
+        records: [],
+        totalSize: 0,
+      });
+
+      try {
+        await runSafeQuery(mockConnection, 'queryString');
+      } catch (err) {
+        const error = err as Error;
+        expect(error.name).to.equal('No-results-foundError');
+        expect(error.message).to.equal(messages.getMessage('error.no-results-found'));
+      }
+    });
+
+    it('it handles errored query', async () => {
+      const mockConnection = sandbox.createStubInstance(Connection);
+      mockConnection.query.throws({ name: 'BOOM' });
+
+      try {
+        await runSafeQuery(mockConnection, 'queryString');
+      } catch (err) {
+        const error = err as Error;
+        expect(error.name).to.equal('Query-failedError');
+        expect(error.message).to.equal(messages.getMessage('error.query-failed'));
+      }
+    });
+  });
+});

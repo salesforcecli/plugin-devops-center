@@ -11,6 +11,7 @@ import { Connection } from '@salesforce/core';
 import { QueryResult } from 'jsforce';
 import * as selector from '../../../src/common/selectors/pipelineStageSelector';
 import { PipelineStage } from '../../../src/common';
+import * as SelectorUtils from '../../../src/common/selectors/selectorUtils';
 
 const MOCK_PIPELINE_STAGE: PipelineStage = {
   Id: 'mock-Id',
@@ -43,7 +44,11 @@ describe('AOR selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
+    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
+
     const result = await selector.selectPipelineStagesByProject(mockConnection, 'mock-project-name');
+
+    expect(runSafeQuerySpy.called).to.equal(true);
 
     // verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);
