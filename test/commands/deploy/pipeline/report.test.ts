@@ -13,7 +13,7 @@ import { ConfigAggregator, Org } from '@salesforce/core';
 import { ConfigVars } from '../../../../src/configMeta';
 import * as DeploymentResultSelector from '../../../../src/common/selectors/deploymentResultsSelector';
 import { AsyncOperationStatus, DeploymentResult } from '../../../../src/common/types';
-import vacuum from '../../../hepers/vacuum';
+import vacuum from '../../../helpers/vacuum';
 
 const DOCE_ORG = {
   id: '1',
