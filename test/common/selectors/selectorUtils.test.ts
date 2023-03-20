@@ -73,7 +73,7 @@ describe('selectorUtils', () => {
       } catch (err) {
         const error = err as Error;
         expect(error.name).to.equal('Query-failedError');
-        expect(error.message).to.equal(messages.getMessage('error.query-failed'));
+        expect(error.message).to.equal(messages.getMessage('error.query-failed', ['BOOM']));
       }
     });
 

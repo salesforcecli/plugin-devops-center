@@ -36,7 +36,7 @@ No results found
 
 # error.query-failed
 
-Query failed
+Query failed: %s
 
 # error.connection-required
 

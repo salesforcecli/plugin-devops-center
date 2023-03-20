@@ -28,7 +28,7 @@ export async function runSafeQuery<T extends Record>(con: Connection, queryStr: 
       return result;
     }
   } catch (error) {
-    throw messages.createError('error.query-failed');
+    throw messages.createError('error.query-failed', [(error as Error).name]);
   }
 
   // If we arrive here, it means the query has no results.
