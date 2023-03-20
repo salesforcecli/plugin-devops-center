@@ -5,8 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Messages } from '@salesforce/core';
-import { Connection, QueryResult, Record } from 'jsforce';
+import { Messages, Connection } from '@salesforce/core';
+import { QueryResult, Record } from 'jsforce';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -22,7 +22,8 @@ export async function runSafeQuery<T extends Record>(con: Connection, queryStr: 
 
   // Run the query and verify for results
   try {
-    const result: QueryResult<T> = await con.query(queryStr);
+    // We query for 10000 results and we use autoFetch to queryMore automatically.
+    const result: QueryResult<T> = await con.query(queryStr, { autoFetch: true, maxFetch: 10000 });
     if (result.totalSize > 0 && result.records) {
       return result;
     }

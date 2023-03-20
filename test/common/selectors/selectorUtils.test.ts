@@ -6,7 +6,7 @@
  */
 
 import { Connection, Messages } from '@salesforce/core';
-import { expect } from 'chai';
+import { expect } from '@oclif/test';
 import * as sinon from 'sinon';
 import { runSafeQuery } from '../../../src/common/selectors/selectorUtils';
 
@@ -75,6 +75,22 @@ describe('selectorUtils', () => {
         expect(error.name).to.equal('Query-failedError');
         expect(error.message).to.equal(messages.getMessage('error.query-failed'));
       }
+    });
+
+    it('it handles a query correctly', async () => {
+      const queryReuslt = {
+        done: true,
+        records: [{ Id: 'recordId', Name: 'recordName' }],
+        totalSize: 1,
+      };
+      const mockConnection = sandbox.createStubInstance(Connection);
+      mockConnection.query.resolves(queryReuslt);
+      const result = await runSafeQuery(mockConnection, 'queryString');
+      expect(result).to.equal(queryReuslt);
+      const builderArgs = mockConnection.query.getCall(0).args;
+      expect(builderArgs[0]).to.contain('queryString');
+      expect(builderArgs[1]?.autoFetch).to.equal(true);
+      expect(builderArgs[1]?.maxFetch).to.equal(10000);
     });
   });
 });
