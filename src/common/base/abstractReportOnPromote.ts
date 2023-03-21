@@ -61,7 +61,7 @@ export abstract class ReportOnPromoteCommand<T extends typeof SfCommand> extends
         this.operationName
       );
       displayer.printOpSummary();
-    } else if (operationResult === null) {
+    } else if (!operationResult) {
       throw messages.createError('error.InvalidAorId', [asyncJobId]);
     }
 
