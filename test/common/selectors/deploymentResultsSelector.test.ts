@@ -77,4 +77,24 @@ describe('DeploymentResult selector', () => {
     // verify we used the correct filter
     expect(builderArgs[0]).to.contain(`WHERE sf_devops__Status__r.Id = '${mockAorId}'`);
   });
+
+  it('returns null when no records found', async () => {
+    const mockRecord = {
+      done: true,
+      records: [],
+      totalSize: 0,
+    };
+    const mockConnection = sandbox.createStubInstance(Connection);
+    mockConnection.query.resolves(mockRecord);
+
+    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
+
+    const result = await selector.selectOneDeploymentResultByAsyncJobId(mockConnection, 'mock-id');
+
+    expect(runSafeQuerySpy.called).to.equal(true);
+
+    // verify we received the correct result
+    expect(mockConnection.query.called).to.equal(true);
+    expect(result).to.equal(null);
+  });
 });

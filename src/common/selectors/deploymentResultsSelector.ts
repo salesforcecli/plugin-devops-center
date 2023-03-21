@@ -17,7 +17,7 @@ import { runSafeQuery } from './selectorUtils';
 export async function selectOneDeploymentResultByAsyncJobId(
   con: Connection,
   asyncJobId: string
-): Promise<DeploymentResult> {
+): Promise<DeploymentResult | null> {
   const queryStr = `SELECT sf_devops__Full_Deploy__c, sf_devops__Check_Deploy__c, sf_devops__Test_Level__c, sf_devops__Run_Tests__c, sf_devops__Completion_Date__c,
                       sf_devops__Status__r.Id, sf_devops__Status__r.CreatedDate, sf_devops__Status__r.CreatedById,
                       sf_devops__Status__r.CreatedBy.Name, sf_devops__Status__r.sf_devops__Message__c, 
@@ -25,6 +25,6 @@ export async function selectOneDeploymentResultByAsyncJobId(
                     FROM sf_devops__Deployment_Result__c  
                     WHERE sf_devops__Status__r.Id = '${asyncJobId}'`;
 
-  const resp: QueryResult<DeploymentResult> = await runSafeQuery(con, queryStr);
-  return resp.records[0];
+  const resp: QueryResult<DeploymentResult> = await runSafeQuery(con, queryStr, true);
+  return resp.totalSize > 0 ? resp.records[0] : null;
 }

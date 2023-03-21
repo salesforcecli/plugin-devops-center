@@ -11,7 +11,11 @@ import { QueryResult, Record } from 'jsforce';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export async function runSafeQuery<T extends Record>(con: Connection, queryStr: string): Promise<QueryResult<T>> {
+export async function runSafeQuery<T extends Record>(
+  con: Connection,
+  queryStr: string,
+  allowNullResults = false
+): Promise<QueryResult<T>> {
   // Parameters verification
   if (!con) {
     throw messages.createError('error.connection-required');
@@ -24,7 +28,7 @@ export async function runSafeQuery<T extends Record>(con: Connection, queryStr: 
   try {
     // We query for 10000 results and we use autoFetch to queryMore automatically.
     const result: QueryResult<T> = await con.query(queryStr, { autoFetch: true, maxFetch: 10000 });
-    if (result.totalSize > 0 && result.records) {
+    if ((result.totalSize > 0 && result.records) || (result.totalSize === 0 && allowNullResults)) {
       return result;
     }
   } catch (error) {
