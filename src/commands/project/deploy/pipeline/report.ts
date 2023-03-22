@@ -6,11 +6,11 @@
  */
 import { Messages } from '@salesforce/core';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
-import { PromotePipelineResult } from '../../../common';
-import { ReportOnPromoteCommand } from '../../../common/base/abstractReportOnPromote';
+import { PromotePipelineResult } from '../../../../common';
+import { ReportOnPromoteCommand } from '../../../../common/base/abstractReportOnPromote';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline.report');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'project.deploy.pipeline.report');
 
 export default class DeployPipelineReport extends ReportOnPromoteCommand<typeof SfCommand> {
   public static readonly description = messages.getMessage('description');

@@ -39,7 +39,7 @@ To use your plugin, run using the local `./bin/dev` or `./bin/dev.cmd` file.
 
 ```bash
 # Run using local run file.
-./bin/dev deploy pipeline
+./bin/dev project deploy pipeline start
 ```
 
 There should be no differences when running via the Salesforce CLI or using the local run file. However, it can be useful to link the plugin to do some additional testing or run your commands from anywhere on your machine.
@@ -47,6 +47,7 @@ There should be no differences when running via the Salesforce CLI or using the 
 ```bash
 # Link your plugin to the sf cli
 sf plugins link .
+
 # To verify
 sf plugins
 ```
@@ -55,17 +56,17 @@ sf plugins
 
 <!-- commands -->
 
-- [`sf deploy pipeline`](#sf-deploy-pipeline)
-- [`sf deploy pipeline report`](#sf-deploy-pipeline-report)
-- [`sf deploy pipeline resume`](#sf-deploy-pipeline-resume)
+- [`sf project deploy pipeline start`](#sf-project-deploy-pipeline-start)
+- [`sf project deploy pipeline report`](#sf-project-deploy-pipeline-report)
+- [`sf project deploy pipeline resume`](#sf-project-deploy-pipeline-resume)
 
-## `sf deploy pipeline`
+## `sf project deploy pipeline start`
 
 Deploy changes from a branch to the pipeline stage’s org.
 
 ```
 USAGE
-$ sf deploy pipeline [--json] [-c <value>] [-p <value>] [-b <value>] [-v <value>] [-a] [--async | -w <value>] [--concise | --verbose]
+$ sf project deploy pipeline start [--json] [-c <value>] [-p <value>] [-b <value>] [-v <value>] [-a] [--async | -w <value>] [--concise | --verbose]
     [-t <value>] [-l NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg]
 
 FLAGS
@@ -91,11 +92,11 @@ Before you run this command, changes in the branch must be merged in the source 
 EXAMPLES
 Deploy changes in the Staging branch to the Staging environment (sandbox), if the previous stage is the bundling stage:
 
-  $ sf deploy pipeline —-devops-center-project-name “Recruiting App” —-branch-name staging —-devops-center-username MyStagingSandbox —-bundle-version-name 1.0
+  $ sf project deploy pipeline start —-devops-center-project-name “Recruiting App” —-branch-name staging —-devops-center-username MyStagingSandbox —-bundle-version-name 1.0
 
 Deploy all changes in the main branch to the release environment:
 
-  $ sf deploy pipeline —-devops-center-project-name “Recruiting App” —-branch-name main —-devops-center-username MyReleaseOrg —-deploy-all
+  $ sf project deploy pipeline start —-devops-center-project-name “Recruiting App” —-branch-name main —-devops-center-username MyReleaseOrg —-deploy-all
 
 FLAG DESCRIPTIONS
 -a, --deploy-all  Deploy all metadata in the branch
@@ -141,21 +142,21 @@ FLAG DESCRIPTIONS
 -w, --wait=<minutes> Number of minutes to wait for command to complete and display results.
 
   If the command continues to run after the wait period, the CLI returns control of the terminal window to you and returns the job ID.
-  To check the status of the deploy operation, run "sf deploy pipeline report".
+  To check the status of the deploy operation, run "sf project deploy pipeline report".
 
 --async  Run the command asynchronously.
 
   The command immediately returns the job ID and control of the terminal to you. This way, you can continue to use the CLI. To resume the deployment,
-  run "sf deploy pipeline resume". To check the status of the deployment, run "sf deploy pipeline report".
+  run "sf project deploy pipeline resume". To check the status of the deployment, run "sf project deploy pipeline report".
 ```
 
-## `sf deploy pipeline report`
+## `sf project deploy pipeline report`
 
 Check the status of a pipeline deploy operation.
 
 ```
 USAGE
-  $ sf deploy pipeline report [--json] [-c <value>] [-i <value>] [-r]
+  $ sf project deploy pipeline report [--json] [-c <value>] [-i <value>] [-r]
 
 FLAGS
   -c, --devops-center-username=<value>  Username or alias for the DevOps Center org.
@@ -173,11 +174,11 @@ DESCRIPTION
 EXAMPLES
   Check the status using a job ID:
 
-    $ sf deploy pipeline report --devops-center-username MyStagingSandbox --job-id 0Af0x000017yLUFCA2
+    $ sf project deploy pipeline report --devops-center-username MyStagingSandbox --job-id 0Af0x000017yLUFCA2
 
   Check the status of the most recent deploy operation:
 
-    $ sf deploy pipeline report --devops-center-username MyStagingSandbox --use-most-recent
+    $ sf project deploy pipeline report --devops-center-username MyStagingSandbox --use-most-recent
 
 FLAG DESCRIPTIONS
   -c, --devops-center-username=<value> Username or alias for the DevOps Center org.
@@ -192,13 +193,13 @@ FLAG DESCRIPTIONS
 
 ```
 
-## `sf deploy pipeline resume`
+## `sf project deploy pipeline resume`
 
 Resume watching a pipeline deploy operation.
 
 ```
   USAGE
-    $ sf deploy pipeline resume [--json] [-c <value>] [-i <value>] [-r] [-w <value>]
+    $ sf project deploy pipeline resume [--json] [-c <value>] [-i <value>] [-r] [-w <value>]
 
   FLAGS
     -c, --devops-center-username=<value>  Username or alias of the DevOps Center org.
@@ -218,20 +219,20 @@ Resume watching a pipeline deploy operation.
   EXAMPLES
     Resume watching a deploy operation using a job ID:
 
-      $ sf deploy pipeline resume --job-id 0Af0x000017yLUFCA2
+      $ sf project deploy pipeline resume --job-id 0Af0x000017yLUFCA2
 
     Resume watching the most recent deploy operation:
 
-      $ sf deploy pipeline resume --use-most-recent
+      $ sf project deploy pipeline resume --use-most-recent
 
   FLAG DESCRIPTIONS
     -i, --job-id=<value>  Job ID of the pipeline deploy operation you want to resume.
 
       These commands return a job ID if they time out or you specified the --async flag:
 
-      - sf deploy pipeline
-      - sf deploy pipeline validate
-      - sf deploy pipeline quick
+      - sf project deploy pipeline start
+      - sf project deploy pipeline validate
+      - sf project deploy pipeline quick
 
       The job ID is valid for 10 days from when you started the deploy operation.
 
@@ -241,5 +242,5 @@ Resume watching a pipeline deploy operation.
 
     -w, --wait=<minutes>  Number of minutes to wait for command to complete and display results.
 
-      If the command continues to run after the wait period, the CLI returns control of the terminal window to you and returns the job ID. To check the status of the operation, run "sf deploy pipeline resume report".
+      If the command continues to run after the wait period, the CLI returns control of the terminal window to you and returns the job ID. To check the status of the operation, run "sf project deploy pipeline report".
 ```

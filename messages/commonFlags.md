@@ -26,9 +26,9 @@ Job ID of the pipeline deploy operation you want to resume.
 
 These commands return a job ID if they time out or you specified the --async flag:
 
-- sf deploy pipeline
-- sf deploy pipeline validate
-- sf deploy pipeline quick
+- sf project deploy pipeline start
+- sf project deploy pipeline validate
+- sf project deploy pipeline quick
 
 The job ID is valid for 10 days from when you started the deploy operation.
 

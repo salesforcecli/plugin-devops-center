@@ -64,7 +64,7 @@ describe('DOCeStreaming', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       streamingClient = sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
     })
-    .it('it correctly handles the stream creation', async () => {
+    .it('correctly handles the stream creation', async () => {
       await instance.monitor();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(streamingClient.called).to.equal(true);
@@ -75,7 +75,7 @@ describe('DOCeStreaming', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       streamingClient = sandbox.stub(StreamingClient, 'create' as any).throwsException({ name: 'BoomError' });
     })
-    .it('it correctly handles streamingClient error', async () => {
+    .it('correctly handles streamingClient error', async () => {
       try {
         await instance.monitor();
       } catch (error) {

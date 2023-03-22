@@ -17,7 +17,7 @@ import { OutputFlags } from './outputService';
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline.report');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'project.deploy.pipeline.report');
 
 /**
  * Interface for output methods for report operations.

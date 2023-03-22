@@ -186,7 +186,10 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
    */
   protected catch(error: Error | SfError): Promise<SfCommand.Error> {
     if (error.name.includes('GenericTimeoutError')) {
-      const err = messages.createError('error.ClientTimeout', [this.config.bin, this.id]);
+      const err = messages.createError('error.ClientTimeout', [
+        this.config.bin,
+        this.id?.split(':').slice(0, -1).join(' '),
+      ]);
       return super.catch({ ...error, name: err.name, message: err.message, code: err.code });
     }
     return super.catch(error);

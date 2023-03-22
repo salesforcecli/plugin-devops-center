@@ -10,10 +10,10 @@ import { expect, test } from '@oclif/test';
 import { TestContext } from '@salesforce/core/lib/testSetup';
 import * as sinon from 'sinon';
 import { ConfigAggregator, Org } from '@salesforce/core';
-import { ConfigVars } from '../../../../src/configMeta';
-import * as DeploymentResultSelector from '../../../../src/common/selectors/deploymentResultsSelector';
-import { AsyncOperationStatus, DeploymentResult } from '../../../../src/common/types';
-import vacuum from '../../../helpers/vacuum';
+import { ConfigVars } from '../../../../../src/configMeta';
+import * as DeploymentResultSelector from '../../../../../src/common/selectors/deploymentResultsSelector';
+import { AsyncOperationStatus, DeploymentResult } from '../../../../../src/common/types';
+import vacuum from '../../../../helpers/vacuum';
 
 const DOCE_ORG = {
   id: '1',
@@ -25,7 +25,7 @@ const DOCE_ORG = {
   },
 };
 
-describe('deploy pipeline report', () => {
+describe('project deploy pipeline report', () => {
   let sandbox: sinon.SinonSandbox;
   const mockCache = {};
   let mockDeploymentResult: DeploymentResult;
@@ -54,9 +54,9 @@ describe('deploy pipeline report', () => {
           isEnvVar: () => false,
         });
       })
-      .command(['deploy pipeline report'])
+      .command(['project deploy pipeline report'])
       .catch(() => {})
-      .it('runs deploy pipeline report without specifying any target Devops Center org', (ctx) => {
+      .it('runs project deploy pipeline report without specifying any target Devops Center org', (ctx) => {
         expect(ctx.stderr).to.contain(
           'You must specify the DevOps Center org username by indicating the -c flag on the command line or by setting the target-devops-center configuration variable.'
         );
@@ -83,18 +83,18 @@ describe('deploy pipeline report', () => {
     test
       .stdout()
       .stderr()
-      .command(['deploy pipeline report'])
+      .command(['project deploy pipeline report'])
       .catch(() => {})
-      .it('runs deploy pipeline report without any fo the required flags', (ctx) => {
+      .it('runs project deploy pipeline report without any fo the required flags', (ctx) => {
         expect(ctx.stderr).to.contain('Exactly one of the following must be provided: --job-id, --use-most-recent');
       });
 
     test
       .stdout()
       .stderr()
-      .command(['deploy pipeline report', '-r', `-i=${mockAorId}`])
+      .command(['project deploy pipeline report', '-r', `-i=${mockAorId}`])
       .catch(() => {})
-      .it('runs deploy pipeline report specifying both -r and -i flags', (ctx) => {
+      .it('runs project deploy pipeline report specifying both -r and -i flags', (ctx) => {
         expect(ctx.stderr).to.contain('--job-id cannot also be provided when using --use-most-recent');
         expect(ctx.stderr).to.contain('--use-most-recent cannot also be provided when using --job-id');
       });
@@ -102,9 +102,9 @@ describe('deploy pipeline report', () => {
     test
       .stdout()
       .stderr()
-      .command(['deploy pipeline report', '-r'])
+      .command(['project deploy pipeline report', '-r'])
       .catch(() => {})
-      .it('runs deploy pipeline report specifying -r when there are no Ids in cache', (ctx) => {
+      .it('runs project deploy pipeline report specifying -r when there are no Ids in cache', (ctx) => {
         expect(ctx.stderr).to.contain("Can't find the job ID. Verify that a pipeline promotion has been started");
       });
   });
@@ -144,7 +144,7 @@ describe('deploy pipeline report', () => {
         };
         sandbox.stub(DeploymentResultSelector, 'selectOneDeploymentResultByAsyncJobId').resolves(mockDeploymentResult);
       })
-      .command(['deploy pipeline report', `-i=${mockAorId}`])
+      .command(['project deploy pipeline report', `-i=${mockAorId}`])
       .it('correctly displays the deploy operation status of a success promotion in table format', (ctx) => {
         expect(vacuum(ctx.stdout)).to.contain(
           vacuum(`
@@ -189,7 +189,7 @@ describe('deploy pipeline report', () => {
         };
         sandbox.stub(DeploymentResultSelector, 'selectOneDeploymentResultByAsyncJobId').resolves(mockDeploymentResult);
       })
-      .command(['deploy pipeline report', `-i=${mockAorId}`])
+      .command(['project deploy pipeline report', `-i=${mockAorId}`])
       .it('correctly displays the deploy operation status of a failed promotion in table format', (ctx) => {
         expect(vacuum(ctx.stdout)).to.contain(
           vacuum(`
@@ -234,7 +234,7 @@ describe('deploy pipeline report', () => {
         };
         sandbox.stub(DeploymentResultSelector, 'selectOneDeploymentResultByAsyncJobId').resolves(mockDeploymentResult);
       })
-      .command(['deploy pipeline report', `-i=${mockAorId}`])
+      .command(['project deploy pipeline report', `-i=${mockAorId}`])
       .it('correctly displays the deploy operation status of an In Progress promotion in table format', (ctx) => {
         expect(vacuum(ctx.stdout)).to.contain(
           vacuum(`
@@ -274,7 +274,7 @@ describe('deploy pipeline report', () => {
         };
         sandbox.stub(DeploymentResultSelector, 'selectOneDeploymentResultByAsyncJobId').resolves(mockDeploymentResult);
       })
-      .command(['deploy pipeline report', `-i=${mockAorId}`, '--json'])
+      .command(['project deploy pipeline report', `-i=${mockAorId}`, '--json'])
       .it('correctly displays the deploy operation status in json format when --json flag is provided', (ctx) => {
         expect(vacuum(ctx.stdout)).to.contain(
           vacuum(`
@@ -295,7 +295,7 @@ describe('deploy pipeline report', () => {
           .stub(DeploymentResultSelector, 'selectOneDeploymentResultByAsyncJobId')
           .throwsException({ name: 'SingleRecordQuery_NoRecords' });
       })
-      .command(['deploy pipeline report', `-i=${mockAorId}`])
+      .command(['project deploy pipeline report', `-i=${mockAorId}`])
       .catch(() => {})
       .it('displays an error message when we can not find a deployment result for the given aorId', (ctx) => {
         expect(ctx.stderr).to.contains(`No job found for ID: ${mockAorId}.`);
@@ -309,7 +309,7 @@ describe('deploy pipeline report', () => {
           .stub(DeploymentResultSelector, 'selectOneDeploymentResultByAsyncJobId')
           .throws({ message: 'unexpected error' });
       })
-      .command(['deploy pipeline report', `-i=${mockAorId}`])
+      .command(['project deploy pipeline report', `-i=${mockAorId}`])
       .catch(() => {})
       .it('displays an error message when we get an unexpected error', (ctx) => {
         expect(ctx.stderr).to.contains('unexpected error');

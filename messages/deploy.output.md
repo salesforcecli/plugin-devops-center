@@ -1,8 +1,8 @@
 # output.async-run-info
 
 Deploy has been queued.
-Run "sf deploy pipeline resume --job-id %s to resume watching the deploy.
-Run "sf deploy pipeline report --job-id %s to get the latest status.
+Run "sf project deploy pipeline resume --job-id %s to resume watching the deploy.
+Run "sf project deploy pipeline report --job-id %s to get the latest status.
 
 # output.item
 

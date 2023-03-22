@@ -17,7 +17,3 @@ Run this command by either passing it a job ID or specifying the --use-most-rece
 - Resume watching the most recent deploy operation:
 
       <%= config.bin %> <%= command.id %> --use-most-recent
-
-# error.ClientTimeout
-
-The command has timed out, although it is still running. To check the status of the deploy operation, run "sf deploy pipeline report".
