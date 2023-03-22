@@ -293,7 +293,19 @@ describe('deploy pipeline report', () => {
       .do(() => {
         sandbox
           .stub(DeploymentResultSelector, 'selectOneDeploymentResultByAsyncJobId')
-          .throwsException({ name: 'SingleRecordQuery_NoRecords' });
+          .throwsException({ name: 'AnyError', message: 'AnyErrorMessage' });
+      })
+      .command(['deploy pipeline report', `-i=${mockAorId}`])
+      .catch(() => {})
+      .it('displays an error message when the query throws an error', (ctx) => {
+        expect(ctx.stderr).to.contains('AnyErrorMessage');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        sandbox.stub(DeploymentResultSelector, 'selectOneDeploymentResultByAsyncJobId').resolves(null);
       })
       .command(['deploy pipeline report', `-i=${mockAorId}`])
       .catch(() => {})

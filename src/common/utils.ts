@@ -5,10 +5,10 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { Connection, Messages, Org, SfError } from '@salesforce/core';
+import { Connection, Messages, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import { getString, Nullable } from '@salesforce/ts-types';
-import { ApiError, PipelineStage, TestLevel } from '../common';
+import { Nullable } from '@salesforce/ts-types';
+import { PipelineStage, TestLevel } from '../common';
 import { selectPipelineStagesByProject } from '../common/selectors/pipelineStageSelector';
 import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
 import { colorStatus } from './outputService/outputUtils';
@@ -56,11 +56,11 @@ export async function fetchAndValidatePipelineStage(
   try {
     stages = await selectPipelineStagesByProject(targetOrg.getConnection(), projectName);
   } catch (err) {
-    const error = err as ApiError;
-    if (error.errorCode === 'INVALID_TYPE') {
+    const error = err as Error;
+    if (error.name === 'Query-failedError') {
       throw messages.createError('error.DevopsAppNotInstalled');
     }
-    throw new SfError(getString(err, 'errorMessage', 'unknown'), getString(err, 'errorStatusCode', 'unknown'));
+    throw err;
   }
   if (!stages.length) {
     throw messages.createError('error.ProjectNotFound', [projectName]);
@@ -81,7 +81,7 @@ export async function fetchAsyncOperationResult(con: Connection, aorId: string):
     aor = await selectAsyncOperationResultById(con, aorId);
   } catch (err) {
     const error = err as Error;
-    if (error.name === 'SingleRecordQuery_NoRecords') {
+    if (error.name === 'No-results-foundError') {
       throw messages.createError('error.InvalidAorId', [aorId]);
     }
     throw err;

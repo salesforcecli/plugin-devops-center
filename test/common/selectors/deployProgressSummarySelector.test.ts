@@ -16,6 +16,7 @@ import {
   selectDeployAORSummaryDataById,
 } from '../../../src/common/selectors/deployProgressSummarySelector';
 import { WorkItemPromote } from '../../../src/common/types';
+import * as SelectorUtils from '../../../src/common/selectors/selectorUtils';
 
 const WORK_ITEM_1: WorkItemPromote = {
   sf_devops__Pipeline_Stage__r: {
@@ -92,7 +93,11 @@ describe('deploy progress sumary selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
+    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
+
     const result = await selectDeployAORSummaryDataById(mockConnection, 'AAA');
+
+    expect(runSafeQuerySpy.called).to.equal(true);
 
     // Verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);
