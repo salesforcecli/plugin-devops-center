@@ -295,7 +295,7 @@ describe('project deploy pipeline report', () => {
           .stub(DeploymentResultSelector, 'selectOneDeploymentResultByAsyncJobId')
           .throwsException({ name: 'AnyError', message: 'AnyErrorMessage' });
       })
-      .command(['deploy pipeline report', `-i=${mockAorId}`])
+      .command(['project deploy pipeline report', `-i=${mockAorId}`])
       .catch(() => {})
       .it('displays an error message when the query throws an error', (ctx) => {
         expect(ctx.stderr).to.contains('AnyErrorMessage');
