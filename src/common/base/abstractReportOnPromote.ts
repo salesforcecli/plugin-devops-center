@@ -49,33 +49,27 @@ export abstract class ReportOnPromoteCommand<T extends typeof SfCommand> extends
       : (this.flags['job-id'] as string);
     const org = this.flags['devops-center-username'] as Org;
 
-    try {
-      // query the deployment result related to the promote operation.
-      const operationResult: DeploymentResult = await selectOneDeploymentResultByAsyncJobId(
-        org.getConnection(),
-        asyncJobId
+    // query the deployment result related to the promote operation.
+    const operationResult: DeploymentResult | null = await selectOneDeploymentResultByAsyncJobId(
+      org.getConnection(),
+      asyncJobId
+    );
+    if (operationResult && !this.jsonEnabled()) {
+      const displayer: OutputService = new OutputServiceFactory().forPromotionReport(
+        this.flags,
+        operationResult,
+        this.operationName
       );
-      if (!this.jsonEnabled()) {
-        const displayer: OutputService = new OutputServiceFactory().forPromotionReport(
-          this.flags,
-          operationResult,
-          this.operationName
-        );
-        displayer.printOpSummary();
-      }
-
-      return {
-        jobId: asyncJobId,
-        status: operationResult.sf_devops__Status__r.sf_devops__Status__c,
-        message: operationResult.sf_devops__Status__r.sf_devops__Message__c,
-        errorDetails: operationResult.sf_devops__Status__r.sf_devops__Error_Details__c,
-      };
-    } catch (err) {
-      const error = err as Error;
-      if (error.name === 'SingleRecordQuery_NoRecords') {
-        throw messages.createError('error.InvalidAorId', [asyncJobId]);
-      }
-      throw err;
+      displayer.printOpSummary();
+    } else if (!operationResult) {
+      throw messages.createError('error.InvalidAorId', [asyncJobId]);
     }
+
+    return {
+      jobId: asyncJobId,
+      status: operationResult.sf_devops__Status__r.sf_devops__Status__c,
+      message: operationResult.sf_devops__Status__r.sf_devops__Message__c,
+      errorDetails: operationResult.sf_devops__Status__r.sf_devops__Error_Details__c,
+    };
   }
 }

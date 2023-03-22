@@ -12,6 +12,7 @@ import { Connection } from '@salesforce/core';
 import sinon = require('sinon');
 import { selectDeployComponentsByAsyncOpId } from '../../../src/common/selectors/deployComponentsSelector';
 import { DeployComponent } from '../../../src/common/types';
+import * as SelectorUtils from '../../../src/common/selectors/selectorUtils';
 
 const MOCK_DEPLOY_COMPONENT: DeployComponent = {
   sf_devops__Source_Component__c: 'apexClass:foo',
@@ -38,7 +39,12 @@ describe('endpoint selector', () => {
       totalSize: 1,
     });
 
+    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
+
     const result = await selectDeployComponentsByAsyncOpId(mockConnection, 'ABC');
+
+    // Verify we call the correct method
+    expect(runSafeQuerySpy.called).to.equal(true);
 
     // Verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);
