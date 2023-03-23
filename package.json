@@ -79,7 +79,6 @@
     "topics": {
       "project": {
         "external": true,
-        "description": "TODO",
         "subtopics": {
           "deploy": {
             "description": "Commands to deploy artifacts to an environment.",
