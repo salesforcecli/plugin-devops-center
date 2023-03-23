@@ -283,7 +283,7 @@ describe('project deploy pipeline start', () => {
         requestMock = sinon.stub().resolves('mock-aor-id');
       })
       .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch', '--async'])
-      .it('cache the aorId when running project deploy pipeline start with the async flag', async () => {
+      .it('caches the aorId when running project deploy pipeline start with the async flag', async () => {
         const cache = await DeployPipelineCache.create();
         const key = cache.getLatestKeyOrThrow();
         expect(key).not.to.be.undefined;
@@ -322,7 +322,7 @@ describe('project deploy pipeline start', () => {
         sandbox.stub(Utils, 'fetchAsyncOperationResult').resolves({ Id: 'MockId' });
       })
       .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
-      .it('cache the aorId when running project deploy pipeline start without the async flag', async () => {
+      .it('caches the aorId when running project deploy pipeline start without the async flag', async () => {
         const cache = await DeployPipelineCache.create();
         const key = cache.getLatestKeyOrThrow();
         expect(key).not.to.be.undefined;

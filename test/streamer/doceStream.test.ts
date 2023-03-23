@@ -39,7 +39,6 @@ const stubStreamingClient = async (options?: StreamingClient.Options) => ({
     }),
 });
 
-//
 const testProcessor = (event: JsonMap) => ({ completed: true, payload: event.payload } as StatusResult);
 
 describe('DOCeStreaming', () => {

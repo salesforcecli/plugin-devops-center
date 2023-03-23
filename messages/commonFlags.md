@@ -8,7 +8,7 @@ Username or alias for the DevOps Center org.
 
 # flags.wait.description
 
-If the command continues to run after the wait period, the CLI returns control of the terminal window to you and returns the job ID. To check the status of the operation, run "<%= config.bin %> <%= command.id %> report".
+If the command continues to run after the wait period, the CLI returns control of the terminal window to you and returns the job ID. To check the status of the operation, run "<%= config.bin %> <%= command.id.split(' ').slice(0, -1).join(' ') %> report".
 
 # flags.wait.summary
 

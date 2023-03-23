@@ -83,7 +83,7 @@ describe('project deploy pipeline resume', () => {
       .stderr()
       .command(['project deploy pipeline resume'])
       .catch(() => {})
-      .it('runs project deploy pipeline resume without any fo the required flags', (ctx) => {
+      .it('runs project deploy pipeline resume without any of the required flags', (ctx) => {
         expect(ctx.stderr).to.contain('Exactly one of the following must be provided: --job-id, --use-most-recent');
       });
 
