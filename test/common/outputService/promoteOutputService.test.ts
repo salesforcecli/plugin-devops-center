@@ -12,16 +12,9 @@ import * as sinon from 'sinon';
 import { Messages, Org } from '@salesforce/core';
 import { ux } from '@oclif/core';
 import { Optional } from '@salesforce/ts-types';
-import {
-  ChangeBundleInstall,
-  NamedCredential,
-  WorkItem,
-  WorkItemPromote,
-  DeployComponent,
-} from '../../../src/common/types';
+import { ChangeBundleInstall, WorkItem, WorkItemPromote, DeployComponent } from '../../../src/common/types';
 import * as DeploySelector from '../../../src/common/selectors/deployProgressSummarySelector';
 import { AsyncOperationType } from '../../../src/common/constants';
-import * as EndpointSelector from '../../../src/common/selectors/namedCredentialSelector';
 import * as StageSelector from '../../../src/common/selectors/environmentSelector';
 import * as WorkItemSelector from '../../../src/common/selectors/workItemSelector';
 import { AbstractPromoteOutputService, DeploySummaryBuilder } from '../../../src/common/outputService';
@@ -132,11 +125,7 @@ describe('promoteOutputService', () => {
     const workItem1Name = 'WI1';
     const workItem2Name = 'WI2';
     const stageName = 'UAT';
-    const orgUrl = 'www.example.com';
-
-    const namedCredential: NamedCredential = {
-      Endpoint: orgUrl,
-    };
+    const environmentName = 'envName';
 
     test
       .stdout()
@@ -167,6 +156,7 @@ describe('promoteOutputService', () => {
             sf_devops__Pipeline_Stages__r: undefined,
             sf_devops__Environment__r: {
               Id: 'E',
+              Name: environmentName,
               sf_devops__Named_Credential__c: envNamedCredential,
             },
           },
@@ -194,8 +184,6 @@ describe('promoteOutputService', () => {
           sf_devops__Work_Items__r: null,
           sf_devops__Operation__c: AsyncOperationType.AD_HOC_PROMOTE,
         });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sandbox.stub(EndpointSelector, 'selectNamedCredentialByName').resolves(namedCredential);
         await outputServiceParam.printOpSummary();
       }
 
@@ -205,7 +193,7 @@ describe('promoteOutputService', () => {
         expect(ctx.stdout).to.contain(
           `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work item ${workItem1Name}.`
         );
-        expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${orgUrl}.`);
+        expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${environmentName}.`);
       });
 
       test.stdout().it('prints the correct message for a multiple WIs ad hoc deployment', async (ctx) => {
@@ -214,7 +202,7 @@ describe('promoteOutputService', () => {
         expect(ctx.stdout).to.contain(
           `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work items ${workItem1Name}, ${workItem2Name}.`
         );
-        expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${orgUrl}.`);
+        expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${environmentName}.`);
       });
 
       test.stdout().it('prints the correct message for concise flag for adHoc', async (ctx) => {
@@ -222,7 +210,7 @@ describe('promoteOutputService', () => {
         const workItemsPromote: WorkItemPromote[] = [mockWorkItemPromote1, mockWorkItemPromote2];
         await adHocDeploy(workItemsPromote, outputService);
         expect(ctx.stdout).to.contain(
-          `DevOps Center pipeline stage ${stageName} being updated. Deploying metadata from ${branchName} branch to target org ${orgUrl}.`
+          `DevOps Center pipeline stage ${stageName} being updated. Deploying metadata from ${branchName} branch to target org ${environmentName}.`
         );
       });
     });
@@ -231,6 +219,7 @@ describe('promoteOutputService', () => {
       return {
         sf_devops__Environment__r: {
           Id: 'E',
+          Name: environmentName,
           sf_devops__Named_Credential__c: envNamedCredential,
         },
         sf_devops__Change_Bundle__r: {
@@ -282,11 +271,8 @@ describe('promoteOutputService', () => {
           sf_devops__Operation__c: AsyncOperationType.SOUP_PROMOTE,
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sandbox.stub(EndpointSelector, 'selectNamedCredentialByName').resolves(namedCredential);
-
         sandbox.stub(StageSelector, 'selectPipelineStageByEnvironment').resolves({
-          sf_devops__Named_Credential__c: 'ABC',
+          Name: environmentName,
           sf_devops__Pipeline_Stages__r: {
             done: true,
             totalSize: 1,
@@ -303,6 +289,7 @@ describe('promoteOutputService', () => {
                 sf_devops__Pipeline_Stages__r: undefined,
                 sf_devops__Environment__r: {
                   Id: 'E',
+                  Name: environmentName,
                   sf_devops__Named_Credential__c: 'ABC',
                 },
               },
@@ -316,14 +303,14 @@ describe('promoteOutputService', () => {
         expect(ctx.stdout).to.contain(
           `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work items ${workItem1Name}, ${workItem2Name} in bundle ${changeBundleInstall1VersionName}.`
         );
-        expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${orgUrl}.`);
+        expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${environmentName}.`);
       });
 
       test.stdout().it('prints the correct message for concise flag for soup', async (ctx) => {
         outputService = getOutputService(true, false);
         await outputService.printOpSummary();
         expect(ctx.stdout).to.contain(
-          `DevOps Center pipeline stage ${stageName} being updated. Deploying metadata from ${branchName} branch to target org ${orgUrl}.`
+          `DevOps Center pipeline stage ${stageName} being updated. Deploying metadata from ${branchName} branch to target org ${environmentName}.`
         );
       });
     });
@@ -368,11 +355,8 @@ describe('promoteOutputService', () => {
           sf_devops__Operation__c: AsyncOperationType.VERSIONED_PROMOTE,
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sandbox.stub(EndpointSelector, 'selectNamedCredentialByName').resolves(namedCredential);
-
         sandbox.stub(StageSelector, 'selectPipelineStageByEnvironment').resolves({
-          sf_devops__Named_Credential__c: 'ABC',
+          Name: environmentName,
           sf_devops__Pipeline_Stages__r: {
             done: true,
             totalSize: 1,
@@ -389,6 +373,7 @@ describe('promoteOutputService', () => {
                 sf_devops__Pipeline_Stages__r: undefined,
                 sf_devops__Environment__r: {
                   Id: 'E',
+                  Name: environmentName,
                   sf_devops__Named_Credential__c: 'ABC',
                 },
               },
@@ -429,14 +414,14 @@ describe('promoteOutputService', () => {
         expect(ctx.stdout).to.contain(
           `DevOps Center pipeline stage ${stageName} being updated with metadata associated with work items ${workItem1Name}, ${workItem2Name} in bundle ${changeBundleInstall1VersionName}; work item ${workItem3Name} in bundle ${changeBundleInstall2VersionName}.`
         );
-        expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${orgUrl}.`);
+        expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${environmentName}.`);
       });
 
       test.stdout().it('prints the correct message for concise flag for versioned', async (ctx) => {
         outputService = getOutputService(true, false);
         await outputService.printOpSummary();
         expect(ctx.stdout).to.contain(
-          `DevOps Center pipeline stage ${stageName} being updated. Deploying metadata from ${branchName} branch to target org ${orgUrl}.`
+          `DevOps Center pipeline stage ${stageName} being updated. Deploying metadata from ${branchName} branch to target org ${environmentName}.`
         );
       });
     });
