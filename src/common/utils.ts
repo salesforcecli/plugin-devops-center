@@ -59,11 +59,10 @@ export async function fetchAndValidatePipelineStage(
     const error = err as Error;
     if (error.name === 'Query-failedError') {
       throw messages.createError('error.DevopsAppNotInstalled');
+    } else if (error.name === 'No-results-foundError') {
+      throw messages.createError('error.ProjectNotFound', [projectName]);
     }
     throw err;
-  }
-  if (!stages.length) {
-    throw messages.createError('error.ProjectNotFound', [projectName]);
   }
   // find stage by branch name
   const stage: PipelineStage | undefined = stages.find(

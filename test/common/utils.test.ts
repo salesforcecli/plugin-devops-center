@@ -91,8 +91,7 @@ describe('utils', () => {
     });
 
     it('fails when we do not find a project with the given name', async () => {
-      mockPipelineStageRecords = [];
-      sandbox.stub(PipelineSelector, 'selectPipelineStagesByProject').resolves(mockPipelineStageRecords);
+      sandbox.stub(PipelineSelector, 'selectPipelineStagesByProject').throws({ name: 'No-results-foundError' });
 
       try {
         await fetchAndValidatePipelineStage(stubOrg, PROJECT_NAME, BRANCH_NAME_1);
