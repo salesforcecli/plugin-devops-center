@@ -12,7 +12,7 @@ import { runSafeQuery } from './selectorUtils';
 
 // This type will be defined here as it is sepecific from this function
 export type EnvQueryResult = {
-  sf_devops__Named_Credential__c: string;
+  Name: string;
   sf_devops__Pipeline_Stages__r: QueryResult<PipelineStage>;
 };
 
@@ -20,7 +20,7 @@ export type EnvQueryResult = {
  * Returns the named credential and pipeline stage name associated with the envId sent
  */
 export async function selectPipelineStageByEnvironment(con: Connection, envId: string): Promise<EnvQueryResult> {
-  const queryStr = `SELECT sf_devops__Named_Credential__c, 
+  const queryStr = `SELECT Name, 
                     (SELECT Name FROM sf_devops__Pipeline_Stages__r)
                     FROM sf_devops__Environment__c 
                     WHERE Id = '${envId}'`;

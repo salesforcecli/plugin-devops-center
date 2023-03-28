@@ -31,6 +31,7 @@ const WORK_ITEM_1: WorkItemPromote = {
     sf_devops__Pipeline_Stages__r: undefined,
     sf_devops__Environment__r: {
       Id: 'ABC',
+      Name: 'envName',
       sf_devops__Named_Credential__c: 'DEF',
     },
   },
@@ -52,6 +53,7 @@ const WORK_ITEM_2: WorkItemPromote = {
     sf_devops__Pipeline_Stages__r: undefined,
     sf_devops__Environment__r: {
       Id: 'ABC',
+      Name: 'envName',
       sf_devops__Named_Credential__c: 'DEF',
     },
   },
@@ -112,7 +114,7 @@ describe('deploy progress sumary selector', () => {
 
     // Verify we queried the correct references
     expect(builderArgs[0]).to.contain(
-      'SELECT sf_devops__Pipeline_Stage__r.Name, sf_devops__Pipeline_Stage__r.sf_devops__Environment__r.sf_devops__Named_Credential__c, sf_devops__Work_Item__r.Name FROM sf_devops__Work_Item_Promotes__r'
+      'SELECT sf_devops__Pipeline_Stage__r.Name, sf_devops__Pipeline_Stage__r.sf_devops__Environment__r.sf_devops__Named_Credential__c, sf_devops__Pipeline_Stage__r.sf_devops__Environment__r.Name, sf_devops__Work_Item__r.Name FROM sf_devops__Work_Item_Promotes__r'
     );
     expect(builderArgs[0]).to.contain(
       'SELECT sf_devops__Change_Bundle__r.Id, sf_devops__Change_Bundle__r.sf_devops__Version_Name__c, sf_devops__Environment__r.Id FROM sf_devops__Change_Bundle_Installs__r'

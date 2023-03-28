@@ -26,6 +26,7 @@ const MOCK_PIPELINE_STAGE: PipelineStage = {
   Name: 'staging',
   sf_devops__Environment__r: {
     Id: 'AAA',
+    Name: 'envName',
     sf_devops__Named_Credential__c: 'ABC',
   },
 };
@@ -46,7 +47,7 @@ describe('environment selector', () => {
       done: true,
       records: [
         {
-          sf_devops__Named_Credential__c: 'ABC',
+          Name: 'ABC',
           sf_devops__Pipeline_Stages__r: {
             done: true,
             records: [MOCK_PIPELINE_STAGE],
@@ -77,7 +78,7 @@ describe('environment selector', () => {
     expect(builderArgs[0]).to.contain('SELECT Name FROM sf_devops__Pipeline_Stages__r');
 
     // Verify we queried the correct fields
-    expect(builderArgs[0]).to.contain('sf_devops__Named_Credential__c');
+    expect(builderArgs[0]).to.contain('Name');
 
     // Verify we used the correct filter
     expect(builderArgs[0]).to.contain("WHERE Id = 'AAA'");

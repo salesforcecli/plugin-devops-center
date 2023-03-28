@@ -24,6 +24,7 @@ const MOCK_PIPELINE_STAGE: PipelineStage = {
   Name: 'stage',
   sf_devops__Environment__r: {
     Id: 'ABC',
+    Name: 'envName',
     sf_devops__Named_Credential__c: 'AAA',
   },
 };

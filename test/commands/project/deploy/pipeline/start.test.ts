@@ -144,6 +144,7 @@ describe('project deploy pipeline start', () => {
           sf_devops__Pipeline_Stages__r: undefined,
           sf_devops__Environment__r: {
             Id: 'envId',
+            Name: 'envName',
             sf_devops__Named_Credential__c: 'ABC',
           },
         };
@@ -190,6 +191,7 @@ describe('project deploy pipeline start', () => {
           sf_devops__Pipeline_Stages__r: undefined,
           sf_devops__Environment__r: {
             Id: 'envId',
+            Name: 'envName',
             sf_devops__Named_Credential__c: 'ABC',
           },
         };
@@ -229,6 +231,7 @@ describe('project deploy pipeline start', () => {
           sf_devops__Pipeline_Stages__r: undefined,
           sf_devops__Environment__r: {
             Id: 'envId',
+            Name: 'envName',
             sf_devops__Named_Credential__c: 'ABC',
           },
         };
@@ -274,6 +277,7 @@ describe('project deploy pipeline start', () => {
           sf_devops__Pipeline_Stages__r: undefined,
           sf_devops__Environment__r: {
             Id: 'envId',
+            Name: 'envName',
             sf_devops__Named_Credential__c: 'ABC',
           },
         };
@@ -306,6 +310,7 @@ describe('project deploy pipeline start', () => {
           sf_devops__Pipeline_Stages__r: undefined,
           sf_devops__Environment__r: {
             Id: 'envId',
+            Name: 'envName',
             sf_devops__Named_Credential__c: 'ABC',
           },
         };
@@ -361,6 +366,7 @@ describe('project deploy pipeline start', () => {
           Name: 'mock',
           sf_devops__Environment__r: {
             Id: 'envId',
+            Name: 'envName',
             sf_devops__Named_Credential__c: 'ABC',
           },
         };
@@ -397,6 +403,7 @@ describe('project deploy pipeline start', () => {
           Name: 'mock',
           sf_devops__Environment__r: {
             Id: 'envId',
+            Name: 'envName',
             sf_devops__Named_Credential__c: 'ABC',
           },
         };
@@ -444,6 +451,7 @@ describe('project deploy pipeline start', () => {
           Name: 'mock',
           sf_devops__Environment__r: {
             Id: 'envId',
+            Name: 'envName',
             sf_devops__Named_Credential__c: 'ABC',
           },
         };
@@ -483,6 +491,7 @@ describe('project deploy pipeline start', () => {
             Name: 'mock',
             sf_devops__Environment__r: {
               Id: 'envId',
+              Name: 'envName',
               sf_devops__Named_Credential__c: 'ABC',
             },
           };
@@ -525,6 +534,7 @@ describe('project deploy pipeline start', () => {
             Name: 'mock',
             sf_devops__Environment__r: {
               Id: 'envId',
+              Name: 'envName',
               sf_devops__Named_Credential__c: 'ABC',
             },
             sf_devops__Pipeline_Stages__r: {
@@ -540,6 +550,7 @@ describe('project deploy pipeline start', () => {
                   Name: 'mock',
                   sf_devops__Environment__r: {
                     Id: 'envId',
+                    Name: 'envName',
                     sf_devops__Named_Credential__c: 'ABC',
                   },
                 },
@@ -585,6 +596,7 @@ describe('project deploy pipeline start', () => {
           sf_devops__Pipeline_Stages__r: undefined,
           sf_devops__Environment__r: {
             Id: 'envId',
+            Name: 'envName',
             sf_devops__Named_Credential__c: 'ABC',
           },
         };
