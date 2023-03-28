@@ -46,7 +46,7 @@ If you don’t specify a test level, the default behavior depends on the content
 
 # promote.async.description
 
-The command immediately returns the job ID and control of the terminal to you. This way, you can continue to use the CLI. To resume the deployment, run "sf deploy pipeline resume". To check the status of the deployment, run "sf deploy pipeline report".
+The command immediately returns the job ID and control of the terminal to you. This way, you can continue to use the CLI. To resume the deployment, run "sf project deploy pipeline resume". To check the status of the deployment, run "sf project deploy pipeline report".
 
 # promote.async.summary
 

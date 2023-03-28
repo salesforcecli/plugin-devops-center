@@ -21,7 +21,7 @@ import { AbstractPromoteOutputService, DeploySummaryBuilder } from '../../../src
 import * as Utils from '../../../src/common/utils';
 
 Messages.importMessagesDirectory(__dirname);
-const tableElements = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
+const tableElements = Messages.loadMessages('@salesforce/plugin-devops-center', 'project.deploy.pipeline.start');
 
 class PromoteOutputServiceTest extends AbstractPromoteOutputService {}
 
@@ -47,8 +47,12 @@ describe('promoteOutputService', () => {
       outputService.setAorId(mockId);
       await outputService.printOpSummary();
       expect(ctx.stdout).to.contain('Deploy has been queued.');
-      expect(ctx.stdout).to.contain(`Run "sf deploy pipeline resume --job-id ${mockId} to resume watching the deploy.`);
-      expect(ctx.stdout).to.contain(`Run "sf deploy pipeline report --job-id ${mockId} to get the latest status.`);
+      expect(ctx.stdout).to.contain(
+        `Run "sf project deploy pipeline resume --job-id ${mockId} to resume watching the deploy.`
+      );
+      expect(ctx.stdout).to.contain(
+        `Run "sf project deploy pipeline report --job-id ${mockId} to get the latest status.`
+      );
     });
   });
 

@@ -25,7 +25,7 @@ describe('selectorUtils', () => {
   });
 
   describe('runSafeQuery', () => {
-    it('it handles missing connection', async () => {
+    it('handles missing connection', async () => {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await runSafeQuery(null as any as Connection, 'queryString');
@@ -36,7 +36,7 @@ describe('selectorUtils', () => {
       }
     });
 
-    it('it handles missing query string', async () => {
+    it('handles missing query string', async () => {
       const mockConnection = sandbox.createStubInstance(Connection);
       try {
         await runSafeQuery(mockConnection, '');
@@ -47,7 +47,7 @@ describe('selectorUtils', () => {
       }
     });
 
-    it('it handles no results found', async () => {
+    it('handles no results found', async () => {
       const mockConnection = sandbox.createStubInstance(Connection);
       mockConnection.query.resolves({
         done: true,
@@ -64,7 +64,7 @@ describe('selectorUtils', () => {
       }
     });
 
-    it('it handles errored query', async () => {
+    it('handles errored query', async () => {
       const mockConnection = sandbox.createStubInstance(Connection);
       mockConnection.query.throws({ name: 'BOOM' });
 
@@ -77,7 +77,7 @@ describe('selectorUtils', () => {
       }
     });
 
-    it('it handles a query correctly', async () => {
+    it('handles a query correctly', async () => {
       const queryReuslt = {
         done: true,
         records: [{ Id: 'recordId', Name: 'recordName' }],

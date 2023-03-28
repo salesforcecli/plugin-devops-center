@@ -74,7 +74,7 @@ describe('AsyncOpStreaming', () => {
   });
 
   describe('watchForSObject', () => {
-    test.it('it starts the stream', async () => {
+    test.it('starts the stream', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -92,13 +92,13 @@ describe('AsyncOpStreaming', () => {
   });
 
   describe('matchingProcessor', () => {
-    test.stdout().it('it does not call the matchProcessor if the Id is different', async () => {
+    test.stdout().it('does not call the matchProcessor if the Id is different', async () => {
       const result = instance.matchingProcessorTest(channelEvent, processorSpy);
       expect(result.completed).to.equal(false);
       expect(processorSpy.called).to.equal(false);
     });
 
-    test.stdout().it('it does not call the matchProcessor if recordIds is null', async () => {
+    test.stdout().it('does not call the matchProcessor if recordIds is null', async () => {
       const event = {
         payload: {
           // eslint-disable-next-line camelcase
@@ -113,7 +113,7 @@ describe('AsyncOpStreaming', () => {
       expect(processorSpy.called).to.equal(false);
     });
 
-    test.it('it does call the matchProcessor', async () => {
+    test.it('does call the matchProcessor', async () => {
       channelEvent.payload.ChangeEventHeader = { recordIds: ['001000000000001'] };
       const result = instance.matchingProcessorTest(channelEvent, processorSpy);
       expect(result.completed).to.equal(true);
@@ -121,7 +121,7 @@ describe('AsyncOpStreaming', () => {
       expect(processorSpy.called).to.equal(true);
     });
 
-    test.it('Incomplete payload', async () => {
+    test.it('incomplete payload', async () => {
       const event = {
         payload: {
           // eslint-disable-next-line camelcase

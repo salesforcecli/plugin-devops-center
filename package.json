@@ -77,11 +77,16 @@
       "@salesforce/plugin-command-reference"
     ],
     "topics": {
-      "deploy": {
-        "description": "Commands to deploy artifacts to an environment.",
+      "project": {
+        "external": true,
         "subtopics": {
-          "pipeline": {
-            "description": "Commands to deploy metadata from a pipeline stage to a Salesforce org."
+          "deploy": {
+            "description": "Commands to deploy artifacts to an environment.",
+            "subtopics": {
+              "pipeline": {
+                "description": "Commands to deploy metadata from a pipeline stage to a Salesforce org."
+              }
+            }
           }
         }
       }

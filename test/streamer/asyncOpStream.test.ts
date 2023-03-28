@@ -75,7 +75,7 @@ describe('AsyncOpStreaming', () => {
   });
 
   describe('startStreaming', () => {
-    it('it calls startStream', async () => {
+    it('calls startStream', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const startStream = sandbox.stub(AsyncOpStreamingTest.prototype, 'startStream' as any);
       await instance.monitor();
@@ -85,7 +85,7 @@ describe('AsyncOpStreaming', () => {
   });
 
   describe('startAsyncOpStreamProcessor', () => {
-    test.stdout().it('it handles a completed event', async (ctx) => {
+    test.stdout().it('handles a completed event', async (ctx) => {
       const result = instance.asyncOpStreamProcessorStub(completedEvent);
 
       expect(result.completed).to.be.equal(true);
@@ -93,14 +93,14 @@ describe('AsyncOpStreaming', () => {
       expect(ctx.stdout).to.contain('prints something completed');
     });
 
-    test.stdout().it('it handles an inPorgress event', async (ctx) => {
+    test.stdout().it('handles an inPorgress event', async (ctx) => {
       const result = instance.asyncOpStreamProcessorStub(inProgressEvent);
 
       expect(result.completed).to.be.equal(false);
       expect(ctx.stdout).to.contain('prints something in progress');
     });
 
-    test.stdout().it('it handles an error', async (ctx) => {
+    test.stdout().it('handles an error', async (ctx) => {
       const result = instance.asyncOpStreamProcessorStub(errorEvent);
 
       expect(result.completed).to.be.equal(true);

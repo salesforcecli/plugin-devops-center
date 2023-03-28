@@ -10,11 +10,11 @@ import { expect, test } from '@oclif/test';
 import { TestContext } from '@salesforce/core/lib/testSetup';
 import * as sinon from 'sinon';
 import { ConfigAggregator, Org } from '@salesforce/core';
-import { ConfigVars } from '../../../../src/configMeta';
-import * as AorSelector from '../../../../src/common/selectors/asyncOperationResultsSelector';
-import { AsyncOperationResult, AsyncOperationStatus } from '../../../../src/common/types';
-import AsyncOpStreaming from '../../../../src/streamer/processors/asyncOpStream';
-import * as Utils from '../../../../src/common/utils';
+import { ConfigVars } from '../../../../../src/configMeta';
+import * as AorSelector from '../../../../../src/common/selectors/asyncOperationResultsSelector';
+import { AsyncOperationResult, AsyncOperationStatus } from '../../../../../src/common/types';
+import AsyncOpStreaming from '../../../../../src/streamer/processors/asyncOpStream';
+import * as Utils from '../../../../../src/common/utils';
 
 const DOCE_ORG = {
   id: '1',
@@ -26,7 +26,7 @@ const DOCE_ORG = {
   },
 };
 
-describe('deploy pipeline resume', () => {
+describe('project deploy pipeline resume', () => {
   let sandbox: sinon.SinonSandbox;
   const mockCache = {};
   let mockAorRecord: AsyncOperationResult;
@@ -56,9 +56,9 @@ describe('deploy pipeline resume', () => {
     test
       .stdout()
       .stderr()
-      .command(['deploy pipeline resume'])
+      .command(['project deploy pipeline resume'])
       .catch(() => {})
-      .it('runs deploy pipeline resume without specifying any target Devops Center org', (ctx) => {
+      .it('runs project deploy pipeline resume without specifying any target Devops Center org', (ctx) => {
         expect(ctx.stderr).to.contain(
           'You must specify the DevOps Center org username by indicating the -c flag on the command line or by setting the target-devops-center configuration variable.'
         );
@@ -81,18 +81,18 @@ describe('deploy pipeline resume', () => {
     test
       .stdout()
       .stderr()
-      .command(['deploy pipeline resume'])
+      .command(['project deploy pipeline resume'])
       .catch(() => {})
-      .it('runs deploy pipeline resume without any fo the required flags', (ctx) => {
+      .it('runs project deploy pipeline resume without any of the required flags', (ctx) => {
         expect(ctx.stderr).to.contain('Exactly one of the following must be provided: --job-id, --use-most-recent');
       });
 
     test
       .stdout()
       .stderr()
-      .command(['deploy pipeline resume', '-r', `-i=${mockAorId}`])
+      .command(['project deploy pipeline resume', '-r', `-i=${mockAorId}`])
       .catch(() => {})
-      .it('runs deploy pipeline resume specifying both -r and -i flags', (ctx) => {
+      .it('runs project deploy pipeline resume specifying both -r and -i flags', (ctx) => {
         expect(ctx.stderr).to.contain('--job-id cannot also be provided when using --use-most-recent');
         expect(ctx.stderr).to.contain('--use-most-recent cannot also be provided when using --job-id');
       });
@@ -100,9 +100,9 @@ describe('deploy pipeline resume', () => {
     test
       .stdout()
       .stderr()
-      .command(['deploy pipeline resume', '-r'])
+      .command(['project deploy pipeline resume', '-r'])
       .catch(() => {})
-      .it('runs deploy pipeline resume specifying -r when there are no Ids in cache', (ctx) => {
+      .it('runs project deploy pipeline resume specifying -r when there are no Ids in cache', (ctx) => {
         expect(ctx.stderr).to.contain("Can't find the job ID. Verify that a pipeline promotion has been started");
       });
   });
@@ -139,7 +139,7 @@ describe('deploy pipeline resume', () => {
         };
         sandbox.stub(AorSelector, 'selectAsyncOperationResultById').resolves(mockAorRecord);
       })
-      .command(['deploy pipeline resume', `-i=${mockAorId}`])
+      .command(['project deploy pipeline resume', `-i=${mockAorId}`])
       .catch(() => {})
       .it('fails because the async job is not resumable due to error state', (ctx) => {
         expect(ctx.stderr).to.contain(
@@ -161,7 +161,7 @@ describe('deploy pipeline resume', () => {
         spyStreamerBuilder = sinon.spy(Utils, 'getAsyncOperationStreamer');
         monitorStub = sinon.stub(AsyncOpStreaming.prototype, 'monitor');
       })
-      .command(['deploy pipeline resume', `-i=${mockAorId}`])
+      .command(['project deploy pipeline resume', `-i=${mockAorId}`])
       .it('correclty streams the status of the async operation', (ctx) => {
         // verify output
         expect(ctx.stdout).to.contain('*** Resuming Deployment ***');
@@ -192,12 +192,15 @@ describe('deploy pipeline resume', () => {
           .stub(AsyncOpStreaming.prototype, 'monitor')
           .throwsException({ name: 'GenericTimeoutError' });
       })
-      .command(['deploy pipeline resume', `-i=${mockAorId}`])
+      .command(['project deploy pipeline resume', `-i=${mockAorId}`])
       .catch(() => {})
       .it('catches a timeout exception from the monitor service and displays proper error message', (ctx) => {
         // verify output error message
         expect(ctx.stderr).to.contain('The command has timed out');
-        expect(ctx.stderr).to.contain('To check the status of the current operation, run "sf deploy pipeline report".');
+        expect(ctx.stderr).to.contain(
+          'To check the status of the current operation, run "sf project deploy pipeline report".',
+          ctx.stderr
+        );
         expect(monitorStub.called).to.equal(true);
       });
   });

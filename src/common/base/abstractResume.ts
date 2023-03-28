@@ -55,7 +55,6 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
   private outputService: ResumeOutputService;
 
   protected abstract operationType: string;
-  protected abstract baseCommand: string;
 
   public async init(): Promise<void> {
     await super.init();
@@ -107,7 +106,10 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
    */
   protected catch(error: Error | SfError): Promise<SfCommand.Error> {
     if (error.name.includes('GenericTimeoutError')) {
-      const err = messages.createError('error.ClientTimeout', [this.config.bin, this.baseCommand]);
+      const err = messages.createError('error.ClientTimeout', [
+        this.config.bin,
+        this.id?.split(':').slice(0, -1).join(' '),
+      ]);
       return super.catch({ ...error, name: err.name, message: err.message, code: err.code });
     }
     return super.catch(error);

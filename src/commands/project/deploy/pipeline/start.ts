@@ -7,15 +7,15 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { PromoteCommand } from '../../common/base/abstractPromote';
-import { PipelineStage, PromoteOptions, PromotePipelineResult } from '../../common';
-import { APPROVED } from '../../common/constants';
+import { PromoteCommand } from '../../../../common/base/abstractPromote';
+import { PipelineStage, PromoteOptions, PromotePipelineResult } from '../../../../common';
+import { APPROVED } from '../../../../common/constants';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'project.deploy.pipeline.start');
 
 /**
- * Contains the logic to execute the sf deploy pipeline command.
+ * Contains the logic to execute the sf project deploy pipeline start command.
  */
 export default class DeployPipeline extends PromoteCommand<typeof SfCommand> {
   public static readonly summary = messages.getMessage('summary');

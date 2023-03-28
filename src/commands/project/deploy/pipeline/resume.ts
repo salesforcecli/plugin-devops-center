@@ -7,11 +7,11 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { PromotePipelineResult } from '../../../common';
-import { ResumeCommand } from '../../../common/base/abstractResume';
+import { PromotePipelineResult } from '../../../../common';
+import { ResumeCommand } from '../../../../common/base/abstractResume';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline.resume');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'project.deploy.pipeline.resume');
 
 export default class DeployPipelineResume extends ResumeCommand<typeof SfCommand> {
   public static readonly summary = messages.getMessage('summary');
@@ -20,7 +20,6 @@ export default class DeployPipelineResume extends ResumeCommand<typeof SfCommand
   public static readonly state = 'beta';
 
   protected operationType = 'Deployment';
-  protected baseCommand = 'deploy pipeline';
 
   public async run(): Promise<PromotePipelineResult> {
     return this.resumeOperation();

@@ -8,7 +8,7 @@
 import { Messages } from '@salesforce/core';
 
 Messages.importMessagesDirectory(__dirname);
-const tableElements = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.pipeline');
+const tableElements = Messages.loadMessages('@salesforce/plugin-devops-center', 'project.deploy.pipeline.start');
 
 export const DeployComponentsTable = {
   columns: {
