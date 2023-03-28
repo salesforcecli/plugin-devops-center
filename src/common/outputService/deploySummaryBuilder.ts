@@ -11,7 +11,6 @@ import { Connection, Messages } from '@salesforce/core';
 import { AsyncOperationType } from '../constants';
 import { DeploySummaryQueryResult, selectDeployAORSummaryDataById } from '../selectors/deployProgressSummarySelector';
 import { EnvQueryResult, selectPipelineStageByEnvironment } from '../selectors/environmentSelector';
-import { selectNamedCredentialByName } from '../selectors/namedCredentialSelector';
 import { selectWorkItemsByChangeBundles, WorkItemsQueryResult } from '../selectors/workItemSelector';
 import { ChangeBundle, ChangeBundleInstall, WorkItem, WorkItemPromote } from '../types';
 import { AbstractOutputService, OutputFlags, OutputService } from './outputService';
@@ -75,7 +74,7 @@ export abstract class DeploySummaryOutputService<T extends OutputFlags> extends 
 
   protected branch: string;
   protected stageName: string;
-  protected orgUrl: string;
+  protected environmentName: string;
 
   public constructor(con: Connection, branch: string, flags: T) {
     super(flags);
@@ -94,7 +93,7 @@ export abstract class DeploySummaryOutputService<T extends OutputFlags> extends 
 
   // eslint-disable-next-line class-methods-use-this
   protected printConciseSummary(): void {
-    console.log(output.getMessage('output.concise.summary', [this.stageName, this.branch, this.orgUrl]));
+    console.log(output.getMessage('output.concise.summary', [this.stageName, this.branch, this.environmentName]));
   }
 
   /**
@@ -122,14 +121,13 @@ class AdHocDeploySummaryOutputService<T extends OutputFlags> extends DeploySumma
     this.workItemsPromote = workItemsPromote;
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   protected async buildSummary(): Promise<void> {
     this.stageName = this.workItemsPromote[0].sf_devops__Pipeline_Stage__r.Name;
 
     this.workItems = this.workItemsPromote.map((workItem) => workItem.sf_devops__Work_Item__r.Name);
 
-    const namedCredential: string =
-      this.workItemsPromote[0].sf_devops__Pipeline_Stage__r.sf_devops__Environment__r.sf_devops__Named_Credential__c;
-    this.orgUrl = (await selectNamedCredentialByName(this.con, namedCredential)).Endpoint;
+    this.environmentName = this.workItemsPromote[0].sf_devops__Pipeline_Stage__r.sf_devops__Environment__r.Name;
   }
 
   protected printSummary(): void {
@@ -142,7 +140,7 @@ class AdHocDeploySummaryOutputService<T extends OutputFlags> extends DeploySumma
         itemsLabel,
         workItems,
         this.branch,
-        this.orgUrl,
+        this.environmentName,
       ])
     );
   }
@@ -171,9 +169,7 @@ abstract class VersionedOrSoupSummaryOutputService<T extends OutputFlags> extend
     const envQueryResp: EnvQueryResult = await selectPipelineStageByEnvironment(this.con, envId);
 
     this.stageName = envQueryResp.sf_devops__Pipeline_Stages__r.records[0].Name;
-
-    const namedCredential: string = envQueryResp.sf_devops__Named_Credential__c;
-    this.orgUrl = (await selectNamedCredentialByName(this.con, namedCredential)).Endpoint;
+    this.environmentName = envQueryResp.Name;
   }
 
   protected printSummary(): void {
@@ -193,7 +189,7 @@ abstract class VersionedOrSoupSummaryOutputService<T extends OutputFlags> extend
         this.stageName,
         bundlesSummary.join('; '),
         this.branch,
-        this.orgUrl,
+        this.environmentName,
       ])
     );
   }

@@ -56,6 +56,7 @@ export type WorkItemPromote = {
 
 export type Environment = {
   Id: string;
+  Name: string;
   sf_devops__Named_Credential__c: string;
 };
 
