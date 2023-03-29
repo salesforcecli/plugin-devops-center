@@ -47,7 +47,7 @@ export const requiredDoceOrgFlag = OclifFlags.custom({
   summary: messages.getMessage('flags.targetDoceOrg.summary'),
   parse: async (input: string | undefined) => getOrgOrThrow(input),
   default: async () => getOrgOrThrow(),
-  defaultHelp: async () => (await getOrgOrThrow())?.getUsername(),
+  defaultHelp: async () => getDefaultDevopsCenterUsernameAlias(),
   required: true,
 });
 
@@ -75,17 +75,25 @@ export const concise: BooleanFlag<boolean> = Flags.boolean({
 });
 
 /**
+ * Helper to get the userneame or alias of the default Devops Center org
+ * from the target-devops-center config variable.
+ */
+export const getDefaultDevopsCenterUsernameAlias = async (): Promise<string | undefined> => {
+  const config = await ConfigAggregator.create({ customConfigMeta: ConfigMeta });
+  return config.getInfo(ConfigVars.TARGET_DEVOPS_CENTER)?.value?.toString();
+};
+
+/**
  *
  * @param input alias/username of an org
  * @returns instance of an Org that correspons to the alias/username passed in
  * or to the alias/username set in --target-devops-center config variable.
  */
 const getOrgOrThrow = async (input?: string): Promise<Org> => {
-  const aggregator = await ConfigAggregator.create({ customConfigMeta: ConfigMeta });
-  const alias = input ? input : aggregator.getInfo(ConfigVars.TARGET_DEVOPS_CENTER)?.value?.toString();
-  if (!alias) {
+  const usernameOrAlias = input ? input : await getDefaultDevopsCenterUsernameAlias();
+  if (!usernameOrAlias) {
     throw messages.createError('errors.NoDefaultDoceEnv');
   }
-  const org: Org = await Org.create({ aliasOrUsername: alias });
+  const org: Org = await Org.create({ aliasOrUsername: usernameOrAlias });
   return org;
 };
