@@ -54,7 +54,7 @@
     "/oclif.manifest.json",
     "/schemas"
   ],
-  "homepage": "https://github.com/salesforcecli/plugin-template-sf",
+  "homepage": "https://github.com/salesforcecli/plugin-devops-center",
   "keywords": [
     "force",
     "salesforce",
@@ -92,7 +92,7 @@
       }
     }
   },
-  "repository": "salesforcecli/plugin-template-sf",
+  "repository": "salesforcecli/plugin-devops-center",
   "scripts": {
     "build": "sf-build",
     "clean": "sf-clean",
