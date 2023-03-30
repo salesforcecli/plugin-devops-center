@@ -105,7 +105,7 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
    * @returns
    */
   protected catch(error: Error | SfError): Promise<SfCommand.Error> {
-    if (error.name.includes('GenericTimeoutError')) {
+    if (error.name?.includes('GenericTimeoutError')) {
       const err = messages.createError('error.ClientTimeout', [
         this.config.bin,
         this.id?.split(':').slice(0, -1).join(' '),
