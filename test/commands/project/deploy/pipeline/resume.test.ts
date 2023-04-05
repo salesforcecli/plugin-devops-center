@@ -15,6 +15,7 @@ import * as AorSelector from '../../../../../src/common/selectors/asyncOperation
 import { AsyncOperationResult, AsyncOperationStatus } from '../../../../../src/common/types';
 import AsyncOpStreaming from '../../../../../src/streamer/processors/asyncOpStream';
 import * as Utils from '../../../../../src/common/utils';
+import { ResumeCommandOutputService } from '../../../../../src/common/outputService/resumeCommandOutputService';
 
 const DOCE_ORG = {
   id: '1',
@@ -105,11 +106,21 @@ describe('project deploy pipeline resume', () => {
       .it('runs project deploy pipeline resume specifying -r when there are no Ids in cache', (ctx) => {
         expect(ctx.stderr).to.contain("Can't find the job ID. Verify that a pipeline promotion has been started");
       });
+
+    test
+      .stdout()
+      .stderr()
+      .command(['project deploy pipeline resume', '-r', '--verbose', '--concise'])
+      .catch(() => {})
+      .it('runs project deploy pipeline resume specifying both --verbose and --concise flags', (ctx) => {
+        expect(ctx.stderr).to.contain('--verbose=true cannot also be provided when using --concise');
+      });
   });
 
   describe('stream aor status', () => {
     let spyStreamerBuilder: sinon.SinonSpy;
     let monitorStub: sinon.SinonStub;
+    let stubDisplayEndResults: sinon.SinonStub;
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sandbox.stub(Org, 'create' as any).returns(DOCE_ORG);
@@ -175,6 +186,28 @@ describe('project deploy pipeline resume', () => {
         expect(builderArgs[1]).to.contain({ quantity: 33, unit: 0 });
         expect(builderArgs[2]).to.equal(mockAorId);
         expect(monitorStub.called).to.equal(true);
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        mockAorRecord = {
+          Id: mockAorId,
+          sf_devops__Message__c: 'mockMessage',
+          sf_devops__Status__c: AsyncOperationStatus.InProgress,
+          sf_devops__Error_Details__c: 'mockErrorDetail',
+        };
+        sandbox.stub(AorSelector, 'selectAsyncOperationResultById').resolves(mockAorRecord);
+
+        monitorStub = sinon.stub(AsyncOpStreaming.prototype, 'monitor');
+        sandbox.stub(ResumeCommandOutputService.prototype, 'getStatus').returns(AsyncOperationStatus.Completed);
+        stubDisplayEndResults = sandbox.stub(ResumeCommandOutputService.prototype, 'displayEndResults');
+      })
+      .command(['project deploy pipeline resume', `-i=${mockAorId}`, '--verbose'])
+      .it('prints output for verbose flag correctly', () => {
+        // verify we printed the end results message
+        expect(stubDisplayEndResults.called).to.equal(true);
       });
 
     test

@@ -5,6 +5,10 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
+import { Connection } from '@salesforce/core';
+import { DeployComponentsTable } from '../outputColumns';
+import { DeployComponent } from '../types';
+import { getFormattedDeployComponentsByAyncOpId } from '../utils';
 import { AorOutputService, AorOutputFlags, AbstractAorOutputService } from './aorOutputService';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
@@ -14,7 +18,9 @@ import { AorOutputService, AorOutputFlags, AbstractAorOutputService } from './ao
  *
  * @author JuanStenghele-sf
  */
-export interface ResumeOutputService extends AorOutputService {}
+export interface ResumeOutputService extends AorOutputService {
+  displayEndResults(): void;
+}
 
 /**
  * Abstract class that implements ResumeOutputService interface
@@ -23,4 +29,17 @@ export interface ResumeOutputService extends AorOutputService {}
  */
 export abstract class AbstractResumeOutputService<T extends AorOutputFlags>
   extends AbstractAorOutputService<T>
-  implements ResumeOutputService {}
+  implements ResumeOutputService
+{
+  protected con: Connection;
+
+  /**
+   * This method will print a table of the deployed components for the current AOR
+   */
+  public async displayEndResults(): Promise<void> {
+    if (this.flags.verbose) {
+      const components: DeployComponent[] = await getFormattedDeployComponentsByAyncOpId(this.con, this.aorId);
+      this.displayTable(components, DeployComponentsTable.title, DeployComponentsTable.columns);
+    }
+  }
+}

@@ -7,9 +7,11 @@
 
 /* eslint-disable no-console, @typescript-eslint/require-await */
 
-import { Messages } from '@salesforce/core';
-import { AbstractAorOutputService, AorOutputFlags } from './aorOutputService';
-import { ResumeOutputService } from './resumeOutputService';
+import { Connection, Messages } from '@salesforce/core';
+import { SfCommand } from '@salesforce/sf-plugins-core';
+import { Flags } from '../base/abstractResume';
+import { AorOutputFlags } from './aorOutputService';
+import { AbstractResumeOutputService } from './resumeOutputService';
 
 Messages.importMessagesDirectory(__dirname);
 const output = Messages.loadMessages('@salesforce/plugin-devops-center', 'resume.output');
@@ -19,14 +21,18 @@ const output = Messages.loadMessages('@salesforce/plugin-devops-center', 'resume
  *
  * @author JuanStenghele-sf
  */
-export class ResumeCommandOutputService
-  extends AbstractAorOutputService<AorOutputFlags>
-  implements ResumeOutputService
-{
+export class ResumeCommandOutputService extends AbstractResumeOutputService<AorOutputFlags> {
   private operationType: string;
 
-  public constructor(operationType: string) {
-    super({}, '');
+  public constructor(flags: Flags<typeof SfCommand>, operationType: string, con: Connection) {
+    super(
+      {
+        concise: flags['concise'],
+        verbose: flags['verbose'],
+      },
+      ''
+    );
+    this.con = con;
     this.operationType = operationType;
   }
 
