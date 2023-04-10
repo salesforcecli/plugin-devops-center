@@ -205,7 +205,7 @@ describe('project deploy pipeline resume', () => {
         stubDisplayEndResults = sandbox.stub(ResumeCommandOutputService.prototype, 'displayEndResults');
       })
       .command(['project deploy pipeline resume', `-i=${mockAorId}`, '--verbose'])
-      .it('prints output for verbose flag correctly', () => {
+      .it('calls displayEndResults when deployment is completed', () => {
         // verify we printed the end results message
         expect(stubDisplayEndResults.called).to.equal(true);
       });

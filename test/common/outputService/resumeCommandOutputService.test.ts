@@ -106,6 +106,32 @@ describe('resume output', () => {
     expect(ctx.stdout).to.not.contain('=== Deployed Source');
   });
 
+  test.stdout().it('does not prints the deployed components table when concise flag is provided', async (ctx) => {
+    const deployedComponents: DeployComponent[] = [
+      {
+        sf_devops__Source_Component__c: 'ApexClass:Foo',
+        sf_devops__Operation__c: 'add',
+        sf_devops__File_Path__c: 'path',
+        Type: 'ApexClass',
+        Name: 'Foo',
+      },
+      {
+        sf_devops__Source_Component__c: 'ApexClass:Bar',
+        sf_devops__Operation__c: 'add',
+        sf_devops__File_Path__c: 'path',
+        Type: 'ApexClass',
+        Name: 'Bar',
+      },
+    ];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves(deployedComponents);
+
+    outputService = getOutputService(true, false);
+    await outputService.displayEndResults();
+    expect(ctx.stdout).to.not.contain('=== Deployed Source');
+  });
+
   function getOutputService(conciseFlag: boolean, verboseFlag: boolean): ResumeCommandOutputService {
     return new ResumeCommandOutputService(
       buildResumeFlags(conciseFlag, verboseFlag),
