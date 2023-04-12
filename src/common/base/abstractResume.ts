@@ -14,7 +14,7 @@ import {
   getAsyncOperationStreamer,
   PromotePipelineResult,
 } from '../../common';
-import { jobId, requiredDoceOrgFlag, useMostRecent, wait } from '../../common/flags/flags';
+import { concise, jobId, requiredDoceOrgFlag, useMostRecent, verbose, wait } from '../../common/flags/flags';
 import DoceMonitor from '../../streamer/doceMonitor';
 import { DeployPipelineCache } from './../deployPipelineCache';
 import { OutputServiceFactory, ResumeOutputService } from './../outputService';
@@ -47,6 +47,8 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
     'devops-center-username': requiredDoceOrgFlag(),
     'job-id': jobId,
     'use-most-recent': useMostRecent,
+    concise,
+    verbose,
     wait,
   };
 
@@ -64,7 +66,11 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
       baseFlags: (super.ctor as typeof ResumeCommand).baseFlags,
     }); // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags as Flags<T>;
-    this.outputService = new OutputServiceFactory().forResume(this.operationType);
+    this.outputService = new OutputServiceFactory().forResume(
+      this.flags,
+      this.operationType,
+      (this.flags['devops-center-username'] as Org).getConnection()
+    );
   }
 
   protected async resumeOperation(): Promise<PromotePipelineResult> {
@@ -87,6 +93,9 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
 
     const streamer: DoceMonitor = getAsyncOperationStreamer(doceOrg, this.flags.wait, asyncJobId, this.outputService);
     await streamer.monitor();
+    if (this.outputService.getStatus() === AsyncOperationStatus.Completed) {
+      this.outputService.displayEndResults();
+    }
 
     // get final state of the async job
     asyncJob = await fetchAsyncOperationResult(doceOrg.getConnection(), asyncJobId);

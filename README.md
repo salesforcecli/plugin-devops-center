@@ -199,13 +199,15 @@ Resume watching a pipeline deploy operation.
 
 ```
   USAGE
-    $ sf project deploy pipeline resume [--json] [-c <value>] [-i <value>] [-r] [-w <value>]
+    $ sf project deploy pipeline resume [--json] [-c <value>] [-i <value>] [-r] [-w <value>] [--concise | --verbose]
 
   FLAGS
     -c, --devops-center-username=<value>  Username or alias of the DevOps Center org.
     -i, --job-id=<value>                  Job ID of the pipeline deploy operation you want to resume.
     -r, --use-most-recent                 Use the job ID of the most recent deploy operation.
     -w, --wait=<minutes>                  Number of minutes to wait for command to complete and display results.
+    --concise                             Show concise output of the deploy result.
+    --verbose                             Show verbose output of the deploy result.
 
   GLOBAL FLAGS
     --json  Format output as json.

@@ -6,9 +6,6 @@
  */
 
 import { Connection, Messages } from '@salesforce/core';
-import { DeployComponentsTable } from '../outputColumns';
-import { DeployComponent } from '../types';
-import { getFormattedDeployComponentsByAyncOpId } from '../utils';
 import { AorOutputFlags } from './aorOutputService';
 import { DeploySummaryBuilder } from './deploySummaryBuilder';
 import { OutputService } from './outputService';
@@ -28,9 +25,7 @@ export type PromoteOutputFlags = {
  *
  * @author JuanStenghele-sf
  */
-export interface PromoteOutputService extends ResumeOutputService {
-  displayEndResults(): Promise<void>;
-}
+export interface PromoteOutputService extends ResumeOutputService {}
 
 /**
  * Abstract class that implements PromoteOutputService interface
@@ -42,7 +37,6 @@ export abstract class AbstractPromoteOutputService
   implements PromoteOutputService
 {
   private summaryBuilder: DeploySummaryBuilder;
-  private con: Connection;
 
   public constructor(flags: PromoteOutputFlags, summaryBuilder: DeploySummaryBuilder, con: Connection) {
     super(flags, '');
@@ -68,16 +62,6 @@ export abstract class AbstractPromoteOutputService
       // We print the summary
       // eslint-disable-next-line @typescript-eslint/await-thenable
       await deploySummaryOutputService.printOpSummary();
-    }
-  }
-
-  /**
-   * This method will print a table of the deployed components for the current AOR
-   */
-  public async displayEndResults(): Promise<void> {
-    if (this.flags.verbose) {
-      const components: DeployComponent[] = await getFormattedDeployComponentsByAyncOpId(this.con, this.aorId);
-      this.displayTable(components, DeployComponentsTable.title, DeployComponentsTable.columns);
     }
   }
 }

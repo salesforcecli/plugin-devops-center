@@ -9,9 +9,10 @@
 
 import { Connection } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import * as Promote from '../base/abstractPromote';
+import { Flags as PromoteFlags } from '../base/abstractPromote';
+import { Flags as ReportFlags } from '../base/abstractReportOnPromote';
+import { Flags as ResumeFlags } from '../base/abstractResume';
 import { DeploymentResult } from '../types';
-import { Flags } from '../base/abstractReportOnPromote';
 import { DeployCommandOutputService } from './deployCommandOutputService';
 import { PromoteReportOutputService } from './reportOutputService';
 import { ResumeCommandOutputService } from './resumeCommandOutputService';
@@ -25,22 +26,26 @@ export class OutputServiceFactory {
   /**
    * Create a service to print the deployment info.
    */
-  public forDeployment(flags: Promote.Flags<typeof SfCommand>, con: Connection): DeployCommandOutputService {
+  public forDeployment(flags: PromoteFlags<typeof SfCommand>, con: Connection): DeployCommandOutputService {
     return new DeployCommandOutputService(flags, con);
   }
 
   /**
    * Create a service to print the resume info.
    */
-  public forResume(operationType: string): ResumeCommandOutputService {
-    return new ResumeCommandOutputService(operationType);
+  public forResume(
+    flags: ResumeFlags<typeof SfCommand>,
+    operationType: string,
+    con: Connection
+  ): ResumeCommandOutputService {
+    return new ResumeCommandOutputService(flags, operationType, con);
   }
 
   /**
    * Create a service to print the report info.
    */
   public forPromotionReport(
-    flags: Flags<typeof SfCommand>,
+    flags: ReportFlags<typeof SfCommand>,
     operationResult: DeploymentResult,
     operationName: string
   ): PromoteReportOutputService {
