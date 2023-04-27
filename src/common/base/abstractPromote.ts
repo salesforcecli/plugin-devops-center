@@ -29,7 +29,7 @@ import {
 
 import DoceMonitor from '../../streamer/doceMonitor';
 import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from '../constants';
-import { ApiError, AsyncOperationResult, AsyncOperationStatus } from '../types';
+import { ApiError, ApiPromoteResponse, ApiResponse, AsyncOperationResult, AsyncOperationStatus } from '../types';
 import { fetchAsyncOperationResult } from '../utils';
 import { OutputServiceFactory, PromoteOutputService } from '../outputService';
 
@@ -207,7 +207,24 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
         promoteOptions: this.deployOptions,
       }),
     };
-    return targetOrg.getConnection().request(req);
+    try {
+      const response: ApiPromoteResponse = await targetOrg.getConnection().request(req);
+      return response.jobId;
+    } catch (error) {
+      // The error message contains the API response
+      // We should parse that to get the error
+      const rawError = error as ApiError;
+      try {
+        const response = JSON.parse(rawError.message) as ApiResponse;
+        if (response.error) {
+          // This should be true
+          rawError.message = response.error.message;
+        }
+      } catch {
+        throw error;
+      }
+      throw error;
+    }
   }
 
   private buildPromoteOptions(): void {

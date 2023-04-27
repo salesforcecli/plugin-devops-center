@@ -42,7 +42,14 @@ export enum TestLevel {
 
 export interface ApiError extends Error {
   errorCode: string;
-  name: string;
+}
+
+export interface ApiResponse {
+  error?: ApiError;
+}
+
+export interface ApiPromoteResponse extends ApiResponse {
+  jobId: string;
 }
 
 export type WorkItem = {

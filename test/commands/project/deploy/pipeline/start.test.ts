@@ -376,6 +376,7 @@ describe('project deploy pipeline start', () => {
         requestMock = sinon.stub();
       })
       .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
+      .catch(() => {})
       .it('correctly sets the promote option to perfome an undeployedOnly promotion', () => {
         // verify we made the request
         expect(requestMock.called).to.equal(true);
@@ -421,6 +422,7 @@ describe('project deploy pipeline start', () => {
         '-t=DummyTest_1,DummyTest_2,DummyTest_3',
         '-v=DummyChangeBundleName',
       ])
+      .catch(() => {})
       .it('correctly builds the promote options passed using flags', () => {
         // verify we made the request
         expect(requestMock.called).to.equal(true);
@@ -461,6 +463,7 @@ describe('project deploy pipeline start', () => {
         requestMock = sinon.stub();
       })
       .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
+      .catch(() => {})
       .it('correctly sets the test level as deault when no test level is provided by the user', () => {
         // verify we made the request
         expect(requestMock.called).to.equal(true);
@@ -501,6 +504,7 @@ describe('project deploy pipeline start', () => {
           requestMock = sinon.stub();
         })
         .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
+        .catch(() => {})
         .it('correctly computes the source pipeline stage id when deploying to first stage in the pipeline', () => {
           expect(fetchAndValidatePipelineStageStub.called).to.equal(true);
           // verify we made the request
@@ -563,6 +567,7 @@ describe('project deploy pipeline start', () => {
           requestMock = sinon.stub();
         })
         .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
+        .catch(() => {})
         .it(
           'correctly computes the source pipeline stage id when deploying to the second stage in the pipeline',
           () => {
@@ -610,7 +615,7 @@ describe('project deploy pipeline start', () => {
         .stdout()
         .stderr()
         .do(() => {
-          requestMock = sinon.stub().resolves('mock-aor-id');
+          requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
         })
         .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
         .it('succeeds the request after first request', (ctx) => {
@@ -673,7 +678,7 @@ describe('project deploy pipeline start', () => {
           mockError['errorCode'] = 'CONFLICT';
           requestMock = sinon.stub().throws(mockError);
           // on the 4th try we want to complete the VCS event processing and return an AOR Id to the user
-          requestMock.onCall(4).resolves('mock-aor-id');
+          requestMock.onCall(4).resolves({ jobId: 'mock-aor-id' });
         })
         .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
         .it('succeeds the request after few retries', (ctx) => {
