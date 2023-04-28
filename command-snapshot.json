@@ -1,5 +1,11 @@
 [
   {
+    "command": "project:deploy:pipeline:quick",
+    "plugin": "@salesforce/plugin-devops-center",
+    "flags": ["async", "concise", "devops-center-username", "job-id", "json", "use-most-recent", "verbose", "wait"],
+    "alias": []
+  },
+  {
     "command": "project:deploy:pipeline:report",
     "plugin": "@salesforce/plugin-devops-center",
     "flags": ["devops-center-username", "job-id", "json", "use-most-recent"],

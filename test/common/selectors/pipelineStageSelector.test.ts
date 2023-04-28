@@ -29,7 +29,7 @@ const MOCK_PIPELINE_STAGE: PipelineStage = {
   },
 };
 
-describe('AOR selector', () => {
+describe('Pipeline stage selector', () => {
   let sandbox: sinon.SinonSandbox;
 
   beforeEach(() => {
@@ -65,5 +65,32 @@ describe('AOR selector', () => {
     expect(builderArgs[0]).to.contain('(SELECT Id FROM sf_devops__Pipeline_Stages__r)');
     // verify we used the correct filter
     expect(builderArgs[0]).to.contain("WHERE sf_devops__Pipeline__r.sf_devops__Project__r.Name = 'mock-project-name'");
+  });
+
+  it('query pipeline stage by environment id', async () => {
+    const mockRecord: QueryResult<PipelineStage> = { done: true, records: [MOCK_PIPELINE_STAGE], totalSize: 1 };
+    const mockConnection = sandbox.createStubInstance(Connection);
+    mockConnection.query.resolves(mockRecord);
+
+    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
+
+    const result = await selector.selectOnePipelineStageByEnvironmentId(mockConnection, 'mock-environment-id');
+
+    expect(runSafeQuerySpy.called).to.equal(true);
+
+    // verify we received the correct result
+    expect(mockConnection.query.called).to.equal(true);
+    expect(result).to.equal(mockRecord.records[0]);
+
+    // verify we queried the correct object
+    const builderArgs = mockConnection.query.getCall(0).args;
+    expect(builderArgs[0]).to.contain('FROM sf_devops__Pipeline_Stage__c');
+    // verify we queried the correct fields
+    expect(builderArgs[0]).to.contain('Id');
+    expect(builderArgs[0]).to.contain('sf_devops__Pipeline__r.sf_devops__Project__c');
+    expect(builderArgs[0]).to.contain('sf_devops__Branch__r.sf_devops__Name__c');
+    expect(builderArgs[0]).to.contain('(SELECT Id FROM sf_devops__Pipeline_Stages__r)');
+    // verify we used the correct filter
+    expect(builderArgs[0]).to.contain("WHERE sf_devops__Environment__c = 'mock-environment-id'");
   });
 });

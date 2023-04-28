@@ -7,7 +7,7 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { PromotePipelineResult } from '../../../../common';
+import { AsyncOperationResultJson } from '../../../../common';
 import { ResumeCommand } from '../../../../common/base/abstractResume';
 
 Messages.importMessagesDirectory(__dirname);
@@ -20,8 +20,9 @@ export default class DeployPipelineResume extends ResumeCommand<typeof SfCommand
   public static readonly state = 'beta';
 
   protected operationType = 'Deployment';
+  protected baseCommand = 'project deploy pipeline';
 
-  public async run(): Promise<PromotePipelineResult> {
+  public async run(): Promise<AsyncOperationResultJson> {
     return this.resumeOperation();
   }
 }

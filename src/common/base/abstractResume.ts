@@ -4,20 +4,19 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { Messages, Org, SfError } from '@salesforce/core';
+import { Messages, Org } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
 import {
   AsyncOperationResult,
+  AsyncOperationResultJson,
   AsyncOperationStatus,
   fetchAsyncOperationResult,
-  getAsyncOperationStreamer,
-  PromotePipelineResult,
 } from '../../common';
 import { concise, jobId, requiredDoceOrgFlag, useMostRecent, verbose, wait } from '../../common/flags/flags';
-import DoceMonitor from '../../streamer/doceMonitor';
 import { DeployPipelineCache } from './../deployPipelineCache';
-import { OutputServiceFactory, ResumeOutputService } from './../outputService';
+import { OutputServiceFactory } from './../outputService';
+import { AsyncCommand } from './abstractAsyncOperation';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -41,7 +40,7 @@ export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
  * Base class with the common logic to resume an in progress opeation
  */
 
-export abstract class ResumeCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
+export abstract class ResumeCommand<T extends typeof SfCommand> extends AsyncCommand {
   // common flags that can be inherited by any command that extends ResumeCommand
   public static baseFlags = {
     'devops-center-username': requiredDoceOrgFlag(),
@@ -54,8 +53,6 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
 
   protected flags!: Flags<T>;
 
-  private outputService: ResumeOutputService;
-
   protected abstract operationType: string;
 
   public async init(): Promise<void> {
@@ -66,61 +63,28 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends SfComman
       baseFlags: (super.ctor as typeof ResumeCommand).baseFlags,
     }); // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags as Flags<T>;
-    this.outputService = new OutputServiceFactory().forResume(
-      this.flags,
-      this.operationType,
-      (this.flags['devops-center-username'] as Org).getConnection()
+    this.setOutputService(
+      new OutputServiceFactory().forResume(
+        this.flags,
+        this.operationType,
+        (this.flags['devops-center-username'] as Org).getConnection()
+      )
     );
   }
 
-  protected async resumeOperation(): Promise<PromotePipelineResult> {
+  protected async resumeOperation(): Promise<AsyncOperationResultJson> {
     const asyncJobId: string = this.flags['use-most-recent']
       ? (await DeployPipelineCache.create()).getLatestKeyOrThrow()
       : (this.flags['job-id'] as string);
 
     // get the latest state of the async job and validate that it's resumable
-    const doceOrg: Org = this.flags['devops-center-username'] as Org;
-    let asyncJob: AsyncOperationResult = await fetchAsyncOperationResult(doceOrg.getConnection(), asyncJobId);
+    this.targetOrg = this.flags['devops-center-username'] as Org;
+    const asyncJob: AsyncOperationResult = await fetchAsyncOperationResult(this.targetOrg.getConnection(), asyncJobId);
     if (asyncJob.sf_devops__Status__c && isNotResumable(asyncJob.sf_devops__Status__c)) {
       throw messages.createError('error.JobNotResumable', [asyncJobId, asyncJob.sf_devops__Status__c]);
     }
 
-    // it is resumable so we can start monitoring the operation
-    this.outputService.setAorId(asyncJobId);
-
-    this.outputService.printOpSummary();
-    this.outputService.printAorId();
-
-    const streamer: DoceMonitor = getAsyncOperationStreamer(doceOrg, this.flags.wait, asyncJobId, this.outputService);
-    await streamer.monitor();
-    if (this.outputService.getStatus() === AsyncOperationStatus.Completed) {
-      this.outputService.displayEndResults();
-    }
-
-    // get final state of the async job
-    asyncJob = await fetchAsyncOperationResult(doceOrg.getConnection(), asyncJobId);
-    return {
-      jobId: asyncJobId,
-      status: asyncJob.sf_devops__Status__c,
-      message: asyncJob.sf_devops__Message__c,
-      errorDetails: asyncJob.sf_devops__Error_Details__c,
-    };
-  }
-
-  /**
-   * Default function for catching commands errors.
-   *
-   * @param error
-   * @returns
-   */
-  protected catch(error: Error | SfError): Promise<SfCommand.Error> {
-    if (error.name?.includes('GenericTimeoutError')) {
-      const err = messages.createError('error.ClientTimeout', [
-        this.config.bin,
-        this.id?.split(':').slice(0, -1).join(' '),
-      ]);
-      return super.catch({ ...error, name: err.name, message: err.message, code: err.code });
-    }
-    return super.catch(error);
+    this.setAsyncOperationId(asyncJobId);
+    return this.monitorOperation(false, this.flags.wait);
   }
 }
