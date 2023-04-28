@@ -20,4 +20,5 @@ export const DeployComponentsTable = {
     sf_devops__File_Path__c: { header: tableElements.getMessage('deployComponent.path.column') },
   },
   title: tableElements.getMessage('deployComponent.table.title'),
+  validateDeployTitle: tableElements.getMessage('deployComponent.table.validateDeployTitle'),
 };

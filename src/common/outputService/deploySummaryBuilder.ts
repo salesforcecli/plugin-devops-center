@@ -12,6 +12,7 @@ import { AsyncOperationType } from '../constants';
 import { DeploySummaryQueryResult, selectDeployAORSummaryDataById } from '../selectors/deployProgressSummarySelector';
 import { EnvQueryResult, selectPipelineStageByEnvironment } from '../selectors/environmentSelector';
 import { selectWorkItemsByChangeBundles, WorkItemsQueryResult } from '../selectors/workItemSelector';
+import { selectValidateDeployAORSummaryDataById } from '../selectors/validateDeploySelector';
 import { ChangeBundle, ChangeBundleInstall, WorkItem, WorkItemPromote } from '../types';
 import { AbstractOutputService, OutputFlags, OutputService } from './outputService';
 
@@ -62,6 +63,11 @@ export class DeploySummaryBuilder {
           branch,
           flags
         );
+
+      case AsyncOperationType.CHECK_DEPLOY: {
+        const response: ChangeBundleInstall[] = await selectValidateDeployAORSummaryDataById(this.con, aorId);
+        return new ValidateDeploySummaryOutputService(response, this.con, branch, flags);
+      }
 
       default:
         break;
@@ -166,10 +172,9 @@ abstract class VersionedOrSoupSummaryOutputService<T extends OutputFlags> extend
   protected async buildCommonSummary(): Promise<void> {
     // We get the stage name and the org url
     const envId: string = this.changeBundleInstalls[this.changeBundleInstalls.length - 1].sf_devops__Environment__r.Id;
-    const envQueryResp: EnvQueryResult = await selectPipelineStageByEnvironment(this.con, envId);
-
-    this.stageName = envQueryResp.sf_devops__Pipeline_Stages__r.records[0].Name;
-    this.environmentName = envQueryResp.Name;
+    const pipelineInfo: PipelineInfo = await getPipelineInfo(this.con, envId);
+    this.stageName = pipelineInfo.stageName;
+    this.environmentName = pipelineInfo.environmentName;
   }
 
   protected printSummary(): void {
@@ -269,3 +274,75 @@ class SoupDeploySummaryOutputService<T extends OutputFlags> extends VersionedOrS
     this.workItems = workItems;
   }
 }
+
+/**
+ * Service class used to print the operation summary of an validate-deploy
+ *
+ */
+class ValidateDeploySummaryOutputService<T extends OutputFlags> extends DeploySummaryOutputService<T> {
+  protected changeBundleInstalls: ChangeBundleInstall[];
+  protected changeBundles: string[] = [];
+
+  public constructor(changeBundleInstalls: ChangeBundleInstall[], con: Connection, branch: string, flags: T) {
+    super(con, branch, flags);
+    this.changeBundleInstalls = changeBundleInstalls;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/require-await
+  protected async buildSummary(): Promise<void> {
+    // We get the stage name and the org url
+    const envId: string = this.changeBundleInstalls[this.changeBundleInstalls.length - 1].sf_devops__Environment__r.Id;
+    const pipelineInfo: PipelineInfo = await getPipelineInfo(this.con, envId);
+    this.environmentName = pipelineInfo.environmentName;
+
+    const changeBundles: Set<string> = new Set();
+    for (const changeBundleInstall of this.changeBundleInstalls) {
+      const changeBundle = changeBundleInstall.sf_devops__Change_Bundle__r;
+      changeBundles.add(changeBundle.sf_devops__Version_Name__c);
+    }
+
+    this.changeBundles = Array.from(changeBundles);
+  }
+
+  protected printSummary(): void {
+    const bundlesLabel =
+      this.changeBundles.length === 1 ? output.getMessage('output.bundle') : output.getMessage('output.bundles');
+
+    console.log(
+      output.getMessage('output.validate-deploy-summary', [
+        bundlesLabel,
+        this.changeBundles.join('; '),
+        this.environmentName,
+      ])
+    );
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  protected printConciseSummary(): void {
+    console.log(output.getMessage('output.concise.validate-deploy-summary', [this.branch, this.environmentName]));
+  }
+}
+
+/**
+ * This method gets info from the Pipeline to write the summaries (soup, versioned, validate-deploy)
+ *
+ * @param con Conenction used to query
+ * @param environmentId
+ * @returns PipelineInfo
+ */
+export async function getPipelineInfo(con: Connection, environmentId: string): Promise<PipelineInfo> {
+  const envQueryResp: EnvQueryResult = await selectPipelineStageByEnvironment(con, environmentId);
+
+  const pipelineInfo: PipelineInfo = {
+    stageName: envQueryResp.sf_devops__Pipeline_Stages__r.records[0].Name,
+    environmentName: envQueryResp.Name,
+  };
+
+  return pipelineInfo;
+}
+
+// This type will be defined here as it is sepecific from this function
+export type PipelineInfo = {
+  stageName: string;
+  environmentName: string;
+};

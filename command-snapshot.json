@@ -29,5 +29,24 @@
       "wait"
     ],
     "alias": []
+  },
+  {
+    "command": "project:deploy:pipeline:validate",
+    "plugin": "@salesforce/plugin-devops-center",
+    "flags": [
+      "async",
+      "branch-name",
+      "bundle-version-name",
+      "concise",
+      "deploy-all",
+      "devops-center-project-name",
+      "devops-center-username",
+      "json",
+      "test-level",
+      "tests",
+      "verbose",
+      "wait"
+    ],
+    "alias": []
   }
 ]

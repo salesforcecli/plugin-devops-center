@@ -16,6 +16,7 @@ import { Flags as ResumeFlags } from '../../../src/common/base/abstractResume';
 import { DeployComponent } from '../../../src/common';
 import * as Utils from '../../../src/common/utils';
 import vacuum from '../../helpers/vacuum';
+import * as DeploymentResultsSelector from '../../../src/common/selectors/deploymentResultsSelector';
 
 const TEST_OPERATION_TYPE = 'test operation type';
 
@@ -65,6 +66,7 @@ describe('resume output', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves(deployedComponents);
+    sandbox.stub(DeploymentResultsSelector, 'isCheckDeploy').resolves(false);
 
     outputService = getOutputService(false, true);
     await outputService.displayEndResults();
@@ -79,6 +81,36 @@ describe('resume output', () => {
             `)
     );
   });
+
+  test
+    .stdout()
+    .it('prints the deployed components table when verbose flag is provided and is a checkDeploy', async (ctx) => {
+      const deployedComponents: DeployComponent[] = [
+        {
+          sf_devops__Source_Component__c: 'ApexClass:Foo',
+          sf_devops__Operation__c: 'add',
+          sf_devops__File_Path__c: 'path',
+          Type: 'ApexClass',
+          Name: 'Foo',
+        },
+      ];
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves(deployedComponents);
+      sandbox.stub(DeploymentResultsSelector, 'isCheckDeploy').resolves(true);
+
+      outputService = getOutputService(false, true);
+      await outputService.displayEndResults();
+      expect(vacuum(ctx.stdout)).to.contain(
+        vacuum(`
+          === Validate-only Deployed Source
+
+          Operation Name Type      Path 
+          ───────── ──── ───────── ──── 
+          add       Foo  ApexClass path 
+            `)
+      );
+    });
 
   test.stdout().it('does not prints the deployed components table when verbose flag is not provided', async (ctx) => {
     const deployedComponents: DeployComponent[] = [

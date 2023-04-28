@@ -29,3 +29,19 @@ Deploying metadata from %s branch to target org %s.
 # output.concise.summary
 
 DevOps Center pipeline stage %s being updated. Deploying metadata from %s branch to target org %s.
+
+# output.validate-deploy-summary
+
+Performing a validate-only deployment for work item %s %s to %s.
+
+# output.bundle
+
+bundle
+
+# output.bundles
+
+bundles
+
+# output.concise.validate-deploy-summary
+
+Validate-Deploying metadata from %s branch to target org %s.
