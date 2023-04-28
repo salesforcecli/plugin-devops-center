@@ -46,7 +46,7 @@ const stubStreamingClient = async (options?: StreamingClient.Options) => ({
     }),
 });
 
-describe('project deploy pipeline start', () => {
+describe('project deploy pipeline validate', () => {
   let sandbox: sinon.SinonSandbox;
   let pipelineStageMock: PipelineStage;
   const $$ = new TestContext();
@@ -147,7 +147,6 @@ describe('project deploy pipeline start', () => {
       .stderr()
       .command(['project deploy pipeline validate', '-p=testProject', '-b=testBranch', '--wait=3', '--verbose'])
       .it('runs project deploy pipeline validate and handles the verbose flag correctly ', () => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect(stubDisplayEndResults.called).to.equal(true);
       });
   });

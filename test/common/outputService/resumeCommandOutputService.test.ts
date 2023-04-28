@@ -64,7 +64,6 @@ describe('resume output', () => {
       },
     ];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves(deployedComponents);
     sandbox.stub(DeploymentResultsSelector, 'isCheckDeploy').resolves(false);
 
@@ -95,7 +94,6 @@ describe('resume output', () => {
         },
       ];
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves(deployedComponents);
       sandbox.stub(DeploymentResultsSelector, 'isCheckDeploy').resolves(true);
 
@@ -130,7 +128,6 @@ describe('resume output', () => {
       },
     ];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves(deployedComponents);
 
     outputService = getOutputService(false, false);
@@ -156,7 +153,6 @@ describe('resume output', () => {
       },
     ];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves(deployedComponents);
 
     outputService = getOutputService(true, false);

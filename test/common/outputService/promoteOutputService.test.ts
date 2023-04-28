@@ -436,7 +436,6 @@ describe('promoteOutputService', () => {
       let changeBundleInstalls: ChangeBundleInstall[] = [mockChangeBunldeInstall1, mockChangeBunldeInstall2];
 
       beforeEach(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(DeploySelector, 'selectDeployAORSummaryDataById').resolves({
           sf_devops__Work_Item_Promotes__r: null,
           sf_devops__Change_Bundle_Installs__r: {

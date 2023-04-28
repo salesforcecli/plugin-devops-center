@@ -97,7 +97,6 @@ export abstract class DeploySummaryOutputService<T extends OutputFlags> extends 
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
   protected printConciseSummary(): void {
     console.log(output.getMessage('output.concise.summary', [this.stageName, this.branch, this.environmentName]));
   }
@@ -288,7 +287,6 @@ class ValidateDeploySummaryOutputService<T extends OutputFlags> extends DeploySu
     this.changeBundleInstalls = changeBundleInstalls;
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   protected async buildSummary(): Promise<void> {
     // We get the stage name and the org url
     const envId: string = this.changeBundleInstalls[this.changeBundleInstalls.length - 1].sf_devops__Environment__r.Id;
@@ -317,7 +315,6 @@ class ValidateDeploySummaryOutputService<T extends OutputFlags> extends DeploySu
     );
   }
 
-  // eslint-disable-next-line class-methods-use-this
   protected printConciseSummary(): void {
     console.log(output.getMessage('output.concise.validate-deploy-summary', [this.branch, this.environmentName]));
   }
