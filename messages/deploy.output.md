@@ -44,4 +44,4 @@ bundles
 
 # output.concise.validate-deploy-summary
 
-Validate-Deploying metadata from %s branch to target org %s.
+Performing Validate-only deployment from %s branch to target org %s.

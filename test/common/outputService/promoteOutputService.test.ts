@@ -513,7 +513,9 @@ describe('promoteOutputService', () => {
         sandbox.stub(ValidateDeploySelector, 'selectValidateDeployAORSummaryDataById').resolves(changeBundleInstalls);
         outputService = getOutputService(true, false);
         await outputService.printOpSummary();
-        expect(ctx.stdout).to.contain(`Deploying metadata from ${branchName} branch to target org ${environmentName}.`);
+        expect(ctx.stdout).to.contain(
+          `Performing Validate-only deployment from ${branchName} branch to target org ${environmentName}.`
+        );
       });
     });
   });
