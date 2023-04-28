@@ -58,13 +58,8 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
     });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags as Flags<T>;
-    this.setOutputService(
-      new OutputServiceFactory().forDeployment(
-        this.flags,
-        (this.flags['devops-center-username'] as Org).getConnection()
-      )
-    );
     this.targetOrg = this.flags['devops-center-username'] as Org;
+    this.setOutputService(new OutputServiceFactory().forDeployment(this.flags, this.targetOrg.getConnection()));
   }
 
   protected async executePromotion(): Promise<AsyncOperationResultJson> {

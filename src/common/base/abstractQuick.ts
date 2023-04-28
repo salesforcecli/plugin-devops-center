@@ -86,7 +86,7 @@ export default abstract class QuickPromotionCommand<T extends typeof SfCommand> 
 
     this.setAsyncOperationId(
       await this.requestPromotion(
-        this.targetStage?.sf_devops__Pipeline__r.sf_devops__Project__c,
+        this.targetStage.sf_devops__Pipeline__r.sf_devops__Project__c,
         this.getSourceStageId(),
         deploymentResult.sf_devops__Deployment_Id__c
       )
