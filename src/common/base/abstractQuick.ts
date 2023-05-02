@@ -69,7 +69,7 @@ export default abstract class QuickPromotionCommand<T extends typeof SfCommand> 
    * Knows how to perform a quick promotion and watch its progress.
    */
   public async executeQuickPromotion(): Promise<AsyncOperationResultJson> {
-    const deploymentResult = await this.getDeploymentIdForQuickDeploy();
+    const deploymentResult = await this.getDeploymentResultForQuickDeploy();
     const envId = deploymentResult.sf_devops__Change_Bundle_Installs__r.records[0].sf_devops__Environment__c;
     this.targetStage = (await selectOnePipelineStageByEnvironmentId(
       this.targetOrg.getConnection(),
@@ -123,7 +123,7 @@ export default abstract class QuickPromotionCommand<T extends typeof SfCommand> 
    *
    * Obtain the deployment ID to use for quick promotion.
    */
-  private async getDeploymentIdForQuickDeploy(): Promise<CheckDeploymentResultWithChangeBundleInstalls> {
+  private async getDeploymentResultForQuickDeploy(): Promise<CheckDeploymentResultWithChangeBundleInstalls> {
     const asyncJobId = this.flags['use-most-recent']
       ? (await DeployPipelineCache.create()).getLatestKeyOrThrow()
       : (this.flags['job-id'] as string);
