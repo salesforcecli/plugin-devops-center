@@ -44,11 +44,7 @@ export interface ApiError extends Error {
   errorCode: string;
 }
 
-export interface ApiResponse {
-  error?: ApiError;
-}
-
-export interface ApiPromoteResponse extends ApiResponse {
+export interface ApiPromoteResponse {
   jobId: string;
 }
 
