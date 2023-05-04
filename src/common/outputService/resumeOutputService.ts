@@ -40,7 +40,11 @@ export abstract class AbstractResumeOutputService<T extends AorOutputFlags>
   public async displayEndResults(): Promise<void> {
     if (this.flags.verbose) {
       const isValidateDeploy = await isCheckDeploy(this.con, this.aorId);
-      const components: DeployComponent[] = await getFormattedDeployComponentsByAyncOpId(this.con, this.aorId);
+      const components: DeployComponent[] = await getFormattedDeployComponentsByAyncOpId(
+        this.con,
+        this.aorId,
+        isValidateDeploy
+      );
       const title = isValidateDeploy ? DeployComponentsTable.validateDeployTitle : DeployComponentsTable.title;
       this.displayTable(components, title, DeployComponentsTable.columns);
     }

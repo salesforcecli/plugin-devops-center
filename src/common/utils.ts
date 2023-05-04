@@ -15,7 +15,10 @@ import { colorStatus } from './outputService/outputUtils';
 import { AorOutputService } from './outputService/aorOutputService';
 import { selectAsyncOperationResultById } from './selectors/asyncOperationResultsSelector';
 import { AsyncOperationResult, AsyncOperationStatus, DeployComponent } from './types';
-import { selectDeployComponentsByAsyncOpId } from './selectors/deployComponentsSelector';
+import {
+  selectDeployComponentsByAsyncOpId,
+  selectDeployComponentsForCheckDeployByAsynchOpId,
+} from './selectors/deployComponentsSelector';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
@@ -172,9 +175,12 @@ export function formatFieldName(fieldName: string): string {
  */
 export async function getFormattedDeployComponentsByAyncOpId(
   con: Connection,
-  asyncOpId: string
+  asyncOpId: string,
+  isValidateDeploy: boolean
 ): Promise<DeployComponent[]> {
-  const components: DeployComponent[] = await selectDeployComponentsByAsyncOpId(con, asyncOpId);
+  const components: DeployComponent[] = isValidateDeploy
+    ? await selectDeployComponentsForCheckDeployByAsynchOpId(con, asyncOpId)
+    : await selectDeployComponentsByAsyncOpId(con, asyncOpId);
 
   components.forEach((component) => {
     component.Type = component.sf_devops__Source_Component__c.split(':')[0];

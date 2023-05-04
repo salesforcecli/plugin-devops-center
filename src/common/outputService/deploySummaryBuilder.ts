@@ -66,7 +66,7 @@ export class DeploySummaryBuilder {
 
       case AsyncOperationType.CHECK_DEPLOY: {
         const response: ChangeBundleInstall[] = await selectValidateDeployAORSummaryDataById(this.con, aorId);
-        return new ValidateDeploySummaryOutputService(response, this.con, branch, flags);
+        return new ValidateVersionedDeploySummaryOutputService(response, this.con, branch, flags);
       }
 
       default:
@@ -171,9 +171,9 @@ abstract class VersionedOrSoupSummaryOutputService<T extends OutputFlags> extend
   protected async buildCommonSummary(): Promise<void> {
     // We get the stage name and the org url
     const envId: string = this.changeBundleInstalls[this.changeBundleInstalls.length - 1].sf_devops__Environment__r.Id;
-    const pipelineInfo: PipelineInfo = await getPipelineInfo(this.con, envId);
-    this.stageName = pipelineInfo.stageName;
-    this.environmentName = pipelineInfo.environmentName;
+    const pipelineStageInfo: PipelineStageInfo = await getPipelineStageInfo(this.con, envId);
+    this.stageName = pipelineStageInfo.stageName;
+    this.environmentName = pipelineStageInfo.environmentName;
   }
 
   protected printSummary(): void {
@@ -278,7 +278,7 @@ class SoupDeploySummaryOutputService<T extends OutputFlags> extends VersionedOrS
  * Service class used to print the operation summary of an validate-deploy
  *
  */
-class ValidateDeploySummaryOutputService<T extends OutputFlags> extends DeploySummaryOutputService<T> {
+class ValidateVersionedDeploySummaryOutputService<T extends OutputFlags> extends DeploySummaryOutputService<T> {
   protected changeBundleInstalls: ChangeBundleInstall[];
   protected changeBundles: string[] = [];
 
@@ -290,8 +290,8 @@ class ValidateDeploySummaryOutputService<T extends OutputFlags> extends DeploySu
   protected async buildSummary(): Promise<void> {
     // We get the stage name and the org url
     const envId: string = this.changeBundleInstalls[this.changeBundleInstalls.length - 1].sf_devops__Environment__r.Id;
-    const pipelineInfo: PipelineInfo = await getPipelineInfo(this.con, envId);
-    this.environmentName = pipelineInfo.environmentName;
+    const pipelineStageInfo: PipelineStageInfo = await getPipelineStageInfo(this.con, envId);
+    this.environmentName = pipelineStageInfo.environmentName;
 
     const changeBundles: Set<string> = new Set();
     for (const changeBundleInstall of this.changeBundleInstalls) {
@@ -327,19 +327,19 @@ class ValidateDeploySummaryOutputService<T extends OutputFlags> extends DeploySu
  * @param environmentId
  * @returns PipelineInfo
  */
-export async function getPipelineInfo(con: Connection, environmentId: string): Promise<PipelineInfo> {
+export async function getPipelineStageInfo(con: Connection, environmentId: string): Promise<PipelineStageInfo> {
   const envQueryResp: EnvQueryResult = await selectPipelineStageByEnvironment(con, environmentId);
 
-  const pipelineInfo: PipelineInfo = {
+  const pipelineStageInfo: PipelineStageInfo = {
     stageName: envQueryResp.sf_devops__Pipeline_Stages__r.records[0].Name,
     environmentName: envQueryResp.Name,
   };
 
-  return pipelineInfo;
+  return pipelineStageInfo;
 }
 
 // This type will be defined here as it is sepecific from this function
-export type PipelineInfo = {
+export type PipelineStageInfo = {
   stageName: string;
   environmentName: string;
 };

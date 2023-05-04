@@ -13,9 +13,9 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'project.deploy.pipeline.validate');
 
 /**
- * Contains the logic to execute the sf project deploy pipeline start command.
+ * Contains the logic to execute the sf project deploy pipeline validate command.
  */
-export default class validateDeployPipeline extends DeployPipeline {
+export default class ValidateDeployPipeline extends DeployPipeline {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -27,9 +27,9 @@ export default class validateDeployPipeline extends DeployPipeline {
   }
 
   /**
-   * Returns the promote option necessary to performs an undeployed only promotion
+   * Returns the promote option necessary to perform a validate deploy
    */
   protected getPromoteOptions(): Partial<PromoteOptions> {
-    return { checkDeploy: this.isCheckDeploy };
+    return { ...super.getPromoteOptions(), checkDeploy: this.isCheckDeploy };
   }
 }
