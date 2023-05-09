@@ -97,4 +97,59 @@ describe('DeploymentResult selector', () => {
     expect(mockConnection.query.called).to.equal(true);
     expect(result).to.equal(null);
   });
+
+  it('queries deployment result with CBI by check deploy id', async () => {
+    const mockRecord = MOCK_RECORD;
+    const mockConnection = sandbox.createStubInstance(Connection);
+    mockConnection.query.resolves(mockRecord);
+
+    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
+
+    const result = await selector.selectOneDeploymentResultWithChangeBundleInstallsByAsyncJobId(
+      mockConnection,
+      mockAorId
+    );
+
+    expect(runSafeQuerySpy.called).to.equal(true);
+
+    // verify we received the correct result
+    expect(mockConnection.query.called).to.equal(true);
+    expect(result).to.equal(mockRecord.records[0]);
+
+    // verify we queried the correct object
+    const builderArgs = mockConnection.query.getCall(0).args;
+    expect(builderArgs[0]).to.contain('FROM sf_devops__Deployment_Result__c');
+    // verify we queried the correct fields
+    expect(builderArgs[0]).to.contain(
+      'SELECT sf_devops__Check_Deploy__c, sf_devops__Deployment_Id__c, sf_devops__Check_Deploy_Status__r.sf_devops__Status__c'
+    );
+    expect(builderArgs[0]).to.contain('(SELECT sf_devops__Environment__c FROM sf_devops__Change_Bundle_Installs__r)');
+    // verify we used the correct filter
+    expect(builderArgs[0]).to.contain(
+      `WHERE sf_devops__Check_Deploy_Status__c = '${mockAorId}' AND sf_devops__Check_Deploy__c = TRUE`
+    );
+  });
+
+  it('returns null when no records found', async () => {
+    const mockRecord = {
+      done: true,
+      records: [],
+      totalSize: 0,
+    };
+    const mockConnection = sandbox.createStubInstance(Connection);
+    mockConnection.query.resolves(mockRecord);
+
+    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
+
+    const result = await selector.selectOneDeploymentResultWithChangeBundleInstallsByAsyncJobId(
+      mockConnection,
+      mockAorId
+    );
+
+    expect(runSafeQuerySpy.called).to.equal(true);
+
+    // verify we received the correct result
+    expect(mockConnection.query.called).to.equal(true);
+    expect(result).to.equal(null);
+  });
 });

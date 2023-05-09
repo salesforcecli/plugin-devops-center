@@ -4,13 +4,14 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-
-export type PromotePipelineResult = {
+export type AsyncOperationResultJson = {
   jobId: string;
-  status?: string;
-  message?: string;
-  errorDetails?: string;
+  status: string;
+  message: string;
+  errorDetails: string;
 };
+
+export type PromotePipelineResult = Partial<AsyncOperationResultJson> & Pick<AsyncOperationResultJson, 'jobId'>;
 
 export type Pipeline = {
   sf_devops__Project__c: string;
@@ -61,6 +62,7 @@ export type Environment = {
 };
 
 export type ChangeBundleInstall = {
+  sf_devops__Environment__c: string;
   sf_devops__Environment__r: Environment;
   sf_devops__Change_Bundle__r: ChangeBundle;
 };
@@ -83,6 +85,7 @@ export type DeploymentResult = {
   sf_devops__Full_Deploy__c: boolean;
   sf_devops__Check_Deploy__c: boolean;
   sf_devops__Completion_Date__c: string;
+  sf_devops__Deployment_Id__c: string;
   sf_devops__Test_Level__c: string;
   sf_devops__Run_Tests__c: string;
   sf_devops__Status__r: AsyncOperationResult;

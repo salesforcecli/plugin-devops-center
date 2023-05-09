@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/PromotePipelineResult",
+  "$ref": "#/definitions/AsyncOperationResultJson",
   "definitions": {
-    "PromotePipelineResult": {
+    "AsyncOperationResultJson": {
       "type": "object",
       "properties": {
         "jobId": {
@@ -18,7 +18,7 @@
           "type": "string"
         }
       },
-      "required": ["jobId"],
+      "required": ["jobId", "status", "message", "errorDetails"],
       "additionalProperties": false
     }
   }

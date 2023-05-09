@@ -12,6 +12,7 @@ import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags as PromoteFlags } from '../base/abstractPromote';
 import { Flags as ReportFlags } from '../base/abstractReportOnPromote';
 import { Flags as ResumeFlags } from '../base/abstractResume';
+import { Flags as QuickPromoteFlags } from '../base/abstractQuick';
 import { DeploymentResult } from '../types';
 import { DeployCommandOutputService } from './deployCommandOutputService';
 import { PromoteReportOutputService } from './reportOutputService';
@@ -26,8 +27,19 @@ export class OutputServiceFactory {
   /**
    * Create a service to print the deployment info.
    */
-  public forDeployment(flags: PromoteFlags<typeof SfCommand>, con: Connection): DeployCommandOutputService {
+  public forDeployment(flags: Partial<PromoteFlags<typeof SfCommand>>, con: Connection): DeployCommandOutputService {
     return new DeployCommandOutputService(flags, con);
+  }
+
+  /**
+   * Create a service to print the quick deployment info.
+   */
+  public forQuickDeployment(
+    flags: Partial<QuickPromoteFlags<typeof SfCommand>>,
+    con: Connection,
+    branchName: string
+  ): DeployCommandOutputService {
+    return new DeployCommandOutputService(flags, con, branchName);
   }
 
   /**
