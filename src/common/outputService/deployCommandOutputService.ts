@@ -19,11 +19,11 @@ import { AbstractPromoteOutputService } from './promoteOutputService';
  * @author JuanStenghele-sf
  */
 export class DeployCommandOutputService extends AbstractPromoteOutputService {
-  public constructor(flags: Flags<typeof SfCommand>, con: Connection) {
+  public constructor(flags: Partial<Flags<typeof SfCommand>>, con: Connection, branchName?: string) {
     super(
       {
         async: flags['async'],
-        branch: flags['branch-name'],
+        branch: branchName ? branchName : (flags['branch-name'] as string),
         concise: flags['concise'],
         verbose: flags['verbose'],
       },

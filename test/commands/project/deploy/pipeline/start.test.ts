@@ -20,6 +20,7 @@ import * as Utils from '../../../../../src/common/utils';
 import { REST_PROMOTE_BASE_URL } from '../../../../../src/common/constants';
 import { DeployCommandOutputService } from '../../../../../src/common/outputService';
 import { DeployPipelineCache } from '../../../../../src/common/deployPipelineCache';
+import * as AorSelector from '../../../../../src/common/selectors/asyncOperationResultsSelector';
 
 let requestMock: sinon.SinonStub;
 let stubDisplayEndResults: sinon.SinonStub;
@@ -281,10 +282,17 @@ describe('project deploy pipeline start', () => {
             sf_devops__Named_Credential__c: 'ABC',
           },
         };
+        const mockAorRecord = {
+          Id: 'mock-aor-id',
+          sf_devops__Message__c: 'mockMessage',
+          sf_devops__Status__c: AsyncOperationStatus.InProgress,
+          sf_devops__Error_Details__c: 'mockErrorDetail',
+        };
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
           .resolves(pipelineStageMock);
         requestMock = sinon.stub().resolves('mock-aor-id');
+        sandbox.stub(AorSelector, 'selectAsyncOperationResultById').resolves(mockAorRecord);
       })
       .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch', '--async'])
       .it('caches the aorId when running project deploy pipeline start with the async flag', async () => {

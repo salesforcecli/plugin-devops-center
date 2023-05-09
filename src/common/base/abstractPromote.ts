@@ -4,19 +4,11 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { Messages, Org, SfError } from '@salesforce/core';
+import { Org } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
 import { HttpRequest } from 'jsforce';
-import { DeployPipelineCache } from '../deployPipelineCache';
-import AsyncOpStreaming from '../../streamer/processors/asyncOpStream';
-import {
-  fetchAndValidatePipelineStage,
-  PipelineStage,
-  PromoteOptions,
-  PromotePipelineResult,
-  validateTestFlags,
-} from '..';
+import { fetchAndValidatePipelineStage, PipelineStage, PromoteOptions, validateTestFlags } from '..';
 import { devopsCenterProjectName, requiredDoceOrgFlag, wait, verbose, concise } from '../flags/flags';
 import {
   branchName,
@@ -26,21 +18,16 @@ import {
   testLevel,
   async,
 } from '../flags/promote/promoteFlags';
-
-import DoceMonitor from '../../streamer/doceMonitor';
 import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from '../constants';
-import { ApiError, ApiPromoteResponse, AsyncOperationResult, AsyncOperationStatus } from '../types';
-import { fetchAsyncOperationResult } from '../utils';
-import { OutputServiceFactory, PromoteOutputService } from '../outputService';
-
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
+import { ApiError, ApiPromoteResponse, AsyncOperationResultJson } from '../../common';
+import { OutputServiceFactory } from '../outputService';
+import { AsyncCommand } from './abstractAsyncOperation';
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
   (typeof PromoteCommand)['baseFlags'] & T['flags']
 >;
 
-export abstract class PromoteCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
+export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCommand {
   // common flags that can be inherited by any command that extends PromoteCommand
   public static baseFlags = {
     'branch-name': branchName,
@@ -62,8 +49,6 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
   private deployOptions: Partial<PromoteOptions>;
   private numRetries409 = 50; // this is the number of times we retry if we get a http-409-Conflict response
 
-  private outputService: PromoteOutputService;
-
   public async init(): Promise<void> {
     await super.init();
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -73,77 +58,40 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags as Flags<T>;
-    this.outputService = new OutputServiceFactory().forDeployment(
-      this.flags,
-      (this.flags['devops-center-username'] as Org).getConnection()
-    );
+    this.targetOrg = this.flags['devops-center-username'] as Org;
+    this.setOutputService(new OutputServiceFactory().forDeployment(this.flags, this.targetOrg.getConnection()));
   }
 
-  protected async executePromotion(): Promise<PromotePipelineResult> {
+  protected async executePromotion(): Promise<AsyncOperationResultJson> {
     validateTestFlags(this.flags['test-level'], this.flags.tests);
-    const doceOrg: Org = this.flags['devops-center-username'] as Org;
     this.targetStage = await fetchAndValidatePipelineStage(
-      doceOrg,
+      this.targetOrg,
       this.flags['devops-center-project-name'],
       this.flags['branch-name']
     );
     this.sourceStageId = this.getSourceStageId();
-    const asyncOperationId: string = await this.requestPromotionFlow(doceOrg);
+    this.setAsyncOperationId(await this.requestPromotionFlow());
 
-    this.outputService.setAorId(asyncOperationId);
-
-    this.outputService.printAorId();
-    // eslint-disable-next-line @typescript-eslint/await-thenable
-    await this.outputService.printOpSummary();
-
-    await DeployPipelineCache.set(asyncOperationId, {});
-
-    if (this.flags.async) {
-      return {
-        jobId: asyncOperationId,
-        status: AsyncOperationStatus.InProgress,
-      };
-    }
-
-    const doceMonitor: DoceMonitor = new AsyncOpStreaming(
-      doceOrg,
-      this.flags.wait,
-      asyncOperationId,
-      this.outputService
-    );
-    await doceMonitor.monitor();
-    if (this.outputService.getStatus() === AsyncOperationStatus.Completed) {
-      this.outputService.displayEndResults();
-    }
-
-    // get final state of the async job
-    const asyncJob: AsyncOperationResult = await fetchAsyncOperationResult(doceOrg.getConnection(), asyncOperationId);
-    return {
-      jobId: asyncOperationId,
-      status: asyncJob.sf_devops__Status__c,
-      message: asyncJob.sf_devops__Message__c,
-      errorDetails: asyncJob.sf_devops__Error_Details__c,
-    };
+    return this.monitorOperation(this.flags.async, this.flags.wait);
   }
 
   /**
    *
    * Sends an Http request to the target org to initiate a promotion.
    *
-   * @param doceOrg target org.
    * @returns Aor Id of promote operation.
    */
-  protected async requestPromotionFlow(doceOrg: Org): Promise<string> {
+  protected async requestPromotionFlow(): Promise<string> {
     let spinnerStarted = false;
     try {
-      return await this.requestPromotion(doceOrg);
+      return await this.requestPromotion();
     } catch (error) {
       const err = error as ApiError;
       // if we get a 409 error then call the retry flow
       if (err.errorCode === HTTP_CONFLICT_CODE) {
         this.spinner.start('Synchronization of source control system events in progress');
         spinnerStarted = true;
-        return await this.retryRequestPromotion(doceOrg, this.numRetries409);
+        return await this.retryRequestPromotion(this.numRetries409);
       }
       throw error;
     } finally {
@@ -157,18 +105,17 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
    * If it gets a 409/Conflict it will retry till the request successes,
    * gets a differenct error or run out of retry attempts.
    *
-   * @param doceOrg target org.
    * @param numRetries Amount of remaining retry attempts.
    * @returns Aor Id of promote operation
    */
-  protected async retryRequestPromotion(doceOrg: Org, numRetries: number): Promise<string> {
+  protected async retryRequestPromotion(numRetries: number): Promise<string> {
     try {
-      return await this.requestPromotion(doceOrg);
+      return await this.requestPromotion();
     } catch (error) {
       const err = error as ApiError;
       // if we still get a 409 error and haven't run out of retry attempts then retry again
       if (err.errorCode === HTTP_CONFLICT_CODE && numRetries > 1) {
-        return this.retryRequestPromotion(doceOrg, numRetries - 1);
+        return this.retryRequestPromotion(numRetries - 1);
       }
       throw error;
     }
@@ -178,24 +125,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
     return this.targetStage;
   }
 
-  /**
-   * Default function for catching commands errors.
-   *
-   * @param error
-   * @returns
-   */
-  protected catch(error: Error | SfError): Promise<SfCommand.Error> {
-    if (error.name?.includes('GenericTimeoutError')) {
-      const err = messages.createError('error.ClientTimeout', [
-        this.config.bin,
-        this.id?.split(':').slice(0, -1).join(' '),
-      ]);
-      return super.catch({ ...error, name: err.name, message: err.message, code: err.code });
-    }
-    return super.catch(error);
-  }
-
-  private async requestPromotion(targetOrg: Org): Promise<string> {
+  private async requestPromotion(): Promise<string> {
     this.buildPromoteOptions();
     const req: HttpRequest = {
       method: 'POST',
@@ -207,7 +137,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends SfComma
         promoteOptions: this.deployOptions,
       }),
     };
-    const response: ApiPromoteResponse = await targetOrg.getConnection().request(req);
+    const response: ApiPromoteResponse = await this.targetOrg.getConnection().request(req);
     return response.jobId;
   }
 

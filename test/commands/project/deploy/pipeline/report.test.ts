@@ -132,6 +132,7 @@ describe('project deploy pipeline report', () => {
           sf_devops__Check_Deploy__c: false,
           sf_devops__Test_Level__c: 'mock-test-level',
           sf_devops__Run_Tests__c: 'mock-tests',
+          sf_devops__Deployment_Id__c: 'mock-deployment-id',
           sf_devops__Status__r: {
             Id: mockAorId,
             sf_devops__Message__c: 'Deploy complete',
@@ -156,6 +157,7 @@ describe('project deploy pipeline report', () => {
           CompletionDate 2023-03-01T13:56:02.000+0000 
           CreatedById    mock-user-id                 
           CreatedByName  mock-user-name               
+          DeploymentId   mock-deployment-id          
           FullDeploy     false                        
           Id             ${mockAorId}           
           Message        Deploy complete              
@@ -176,6 +178,7 @@ describe('project deploy pipeline report', () => {
           sf_devops__Check_Deploy__c: false,
           sf_devops__Test_Level__c: 'mock-test-level',
           sf_devops__Run_Tests__c: 'mock-tests',
+          sf_devops__Deployment_Id__c: 'mock-deployment-id',
           sf_devops__Status__r: {
             Id: mockAorId,
             sf_devops__Error_Details__c: 'mock-error-details',
@@ -201,6 +204,7 @@ describe('project deploy pipeline report', () => {
           CompletionDate                    
           CreatedById    mock-user-id       
           CreatedByName  mock-user-name     
+          DeploymentId   mock-deployment-id 
           ErrorDetails   mock-error-details 
           FullDeploy     false              
           Id             ${mockAorId} 
@@ -222,6 +226,7 @@ describe('project deploy pipeline report', () => {
           sf_devops__Check_Deploy__c: false,
           sf_devops__Test_Level__c: 'mock-test-level',
           sf_devops__Run_Tests__c: 'mock-tests',
+          sf_devops__Deployment_Id__c: 'mock-deployment-id',
           sf_devops__Status__r: {
             Id: mockAorId,
             sf_devops__Message__c: 'mock-message',
@@ -246,6 +251,7 @@ describe('project deploy pipeline report', () => {
             CompletionDate                    
             CreatedById    mock-user-id       
             CreatedByName  mock-user-name     
+            DeploymentId   mock-deployment-id 
             FullDeploy     false              
             Id             a00DS00000Aj3AIYAZ 
             Message        mock-message       
@@ -266,6 +272,7 @@ describe('project deploy pipeline report', () => {
           sf_devops__Check_Deploy__c: false,
           sf_devops__Test_Level__c: 'mock-test-level',
           sf_devops__Run_Tests__c: 'mock-tests',
+          sf_devops__Deployment_Id__c: 'mock-deployment-id',
           sf_devops__Status__r: {
             Id: mockAorId,
             sf_devops__Message__c: 'mock-message',

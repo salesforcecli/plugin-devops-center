@@ -6,7 +6,9 @@
  */
 export {
   ApiError,
+  ApiPromoteResponse,
   AsyncOperationResult,
+  AsyncOperationResultJson,
   AsyncOperationStatus,
   DeploymentResult,
   PipelineStage,
