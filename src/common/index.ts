@@ -7,6 +7,7 @@
 export {
   ApiError,
   ApiPromoteResponse,
+  ApiQuickResponse,
   AsyncOperationResult,
   AsyncOperationResultJson,
   AsyncOperationStatus,

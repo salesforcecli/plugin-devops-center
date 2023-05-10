@@ -191,7 +191,7 @@ describe('project deploy pipeline quick', () => {
         .stderr()
         .do(() => {
           stubQueries();
-          requestMock = sinon.stub().resolves(mockReturnedAorId);
+          requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
           stubStreamer();
         })
         .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`])
@@ -206,7 +206,7 @@ describe('project deploy pipeline quick', () => {
         .stderr()
         .do(() => {
           stubQueries();
-          requestMock = sinon.stub().resolves(mockReturnedAorId);
+          requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
           stubStreamer();
         })
         .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`, '--verbose'])
@@ -391,7 +391,7 @@ describe('project deploy pipeline quick', () => {
         .do(() => {
           stubQueries();
           queryStub.onCall(2).resolves(getQueryResultMock([mockAorRecord]));
-          requestMock = sinon.stub().resolves(mockReturnedAorId);
+          requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
 
           spyStreamerBuilder = sinon.spy(Utils, 'getAsyncOperationStreamer');
           stubStreamer();

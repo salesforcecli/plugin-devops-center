@@ -49,6 +49,8 @@ export interface ApiPromoteResponse {
   jobId: string;
 }
 
+export type ApiQuickResponse = ApiPromoteResponse;
+
 export type WorkItem = {
   Name: string;
 };
