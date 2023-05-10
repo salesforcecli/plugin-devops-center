@@ -14,7 +14,7 @@ import AsyncOpStreaming from '../streamer/processors/asyncOpStream';
 import { colorStatus } from './outputService/outputUtils';
 import { AorOutputService } from './outputService/aorOutputService';
 import { selectAsyncOperationResultById } from './selectors/asyncOperationResultsSelector';
-import { AsyncOperationResult, AsyncOperationStatus, DeployComponent } from './types';
+import { ApiError, AsyncOperationResult, AsyncOperationStatus, DeployComponent, RawError } from './types';
 import { selectDeployComponentsByAsyncOpId } from './selectors/deployComponentsSelector';
 
 Messages.importMessagesDirectory(__dirname);
@@ -182,4 +182,19 @@ export async function getFormattedDeployComponentsByAyncOpId(
   });
 
   return components;
+}
+
+/**
+ * Helper to build an ApiError given the raw error returned by the API.
+ *
+ * @param error The error given by the API
+ * @returns A well formated error
+ */
+export function cleanAndGetApiError(error: RawError): ApiError {
+  const err = error as ApiError;
+  const errMsg = JSON.parse(err.message) as RawError;
+  err.statusCode = err.errorCode;
+  err.errorCode = errMsg.errorCode;
+  err.message = errMsg.message;
+  return err;
 }

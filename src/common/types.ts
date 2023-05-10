@@ -41,13 +41,21 @@ export enum TestLevel {
   RunAllTestsInOrg = 'RunAllTestsInOrg',
 }
 
-export interface ApiError extends Error {
+export interface RawError extends Error {
   errorCode: string;
 }
 
-export interface ApiPromoteResponse {
+export interface ApiError extends RawError {
+  statusCode: string;
+}
+
+export type ApiResponse = object;
+
+export interface ApiPromoteResponse extends ApiResponse {
   jobId: string;
 }
+
+export type ApiQuickResponse = ApiPromoteResponse;
 
 export type WorkItem = {
   Name: string;

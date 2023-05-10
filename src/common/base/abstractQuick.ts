@@ -8,7 +8,7 @@ import { Interfaces } from '@oclif/core';
 import { Messages, Org } from '@salesforce/core';
 import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
 import { HttpRequest } from 'jsforce';
-import { AsyncOperationStatus, PipelineStage, PromoteOptions } from '..';
+import { ApiQuickResponse, AsyncOperationStatus, PipelineStage, PromoteOptions } from '..';
 import { REST_PROMOTE_BASE_URL } from '../constants';
 import { DeployPipelineCache } from '../deployPipelineCache';
 import { async } from '../flags/promote/promoteFlags';
@@ -116,7 +116,8 @@ export default abstract class QuickPromotionCommand<T extends typeof SfCommand> 
         promoteOptions: this.deployOptions,
       }),
     };
-    return this.targetOrg.getConnection().request(req);
+    const response = (await this.request(req)) as ApiQuickResponse;
+    return response.jobId;
   }
 
   /**

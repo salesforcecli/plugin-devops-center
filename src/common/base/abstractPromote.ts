@@ -88,7 +88,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
     } catch (error) {
       const err = error as ApiError;
       // if we get a 409 error then call the retry flow
-      if (err.errorCode === HTTP_CONFLICT_CODE) {
+      if (err.statusCode === HTTP_CONFLICT_CODE) {
         this.spinner.start('Synchronization of source control system events in progress');
         spinnerStarted = true;
         return await this.retryRequestPromotion(this.numRetries409);
@@ -114,7 +114,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
     } catch (error) {
       const err = error as ApiError;
       // if we still get a 409 error and haven't run out of retry attempts then retry again
-      if (err.errorCode === HTTP_CONFLICT_CODE && numRetries > 1) {
+      if (err.statusCode === HTTP_CONFLICT_CODE && numRetries > 1) {
         return this.retryRequestPromotion(numRetries - 1);
       }
       throw error;
@@ -137,7 +137,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
         promoteOptions: this.deployOptions,
       }),
     };
-    const response: ApiPromoteResponse = await this.targetOrg.getConnection().request(req);
+    const response = (await this.request(req)) as ApiPromoteResponse;
     return response.jobId;
   }
 
