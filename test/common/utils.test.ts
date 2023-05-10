@@ -15,17 +15,9 @@ import {
   matchesSfId,
   sObjectToArrayOfKeyValue,
   getFormattedDeployComponentsByAyncOpId,
-  cleanAndGetApiError,
 } from '../../src/common/utils';
 import { fetchAsyncOperationResult } from '../../src/common/utils';
-import {
-  ApiError,
-  AsyncOperationResult,
-  AsyncOperationStatus,
-  DeployComponent,
-  PipelineStage,
-  RawError,
-} from '../../src/common';
+import { AsyncOperationResult, AsyncOperationStatus, DeployComponent, PipelineStage } from '../../src/common';
 import * as PipelineSelector from '../../src/common/selectors/pipelineStageSelector';
 import * as AorSelector from '../../src/common/selectors/asyncOperationResultsSelector';
 import * as deployComponentsSelector from '../../src/common/selectors/deployComponentsSelector';
@@ -300,26 +292,6 @@ describe('utils', () => {
       expect(result[0]).to.deep.equal(MOCK_DEPLOY_COMPONENT);
       expect(result[0].Name).to.deep.equal('foo');
       expect(result[0].Type).to.deep.equal('apexClass');
-    });
-  });
-
-  describe('cleanAndGetApiError', () => {
-    it('formats the error received from the API correctly', () => {
-      const apiError: RawError = {
-        errorCode: 'statusCode',
-        name: 'errorName',
-        message: JSON.stringify({
-          message: 'errorMsg',
-          errorCode: 'errorCode',
-        }),
-      };
-
-      const cleanedError: ApiError = cleanAndGetApiError(apiError);
-
-      expect(cleanedError.errorCode).to.equal('errorCode');
-      expect(cleanedError.name).to.equal('errorName');
-      expect(cleanedError.message).to.equal('errorMsg');
-      expect(cleanedError.statusCode).to.equal('statusCode');
     });
   });
 });

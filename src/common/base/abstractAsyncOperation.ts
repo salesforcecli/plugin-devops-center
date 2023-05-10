@@ -7,17 +7,10 @@
 import { Messages, Org, SfError } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { HttpRequest } from 'jsforce';
 import { DeployPipelineCache } from '../deployPipelineCache';
 import DoceMonitor from '../../streamer/doceMonitor';
 import { AsyncOperationResult, AsyncOperationResultJson, AsyncOperationStatus } from '../types';
-import {
-  ApiResponse,
-  cleanAndGetApiError,
-  fetchAsyncOperationResult,
-  getAsyncOperationStreamer,
-  RawError,
-} from '../../common';
+import { fetchAsyncOperationResult, getAsyncOperationStreamer } from '../../common';
 import { PromoteOutputService } from '../outputService';
 
 Messages.importMessagesDirectory(__dirname);
@@ -80,20 +73,6 @@ export abstract class AsyncCommand extends SfCommand<AsyncOperationResultJson> {
    */
   protected async cacheOperation(): Promise<void> {
     await DeployPipelineCache.set(this.asyncOperationId, {});
-  }
-
-  /**
-   * Makes the given request. Throws a clean error.
-   *
-   * @param req The request to make to the target org
-   * @returns The response to the request
-   */
-  protected async request(req: HttpRequest): Promise<ApiResponse> {
-    try {
-      return await this.targetOrg.getConnection().request(req);
-    } catch (error) {
-      throw cleanAndGetApiError(error as RawError);
-    }
   }
 
   /**

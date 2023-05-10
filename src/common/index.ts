@@ -7,8 +7,6 @@
 export {
   ApiError,
   ApiPromoteResponse,
-  ApiQuickResponse,
-  ApiResponse,
   AsyncOperationResult,
   AsyncOperationResultJson,
   AsyncOperationStatus,
@@ -18,10 +16,8 @@ export {
   PromotePipelineResult,
   TestLevel,
   DeployComponent,
-  RawError,
 } from './types';
 export {
-  cleanAndGetApiError,
   fetchAndValidatePipelineStage,
   fetchAsyncOperationResult,
   getAsyncOperationStreamer,
