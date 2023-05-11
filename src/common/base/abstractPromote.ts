@@ -19,7 +19,7 @@ import {
   async,
 } from '../flags/promote/promoteFlags';
 import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from '../constants';
-import { ApiError, AsyncOperationResultJson } from '../../common';
+import { ApiError, ApiPromoteResponse, AsyncOperationResultJson } from '../../common';
 import { OutputServiceFactory } from '../outputService';
 import { AsyncCommand } from './abstractAsyncOperation';
 
@@ -137,7 +137,8 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
         promoteOptions: this.deployOptions,
       }),
     };
-    return this.targetOrg.getConnection().request(req);
+    const response: ApiPromoteResponse = await this.targetOrg.getConnection().request(req);
+    return response.jobId;
   }
 
   private buildPromoteOptions(): void {
