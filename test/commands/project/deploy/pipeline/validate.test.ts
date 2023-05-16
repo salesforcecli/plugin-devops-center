@@ -105,10 +105,10 @@ describe('project deploy pipeline validate', () => {
           },
         };
         sandbox.stub(Utils, 'fetchAndValidatePipelineStage').resolves(pipelineStageMock);
-        requestMock = sinon.stub();
+        requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
       })
       .command(['project deploy pipeline validate', '-p=testProject', '-b=testBranch'])
-      .it('correctly sets the promote option to perfome a checkDeploy promotion', () => {
+      .it('correctly sets the promote option to perfom a checkDeploy promotion', () => {
         // verify we made the request
         expect(requestMock.called).to.equal(true);
         // now that we know the request was made

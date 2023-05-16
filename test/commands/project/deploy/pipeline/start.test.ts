@@ -20,6 +20,7 @@ import * as Utils from '../../../../../src/common/utils';
 import { REST_PROMOTE_BASE_URL } from '../../../../../src/common/constants';
 import { DeployCommandOutputService } from '../../../../../src/common/outputService';
 import { DeployPipelineCache } from '../../../../../src/common/deployPipelineCache';
+import * as AorSelector from '../../../../../src/common/selectors/asyncOperationResultsSelector';
 
 let requestMock: sinon.SinonStub;
 let stubDisplayEndResults: sinon.SinonStub;
@@ -158,7 +159,7 @@ describe('project deploy pipeline start', () => {
           .stub(Utils, 'fetchAndValidatePipelineStage')
           .resolves(pipelineStageMock);
         sandbox.stub(Utils, 'fetchAsyncOperationResult').resolves(aorMock);
-        requestMock = sinon.stub().resolves('mock-aor-id');
+        requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -198,7 +199,7 @@ describe('project deploy pipeline start', () => {
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
           .resolves(pipelineStageMock);
-        requestMock = sinon.stub().resolves('mock-aor-id');
+        requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
         sandbox
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .stub(AsyncOpStreaming.prototype, 'monitor' as any)
@@ -238,7 +239,7 @@ describe('project deploy pipeline start', () => {
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
           .resolves(pipelineStageMock);
-        requestMock = sinon.stub().resolves('mock-aor-id');
+        requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(AsyncOpStreaming.prototype, 'monitor' as any).returns({ completed: true, payload: {} });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -281,10 +282,17 @@ describe('project deploy pipeline start', () => {
             sf_devops__Named_Credential__c: 'ABC',
           },
         };
+        const mockAorRecord = {
+          Id: 'mock-aor-id',
+          sf_devops__Message__c: 'mockMessage',
+          sf_devops__Status__c: AsyncOperationStatus.InProgress,
+          sf_devops__Error_Details__c: 'mockErrorDetail',
+        };
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
           .resolves(pipelineStageMock);
-        requestMock = sinon.stub().resolves('mock-aor-id');
+        requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
+        sandbox.stub(AorSelector, 'selectAsyncOperationResultById').resolves(mockAorRecord);
       })
       .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch', '--async'])
       .it('caches the aorId when running project deploy pipeline start with the async flag', async () => {
@@ -317,7 +325,7 @@ describe('project deploy pipeline start', () => {
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
           .resolves(pipelineStageMock);
-        requestMock = sinon.stub().resolves('mock-aor-id');
+        requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -373,7 +381,7 @@ describe('project deploy pipeline start', () => {
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
           .resolves(pipelineStageMock);
-        requestMock = sinon.stub();
+        requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
       })
       .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
       .it('correctly sets the promote option to perfome an undeployedOnly promotion', () => {
@@ -410,7 +418,7 @@ describe('project deploy pipeline start', () => {
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
           .resolves(pipelineStageMock);
-        requestMock = sinon.stub();
+        requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
       })
       .command([
         'project deploy pipeline start',
@@ -458,7 +466,7 @@ describe('project deploy pipeline start', () => {
         fetchAndValidatePipelineStageStub = sandbox
           .stub(Utils, 'fetchAndValidatePipelineStage')
           .resolves(pipelineStageMock);
-        requestMock = sinon.stub();
+        requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
       })
       .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
       .it('correctly sets the test level as deault when no test level is provided by the user', () => {
@@ -498,7 +506,7 @@ describe('project deploy pipeline start', () => {
           fetchAndValidatePipelineStageStub = sandbox
             .stub(Utils, 'fetchAndValidatePipelineStage')
             .resolves(pipelineStageMock);
-          requestMock = sinon.stub();
+          requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
         })
         .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
         .it('correctly computes the source pipeline stage id when deploying to first stage in the pipeline', () => {
@@ -560,7 +568,7 @@ describe('project deploy pipeline start', () => {
           fetchAndValidatePipelineStageStub = sandbox
             .stub(Utils, 'fetchAndValidatePipelineStage')
             .resolves(pipelineStageMock);
-          requestMock = sinon.stub();
+          requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
         })
         .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
         .it(
@@ -582,6 +590,7 @@ describe('project deploy pipeline start', () => {
 
     describe('retry promotion request on 409 error', () => {
       const mockError = new Error();
+
       beforeEach(() => {
         // mock the pipeline stage record
         pipelineStageMock = {
@@ -610,7 +619,7 @@ describe('project deploy pipeline start', () => {
         .stdout()
         .stderr()
         .do(() => {
-          requestMock = sinon.stub().resolves('mock-aor-id');
+          requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
         })
         .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
         .it('succeeds the request after first request', (ctx) => {
@@ -673,7 +682,7 @@ describe('project deploy pipeline start', () => {
           mockError['errorCode'] = 'CONFLICT';
           requestMock = sinon.stub().throws(mockError);
           // on the 4th try we want to complete the VCS event processing and return an AOR Id to the user
-          requestMock.onCall(4).resolves('mock-aor-id');
+          requestMock.onCall(4).resolves({ jobId: 'mock-aor-id' });
         })
         .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
         .it('succeeds the request after few retries', (ctx) => {

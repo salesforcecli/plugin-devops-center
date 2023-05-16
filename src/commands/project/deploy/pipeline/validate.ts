@@ -6,7 +6,8 @@
  */
 
 import { Messages } from '@salesforce/core';
-import { PromoteOptions, PromotePipelineResult } from '../../../../common';
+import { PromoteOptions } from '../../../../common';
+import { AsyncOperationResultJson } from '../../../../common/types';
 import DeployPipeline from './start';
 
 Messages.importMessagesDirectory(__dirname);
@@ -20,9 +21,10 @@ export default class ValidateDeployPipeline extends DeployPipeline {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly state = 'beta';
+  protected baseCommand = 'project deploy pipeline';
   private readonly isCheckDeploy = true;
 
-  public async run(): Promise<PromotePipelineResult> {
+  public async run(): Promise<AsyncOperationResultJson> {
     return this.executePromotion();
   }
 

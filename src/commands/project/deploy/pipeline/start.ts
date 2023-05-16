@@ -8,8 +8,9 @@
 import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { PromoteCommand } from '../../../../common/base/abstractPromote';
-import { PipelineStage, PromoteOptions, PromotePipelineResult } from '../../../../common';
+import { PipelineStage, PromoteOptions } from '../../../../common';
 import { APPROVED } from '../../../../common/constants';
+import { AsyncOperationResultJson } from '../../../../common/types';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'project.deploy.pipeline.start');
@@ -22,9 +23,10 @@ export default class DeployPipeline extends PromoteCommand<typeof SfCommand> {
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
   public static readonly state = 'beta';
+  protected baseCommand = 'project deploy pipeline';
   private readonly isUndeployedOnly = true;
 
-  public async run(): Promise<PromotePipelineResult> {
+  public async run(): Promise<AsyncOperationResultJson> {
     return this.executePromotion();
   }
 

@@ -223,6 +223,7 @@ describe('promoteOutputService', () => {
 
     function mockChangeBundleInstall(id: string, versionName: string, envNamedCredential: string): ChangeBundleInstall {
       return {
+        sf_devops__Environment__c: 'E',
         sf_devops__Environment__r: {
           Id: 'E',
           Name: environmentName,
