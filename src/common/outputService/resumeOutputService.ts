@@ -7,6 +7,7 @@
 
 import { Connection } from '@salesforce/core';
 import { DeployComponentsTable } from '../outputColumns';
+import { isCheckDeploy } from '../selectors/deploymentResultsSelector';
 import { DeployComponent } from '../types';
 import { getFormattedDeployComponentsByAyncOpId } from '../utils';
 import { AorOutputService, AorOutputFlags, AbstractAorOutputService } from './aorOutputService';
@@ -38,8 +39,14 @@ export abstract class AbstractResumeOutputService<T extends AorOutputFlags>
    */
   public async displayEndResults(): Promise<void> {
     if (this.flags.verbose) {
-      const components: DeployComponent[] = await getFormattedDeployComponentsByAyncOpId(this.con, this.aorId);
-      this.displayTable(components, DeployComponentsTable.title, DeployComponentsTable.columns);
+      const isValidateDeploy = await isCheckDeploy(this.con, this.aorId);
+      const components: DeployComponent[] = await getFormattedDeployComponentsByAyncOpId(
+        this.con,
+        this.aorId,
+        isValidateDeploy
+      );
+      const title = isValidateDeploy ? DeployComponentsTable.validateDeployTitle : DeployComponentsTable.title;
+      this.displayTable(components, title, DeployComponentsTable.columns);
     }
   }
 }

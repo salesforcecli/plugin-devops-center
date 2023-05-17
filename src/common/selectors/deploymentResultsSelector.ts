@@ -10,6 +10,10 @@ import { QueryResult } from 'jsforce';
 import { AsyncOperationResult, ChangeBundleInstall, DeploymentResult } from '../types';
 import { runSafeQuery } from './selectorUtils';
 
+// This type will be defined here as it is sepecific from this function
+export type DeploymentResultCheckDeploy = {
+  sf_devops__Check_Deploy__c: boolean | null;
+};
 export type CheckDeploymentResultWithChangeBundleInstalls = {
   sf_devops__Change_Bundle_Installs__r: QueryResult<ChangeBundleInstall>;
   sf_devops__Check_Deploy_Status__r: AsyncOperationResult;
@@ -34,6 +38,21 @@ export async function selectOneDeploymentResultByAsyncJobId(
   return resp.totalSize > 0 ? resp.records[0] : null;
 }
 
+/**
+ *
+ * Returns if a deployment result is from a Check-Deploy by async job id.
+ */
+export async function isCheckDeploy(con: Connection, asyncJobId: string): Promise<boolean> {
+  const queryStr = `SELECT sf_devops__Check_Deploy__c,
+                      sf_devops__Status__r.Id, sf_devops__Check_Deploy_Status__r.Id     
+                    FROM sf_devops__Deployment_Result__c  
+                    WHERE sf_devops__Status__r.Id = '${asyncJobId}'
+                    OR sf_devops__Check_Deploy_Status__r.Id = '${asyncJobId}'`;
+
+  const resp: QueryResult<DeploymentResultCheckDeploy> = await runSafeQuery(con, queryStr, true);
+  const result = resp.totalSize > 0 && !!resp.records[0].sf_devops__Check_Deploy__c;
+  return result;
+}
 /**
  *
  * Returns deployment result record with Change Bundle Installs filtering by check deploy job id.

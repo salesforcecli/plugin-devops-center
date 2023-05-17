@@ -17,6 +17,8 @@ import * as DeploySelector from '../../../src/common/selectors/deployProgressSum
 import { AsyncOperationType } from '../../../src/common/constants';
 import * as StageSelector from '../../../src/common/selectors/environmentSelector';
 import * as WorkItemSelector from '../../../src/common/selectors/workItemSelector';
+import * as DeploymentResultsSelector from '../../../src/common/selectors/deploymentResultsSelector';
+import * as ValidateDeploySelector from '../../../src/common/selectors/validateDeploySelector';
 import { AbstractPromoteOutputService, DeploySummaryBuilder } from '../../../src/common/outputService';
 import * as Utils from '../../../src/common/utils';
 
@@ -79,8 +81,8 @@ describe('promoteOutputService', () => {
 
       const deployedComponents: DeployComponent[] = new Array(deployed);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves(deployedComponents);
+      sandbox.stub(DeploymentResultsSelector, 'isCheckDeploy').resolves(false);
 
       const logSpy = sandbox.spy(ux, 'log');
 
@@ -427,6 +429,92 @@ describe('promoteOutputService', () => {
         await outputService.printOpSummary();
         expect(ctx.stdout).to.contain(
           `DevOps Center pipeline stage ${stageName} being updated. Deploying metadata from ${branchName} branch to target org ${environmentName}.`
+        );
+      });
+    });
+
+    describe('validate-only deployment', () => {
+      let changeBundleInstalls: ChangeBundleInstall[] = [mockChangeBunldeInstall1, mockChangeBunldeInstall2];
+
+      beforeEach(() => {
+        sandbox.stub(DeploySelector, 'selectDeployAORSummaryDataById').resolves({
+          sf_devops__Work_Item_Promotes__r: null,
+          sf_devops__Change_Bundle_Installs__r: {
+            done: true,
+            totalSize: changeBundleInstalls.length,
+            records: changeBundleInstalls,
+            nextRecordsUrl: undefined,
+          },
+          sf_devops__Work_Items__r: null,
+          sf_devops__Operation__c: AsyncOperationType.CHECK_DEPLOY,
+        });
+
+        sandbox.stub(StageSelector, 'selectPipelineStageByEnvironment').resolves({
+          Name: environmentName,
+          sf_devops__Pipeline_Stages__r: {
+            done: true,
+            totalSize: 1,
+            records: [
+              {
+                Id: 'S',
+                Name: stageName,
+                sf_devops__Branch__r: {
+                  sf_devops__Name__c: 'NotUsed',
+                },
+                sf_devops__Pipeline__r: {
+                  sf_devops__Project__c: 'AProject',
+                },
+                sf_devops__Pipeline_Stages__r: undefined,
+                sf_devops__Environment__r: {
+                  Id: 'E',
+                  Name: environmentName,
+                  sf_devops__Named_Credential__c: 'ABC',
+                },
+              },
+            ],
+          },
+        });
+      });
+
+      test.stdout().it('prints the correct message for a validate-only deployment (>1 CBs)', async (ctx) => {
+        sandbox.stub(ValidateDeploySelector, 'selectValidateDeployAORSummaryDataById').resolves(changeBundleInstalls);
+
+        outputService = getOutputService(false, true);
+        await outputService.printOpSummary();
+
+        expect(ctx.stdout).to.contain(
+          `Performing a validate-only deployment for work item bundle ${changeBundleInstall1VersionName} to ${environmentName}.`
+        );
+      });
+
+      test.stdout().it('prints the correct message for a validate-only deployment (>1 CBs)', async (ctx) => {
+        const changeBundleInstall3VersionName = '2.0';
+        const changeBundleInstall3Id = 'CB2';
+
+        const mockChangeBunldeInstall3 = mockChangeBundleInstall(
+          changeBundleInstall3Id,
+          changeBundleInstall3VersionName,
+          'ABC'
+        );
+
+        changeBundleInstalls = [mockChangeBunldeInstall1, mockChangeBunldeInstall3];
+
+        sandbox.stub(ValidateDeploySelector, 'selectValidateDeployAORSummaryDataById').resolves(changeBundleInstalls);
+
+        outputService = getOutputService(false, true);
+        await outputService.printOpSummary();
+
+        expect(ctx.stdout).to.contain(
+          `Performing a validate-only deployment for work item bundles ${changeBundleInstall1VersionName}; ${changeBundleInstall3VersionName} to ${environmentName}.`
+        );
+      });
+
+      test.stdout().it('prints the correct message for concise flag for validate-only deployment', async (ctx) => {
+        sandbox.stub(ValidateDeploySelector, 'selectValidateDeployAORSummaryDataById').resolves(changeBundleInstalls);
+        outputService = getOutputService(true, false);
+        await outputService.printOpSummary();
+        expect(ctx.stdout).to.contain(
+          `Performing Validate-only deployment from ${branchName} branch to target org ${environmentName}.`
         );
       });
     });

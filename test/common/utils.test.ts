@@ -276,7 +276,7 @@ describe('utils', () => {
   });
 
   describe('getFormattedDeployComponentsByAyncOpId', () => {
-    it('formats the DeployComponent adding Type and Name', async () => {
+    it('formats the DeployComponent adding Type and Name and calls selectDeployComponentsByAsyncOpId', async () => {
       const stubConnection = sinon.createStubInstance(Connection);
 
       const MOCK_DEPLOY_COMPONENT: DeployComponent = {
@@ -285,13 +285,37 @@ describe('utils', () => {
         sf_devops__File_Path__c: 'path',
       };
 
-      sandbox.stub(deployComponentsSelector, 'selectDeployComponentsByAsyncOpId').resolves([MOCK_DEPLOY_COMPONENT]);
+      const stubSelector = sandbox
+        .stub(deployComponentsSelector, 'selectDeployComponentsByAsyncOpId')
+        .resolves([MOCK_DEPLOY_COMPONENT]);
 
-      const result: DeployComponent[] = await getFormattedDeployComponentsByAyncOpId(stubConnection, 'ID');
+      const result: DeployComponent[] = await getFormattedDeployComponentsByAyncOpId(stubConnection, 'ID', false);
 
       expect(result[0]).to.deep.equal(MOCK_DEPLOY_COMPONENT);
       expect(result[0].Name).to.deep.equal('foo');
       expect(result[0].Type).to.deep.equal('apexClass');
+      expect(stubSelector.called).to.equal(true);
+    });
+
+    it('formats the DeployComponent adding Type and Name and calls selectDeployComponentsForCheckDeployByAsynchOpId', async () => {
+      const stubConnection = sinon.createStubInstance(Connection);
+
+      const MOCK_DEPLOY_COMPONENT: DeployComponent = {
+        sf_devops__Source_Component__c: 'apexClass:foo',
+        sf_devops__Operation__c: 'ADD',
+        sf_devops__File_Path__c: 'path',
+      };
+
+      const stubSelector = sandbox
+        .stub(deployComponentsSelector, 'selectDeployComponentsForCheckDeployByAsynchOpId')
+        .resolves([MOCK_DEPLOY_COMPONENT]);
+
+      const result: DeployComponent[] = await getFormattedDeployComponentsByAyncOpId(stubConnection, 'ID', true);
+
+      expect(result[0]).to.deep.equal(MOCK_DEPLOY_COMPONENT);
+      expect(result[0].Name).to.deep.equal('foo');
+      expect(result[0].Type).to.deep.equal('apexClass');
+      expect(stubSelector.called).to.equal(true);
     });
   });
 });

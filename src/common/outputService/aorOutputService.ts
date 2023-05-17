@@ -64,14 +64,21 @@ export abstract class AbstractAorOutputService<T extends AorOutputFlags>
   }
 
   public printAorStatus(aor: AsyncOperationResult): void {
-    if (aor.sf_devops__Status__c === undefined || aor.sf_devops__Status__c === AsyncOperationStatus.InProgress) {
-      console.log(aor.sf_devops__Message__c);
-    } else if (aor.sf_devops__Status__c === AsyncOperationStatus.Completed) {
+    if (aor.sf_devops__Status__c === AsyncOperationStatus.Completed) {
       console.log(green(aor.sf_devops__Message__c));
-    } else if (aor.sf_devops__Status__c === AsyncOperationStatus.Error && aor.sf_devops__Error_Details__c) {
-      console.log(
-        red(output.getMessage('output.aor-error-status', [aor.sf_devops__Message__c, aor.sf_devops__Error_Details__c]))
-      );
+    } else if (aor.sf_devops__Status__c === AsyncOperationStatus.Error) {
+      if (aor.sf_devops__Error_Details__c) {
+        console.log(
+          red(
+            output.getMessage('output.aor-error-status', [aor.sf_devops__Message__c, aor.sf_devops__Error_Details__c])
+          )
+        );
+      } else {
+        console.log(red(aor.sf_devops__Message__c));
+      }
+    } else {
+      // aor.sf_devops__Status__c == undefined || AsyncOperationStatus.InProgress
+      console.log(aor.sf_devops__Message__c);
     }
 
     this.status = aor.sf_devops__Status__c;

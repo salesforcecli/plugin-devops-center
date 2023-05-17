@@ -43,7 +43,7 @@ describe('DeploymentResult selector', () => {
     sandbox.restore();
   });
 
-  it('uses the connection to fetch the record', async () => {
+  it('uses the connection to fetch the record and selects a Deployment Result', async () => {
     const mockRecord = MOCK_RECORD;
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
@@ -76,6 +76,40 @@ describe('DeploymentResult selector', () => {
     );
     // verify we used the correct filter
     expect(builderArgs[0]).to.contain(`WHERE sf_devops__Status__r.Id = '${mockAorId}'`);
+  });
+
+  it('uses the connection to fetch the record and check if it is a checkdeploy', async () => {
+    const mockRecord = {
+      done: true,
+      records: [
+        {
+          sf_devops__Check_Deploy__c: true,
+        },
+      ],
+      totalSize: 1,
+    };
+    const mockConnection = sandbox.createStubInstance(Connection);
+    mockConnection.query.resolves(mockRecord);
+
+    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
+
+    const result = await selector.isCheckDeploy(mockConnection, 'mock-id');
+
+    expect(runSafeQuerySpy.called).to.equal(true);
+
+    // verify we received the correct result
+    expect(mockConnection.query.called).to.equal(true);
+    expect(result).to.equal(true);
+
+    // verify we queried the correct object
+    const builderArgs = mockConnection.query.getCall(0).args;
+    expect(builderArgs[0]).to.contain('FROM sf_devops__Deployment_Result__c');
+    // verify we queried the correct fields
+    expect(builderArgs[0]).to.contain('sf_devops__Status__r.Id, sf_devops__Check_Deploy_Status__r.Id');
+    // verify we used the correct filter
+    expect(builderArgs[0]).to.contain(`WHERE sf_devops__Status__r.Id = '${mockAorId}'`);
+    // verify we used the correct filter
+    expect(builderArgs[0]).to.contain(`OR sf_devops__Check_Deploy_Status__r.Id = '${mockAorId}'`);
   });
 
   it('returns null when no records found', async () => {

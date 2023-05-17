@@ -8,8 +8,12 @@
 /* eslint-disable camelcase */
 
 import { expect, test } from '@oclif/test';
+import { Messages } from '@salesforce/core';
 import { AbstractAorOutputService, AorOutputFlags } from '../../../src/common/outputService';
 import { AsyncOperationResult, AsyncOperationStatus } from '../../../src/common/types';
+
+Messages.importMessagesDirectory(__dirname);
+const output = Messages.loadMessages('@salesforce/plugin-devops-center', 'aorOperations.output');
 
 class AorOutputServiceTest extends AbstractAorOutputService<AorOutputFlags> {
   public constructor() {
@@ -75,13 +79,14 @@ describe('aorOutputService', () => {
         sf_devops__Message__c: message,
       };
       outputService.printAorStatus(aor);
-      expect(ctx.stdout).to.contain(errorDetails);
-      expect(ctx.stdout).to.contain(message);
+      expect(ctx.stdout).to.contain(
+        output.getMessage('output.aor-error-status', [aor.sf_devops__Message__c, aor.sf_devops__Error_Details__c])
+      );
     });
 
-    test.stdout().it('handles the print of an Error aor status without an error message', (ctx) => {
+    test.stdout().it('handles the print of an Error aor status without an error message detail', (ctx) => {
       const status = AsyncOperationStatus.Error;
-      const message = 'This should not be printed';
+      const message = 'This should be printed';
       const aor: AsyncOperationResult = {
         Id: 'Id',
         sf_devops__Error_Details__c: undefined,
@@ -89,7 +94,7 @@ describe('aorOutputService', () => {
         sf_devops__Message__c: message,
       };
       outputService.printAorStatus(aor);
-      expect(ctx.stdout).to.be.empty;
+      expect(ctx.stdout).to.contain(message);
     });
   });
 });
