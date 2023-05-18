@@ -361,8 +361,8 @@ describe('project deploy pipeline start', () => {
       // Mock the events streaming and the output service
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       monitorStub = sandbox
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .stub(AsyncOpStreaming.prototype, 'monitor' as any)
         .returns({ completed: true, payload: {} });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
