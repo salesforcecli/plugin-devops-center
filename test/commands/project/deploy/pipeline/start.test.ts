@@ -206,6 +206,13 @@ describe('project deploy pipeline start', () => {
           .throwsException({ name: 'GenericTimeoutError' });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(DeployCommandOutputService.prototype, 'printOpSummary' as any).returns({});
+        // mock the async operation result
+        const aorMock = {
+          Id: 'mock-id',
+          sf_devops__Status__c: AsyncOperationStatus.InProgress,
+          sf_devops__Message__c: 'Completed',
+        };
+        sandbox.stub(Utils, 'fetchAsyncOperationResult').resolves(aorMock);
       })
       .stdout()
       .stderr()
@@ -346,15 +353,23 @@ describe('project deploy pipeline start', () => {
     const firstStageId = 'mock-first-stage-id';
     const secondStageId = 'mock-second-stage-id';
 
+    let fetchAsyncOperationResultStub: sinon.SinonStub;
+    let monitorStub: sinon.SinonStub;
+    let printAorStatusStub: sinon.SinonStub;
+
     beforeEach(() => {
       // Mock the events streaming and the output service
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      sandbox.stub(AsyncOpStreaming.prototype, 'monitor' as any).returns({ completed: true, payload: {} });
+      monitorStub = sandbox
+        .stub(AsyncOpStreaming.prototype, 'monitor' as any)
+        .returns({ completed: true, payload: {} });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sandbox.stub(DeployCommandOutputService.prototype, 'printOpSummary' as any).returns({});
-      sandbox.stub(Utils, 'fetchAsyncOperationResult').resolves({ Id: 'MockId' });
+      fetchAsyncOperationResultStub = sandbox
+        .stub(Utils, 'fetchAsyncOperationResult')
+        .resolves({ Id: 'MockId', sf_devops__Status__c: AsyncOperationStatus.Completed });
     });
 
     test
@@ -477,6 +492,39 @@ describe('project deploy pipeline start', () => {
         // and validate its values
         const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
         expect(requestArgument.body).to.contain('"testLevel":"Default"');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .do(() => {
+        // mock the pipeline stage record
+        pipelineStageMock = {
+          Id: firstStageId,
+          sf_devops__Branch__r: {
+            sf_devops__Name__c: 'mockBranchName',
+          },
+          sf_devops__Pipeline__r: {
+            sf_devops__Project__c: 'mockProjectId',
+          },
+          sf_devops__Pipeline_Stages__r: undefined,
+          Name: 'mock',
+          sf_devops__Environment__r: {
+            Id: 'envId',
+            Name: 'envName',
+            sf_devops__Named_Credential__c: 'ABC',
+          },
+        };
+        sandbox.stub(Utils, 'fetchAndValidatePipelineStage').resolves(pipelineStageMock);
+        requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
+
+        printAorStatusStub = sandbox.stub(DeployCommandOutputService.prototype, 'printAorStatus');
+      })
+      .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
+      .it('correctly handles when the async operation inmediately transitions to concluded state', () => {
+        expect(monitorStub.called).to.equal(false);
+        expect(fetchAsyncOperationResultStub.called).to.equal(true);
+        expect(printAorStatusStub.called).to.equal(true);
       });
 
     describe('compute source stage', () => {
