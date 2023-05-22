@@ -98,12 +98,23 @@ export abstract class AsyncCommand extends SfCommand<AsyncOperationResultJson> {
    * @param wait
    */
   private async startMonitoring(wait: Duration): Promise<void> {
-    const streamer: DoceMonitor = getAsyncOperationStreamer(
-      this.targetOrg,
-      wait,
-      this.asyncOperationId,
-      this.outputService
+    const asyncJob: AsyncOperationResult = await fetchAsyncOperationResult(
+      this.targetOrg.getConnection(),
+      this.asyncOperationId
     );
-    await streamer.monitor();
+    if (
+      asyncJob.sf_devops__Status__c === undefined ||
+      asyncJob.sf_devops__Status__c === AsyncOperationStatus.InProgress
+    ) {
+      const streamer: DoceMonitor = getAsyncOperationStreamer(
+        this.targetOrg,
+        wait,
+        this.asyncOperationId,
+        this.outputService
+      );
+      await streamer.monitor();
+    } else {
+      this.outputService.printAorStatus(asyncJob);
+    }
   }
 }
