@@ -14,6 +14,7 @@ import {
   fetchAndValidatePipelineStage,
   matchesSfId,
   sObjectToArrayOfKeyValue,
+  sleep,
   getFormattedDeployComponentsByAyncOpId,
 } from '../../src/common/utils';
 import { fetchAsyncOperationResult } from '../../src/common/utils';
@@ -316,6 +317,15 @@ describe('utils', () => {
       expect(result[0].Name).to.deep.equal('foo');
       expect(result[0].Type).to.deep.equal('apexClass');
       expect(stubSelector.called).to.equal(true);
+    });
+  });
+
+  describe('sleep', () => {
+    it('sets a timeout of the number of miliseconds', async () => {
+      const prevTime = Date.now();
+      await sleep(20);
+      const nextTime = Date.now();
+      expect(nextTime).to.greaterThanOrEqual(prevTime + 2);
     });
   });
 });
