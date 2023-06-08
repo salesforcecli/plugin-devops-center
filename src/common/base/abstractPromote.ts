@@ -21,6 +21,7 @@ import {
 import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from '../constants';
 import { ApiError, ApiPromoteResponse, AsyncOperationResultJson } from '../../common';
 import { OutputServiceFactory } from '../outputService';
+import { sleep } from '../utils';
 import { AsyncCommand } from './abstractAsyncOperation';
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
@@ -110,6 +111,8 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
    */
   protected async retryRequestPromotion(numRetries: number): Promise<string> {
     try {
+      // Sleep 2 seconds before requesting promotion again.
+      await sleep(2000);
       return await this.requestPromotion();
     } catch (error) {
       const err = error as ApiError;

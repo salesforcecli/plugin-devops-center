@@ -639,7 +639,10 @@ describe('project deploy pipeline start', () => {
     describe('retry promotion request on 409 error', () => {
       const mockError = new Error();
 
+      let sleepStub: sinon.SinonStub;
+
       beforeEach(() => {
+        sleepStub = sinon.stub(Utils, 'sleep').resolves();
         // mock the pipeline stage record
         pipelineStageMock = {
           Id: 'mock-id',
@@ -662,6 +665,10 @@ describe('project deploy pipeline start', () => {
           .resolves(pipelineStageMock);
       });
 
+      afterEach(() => {
+        sleepStub.restore();
+      });
+
       // Test case: promotion request returns a valid AOR Id the first time so we don't have to retry.
       test
         .stdout()
@@ -675,6 +682,7 @@ describe('project deploy pipeline start', () => {
           expect(requestMock.callCount).to.equal(1);
           // make sure that we show the returned aor id to the user
           expect(ctx.stdout).to.contain('mock-aor-id');
+          sinon.assert.notCalled(sleepStub);
         });
 
       // Test case: promotion request returns 409 error so we retry the request till it reaches the limit.
@@ -699,6 +707,8 @@ describe('project deploy pipeline start', () => {
           // make sure that we called the spinner and stopped it as well
           expect(spinnerStartStub.called).to.equal(true);
           expect(spinnerStopStub.called).to.equal(true);
+          sinon.assert.callCount(sleepStub, 50);
+          sinon.assert.alwaysCalledWith(sleepStub, 2000);
         });
 
       // Test case: promotion request returns a non-409 error so we don't retry and display the error.
@@ -718,6 +728,7 @@ describe('project deploy pipeline start', () => {
           expect(requestMock.called).to.equal(true);
           // make sure that we show the error to the user
           expect(ctx.stderr).to.contain('ERROR');
+          sinon.assert.notCalled(sleepStub);
         });
 
       // Test case: Test case: promotion request returns 409 error and after few retries it returns a valid AOR Id.
@@ -738,6 +749,8 @@ describe('project deploy pipeline start', () => {
           expect(requestMock.callCount).to.equal(5);
           // make sure that we show the returned aor id to the user
           expect(ctx.stdout).to.contain('mock-aor-id');
+          sinon.assert.callCount(sleepStub, 4);
+          sinon.assert.alwaysCalledWith(sleepStub, 2000);
         });
     });
   });

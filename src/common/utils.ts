@@ -189,3 +189,14 @@ export async function getFormattedDeployComponentsByAyncOpId(
 
   return components;
 }
+
+/**
+ * Helper to sleep thread for ms amount of time
+ *
+ * @param ms Number of miliseconds to sleep thread
+ */
+export async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
