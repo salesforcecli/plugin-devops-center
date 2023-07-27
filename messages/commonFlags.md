@@ -4,7 +4,7 @@ Name of the DevOps Center project.
 
 # flags.devops-center-username.summary
 
-Username or alias for the DevOps Center org.
+Username or alias for the org where DevOps Center is installed.
 
 # flags.wait.description
 
@@ -50,4 +50,4 @@ Show concise output of the command result.
 
 # errors.NoDefaultDoceEnv
 
-You must specify the DevOps Center org username by indicating the -c flag on the command line or by setting the target-devops-center configuration variable.
+You must specify the DevOps Center org username by indicating the --devops-center-username flag on the command line or by setting the target-devops-center configuration variable.
