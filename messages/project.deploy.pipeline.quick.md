@@ -22,7 +22,7 @@ This command doesn't support source-tracking. The source you deploy overwrites t
 
 # flags.job-id.summary
 
-Job ID of the deployment you want to quick deploy.
+Job ID of the quick deployment.
 
 # flags.job-id.description
 
@@ -34,11 +34,11 @@ Use the job ID of the most recently validated deployment.
 
 # flags.use-most-recent.description
 
-For performance reasons, this flag uses only job IDs that were validated in the past 3 days or less. If your most recent deployment validation was more than 3 days ago, this flag won't find a job ID.
+For performance reasons, this flag uses only job IDs that were validated in the past 3 days or less. If your most recent deployment validation was more than 3 days ago, this flag won't find the job ID.
 
 # error.JobIsNotValidationDeployment
 
-The job ID is invalid for the quick deployment. Verify that a deployment validation was run, and that you specified the correct job ID. Then try again.
+The job ID is invalid for the quick deployment. Verify that a deployment validation was run or hasn't expired, and that you specified the correct job ID. Then try again.
 
 # error.JobIsNotValidated
 
