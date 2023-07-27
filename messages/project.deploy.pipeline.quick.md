@@ -22,7 +22,7 @@ This command doesn't support source-tracking. The source you deploy overwrites t
 
 # flags.job-id.summary
 
-Job ID of the quick deployment.
+Job ID of the validated deployment to quick deploy.
 
 # flags.job-id.description
 
