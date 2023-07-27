@@ -4,7 +4,7 @@ Check the status of a pipeline deploy operation.
 
 # description
 
-Run this command by either passing it a job ID or specifying the —use-most-recent flag to use the job ID of the most recent deploy operation.
+Run this command by either indicating a job ID or specifying the —use-most-recent flag to use the job ID of the most recent deploy operation.
 
 # examples
 
@@ -18,7 +18,7 @@ Run this command by either passing it a job ID or specifying the —use-most-rec
 
 # flags.job-id.summary
 
-Job ID of the pipeline deployment you want to check the status of.
+Job ID of the pipeline deployment to check the status of.
 
 # flags.job-id.description
 
@@ -30,7 +30,7 @@ Use the job ID of the most recent deploy operation.
 
 # flags.use-most-recent.description
 
-For performance reasons, this flag uses job IDs for deploy operations that started in the past 3 days or fewer. If your most recent operation was longer than 3 days ago, this flag won't find a job ID.
+For performance reasons, this flag uses job IDs for deploy operations that started in the past 3 days or fewer. If your most recent operation was longer than 3 days ago, this flag won't find the job ID.
 
 # report.key.created-by-name
 
