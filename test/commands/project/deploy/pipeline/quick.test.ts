@@ -122,7 +122,7 @@ describe('project deploy pipeline quick', () => {
       .catch(() => {})
       .it('runs project deploy pipeline quick without specifying any target Devops Center org', (ctx) => {
         expect(ctx.stderr).to.contain(
-          'You must specify the DevOps Center org username by indicating the -c flag on the command line or by setting the target-devops-center configuration variable.'
+          'You must specify the DevOps Center org username by indicating the --devops-center-username flag on the command line or by setting the target-devops-center configuration variable.'
         );
       });
   });
@@ -349,7 +349,7 @@ describe('project deploy pipeline quick', () => {
         .catch(() => {})
         .it('display an error message when we cannot find the deployment result for the given AOR ID', (ctx) => {
           expect(ctx.stderr).to.contain(
-            'The job ID is invalid for the quick deployment. Verify that a deployment validation was run, and that you specified the correct job ID. Then try again.'
+            "The job ID is invalid for the quick deployment. Verify that a deployment validation was run or hasn't expired, and that you specified the correct job ID. Then try again."
           );
         });
 

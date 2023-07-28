@@ -58,7 +58,7 @@ describe('project deploy pipeline report', () => {
       .catch(() => {})
       .it('runs project deploy pipeline report without specifying any target Devops Center org', (ctx) => {
         expect(ctx.stderr).to.contain(
-          'You must specify the DevOps Center org username by indicating the -c flag on the command line or by setting the target-devops-center configuration variable.'
+          'You must specify the DevOps Center org username by indicating the --devops-center-username flag on the command line or by setting the target-devops-center configuration variable.'
         );
       });
   });
