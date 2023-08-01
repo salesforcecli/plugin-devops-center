@@ -50,10 +50,10 @@ describe('promoteOutputService', () => {
       await outputService.printOpSummary();
       expect(ctx.stdout).to.contain('Deploy has been queued.');
       expect(ctx.stdout).to.contain(
-        `Run "sf project deploy pipeline resume --job-id ${mockId} to resume watching the deploy.`
+        `Run "sf project deploy pipeline resume --job-id ${mockId}" to resume watching the deploy.`
       );
       expect(ctx.stdout).to.contain(
-        `Run "sf project deploy pipeline report --job-id ${mockId} to get the latest status.`
+        `Run "sf project deploy pipeline report --job-id ${mockId}" to get the latest status.`
       );
     });
   });
@@ -514,7 +514,7 @@ describe('promoteOutputService', () => {
         outputService = getOutputService(true, false);
         await outputService.printOpSummary();
         expect(ctx.stdout).to.contain(
-          `Performing Validate-only deployment from ${branchName} branch to target org ${environmentName}.`
+          `Performing validate-only deployment from ${branchName} branch to target org ${environmentName}.`
         );
       });
     });

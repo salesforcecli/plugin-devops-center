@@ -1,8 +1,8 @@
 # output.async-run-info
 
 Deploy has been queued.
-Run "sf project deploy pipeline resume --job-id %s to resume watching the deploy.
-Run "sf project deploy pipeline report --job-id %s to get the latest status.
+Run "sf project deploy pipeline resume --job-id %s" to resume watching the deploy.
+Run "sf project deploy pipeline report --job-id %s" to get the latest status.
 
 # output.item
 
@@ -44,4 +44,4 @@ bundles
 
 # output.concise.validate-deploy-summary
 
-Performing Validate-only deployment from %s branch to target org %s.
+Performing validate-only deployment from %s branch to target org %s.

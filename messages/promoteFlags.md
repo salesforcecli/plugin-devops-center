@@ -1,10 +1,10 @@
 # promote.branch-name.summary
 
-Name of the branch in the source control repository from which to deploy changes to the stage’s org.
+Name of the branch in the source control repository that corresponds to the pipeline stage that you want to deploy the changes to.
 
 # promote.deploy-all.summary
 
-Deploy all metadata in branch.
+Deploy all metadata in the branch to the stage's org.
 
 # promote.deploy-all.description
 
@@ -24,7 +24,7 @@ Apex tests to run when --test-level is RunSpecifiedTests.
 
 # promote.tests.description
 
-Separate multiple test names with commas, and enclose the entire flag value in double quotes if a test name contains a space.
+Separate multiple test names with commas. Enclose the entire flag value in double quotes if a test name contains spaces.
 
 # promote.test-level.summary
 

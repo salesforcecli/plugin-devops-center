@@ -4,7 +4,7 @@ Deploy changes from a branch to the pipeline stage’s org.
 
 # description
 
-Before you run this command, changes in the branch must be merged in the source control repository.
+Before you run this command, changes in the pipeline stage's branch must be merged in the source control repository.
 
 # examples
 
