@@ -12,7 +12,7 @@ import { Duration } from '@salesforce/kit';
 import { AnyJson, JsonMap, ensureJsonMap } from '@salesforce/ts-types';
 import SObjectStreaming from '../sObjectStream';
 import { ASYNC_OPERATION_CDC } from '../../common/constants';
-import { AsyncOperationResult } from '../../common/types';
+import { AsyncOperationResult, AsyncOperationStatus } from '../../common/types';
 import { AorOutputService } from '../../common/outputService';
 
 export default class AsyncOpStreaming extends SObjectStreaming {
@@ -48,7 +48,7 @@ export default class AsyncOpStreaming extends SObjectStreaming {
     this.outputService.printAorStatus(asyncOpResult);
 
     // In a future we want to test !Is_Completed__c instead of Status != In Progress
-    if (asyncOpResult.sf_devops__Status__c && asyncOpResult.sf_devops__Status__c !== 'In Progress') {
+    if (asyncOpResult.sf_devops__Status__c && asyncOpResult.sf_devops__Status__c !== AsyncOperationStatus.InProgress) {
       return {
         completed: true,
         payload: jsonPayload,
