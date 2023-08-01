@@ -197,7 +197,7 @@ describe('waitFlag', () => {
       });
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(err.message).to.include('The value must be between 3 and undefined (inclusive).');
+      expect(err.message).to.include('The value must be at least 3.');
     }
   });
 
