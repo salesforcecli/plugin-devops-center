@@ -1018,10 +1018,10 @@
     proper-lockfile "^4.1.2"
     ts-retry-promise "^0.7.0"
 
-"@salesforce/core@^5.1.4":
-  version "5.1.4"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-5.1.4.tgz#ab173dabb1b4d7cca71e5a63dff3836dfeb5ea89"
-  integrity sha512-pvITb9oOvhlSeIJZ9vr0nhoCAJK5oduar+pIYChdV+QTsZnIvmyIwLxOdxvZ7rvlpy7wKkm2tLKTXXPlncOWEA==
+"@salesforce/core@^5.1.0", "@salesforce/core@^5.1.4":
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-5.2.0.tgz#7d18439abe3d33432bae1ec9edc700430ae4ca4a"
+  integrity sha512-v5jX/7GLyZOrO9smSgtCL6zallVWIb9ryjTzAkJyB7KsHYNEKZKL9TM6uXHFM7SMYjllJQujup54EHxNbL6ezQ==
   dependencies:
     "@salesforce/kit" "^3.0.6"
     "@salesforce/schemas" "^1.6.0"
@@ -1117,13 +1117,13 @@
   resolved "https://registry.yarnpkg.com/@salesforce/schemas/-/schemas-1.6.0.tgz#14505ebad2fb2d4f7b14837545d662766d293561"
   integrity sha512-SwhDTLucj/GRbPpxlEoDZeqlX22o+G6fiebTXTu1cZKmd1oE0W2L7SlTTgJnWck8bhTeBIgQi9cpD8c2t5ISKA==
 
-"@salesforce/sf-plugins-core@^3.1.12", "@salesforce/sf-plugins-core@^3.1.13":
-  version "3.1.13"
-  resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-3.1.13.tgz#ce78da1639962ef262883759d7449c0aa9ebee61"
-  integrity sha512-zPHpvTmSZHJ3fYANVwfDoxwF5p7YFMsdTnHXvHCRAvGcaQaEb6+Jb+2wNeb/gXEFT3nD1kGa0QZ01v6QztTpUQ==
+"@salesforce/sf-plugins-core@^3.1.12", "@salesforce/sf-plugins-core@^3.1.14":
+  version "3.1.14"
+  resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-3.1.14.tgz#b2ca3bacfdfe338ccceafc2b92b968aa0780be4b"
+  integrity sha512-8tVZoJdTrE77ZEqj3Nh2T0oXB8AEB5o22ffYraeSrUZtGh6lH8feZ8bxAVN1z6wIT9vXW3GhXrqR22UZYDl4ng==
   dependencies:
     "@oclif/core" "^2.11.1"
-    "@salesforce/core" "^4.3.11"
+    "@salesforce/core" "^5.1.0"
     "@salesforce/kit" "^3.0.6"
     "@salesforce/ts-types" "^2.0.5"
     chalk "^4"
