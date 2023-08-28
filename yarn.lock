@@ -777,7 +777,7 @@
     supports-color "^8.1.1"
     tslib "^2"
 
-"@oclif/core@^2.11.1", "@oclif/core@^2.11.5", "@oclif/core@^2.11.7", "@oclif/core@^2.9.4":
+"@oclif/core@2.11.8", "@oclif/core@^2.11.1", "@oclif/core@^2.11.7", "@oclif/core@^2.9.4":
   version "2.11.8"
   resolved "https://registry.yarnpkg.com/@oclif/core/-/core-2.11.8.tgz#780c4fdf53e8569cf754c2a8fefcc7ddeacf1747"
   integrity sha512-GILmztcHBzze45GvxRpUvqQI5nM26kSE/Q21Y+6DtMR+C8etM/hFW26D3uqIAbGlGtg5QEZZ6pjA/Fqgz+gl3A==
