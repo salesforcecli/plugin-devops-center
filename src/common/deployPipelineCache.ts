@@ -10,7 +10,7 @@ import { Duration } from '@salesforce/kit';
 import { JsonMap } from '@salesforce/ts-types';
 
 Messages.importMessagesDirectory(__dirname);
-const cacheMessages = Messages.load('@salesforce/plugin-devops-center', 'cache', ['error.NoRecentAorId']);
+const cacheMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'cache');
 
 // For the moment we will just store the timestamp
 export type AsyncOperationData = Record<string, never>;
@@ -77,12 +77,13 @@ export class DeployPipelineCache extends TTLConfig<TTLConfig.Options, AsyncOpera
   }
 
   /**
-   * Returns the latest data cached
+   * Returns the latest data cached or throws if can't find any.
    */
-  public resolveLatest(): string {
+  public getLatestKeyOrThrow(): string {
     const aorId = this.getLatestKey();
-    if (!aorId) throw cacheMessages.createError('error.NoRecentAorId');
-
+    if (!aorId) {
+      throw cacheMessages.createError('error.NoRecentAorId');
+    }
     return aorId;
   }
 }

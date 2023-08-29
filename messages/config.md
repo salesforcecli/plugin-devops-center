@@ -1,3 +1,7 @@
 # target-devops-center
 
-Username or alias of the DevOps Center org.
+Username or alias for the org where DevOps Center is installed.
+
+# error.OrgNotAuthenticated
+
+org "%s" is not authenticated

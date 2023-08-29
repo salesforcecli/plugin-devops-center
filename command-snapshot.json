@@ -1,18 +1,68 @@
 [
   {
-    "command": "deploy:pipeline",
+    "command": "project:deploy:pipeline:quick",
+    "plugin": "@salesforce/plugin-devops-center",
+    "flags": ["async", "concise", "devops-center-username", "job-id", "json", "use-most-recent", "verbose", "wait"],
+    "alias": [],
+    "flagChars": ["c", "i", "r", "w"],
+    "flagAliases": []
+  },
+  {
+    "command": "project:deploy:pipeline:report",
+    "plugin": "@salesforce/plugin-devops-center",
+    "flags": ["devops-center-username", "job-id", "json", "use-most-recent"],
+    "alias": [],
+    "flagChars": ["c", "i", "r"],
+    "flagAliases": []
+  },
+  {
+    "command": "project:deploy:pipeline:resume",
+    "plugin": "@salesforce/plugin-devops-center",
+    "flags": ["concise", "devops-center-username", "job-id", "json", "use-most-recent", "verbose", "wait"],
+    "alias": [],
+    "flagChars": ["c", "i", "r", "w"],
+    "flagAliases": []
+  },
+  {
+    "command": "project:deploy:pipeline:start",
     "plugin": "@salesforce/plugin-devops-center",
     "flags": [
       "async",
       "branch-name",
       "bundle-version-name",
+      "concise",
       "deploy-all",
       "devops-center-project-name",
       "devops-center-username",
       "json",
       "test-level",
-      "tests"
+      "tests",
+      "verbose",
+      "wait"
     ],
-    "alias": []
+    "alias": [],
+    "flagChars": ["a", "b", "c", "l", "p", "t", "v", "w"],
+    "flagAliases": []
+  },
+  {
+    "command": "project:deploy:pipeline:validate",
+    "plugin": "@salesforce/plugin-devops-center",
+    "flags": [
+      "async",
+      "branch-name",
+      "bundle-version-name",
+      "concise",
+      "deploy-all",
+      "devops-center-project-name",
+      "devops-center-username",
+      "json",
+      "test-level",
+      "tests",
+      "verbose",
+      "wait"
+    ],
+    "alias": [],
+    "flagChars": ["a", "b", "c", "l", "p", "t", "v", "w"],
+    "flagAliases": []
   }
 ]

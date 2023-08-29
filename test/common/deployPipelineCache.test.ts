@@ -10,6 +10,7 @@ import { TestContext } from '@salesforce/core/lib/testSetup';
 import { Global } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { DeployPipelineCache } from '../../src/common/deployPipelineCache';
+import { sleep } from '../../src/common/utils';
 
 describe('deployPipelineCache', () => {
   const $$ = new TestContext();
@@ -25,7 +26,7 @@ describe('deployPipelineCache', () => {
 
     // Retrieve the key set
     const cache = await DeployPipelineCache.create();
-    const key = cache.resolveLatest();
+    const key = cache.getLatestKeyOrThrow();
     expect(key).to.equal('ABC');
   });
 
@@ -63,10 +64,6 @@ describe('deployPipelineCache', () => {
     expect(excThrown);
   });
 
-  function delay(time: number) {
-    return new Promise((resolve) => setTimeout(resolve, time));
-  }
-
   it('updates an existing object', async () => {
     // Set a key value pair
     await DeployPipelineCache.set('ABC', {});
@@ -76,7 +73,7 @@ describe('deployPipelineCache', () => {
     const prevTimestamp = cache.get('ABC')['timestamp'];
 
     // Update the entry after a small delay
-    await delay(10).then(() => DeployPipelineCache.update('ABC', {}));
+    await sleep(10).then(() => DeployPipelineCache.update('ABC', {}));
 
     // Get the timestamp before the update
     cache = await DeployPipelineCache.create();
@@ -102,7 +99,7 @@ describe('deployPipelineCache', () => {
 
     let excThrown = false;
     try {
-      cache.resolveLatest();
+      cache.getLatestKeyOrThrow();
     } catch (err) {
       excThrown = true;
     }

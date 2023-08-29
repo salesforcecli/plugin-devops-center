@@ -9,8 +9,16 @@ import { assert, expect } from 'chai';
 import * as sinon from 'sinon';
 import { Parser } from '@oclif/core';
 import { ConfigAggregator, Org } from '@salesforce/core';
+import { Duration } from '@salesforce/kit';
 import { ConfigVars } from '../../src/configMeta';
-import { requiredDoceOrgFlag } from '../../src/common/flags';
+import {
+  requiredDoceOrgFlag,
+  wait,
+  verbose,
+  concise,
+  getDefaultDevopsCenterUsernameAlias,
+} from '../../src/common/flags/flags';
+import { async } from '../../src/common/flags/promote/promoteFlags';
 
 const TARGET_DEVOPS_CENTER_ALIAS = 'target-devops-center';
 const MOCK_TARGET_DEVOPS_CENTER = {
@@ -110,7 +118,7 @@ describe('requiredDoceOrgFlag', () => {
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.message).to.include(
-        'You must specify the DevOps Center org username by indicating the -c flag on the command line or by setting the --target-devops-center configuration variable.'
+        'You must specify the DevOps Center org username by indicating the --devops-center-username flag on the command line or by setting the target-devops-center configuration variable.'
       );
     }
   });
@@ -132,6 +140,102 @@ describe('requiredDoceOrgFlag', () => {
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.message).to.include(`No authorization information found for ${invalidAlias}`);
+    }
+  });
+
+  it('fails when no alias is provided and the --target-devops-center config var is set but invalid', async () => {
+    const invalidTargetDevopsCenter = 'invalid-target-devops-center';
+    sandbox.stub(ConfigAggregator.prototype, 'getInfo').returns({
+      value: 'invalid-target-devops-center',
+      key: ConfigVars.TARGET_DEVOPS_CENTER,
+      isLocal: () => false,
+      isGlobal: () => true,
+      isEnvVar: () => false,
+    });
+    try {
+      await Parser.parse(['--requiredDoceOrg='], {
+        flags: { requiredDoceOrg: requiredDoceOrgFlag() },
+      });
+      assert.fail('This should have failed');
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(err.message).to.include(`No authorization information found for ${invalidTargetDevopsCenter}`);
+    }
+  });
+
+  it('returns the value of the target-devops-center config variable', async () => {
+    sandbox.stub(ConfigAggregator.prototype, 'getInfo').returns({
+      value: TARGET_DEVOPS_CENTER_ALIAS,
+      key: ConfigVars.TARGET_DEVOPS_CENTER,
+      isLocal: () => false,
+      isGlobal: () => true,
+      isEnvVar: () => false,
+    });
+    const defaultDoceAlias = await getDefaultDevopsCenterUsernameAlias();
+    expect(defaultDoceAlias).to.equal(TARGET_DEVOPS_CENTER_ALIAS);
+  });
+
+  it('returns undefined when there is not a target-devops-center config variable', async () => {
+    sandbox.stub(ConfigAggregator.prototype, 'getInfo').returns({
+      value: null,
+      key: ConfigVars.TARGET_DEVOPS_CENTER,
+      isLocal: () => false,
+      isGlobal: () => true,
+      isEnvVar: () => false,
+    });
+    const defaultDoceAlias = await getDefaultDevopsCenterUsernameAlias();
+    expect(defaultDoceAlias).to.equal(undefined);
+  });
+});
+
+describe('waitFlag', () => {
+  it('errors when input value < min value(3)', async () => {
+    try {
+      // wrong value provided < 3
+      await Parser.parse(['--wait=0'], {
+        flags: { wait },
+      });
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(err.message).to.include('The value must be at least 3.');
+    }
+  });
+
+  it('returns the correct value ', async () => {
+    const out = await Parser.parse(['--wait=4'], {
+      flags: { wait },
+    });
+    expect(out.flags.wait).to.deep.equal(Duration.minutes(4));
+  });
+
+  it('returns the default value ', async () => {
+    const out = await Parser.parse([], {
+      flags: { wait },
+    });
+    expect(out.flags.wait).to.deep.equal(wait.default);
+  });
+
+  it('wait and async flags are mutually exclusive', async () => {
+    try {
+      // wrong value provided < 3
+      await Parser.parse(['--wait=4', '--async'], {
+        flags: { wait, async },
+      });
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(err.message).to.include('--async=true cannot also be provided when using --wait');
+    }
+  });
+
+  it('verbose and concise flags are mutually exclusive', async () => {
+    try {
+      // wrong value provided < 3
+      await Parser.parse(['--verbose', '--concise'], {
+        flags: { verbose, concise },
+      });
+    } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(err.message).to.include('--verbose=true cannot also be provided when using --concise');
     }
   });
 });
