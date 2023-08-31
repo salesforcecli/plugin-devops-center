@@ -1,4 +1,13 @@
-# 1.1.0 (2023-08-29)
+## [1.1.1](https://github.com/salesforcecli/plugin-devops-center/compare/1.1.0...1.1.1) (2023-08-31)
+
+
+### Bug Fixes
+
+* update CDC channel name ([#230](https://github.com/salesforcecli/plugin-devops-center/issues/230)) ([235e08d](https://github.com/salesforcecli/plugin-devops-center/commit/235e08d10fa5b46c11d0a0c70607be015f2a2cb9)), closes [#229](https://github.com/salesforcecli/plugin-devops-center/issues/229)
+
+
+
+# [1.1.0](https://github.com/salesforcecli/plugin-devops-center/compare/1be5315cc2270206c82a2565ddc492d8a943a33d...1.1.0) (2023-08-29)
 
 
 ### Bug Fixes
