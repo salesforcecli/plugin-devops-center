@@ -158,9 +158,11 @@ describe('DeploymentResult selector', () => {
       'SELECT sf_devops__Check_Deploy__c, sf_devops__Deployment_Id__c, sf_devops__Check_Deploy_Status__r.sf_devops__Status__c'
     );
     expect(builderArgs[0]).to.contain('(SELECT sf_devops__Environment__c FROM sf_devops__Change_Bundle_Installs__r)');
-    // verify we used the correct filter
+    // verify we used the correct filters
+    expect(builderArgs[0]).to.contain(`WHERE sf_devops__Check_Deploy_Status__c = '${mockAorId}'`);
+    expect(builderArgs[0]).to.contain('AND sf_devops__Check_Deploy__c = TRUE');
     expect(builderArgs[0]).to.contain(
-      `WHERE sf_devops__Check_Deploy_Status__c = '${mockAorId}' AND sf_devops__Check_Deploy__c = TRUE`
+      'AND Id IN (SELECT sf_devops__Deployment_Result__c FROM sf_devops__Change_Bundle_Install__c)'
     );
   });
 
