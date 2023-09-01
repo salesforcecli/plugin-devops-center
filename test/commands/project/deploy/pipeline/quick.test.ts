@@ -368,6 +368,22 @@ describe('project deploy pipeline quick', () => {
             "We can't perform the quick deployment for the specified job ID because the validate-only deployment failed or is still running. If the validate-only deployment failed, fix the issue and re-run it. If the validate-only deployment was successful, try this command again later."
           );
         });
+
+      test
+        .stdout()
+        .stderr()
+        .do(() => {
+          queryStub = sinon.stub().returns(getQueryResultMock([]));
+          requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
+          stubStreamer();
+        })
+        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`])
+        .catch(() => {})
+        .it('display an error message when the deployment result does not have CBIs', (ctx) => {
+          expect(ctx.stderr).to.contain(
+            " The job ID is invalid for the quick deployment. Verify that a deployment validation was run or hasn't expired, and that you specified the correct job ID. Then try again."
+          );
+        });
     });
 
     describe('stream aor status', () => {
