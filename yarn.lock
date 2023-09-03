@@ -984,14 +984,14 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.7.0"
 
-"@salesforce/core@^5.1.0", "@salesforce/core@^5.1.4", "@salesforce/core@^5.2.0", "@salesforce/core@^5.2.1":
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-5.2.1.tgz#299bddae7d0705c773b194be8994e5730735e2b4"
-  integrity sha512-QMx11A0KA/Vl+Ckmz83cw+fiUCMOmsUD8CA3987wAkfJOgxtqyhT4R1R8tj7ad8flQydKUyL3o4UE/2u82tXOw==
+"@salesforce/core@^5.1.0", "@salesforce/core@^5.2.0", "@salesforce/core@^5.2.1", "@salesforce/core@^5.2.5":
+  version "5.2.5"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-5.2.5.tgz#8314f444d0442d1c540f568e2a8833df0475a05d"
+  integrity sha512-wNGo0alBtotmQe81Fw79PlISBJkFErPK/xENsSihIGEgjHUhiGZDu8BiVm8aA25JQpghNaD/1NRqvy+KAx+64w==
   dependencies:
-    "@salesforce/kit" "^3.0.9"
+    "@salesforce/kit" "^3.0.11"
     "@salesforce/schemas" "^1.6.0"
-    "@salesforce/ts-types" "^2.0.5"
+    "@salesforce/ts-types" "^2.0.7"
     "@types/semver" "^7.5.0"
     ajv "^8.12.0"
     change-case "^4.1.2"
@@ -1001,10 +1001,11 @@
     jsforce "^2.0.0-beta.27"
     jsonwebtoken "9.0.1"
     jszip "3.10.1"
-    pino "^8.14.2"
+    pino "^8.15.0"
     pino-abstract-transport "^1.0.0"
     pino-pretty "^10.2.0"
     proper-lockfile "^4.1.2"
+    semver "^7.5.4"
     ts-retry-promise "^0.7.0"
 
 "@salesforce/dev-config@^4.0.1":
@@ -6455,10 +6456,10 @@ pino-std-serializers@^6.0.0:
   resolved "https://registry.yarnpkg.com/pino-std-serializers/-/pino-std-serializers-6.2.2.tgz#d9a9b5f2b9a402486a5fc4db0a737570a860aab3"
   integrity sha512-cHjPPsE+vhj/tnhCy/wiMh3M3z3h/j15zHQX+S9GkTBgqJuTuJzYJ4gUyACLhDaJ7kk9ba9iRDmbH2tJU03OiA==
 
-pino@^8.14.2:
-  version "8.14.2"
-  resolved "https://registry.yarnpkg.com/pino/-/pino-8.14.2.tgz#99148b3400527fec168691044ba367cc7b7cd605"
-  integrity sha512-zKu9aWeSWTy1JgvxIpZveJKKsAr4+6uNMZ0Vf0KRwzl/UNZA3XjHiIl/0WwqLMkDwuHuDkT5xAgPA2jpKq4whA==
+pino@^8.15.0:
+  version "8.15.0"
+  resolved "https://registry.yarnpkg.com/pino/-/pino-8.15.0.tgz#67c61d5e397bf297e5a0433976a7f7b8aa6f876b"
+  integrity sha512-olUADJByk4twxccmAxb1RiGKOSvddHugCV3wkqjyv+3Sooa2KLrmXrKEWOKi0XPCLasRR5jBXxioE1jxUa4KzQ==
   dependencies:
     atomic-sleep "^1.0.0"
     fast-redact "^3.1.1"
