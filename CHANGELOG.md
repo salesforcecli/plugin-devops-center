@@ -1,3 +1,12 @@
+## [1.1.2](https://github.com/salesforcecli/plugin-devops-center/compare/1.1.1...1.1.2) (2023-09-03)
+
+
+### Bug Fixes
+
+* **deps:** bump @salesforce/core from 5.2.1 to 5.2.5 ([93ca2b4](https://github.com/salesforcecli/plugin-devops-center/commit/93ca2b49d9c418a1cbe11b9fe7c3774381a36f70))
+
+
+
 ## [1.1.1](https://github.com/salesforcecli/plugin-devops-center/compare/1.1.0...1.1.1) (2023-08-31)
 
 
