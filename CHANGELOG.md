@@ -1,3 +1,16 @@
+## [1.1.4](https://github.com/salesforcecli/plugin-devops-center/compare/1.1.3...1.1.4) (2023-09-05)
+
+
+### Bug Fixes
+
+* update version ([#238](https://github.com/salesforcecli/plugin-devops-center/issues/238)) ([46cdba3](https://github.com/salesforcecli/plugin-devops-center/commit/46cdba32eeffd22a89fd3155cc0b36812f8d30c0))
+
+
+
+## [1.1.3](https://github.com/salesforcecli/plugin-devops-center/compare/1.1.2...1.1.3) (2023-09-05)
+
+
+
 ## [1.1.2](https://github.com/salesforcecli/plugin-devops-center/compare/1.1.1...1.1.2) (2023-09-03)
 
 
