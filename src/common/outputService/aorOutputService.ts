@@ -76,8 +76,7 @@ export abstract class AbstractAorOutputService<T extends AorOutputFlags>
       } else {
         console.log(red(aor.sf_devops__Message__c));
       }
-    } else {
-      // aor.sf_devops__Status__c == undefined || AsyncOperationStatus.InProgress
+    } else if (aor.sf_devops__Message__c) {
       console.log(aor.sf_devops__Message__c);
     }
 

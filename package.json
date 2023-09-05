@@ -1,7 +1,7 @@
 {
   "name": "@salesforce/plugin-devops-center",
   "description": "The DevOps Center CLI plugin provides a command-line alternative to performing equivalent actions in the DevOps Center graphical UI",
-  "version": "1.1.2",
+  "version": "1.1.2-beta.1",
   "author": "Salesforce",
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "dependencies": {

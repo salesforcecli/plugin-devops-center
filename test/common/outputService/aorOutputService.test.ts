@@ -43,7 +43,7 @@ describe('aorOutputService', () => {
       expect(ctx.stdout).to.contain(message);
     });
 
-    test.stdout().it('handles the print of an In Progress aor status', (ctx) => {
+    test.stdout().it('handles the print of an In Progress aor status when the message is valid', (ctx) => {
       const status = AsyncOperationStatus.InProgress;
       const message = 'This should be printed';
       const aor: AsyncOperationResult = {
@@ -54,6 +54,18 @@ describe('aorOutputService', () => {
       };
       outputService.printAorStatus(aor);
       expect(ctx.stdout).to.contain(message);
+    });
+
+    test.stdout().it('handles the print of an In Progress aor status when the message is undefined', (ctx) => {
+      const status = AsyncOperationStatus.InProgress;
+      const aor: AsyncOperationResult = {
+        Id: 'Id',
+        sf_devops__Error_Details__c: undefined,
+        sf_devops__Status__c: status,
+        sf_devops__Message__c: undefined,
+      };
+      outputService.printAorStatus(aor);
+      expect(ctx.stdout).to.not.contain(undefined);
     });
 
     test.stdout().it('handles the print of a Completed aor status', (ctx) => {
