@@ -1,3 +1,12 @@
+## [1.1.5](https://github.com/salesforcecli/plugin-devops-center/compare/1.1.4...1.1.5) (2023-09-09)
+
+
+### Bug Fixes
+
+* **deps:** bump tslib from 2.6.1 to 2.6.2 ([e6726da](https://github.com/salesforcecli/plugin-devops-center/commit/e6726da03e28d69b80e08c17ca1d08b235378a8e))
+
+
+
 ## [1.1.4](https://github.com/salesforcecli/plugin-devops-center/compare/1.1.3...1.1.4) (2023-09-05)
 
 
