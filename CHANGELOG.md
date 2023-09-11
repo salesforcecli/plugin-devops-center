@@ -1,3 +1,12 @@
+# [1.2.0](https://github.com/salesforcecli/plugin-devops-center/compare/1.1.5...1.2.0) (2023-09-11)
+
+
+### Features
+
+* use oclif.lock ([c23ee02](https://github.com/salesforcecli/plugin-devops-center/commit/c23ee022c1ea0735950c972dfeb3b1ec60c277b2))
+
+
+
 ## [1.1.5](https://github.com/salesforcecli/plugin-devops-center/compare/1.1.4...1.1.5) (2023-09-09)
 
 
