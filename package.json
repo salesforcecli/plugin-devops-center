@@ -8,7 +8,7 @@
     "@oclif/core": "^2.15.0",
     "@salesforce/core": "^5.2.5",
     "@salesforce/kit": "^3.0.9",
-    "@salesforce/sf-plugins-core": "^3.1.20",
+    "@salesforce/sf-plugins-core": "^3.1.25",
     "tslib": "^2"
   },
   "devDependencies": {
