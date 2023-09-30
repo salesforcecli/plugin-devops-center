@@ -1,3 +1,9 @@
+## [1.2.2](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.1...1.2.2) (2023-09-30)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/sf-plugins-core from 3.1.22 to 3.1.25 ([f0fbdb3](https://github.com/salesforcecli/plugin-devops-center/commit/f0fbdb3097141c51a118198b72e7eeae2200c02b))
+
 ## [1.2.1](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.0...1.2.1) (2023-09-28)
 
 ### Bug Fixes
