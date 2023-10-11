@@ -1,3 +1,9 @@
+## [1.2.3](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.2...1.2.3) (2023-10-11)
+
+### Bug Fixes
+
+- update name of --tests flag (was incorrectly mentioned as --run-tests) ([c9d5324](https://github.com/salesforcecli/plugin-devops-center/commit/c9d5324c11a7c0efed3f1579965b51e7b37b8b7a))
+
 ## [1.2.2](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.1...1.2.2) (2023-09-30)
 
 ### Bug Fixes
