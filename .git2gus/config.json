@@ -1,9 +1,10 @@
 {
-  "productTag": "a1aB00000004Bx8IAE",
-  "defaultBuild": "offcore.tooling.56",
+  "productTag": "a1aAH00000004MRYAY",
+  "defaultBuild": "DOCe-Git2Gus",
   "issueTypeLabels": {
     "feature": "USER STORY",
     "regression": "BUG P1",
     "bug": "BUG P3"
-  }
+  },
+  "statusWhenClosed": "FIXED"
 }
