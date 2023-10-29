@@ -1,3 +1,9 @@
+## [1.2.4](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.3...1.2.4) (2023-10-29)
+
+### Bug Fixes
+
+- **deps:** bump @babel/traverse from 7.22.8 to 7.23.2 ([f135ac5](https://github.com/salesforcecli/plugin-devops-center/commit/f135ac5b3f365b9a5b76a0304c3f338966077730))
+
 ## [1.2.3](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.2...1.2.3) (2023-10-11)
 
 ### Bug Fixes
