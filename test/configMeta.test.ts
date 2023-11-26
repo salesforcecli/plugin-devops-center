@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import * as spawnSync from 'child_process';
+import * as spawnSync from 'node:child_process';
 import { expect } from '@oclif/test';
 import * as sinon from 'sinon';
 import configMeta from '../src/configMeta';
