@@ -149,7 +149,6 @@ export default abstract class QuickPromotionCommand<T extends typeof SfCommand> 
    */
   private buildPromoteOptions(deployId: string): void {
     this.deployOptions = {
-      testLevel: 'Default',
       deploymentId: deployId,
       // get more promote options from the concrete implementation if needed
       ...this.getPromoteOptions(),
