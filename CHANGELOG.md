@@ -1,3 +1,9 @@
+## [1.2.5](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.4...1.2.5) (2023-11-28)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/core from 5.3.17 to 5.3.20 ([037cb62](https://github.com/salesforcecli/plugin-devops-center/commit/037cb62f40e001e8cbb452f9d9a6977ad5cb13f5))
+
 ## [1.2.4](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.3...1.2.4) (2023-10-29)
 
 ### Bug Fixes
