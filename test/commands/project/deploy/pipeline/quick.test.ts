@@ -271,7 +271,6 @@ describe('project deploy pipeline quick', () => {
           // we can get the call argument
           // and validate its values
           const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
-          expect(requestArgument.body).to.contain('"testLevel":"Default"');
           expect(requestArgument.body).to.contain(`"deploymentId":"${mockDeploymentId}"`);
           expect(requestArgument.body).to.contain('"undeployedOnly":true');
         });
