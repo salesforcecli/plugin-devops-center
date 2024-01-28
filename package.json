@@ -6,16 +6,16 @@
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "dependencies": {
     "@oclif/core": "^2.15.0",
-    "@salesforce/core": "^5.3.20",
-    "@salesforce/kit": "^3.0.9",
-    "@salesforce/sf-plugins-core": "^3.1.25",
+    "@salesforce/core": "^6.4.2",
+    "@salesforce/kit": "^3.0.15",
+    "@salesforce/sf-plugins-core": "^5.0.1",
     "tslib": "^2"
   },
   "devDependencies": {
     "@oclif/plugin-command-snapshot": "^4.0.14",
     "@oclif/test": "^2.4.2",
     "@salesforce/cli-plugins-testkit": "^4.4.12",
-    "@salesforce/dev-scripts": "^6.0.4",
+    "@salesforce/dev-scripts": "^8.3.0",
     "@salesforce/plugin-command-reference": "^3.0.63",
     "@salesforce/ts-sinon": "^1.4.19",
     "@swc/cli": "^0.3.2",
@@ -23,7 +23,7 @@
     "eslint-plugin-sf-plugin": "^1.17.2",
     "oclif": "^3.17.2",
     "shx": "0.3.4",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "typescript": "^4.9.5"
   },
   "engines": {
@@ -83,6 +83,7 @@
     "compile": "wireit",
     "docs": "sf-docs",
     "format": "wireit",
+    "link-check": "wireit",
     "lint": "wireit",
     "postpack": "shx rm -f oclif.manifest.json",
     "prepack": "sf-prepack",
@@ -152,7 +153,8 @@
         "test:command-reference",
         "test:deprecation-policy",
         "lint",
-        "test:json-schema"
+        "test:json-schema",
+        "link-check"
       ]
     },
     "test:only": {
@@ -196,6 +198,15 @@
       "files": [
         "src/**/*.ts",
         "schemas"
+      ],
+      "output": []
+    },
+    "link-check": {
+      "command": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|test/|confluence.internal.salesforce.com|my.salesforce.com|%s\" --markdown --retry --directory-listing --verbosity error",
+      "files": [
+        "./*.md",
+        "./!(CHANGELOG).md",
+        "messages/**/*.md"
       ],
       "output": []
     }
