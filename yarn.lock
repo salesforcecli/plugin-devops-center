@@ -1230,10 +1230,10 @@
   resolved "https://registry.yarnpkg.com/@sinonjs/text-encoding/-/text-encoding-0.7.2.tgz#5981a8db18b56ba38ef0efb7d995b12aa7b51918"
   integrity sha512-sXXKG+uL9IrKqViTtao2Ws6dy0znu9sOaP1di/jKGW1M6VssO8vlpXCQcpZ+jisQ1tTFAC5Jo/EOzFbggBagFQ==
 
-"@swc/cli@^0.3.2":
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/@swc/cli/-/cli-0.3.2.tgz#36625c08c4330cff68b2f50346e40f0e8d732e83"
-  integrity sha512-0BoJR8cLkXntX24MsvMGWBY+MOhgWo+LlMorr3hjyCwaGQf50XO/qO09qCJJaGEjX+iI5YgrFZELu2WaM5YP8A==
+"@swc/cli@^0.3.6":
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/@swc/cli/-/cli-0.3.6.tgz#2fbc00443d354d5ca4eb287d1bfedc9a29406956"
+  integrity sha512-ZoQbsJXjiWIlbCgr1m+m7TGNk7pILb3uWm4t423jM8vot8clseclXFU4QCMqJUVcYCSwKStzP3+yYMZvme/lsQ==
   dependencies:
     "@mole-inc/bin-wrapper" "^8.0.1"
     commander "^7.1.0"
