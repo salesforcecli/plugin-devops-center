@@ -1,3 +1,9 @@
+## [1.2.6](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.5...1.2.6) (2024-02-21)
+
+### Bug Fixes
+
+- **deps:** bump ip from 2.0.0 to 2.0.1 ([e09dace](https://github.com/salesforcecli/plugin-devops-center/commit/e09daceba1d33532dc1b6a0df68b4e6ddc50f7fb))
+
 ## [1.2.5](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.4...1.2.5) (2023-11-28)
 
 ### Bug Fixes
