@@ -17,6 +17,7 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
 export abstract class AsyncCommand extends SfCommand<AsyncOperationResultJson> {
+  public static readonly enableJsonFlag = true;
   protected targetOrg: Org;
   private asyncOperationId: string;
   private outputService: PromoteOutputService;

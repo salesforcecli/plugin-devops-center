@@ -73,10 +73,10 @@ describe('resume output', () => {
       vacuum(`
           === Deployed Source
 
-          Operation Name Type      Path 
-          ───────── ──── ───────── ──── 
-          add       Foo  ApexClass path 
-          add       Bar  ApexClass path  
+          Operation Name Type      Path
+          ───────── ──── ───────── ────
+          add       Foo  ApexClass path
+          add       Bar  ApexClass path
             `)
     );
   });
@@ -103,9 +103,9 @@ describe('resume output', () => {
         vacuum(`
           === Validate-only Deployed Source
 
-          Operation Name Type      Path 
-          ───────── ──── ───────── ──── 
-          add       Foo  ApexClass path 
+          Operation Name Type      Path
+          ───────── ──── ───────── ────
+          add       Foo  ApexClass path
             `)
       );
     });
@@ -171,6 +171,7 @@ describe('resume output', () => {
   function buildResumeFlags(conciseFlag: boolean, verboseFlag: boolean): ResumeFlags<typeof SfCommand> {
     return {
       concise: conciseFlag,
+      // @ts-expect-error for testing purposes
       'devops-center-username': undefined,
       'job-id': undefined,
       'use-most-recent': true,

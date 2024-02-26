@@ -5,8 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 import { Interfaces } from '@oclif/core';
-import { Messages, Org } from '@salesforce/core';
-import { Flags, SfCommand } from '@salesforce/sf-plugins-core';
+import { Messages } from '@salesforce/core';
+import { Flags as SfFlags, SfCommand } from '@salesforce/sf-plugins-core';
 import { HttpRequest } from 'jsforce';
 import { ApiPromoteResponse, AsyncOperationStatus, PipelineStage, PromoteOptions } from '..';
 import { REST_PROMOTE_BASE_URL } from '../constants';
@@ -30,19 +30,20 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'project.deploy.pipeline.quick');
 
 export default abstract class QuickPromotionCommand<T extends typeof SfCommand> extends AsyncCommand {
+  public static readonly enableJsonFlag = true;
   public static baseFlags = {
     async,
     concise,
     verbose,
     wait,
     'devops-center-username': requiredDoceOrgFlag(),
-    'job-id': Flags.salesforceId({
+    'job-id': SfFlags.salesforceId({
       char: 'i',
       description: messages.getMessage('flags.job-id.description'),
       summary: messages.getMessage('flags.job-id.summary'),
       exactlyOne: ['use-most-recent', 'job-id'],
     }),
-    'use-most-recent': Flags.boolean({
+    'use-most-recent': SfFlags.boolean({
       char: 'r',
       description: messages.getMessage('flags.use-most-recent.description'),
       summary: messages.getMessage('flags.use-most-recent.summary'),
@@ -59,9 +60,10 @@ export default abstract class QuickPromotionCommand<T extends typeof SfCommand> 
     const { flags } = await this.parse({
       flags: this.ctor.flags,
       baseFlags: (super.ctor as typeof QuickPromotionCommand).baseFlags,
+      enableJsonFlag: this.ctor.enableJsonFlag,
     });
     this.flags = flags as Flags<T>;
-    this.targetOrg = this.flags['devops-center-username'] as Org;
+    this.targetOrg = this.flags['devops-center-username'];
   }
 
   /**
@@ -79,7 +81,7 @@ export default abstract class QuickPromotionCommand<T extends typeof SfCommand> 
     this.setOutputService(
       new OutputServiceFactory().forQuickDeployment(
         this.flags,
-        (this.flags['devops-center-username'] as Org).getConnection(),
+        this.flags['devops-center-username'].getConnection(),
         this.targetStage.sf_devops__Branch__r.sf_devops__Name__c
       )
     );

@@ -7,7 +7,6 @@
 
 import { Global, Messages, TTLConfig } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import { JsonMap } from '@salesforce/ts-types';
 
 Messages.importMessagesDirectory(__dirname);
 const cacheMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'cache');
@@ -63,7 +62,7 @@ export class DeployPipelineCache extends TTLConfig<TTLConfig.Options, AsyncOpera
    * Updates the aorId with the data sent
    * Merges the data sent with the existing one
    */
-  public static async update(aorId: string, data: JsonMap): Promise<void> {
+  public static async update(aorId: string, data: Partial<TTLConfig.Entry<AsyncOperationData>>): Promise<void> {
     const cache = await DeployPipelineCache.create();
     cache.update(aorId, data);
     await cache.write();

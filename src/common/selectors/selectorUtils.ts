@@ -27,7 +27,7 @@ export async function runSafeQuery<T extends Record>(
   // Run the query and verify for results
   try {
     // We query for 10000 results and we use autoFetch to queryMore automatically.
-    const result: QueryResult<T> = await con.query(queryStr, { autoFetch: true, maxFetch: 10000 });
+    const result: QueryResult<T> = await con.query(queryStr, { autoFetch: true, maxFetch: 10_000 });
     if ((result.totalSize > 0 && result.records) || (result.totalSize === 0 && allowNullResults)) {
       return result;
     }

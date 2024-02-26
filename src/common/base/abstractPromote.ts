@@ -4,9 +4,8 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { Org } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { Flags, Interfaces } from '@oclif/core';
+import { Interfaces } from '@oclif/core';
 import { HttpRequest } from 'jsforce';
 import { fetchAndValidatePipelineStage, PipelineStage, PromoteOptions, validateTestFlags } from '..';
 import { devopsCenterProjectName, requiredDoceOrgFlag, wait, verbose, concise } from '../flags/flags';
@@ -29,6 +28,7 @@ export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
 >;
 
 export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCommand {
+  public static readonly enableJsonFlag = true;
   // common flags that can be inherited by any command that extends PromoteCommand
   public static baseFlags = {
     'branch-name': branchName,
@@ -56,10 +56,11 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
     const { flags } = await this.parse({
       flags: this.ctor.flags,
       baseFlags: (super.ctor as typeof PromoteCommand).baseFlags,
+      enableJsonFlag: this.ctor.enableJsonFlag,
     });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags as Flags<T>;
-    this.targetOrg = this.flags['devops-center-username'] as Org;
+    this.targetOrg = this.flags['devops-center-username'];
     this.setOutputService(new OutputServiceFactory().forDeployment(this.flags, this.targetOrg.getConnection()));
   }
 
