@@ -90,7 +90,7 @@ describe('selectorUtils', () => {
       const builderArgs = mockConnection.query.getCall(0).args;
       expect(builderArgs[0]).to.contain('queryString');
       expect(builderArgs[1]?.autoFetch).to.equal(true);
-      expect(builderArgs[1]?.maxFetch).to.equal(10000);
+      expect(builderArgs[1]?.maxFetch).to.equal(10_000);
     });
   });
 });
