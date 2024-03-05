@@ -1,3 +1,9 @@
+## [1.2.7](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.6...1.2.7) (2024-03-05)
+
+### Bug Fixes
+
+- update to latest dev-scripts ([#323](https://github.com/salesforcecli/plugin-devops-center/issues/323)) ([92e4259](https://github.com/salesforcecli/plugin-devops-center/commit/92e42591eb61c2a231eb3daed3455d9d5370e2ea))
+
 ## [1.2.6](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.5...1.2.6) (2024-02-21)
 
 ### Bug Fixes

@@ -77,9 +77,9 @@ FLAGS
   -r, --use-most-recent                 Use the job ID of the most recently validated deployment.
   -w, --wait=<minutes>                  [default: 33 minutes] Number of minutes to wait for command to complete and
                                         display results.
-  --async                               Run the command asynchronously.
-  --concise                             Show concise output of the command result.
-  --verbose                             Show verbose output of the command result.
+      --async                           Run the command asynchronously.
+      --concise                         Show concise output of the command result.
+      --verbose                         Show verbose output of the command result.
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -131,7 +131,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/quick.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.6/src/commands/project/deploy/pipeline/quick.ts)_
+_See code: [src/commands/project/deploy/pipeline/quick.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.7/src/commands/project/deploy/pipeline/quick.ts)_
 
 ## `sf project deploy pipeline report`
 
@@ -175,7 +175,7 @@ FLAG DESCRIPTIONS
     your most recent operation was longer than 3 days ago, this flag won't find the job ID.
 ```
 
-_See code: [src/commands/project/deploy/pipeline/report.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.6/src/commands/project/deploy/pipeline/report.ts)_
+_See code: [src/commands/project/deploy/pipeline/report.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.7/src/commands/project/deploy/pipeline/report.ts)_
 
 ## `sf project deploy pipeline resume`
 
@@ -191,8 +191,8 @@ FLAGS
   -r, --use-most-recent                 Use the job ID of the most recent deploy operation.
   -w, --wait=<minutes>                  [default: 33 minutes] Number of minutes to wait for command to complete and
                                         display results.
-  --concise                             Show concise output of the command result.
-  --verbose                             Show verbose output of the command result.
+      --concise                         Show concise output of the command result.
+      --verbose                         Show verbose output of the command result.
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -237,7 +237,7 @@ FLAG DESCRIPTIONS
     returns the job ID. To check the status of the operation, run "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/resume.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.6/src/commands/project/deploy/pipeline/resume.ts)_
+_See code: [src/commands/project/deploy/pipeline/resume.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.7/src/commands/project/deploy/pipeline/resume.ts)_
 
 ## `sf project deploy pipeline start`
 
@@ -260,9 +260,9 @@ FLAGS
   -v, --bundle-version-name=<value>         Version name of the bundle.
   -w, --wait=<minutes>                      [default: 33 minutes] Number of minutes to wait for command to complete and
                                             display results.
-  --async                                   Run the command asynchronously.
-  --concise                                 Show concise output of the command result.
-  --verbose                                 Show verbose output of the command result.
+      --async                               Run the command asynchronously.
+      --concise                             Show concise output of the command result.
+      --verbose                             Show verbose output of the command result.
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -333,7 +333,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/start.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.6/src/commands/project/deploy/pipeline/start.ts)_
+_See code: [src/commands/project/deploy/pipeline/start.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.7/src/commands/project/deploy/pipeline/start.ts)_
 
 ## `sf project deploy pipeline validate`
 
@@ -356,9 +356,9 @@ FLAGS
   -v, --bundle-version-name=<value>         Version name of the bundle.
   -w, --wait=<minutes>                      [default: 33 minutes] Number of minutes to wait for command to complete and
                                             display results.
-  --async                                   Run the command asynchronously.
-  --concise                                 Show concise output of the command result.
-  --verbose                                 Show verbose output of the command result.
+      --async                               Run the command asynchronously.
+      --concise                             Show concise output of the command result.
+      --verbose                             Show verbose output of the command result.
 
 GLOBAL FLAGS
   --json  Format output as json.
@@ -429,7 +429,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/validate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.6/src/commands/project/deploy/pipeline/validate.ts)_
+_See code: [src/commands/project/deploy/pipeline/validate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.7/src/commands/project/deploy/pipeline/validate.ts)_
 
 <!-- commandsstop -->
 
