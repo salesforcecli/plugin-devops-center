@@ -4,9 +4,9 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { Messages, Org } from '@salesforce/core';
+import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { Flags, Interfaces } from '@oclif/core';
+import { Interfaces } from '@oclif/core';
 import { DeployPipelineCache } from '../../common/deployPipelineCache';
 import { PromotePipelineResult } from '../../common';
 import { requiredDoceOrgFlag } from '../../common/flags/flags';
@@ -23,6 +23,7 @@ export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
 >;
 
 export abstract class ReportOnPromoteCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
+  public static readonly enableJsonFlag = true;
   public static baseFlags = {
     'devops-center-username': requiredDoceOrgFlag(),
   };
@@ -35,6 +36,7 @@ export abstract class ReportOnPromoteCommand<T extends typeof SfCommand> extends
     const { flags } = await this.parse({
       flags: this.ctor.flags,
       baseFlags: (super.ctor as typeof ReportOnPromoteCommand).baseFlags,
+      enableJsonFlag: this.ctor.enableJsonFlag,
     });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags as Flags<T>;
@@ -47,7 +49,7 @@ export abstract class ReportOnPromoteCommand<T extends typeof SfCommand> extends
     const asyncJobId = this.flags['use-most-recent']
       ? (await DeployPipelineCache.create()).getLatestKeyOrThrow()
       : (this.flags['job-id'] as string);
-    const org = this.flags['devops-center-username'] as Org;
+    const org = this.flags['devops-center-username'];
 
     // query the deployment result related to the promote operation.
     const operationResult: DeploymentResult | null = await selectOneDeploymentResultByAsyncJobId(

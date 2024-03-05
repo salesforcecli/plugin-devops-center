@@ -151,19 +151,19 @@ describe('project deploy pipeline report', () => {
           vacuum(`
           === Deploy Info
 
-          Key            Value                    
-          ────────────── ──────────────────────────── 
-          CheckDeploy    false                        
-          CompletionDate 2023-03-01T13:56:02.000+0000 
-          CreatedById    mock-user-id                 
-          CreatedByName  mock-user-name               
-          DeploymentId   mock-deployment-id          
-          FullDeploy     false                        
-          Id             ${mockAorId}           
-          Message        Deploy complete              
-          RunTests       mock-tests                   
-          Status         Completed                    
-          TestLevel      mock-test-level  
+          Key            Value
+          ────────────── ────────────────────────────
+          CheckDeploy    false
+          CompletionDate 2023-03-01T13:56:02.000+0000
+          CreatedById    mock-user-id
+          CreatedByName  mock-user-name
+          DeploymentId   mock-deployment-id
+          FullDeploy     false
+          Id             ${mockAorId}
+          Message        Deploy complete
+          RunTests       mock-tests
+          Status         Completed
+          TestLevel      mock-test-level
             `)
         );
       });
@@ -198,20 +198,20 @@ describe('project deploy pipeline report', () => {
           vacuum(`
           === Deploy Info
 
-          Key            Value             
-          ────────────── ────────────────── 
-          CheckDeploy    false              
-          CompletionDate                    
-          CreatedById    mock-user-id       
-          CreatedByName  mock-user-name     
-          DeploymentId   mock-deployment-id 
-          ErrorDetails   mock-error-details 
-          FullDeploy     false              
-          Id             ${mockAorId} 
-          Message        mock-fail-message  
-          RunTests       mock-tests         
-          Status         Error              
-          TestLevel      mock-test-level  
+          Key            Value
+          ────────────── ──────────────────
+          CheckDeploy    false
+          CompletionDate
+          CreatedById    mock-user-id
+          CreatedByName  mock-user-name
+          DeploymentId   mock-deployment-id
+          ErrorDetails   mock-error-details
+          FullDeploy     false
+          Id             ${mockAorId}
+          Message        mock-fail-message
+          RunTests       mock-tests
+          Status         Error
+          TestLevel      mock-test-level
             `)
         );
       });
@@ -245,19 +245,19 @@ describe('project deploy pipeline report', () => {
           vacuum(`
             === Deploy Info
 
-            Key            Value                
-            ────────────── ────────────────── 
-            CheckDeploy    false              
-            CompletionDate                    
-            CreatedById    mock-user-id       
-            CreatedByName  mock-user-name     
-            DeploymentId   mock-deployment-id 
-            FullDeploy     false              
-            Id             a00DS00000Aj3AIYAZ 
-            Message        mock-message       
-            RunTests       mock-tests         
-            Status         In Progress        
-            TestLevel      mock-test-level  
+            Key            Value
+            ────────────── ──────────────────
+            CheckDeploy    false
+            CompletionDate
+            CreatedById    mock-user-id
+            CreatedByName  mock-user-name
+            DeploymentId   mock-deployment-id
+            FullDeploy     false
+            Id             a00DS00000Aj3AIYAZ
+            Message        mock-message
+            RunTests       mock-tests
+            Status         In Progress
+            TestLevel      mock-test-level
               `)
         );
       });

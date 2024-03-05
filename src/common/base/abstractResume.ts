@@ -4,7 +4,7 @@
  * Licensed under the BSD 3-Clause license.
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-import { Messages, Org } from '@salesforce/core';
+import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Flags, Interfaces } from '@oclif/core';
 import {
@@ -37,10 +37,11 @@ export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
 
 /**
  *
- * Base class with the common logic to resume an in progress opeation
+ * Base class with the common logic to resume an in progress operation
  */
 
 export abstract class ResumeCommand<T extends typeof SfCommand> extends AsyncCommand {
+  public static readonly enableJsonFlag = true;
   // common flags that can be inherited by any command that extends ResumeCommand
   public static baseFlags = {
     'devops-center-username': requiredDoceOrgFlag(),
@@ -67,7 +68,7 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends AsyncCom
       new OutputServiceFactory().forResume(
         this.flags,
         this.operationType,
-        (this.flags['devops-center-username'] as Org).getConnection()
+        this.flags['devops-center-username'].getConnection()
       )
     );
   }
@@ -78,7 +79,7 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends AsyncCom
       : (this.flags['job-id'] as string);
 
     // get the latest state of the async job and validate that it's resumable
-    this.targetOrg = this.flags['devops-center-username'] as Org;
+    this.targetOrg = this.flags['devops-center-username'];
     const asyncJob: AsyncOperationResult = await fetchAsyncOperationResult(this.targetOrg.getConnection(), asyncJobId);
     if (asyncJob.sf_devops__Status__c && isNotResumable(asyncJob.sf_devops__Status__c)) {
       throw messages.createError('error.JobNotResumable', [asyncJobId, asyncJob.sf_devops__Status__c]);
