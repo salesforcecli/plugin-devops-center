@@ -1,3 +1,9 @@
+## [1.2.9](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.8...1.2.9) (2024-03-14)
+
+### Bug Fixes
+
+- remove `default` from wait flag ([#330](https://github.com/salesforcecli/plugin-devops-center/issues/330)) ([cfcba21](https://github.com/salesforcecli/plugin-devops-center/commit/cfcba2102840ae4713e552febd6f0310db12f75b))
+
 ## [1.2.8](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.7...1.2.8) (2024-03-09)
 
 ### Bug Fixes
