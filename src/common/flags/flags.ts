@@ -31,7 +31,6 @@ export const wait: OptionFlag<Duration> = Flags.duration({
   summary: messages.getMessage('flags.wait.summary'),
   description: messages.getMessage('flags.wait.description'),
   defaultValue: 33,
-  default: Duration.minutes(33),
   helpValue: '<minutes>',
   min: 3,
   exclusive: ['async'],

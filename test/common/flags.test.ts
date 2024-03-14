@@ -212,7 +212,7 @@ describe('waitFlag', () => {
     const out = await Parser.parse([], {
       flags: { wait },
     });
-    expect(out.flags.wait).to.deep.equal(wait.default);
+    expect(out.flags.wait).to.deep.equal(Duration.minutes(33));
   });
 
   it('wait and async flags are mutually exclusive', async () => {
