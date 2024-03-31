@@ -19,7 +19,7 @@
     "@oclif/test": "^3",
     "@salesforce/cli-plugins-testkit": "^5",
     "@salesforce/dev-scripts": "^8",
-    "@salesforce/plugin-command-reference": "^3.0.70",
+    "@salesforce/plugin-command-reference": "^3.0.73",
     "@salesforce/ts-sinon": "^1.4.19",
     "@swc/cli": "^0.3.10",
     "@swc/core": "^1.4.11",
