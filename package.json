@@ -5,10 +5,10 @@
   "author": "Salesforce",
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "dependencies": {
-    "@oclif/core": "^3",
-    "@salesforce/core": "^6.7.6",
-    "@salesforce/kit": "^3.0.15",
-    "@salesforce/sf-plugins-core": "^5.0.1",
+    "@oclif/core": "^3.26.2",
+    "@salesforce/core": "^7.0.1",
+    "@salesforce/kit": "^3.1.0",
+    "@salesforce/sf-plugins-core": "^9.0.0",
     "@salesforce/ts-types": "^2.0.9",
     "chalk": "^4",
     "jsforce": "^2.0.0-beta.29",
@@ -17,16 +17,16 @@
   "devDependencies": {
     "@oclif/plugin-command-snapshot": "^5",
     "@oclif/test": "^3",
-    "@salesforce/cli-plugins-testkit": "^5",
-    "@salesforce/dev-scripts": "^8",
+    "@salesforce/cli-plugins-testkit": "^5.2.0",
+    "@salesforce/dev-scripts": "^9.0.0",
     "@salesforce/plugin-command-reference": "^3.0.73",
     "@salesforce/ts-sinon": "^1.4.19",
     "@swc/cli": "^0.3.10",
     "@swc/core": "^1.4.11",
-    "eslint-plugin-sf-plugin": "^1.17.4",
+    "eslint-plugin-sf-plugin": "^1.18.0",
     "oclif": "^4",
     "ts-node": "^10.9.2",
-    "typescript": "^4.9.5"
+    "typescript": "^5.4.3"
   },
   "engines": {
     "node": ">=16.0.0"
