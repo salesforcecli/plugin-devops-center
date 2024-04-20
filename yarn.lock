@@ -1446,11 +1446,11 @@
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
 "@salesforce/cli-plugins-testkit@^5":
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-5.2.1.tgz#24c7629057284a74d9f30a4fdc48c31f59d963af"
-  integrity sha512-GjvgJOLt4N/lGEMjdvQdVlJ8XlRfOfeUMisaVM94uTUWmF23u8fcD1H4zw7XvMt43CrNHs5dmBSAN0uk4ZRl5Q==
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/@salesforce/cli-plugins-testkit/-/cli-plugins-testkit-5.2.2.tgz#07ece4fe3d534764e8f155776985b677aa7c0a08"
+  integrity sha512-p7Mq/ijHT6uw5sZGfmrMqq1wty2bRA3jPB7knOsdzo9igW1D3WvUjnhnGx5Kssn2bUCI0LwFvEcI7dnmuBJjJw==
   dependencies:
-    "@salesforce/core" "^7.2.0"
+    "@salesforce/core" "^7.3.0"
     "@salesforce/kit" "^3.1.0"
     "@salesforce/ts-types" "^2.0.9"
     "@types/shelljs" "^0.8.15"
@@ -1484,10 +1484,10 @@
     semver "^7.6.0"
     ts-retry-promise "^0.7.1"
 
-"@salesforce/core@^7.2.0":
-  version "7.2.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-7.2.0.tgz#5034c8a1104e5feb0c2c96609a98e8f63e6f8676"
-  integrity sha512-N/9hv7Vdr9sEuob9vo90odcQ7dJPtfOQVIE5R8vFcfaHK3W3ej9EpHsaV55PkaVG+hxRhZ2oOVA3UaVfp/diOw==
+"@salesforce/core@^7.2.0", "@salesforce/core@^7.3.0":
+  version "7.3.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-7.3.0.tgz#2ad3dfccb1ef0eb2e65b49b655e39748002bbc13"
+  integrity sha512-c/gZLvKFHvgAv/Gyd4LjGGQykvGLn67QtCmdT7Hnm57bTDZoyr7XJXcaI+ILN0NO47guG1tEWP5eBvAi+u2DNA==
   dependencies:
     "@jsforce/jsforce-node" "^3.1.0"
     "@salesforce/kit" "^3.1.0"
