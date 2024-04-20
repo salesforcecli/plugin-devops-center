@@ -1101,6 +1101,15 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-2.0.2.tgz#d9fae00a2d5cb40f92cfe64b47ad749fbc38f917"
   integrity sha512-6EwiSjwWYP7pTckG6I5eyFANjPhmPjUX9JRLUSfNPC7FX7zK9gyZAfUEaECL6ALTpGX5AjnBq3C9XmVWPitNpw==
 
+"@inquirer/confirm@^2.0.17":
+  version "2.0.17"
+  resolved "https://registry.yarnpkg.com/@inquirer/confirm/-/confirm-2.0.17.tgz#a45eb1b973c51c993a3c093a0114e960b1cf09a4"
+  integrity sha512-EqzhGryzmGpy2aJf6LxJVhndxYmFs+m8cxXzf8nejb1DE3sabf6mUgBcp4J0jAUEiAcYzqmkqRr7LPFh/WdnXA==
+  dependencies:
+    "@inquirer/core" "^6.0.0"
+    "@inquirer/type" "^1.1.6"
+    chalk "^4.1.2"
+
 "@inquirer/confirm@^3.0.0", "@inquirer/confirm@^3.1.2":
   version "3.1.4"
   resolved "https://registry.yarnpkg.com/@inquirer/confirm/-/confirm-3.1.4.tgz#851d2c74ddcf46018c9540caed6bd05e1f081ac7"
@@ -1108,6 +1117,26 @@
   dependencies:
     "@inquirer/core" "^8.0.0"
     "@inquirer/type" "^1.3.0"
+
+"@inquirer/core@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@inquirer/core/-/core-6.0.0.tgz#d44ccd8ae09a4879a78f09cca35bf1ab894b95f4"
+  integrity sha512-fKi63Khkisgda3ohnskNf5uZJj+zXOaBvOllHsOkdsXRA/ubQLJQrZchFFi57NKbZzkTunXiBMdvWOv71alonw==
+  dependencies:
+    "@inquirer/type" "^1.1.6"
+    "@types/mute-stream" "^0.0.4"
+    "@types/node" "^20.10.7"
+    "@types/wrap-ansi" "^3.0.0"
+    ansi-escapes "^4.3.2"
+    chalk "^4.1.2"
+    cli-spinners "^2.9.2"
+    cli-width "^4.1.0"
+    figures "^3.2.0"
+    mute-stream "^1.0.0"
+    run-async "^3.0.0"
+    signal-exit "^4.1.0"
+    strip-ansi "^6.0.1"
+    wrap-ansi "^6.2.0"
 
 "@inquirer/core@^8.0.0":
   version "8.0.0"
@@ -1141,6 +1170,16 @@
     "@inquirer/core" "^8.0.0"
     "@inquirer/type" "^1.3.0"
 
+"@inquirer/password@^1.1.16":
+  version "1.1.16"
+  resolved "https://registry.yarnpkg.com/@inquirer/password/-/password-1.1.16.tgz#37ddebbe37c6e76f8ad27d1f726aacdd7c423558"
+  integrity sha512-aZYZVHLUXZ2gbBot+i+zOJrks1WaiI95lvZCn1sKfcw6MtSSlYC8uDX8sTzQvAsQ8epHoP84UNvAIT0KVGOGqw==
+  dependencies:
+    "@inquirer/core" "^6.0.0"
+    "@inquirer/type" "^1.1.6"
+    ansi-escapes "^4.3.2"
+    chalk "^4.1.2"
+
 "@inquirer/select@^2.2.1":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@inquirer/select/-/select-2.3.0.tgz#7edc17f6502b46a0d320091ae4d9aabed990d662"
@@ -1152,7 +1191,7 @@
     ansi-escapes "^4.3.2"
     chalk "^4.1.2"
 
-"@inquirer/type@^1.3.0":
+"@inquirer/type@^1.1.6", "@inquirer/type@^1.3.0":
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/@inquirer/type/-/type-1.3.0.tgz#9dcb4e0e8bbec03063aff7806072cc90eea2c61d"
   integrity sha512-RW4Zf6RCTnInRaOZuRHTqAUl+v6VJuQGglir7nW2BkT3OXOphMhkIFhvFRjorBx2l0VwtC/M4No8vYR65TdN9Q==
@@ -1314,10 +1353,10 @@
     wordwrap "^1.0.0"
     wrap-ansi "^7.0.0"
 
-"@oclif/core@^3", "@oclif/core@^3.15.1", "@oclif/core@^3.26.0", "@oclif/core@^3.26.2":
-  version "3.26.3"
-  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-3.26.3.tgz#2416f4f5e3e5b9434999edb2f94983c5ac07e8a2"
-  integrity sha512-e6Vwu+cb2Sn4qFFpmY1fQLRWIY5ugruMuN94xb7+kyUzxrirYjJATPhuCT1G5xj9Dk+hTMH+Sp6XcHcVTS1lHg==
+"@oclif/core@^3", "@oclif/core@^3.15.1", "@oclif/core@^3.26.0", "@oclif/core@^3.26.2", "@oclif/core@^3.26.3":
+  version "3.26.4"
+  resolved "https://registry.yarnpkg.com/@oclif/core/-/core-3.26.4.tgz#ab0c6d06f699abaf0fa6186466f64f02a8435c61"
+  integrity sha512-ntfo2ut7enNtAn/jB/dryMUPBM2Fh8Fydmi3k/Ybo6lCGU/hmsPFkBRjCEJAQMyNkK2yVZARaWogdOrcVgFz+w==
   dependencies:
     "@types/cli-progress" "^3.11.5"
     ansi-escapes "^4.3.2"
@@ -1422,7 +1461,7 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.0"
 
-"@salesforce/core@^6.4.1", "@salesforce/core@^6.7.0", "@salesforce/core@^6.7.3", "@salesforce/core@^6.7.6":
+"@salesforce/core@^6.4.1", "@salesforce/core@^6.7.0", "@salesforce/core@^6.7.6":
   version "6.7.6"
   resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-6.7.6.tgz#6a73c6a4e615ce837be5b5c142cfc63a6c8db3bd"
   integrity sha512-0ZZ1GgUQTwTs8/xa+hmZd+wwKXkK8MNcI2Kn20HmHShsweA2Jp3Yaxx0+EbRPqhSBARXso+TADSnsOjlZvQ3tg==
@@ -1513,19 +1552,19 @@
     "@salesforce/ts-types" "^2.0.9"
     tslib "^2.6.2"
 
-"@salesforce/plugin-command-reference@^3.0.73":
-  version "3.0.73"
-  resolved "https://registry.yarnpkg.com/@salesforce/plugin-command-reference/-/plugin-command-reference-3.0.73.tgz#81a3ecb06a2c0ab319e01ce24c1eaab5608c3735"
-  integrity sha512-FkGlvA3H2kH3KrzFxWSQhnPrcgvVLQF1QGig69J/j/Z0rnb2k4rH5gKN0Bg0xcgHXBwmBrlY5otpJltnrpq0PQ==
+"@salesforce/plugin-command-reference@^3.0.78":
+  version "3.0.78"
+  resolved "https://registry.yarnpkg.com/@salesforce/plugin-command-reference/-/plugin-command-reference-3.0.78.tgz#8158dbb62d9d7190e31a0c8c5fbfefb3dfd33efc"
+  integrity sha512-ASrRwX7iIdRWZ3UjsfhRyzaoL64SzYkqEz6AMqBsOk1O6W2YlS76z3u0M8cUOCHq27FioEkqJvpBMFR335D3GQ==
   dependencies:
-    "@oclif/core" "^3.26.0"
-    "@salesforce/core" "^6.7.3"
-    "@salesforce/kit" "^3.0.15"
-    "@salesforce/sf-plugins-core" "^5.0.13"
+    "@oclif/core" "^3.26.3"
+    "@salesforce/core" "^7.2.0"
+    "@salesforce/kit" "^3.1.0"
+    "@salesforce/sf-plugins-core" "^9.0.1"
     "@salesforce/ts-types" "^2.0.9"
-    chalk "^4"
+    chalk "^5.3.0"
+    debug "^4.3.4"
     handlebars "^4.7.8"
-    tslib "^2"
 
 "@salesforce/prettier-config@^0.0.3":
   version "0.0.3"
@@ -1537,7 +1576,7 @@
   resolved "https://registry.yarnpkg.com/@salesforce/schemas/-/schemas-1.7.0.tgz#b7e0af3ee414ae7160bce351c0184d77ccb98fe3"
   integrity sha512-Z0PiCEV55khm0PG+DsnRYCjaDmacNe3HDmsoSm/CSyYvJJm+D5vvkHKN9/PKD/gaRe8XAU836yfamIYFblLINw==
 
-"@salesforce/sf-plugins-core@^5.0.1", "@salesforce/sf-plugins-core@^5.0.13":
+"@salesforce/sf-plugins-core@^5.0.1":
   version "5.0.13"
   resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-5.0.13.tgz#f2941527d66ded5750a6646e146af047ab72acc9"
   integrity sha512-b5R8krKeOIkW0hPxvfpm8T5tCSyWW7MDERnJwm/FXq4ueUJsC1/TCWSscyVKPSZ0VRcEFbzOWKJvpV/omB1D9w==
@@ -1549,6 +1588,19 @@
     "@types/inquirer" "^8.2.3"
     chalk "^4"
     inquirer "^8.2.5"
+
+"@salesforce/sf-plugins-core@^9.0.1":
+  version "9.0.4"
+  resolved "https://registry.yarnpkg.com/@salesforce/sf-plugins-core/-/sf-plugins-core-9.0.4.tgz#6ff2de0890051d74c59b725f5dac98f413954e15"
+  integrity sha512-JJ6BMgzF+idYNSOpBt8mFsSB8GnXN85vwdsXT0gkCdIy1YB9CdgyKJwWqDRw2nTy+fmeeS+2FKA3NS2hbBXyRQ==
+  dependencies:
+    "@inquirer/confirm" "^2.0.17"
+    "@inquirer/password" "^1.1.16"
+    "@oclif/core" "^3.26.2"
+    "@salesforce/core" "^7.2.0"
+    "@salesforce/kit" "^3.1.0"
+    "@salesforce/ts-types" "^2.0.9"
+    chalk "^5.3.0"
 
 "@salesforce/ts-sinon@^1.4.19":
   version "1.4.19"
@@ -2399,7 +2451,7 @@
   dependencies:
     undici-types "~5.26.4"
 
-"@types/node@^20.12.7":
+"@types/node@^20.10.7", "@types/node@^20.12.7":
   version "20.12.7"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.12.7.tgz#04080362fa3dd6c5822061aa3124f5c152cff384"
   integrity sha512-wq0cICSkRLVaf3UGLMGItu/PtdY7oaXaI/RVU+xliKVOtRna3PRY57ZDfztpDL0n11vfymMUnXv8QwYCO7L1wg==
@@ -4252,7 +4304,7 @@ faye@^1.4.0:
     tough-cookie "*"
     tunnel-agent "*"
 
-figures@^3.0.0:
+figures@^3.0.0, figures@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/figures/-/figures-3.2.0.tgz#625c18bd293c604dc4a8ddb2febf0c88341746af"
   integrity sha512-yaduQFRKLXYOGgEn6AZau90j3ggSOyiqXU0F9JZfeXYhNa+Jk4X+s45A2zg5jns87GAFa34BBm2kXw4XpNcbdg==
@@ -6995,6 +7047,11 @@ run-async@^2.4.0:
   resolved "https://registry.yarnpkg.com/run-async/-/run-async-2.4.1.tgz#8440eccf99ea3e70bd409d49aab88e10c189a455"
   integrity sha512-tvVnVv01b8c1RrA6Ep7JkStj85Guv/YrMcwqYQnwjsAS2cTmmPGBBjAjpCW7RrSodNSoE2/qg9O4bceNvUuDgQ==
 
+run-async@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/run-async/-/run-async-3.0.0.tgz#42a432f6d76c689522058984384df28be379daad"
+  integrity sha512-540WwVDOMxA6dN6We19EcT9sc3hkXPw5mzRNGM3FkdN/vtE9NFvj5lFAPNwUDmJjXidm3v7TC1cTE7t17Ulm1Q==
+
 run-parallel@^1.1.9:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/run-parallel/-/run-parallel-1.2.0.tgz#66d1368da7bdf921eb9d95bd1a9229e7f21a43ee"
@@ -7445,7 +7502,16 @@ stdout-stderr@^0.1.9:
     debug "^4.1.1"
     strip-ansi "^6.0.0"
 
-"string-width-cjs@npm:string-width@^4.2.0", string-width@^4.0.0, string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
+"string-width-cjs@npm:string-width@^4.2.0":
+  version "4.2.3"
+  resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
+  integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
+  dependencies:
+    emoji-regex "^8.0.0"
+    is-fullwidth-code-point "^3.0.0"
+    strip-ansi "^6.0.1"
+
+string-width@^4.0.0, string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -7504,7 +7570,14 @@ string_decoder@~1.1.1:
   dependencies:
     safe-buffer "~5.1.0"
 
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@6.0.1, strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
+  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
+  dependencies:
+    ansi-regex "^5.0.1"
+
+strip-ansi@6.0.1, strip-ansi@^6.0.0, strip-ansi@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/strip-ansi/-/strip-ansi-6.0.1.tgz#9e26c63d30f53443e9489495b2105d37b67a85d9"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
@@ -8106,7 +8179,7 @@ workerpool@6.2.1:
   resolved "https://registry.yarnpkg.com/workerpool/-/workerpool-6.2.1.tgz#46fc150c17d826b86a008e5a4508656777e9c343"
   integrity sha512-ILEIE97kDZvF9Wb9f6h5aXK4swSlKGUcOEGiIYb2OOu/IrDU9iwj0fD//SsA6E5ibwJxpEvhullJY4Sl4GcpAw==
 
-"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
+"wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
@@ -8119,6 +8192,15 @@ wrap-ansi@^6.0.1, wrap-ansi@^6.2.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-6.2.0.tgz#e9393ba07102e6c91a3b221478f0257cd2856e53"
   integrity sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==
+  dependencies:
+    ansi-styles "^4.0.0"
+    string-width "^4.1.0"
+    strip-ansi "^6.0.0"
+
+wrap-ansi@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
+  integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
   dependencies:
     ansi-styles "^4.0.0"
     string-width "^4.1.0"
