@@ -1432,11 +1432,11 @@
     lodash.template "^4.5.0"
 
 "@oclif/test@^3":
-  version "3.2.8"
-  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-3.2.8.tgz#ce2388e1910d315005c6a66fbde8cffaf1b77a20"
-  integrity sha512-aC523gJxzRxzL1P1m2Mrdu/xl0FG+ho8GAcZtdUKNOMM6te2iwR481GRzs8B0xDtAPNi0jZWiPFetbyR7mh/kA==
+  version "3.2.10"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-3.2.10.tgz#48fdf3ebb339e81955a42c1e9a23f5f673c39261"
+  integrity sha512-9h6rMHnFS7zf0CLmfqtbAmdDSLpYF8otu25YpeqQXOX3b9TYeyfOvD61TkkxJ2T3zpqnrViNzifsF6gfM6xanQ==
   dependencies:
-    "@oclif/core" "^3.26.0"
+    "@oclif/core" "^3.26.3"
     chai "^4.4.1"
     fancy-test "^3.0.14"
 
