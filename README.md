@@ -87,11 +87,13 @@ GLOBAL FLAGS
 DESCRIPTION
   Quickly deploy a validated deployment to an org.
 
-  Before you run this command, first create a validated deployment with the "sf project deploy pipeline validate"
-  command, which returns a job ID. Validated deployments haven't been deployed to the org yet; you deploy them with this
-  command. Either pass the job ID to this command or use the --use-most-recent flag to use the job ID of the most
-  recently validated deployment. For the quick deploy to succeed, the associated validated deployment must also have
-  succeeded.
+  The first time you run any "project deploy pipeline" command, be sure to authorize the org in which DevOps Center is
+  installed. The easiest way to authorize an org is with the "org login web" command.
+
+  Before you run this command, create a validated deployment with the "project deploy pipeline validate" command, which
+  returns a job ID. Validated deployments haven't been deployed to the org yet; you deploy them with this command.
+  Either pass the job ID to this command or use the --use-most-recent flag to use the job ID of the most recently
+  validated deployment. For the quick deploy to succeed, the associated validated deployment must also have succeeded.
 
   Executing this quick deploy command takes less time than a standard deploy because it skips running Apex tests. These
   tests were previously run as part of the validation. Validating first and then running a quick deploy is useful if the
@@ -131,7 +133,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/quick.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.9/src/commands/project/deploy/pipeline/quick.ts)_
+_See code: [src/commands/project/deploy/pipeline/quick.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.10/src/commands/project/deploy/pipeline/quick.ts)_
 
 ## `sf project deploy pipeline report`
 
@@ -151,6 +153,9 @@ GLOBAL FLAGS
 
 DESCRIPTION
   Check the status of a pipeline deploy operation.
+
+  The first time you run any "project deploy pipeline" command, be sure to authorize the org in which DevOps Center is
+  installed. The easiest way to authorize an org is with the "org login web" command.
 
   Run this command by either indicating a job ID or specifying the —use-most-recent flag to use the job ID of the most
   recent deploy operation.
@@ -175,7 +180,7 @@ FLAG DESCRIPTIONS
     your most recent operation was longer than 3 days ago, this flag won't find the job ID.
 ```
 
-_See code: [src/commands/project/deploy/pipeline/report.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.9/src/commands/project/deploy/pipeline/report.ts)_
+_See code: [src/commands/project/deploy/pipeline/report.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.10/src/commands/project/deploy/pipeline/report.ts)_
 
 ## `sf project deploy pipeline resume`
 
@@ -199,6 +204,9 @@ GLOBAL FLAGS
 
 DESCRIPTION
   Resume watching a pipeline deploy operation.
+
+  The first time you run any "project deploy pipeline" command, be sure to authorize the org in which DevOps Center is
+  installed. The easiest way to authorize an org is with the "org login web" command.
 
   Use this command to resume watching a pipeline deploy operation if the original command times out or you specified the
   --async flag.
@@ -237,7 +245,7 @@ FLAG DESCRIPTIONS
     returns the job ID. To check the status of the operation, run "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/resume.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.9/src/commands/project/deploy/pipeline/resume.ts)_
+_See code: [src/commands/project/deploy/pipeline/resume.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.10/src/commands/project/deploy/pipeline/resume.ts)_
 
 ## `sf project deploy pipeline start`
 
@@ -269,6 +277,9 @@ GLOBAL FLAGS
 
 DESCRIPTION
   Deploy changes from a branch to the pipeline stage’s org.
+
+  The first time you run any "project deploy pipeline" command, be sure to authorize the org in which DevOps Center is
+  installed. The easiest way to authorize an org is with the "org login web" command.
 
   Before you run this command, changes in the pipeline stage's branch must be merged in the source control repository.
 
@@ -333,7 +344,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/start.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.9/src/commands/project/deploy/pipeline/start.ts)_
+_See code: [src/commands/project/deploy/pipeline/start.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.10/src/commands/project/deploy/pipeline/start.ts)_
 
 ## `sf project deploy pipeline validate`
 
@@ -365,6 +376,9 @@ GLOBAL FLAGS
 
 DESCRIPTION
   Perform a validate-only deployment from a branch to the pipeline stage’s org.
+
+  The first time you run any "project deploy pipeline" command, be sure to authorize the org in which DevOps Center is
+  installed. The easiest way to authorize an org is with the "org login web" command.
 
   A validation runs Apex tests to verify whether a deployment will succeed without actually deploying the metadata to
   your environment, so you can then quickly deploy the changes later without re-running the tests.
@@ -429,7 +443,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/validate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.9/src/commands/project/deploy/pipeline/validate.ts)_
+_See code: [src/commands/project/deploy/pipeline/validate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.10/src/commands/project/deploy/pipeline/validate.ts)_
 
 <!-- commandsstop -->
 

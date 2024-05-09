@@ -1,3 +1,13 @@
+## [1.2.10](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.9...1.2.10) (2024-05-09)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 3.26.0 to 3.26.3 ([a1826ab](https://github.com/salesforcecli/plugin-devops-center/commit/a1826ab40da81619a8a07bb75a7bea36572d53c6))
+- **deps:** bump @oclif/core from 3.26.4 to 3.26.5 ([04872b3](https://github.com/salesforcecli/plugin-devops-center/commit/04872b31413b2b417911896e0f0938d9d63a223f))
+- **deps:** bump @salesforce/core from 6.7.3 to 6.7.6 ([f18ec04](https://github.com/salesforcecli/plugin-devops-center/commit/f18ec0413e447661bedcfe29fb3c396c61d94c5a))
+- **deps:** bump tar from 6.2.0 to 6.2.1 ([7350bdf](https://github.com/salesforcecli/plugin-devops-center/commit/7350bdf919fe7615aefe0e641cc400693623be35))
+- set defaultHelp on wait flag ([#360](https://github.com/salesforcecli/plugin-devops-center/issues/360)) ([86b72e4](https://github.com/salesforcecli/plugin-devops-center/commit/86b72e472189864dfc38e46fdb2f09f268fa439c))
+
 ## [1.2.9](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.8...1.2.9) (2024-03-14)
 
 ### Bug Fixes
