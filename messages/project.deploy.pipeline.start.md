@@ -4,7 +4,7 @@ Deploy changes from a branch to the pipeline stage’s org.
 
 # description
 
-The first time you run any "project deploy pipeline" command, be sure to authorize the org in which DevOps Center is installed. The easiest way to authorize an org is with the "sf org login web" command.
+The first time you run any "project deploy pipeline" command, be sure to authorize the org in which DevOps Center is installed. The easiest way to authorize an org is with the "org login web" command.
 
 Before you run this command, changes in the pipeline stage's branch must be merged in the source control repository.
 
