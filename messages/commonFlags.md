@@ -50,4 +50,4 @@ Show concise output of the command result.
 
 # errors.NoDefaultDoceEnv
 
-You must specify the DevOps Center org username by indicating the --devops-center-username flag on the command line or by setting the target-devops-center configuration variable.
+The first time you run any DevOps Center CLI command, you must specify the DevOps Center org username by indicating the --devops-center-username flag on the command line or by setting the target-devops-center configuration variable.
