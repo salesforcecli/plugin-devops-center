@@ -118,7 +118,7 @@ describe('requiredDoceOrgFlag', () => {
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.message).to.include(
-        'You must specify the DevOps Center org username by indicating the --devops-center-username flag on the command line or by setting the target-devops-center configuration variable.'
+        'Before you run a DevOps Center CLI command, you must first use one of the "org login" commands to authorize the org in which DevOps Center is installed. Then, when you run a DevOps Center command, be sure that you specify the DevOps Center org username with the "--devops-center-username" flag. Alternatively, you can set the "target-devops-center" configuration variable to the username with the "config set" command.'
       );
     }
   });
