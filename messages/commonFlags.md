@@ -50,4 +50,4 @@ Show concise output of the command result.
 
 # errors.NoDefaultDoceEnv
 
-Before you run any DevOps Center CLI commands, you must first authorize the org in which DevOps Center is installed. Be sure that the DevOps Center org is authorized, and that you indicated the DevOps Center org username when running the command (--devops-center-username) or set the configuration variable for target-devops-center (sf config set), and try again.
+Before you run a DevOps Center CLI command, you must first use one of the "org login" commands to authorize the org in which DevOps Center is installed. Then, when you run a DevOps Center command, be sure that you specify the DevOps Center org username with the "--devops-center-username" flag. Alternatively, you can set the "target-devops-center" configuration variable to the username with the "config set" command.
