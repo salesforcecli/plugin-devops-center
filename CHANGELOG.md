@@ -1,3 +1,5 @@
+## [1.2.12](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.11...1.2.12) (2024-05-24)
+
 ## [1.2.10](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.9...1.2.10) (2024-05-09)
 
 ### Bug Fixes
