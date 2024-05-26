@@ -1,3 +1,9 @@
+## [1.2.13](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.12...1.2.13) (2024-05-26)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/kit from 3.1.1 to 3.1.2 ([70787cb](https://github.com/salesforcecli/plugin-devops-center/commit/70787cb581331f517eae2a6e20ca93373e549b8f))
+
 ## [1.2.12](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.11...1.2.12) (2024-05-24)
 
 ## [1.2.10](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.9...1.2.10) (2024-05-09)
