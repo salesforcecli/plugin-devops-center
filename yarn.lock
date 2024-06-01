@@ -1429,13 +1429,13 @@
     lodash "^4.17.21"
 
 "@oclif/test@^3":
-  version "3.2.13"
-  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-3.2.13.tgz#8dd242d9fe29ff770321fc977918b9b7e4ec1a53"
-  integrity sha512-H/3K2C55d1gW2YetrYK+hF2DDTRt5lpa0uSjARh9kOxDM2aERnS24pWQcCzLDZKsLnG998/bQmPW9mzvpGM2Wg==
+  version "3.2.15"
+  resolved "https://registry.yarnpkg.com/@oclif/test/-/test-3.2.15.tgz#aaddb08dee841c3d6f86bfbea2a798cae0c3f499"
+  integrity sha512-XqG3RosozNqySkxSXInU12Xec2sPSOkqYHJDfdFZiWG3a8Cxu4dnPiAQvms+BJsOlLQmfEQlSHqiyVUKOMHhXA==
   dependencies:
-    "@oclif/core" "^3.26.5"
+    "@oclif/core" "^3.26.6"
     chai "^4.4.1"
-    fancy-test "^3.0.14"
+    fancy-test "^3.0.15"
 
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
@@ -4224,10 +4224,10 @@ external-editor@^3.0.3:
     iconv-lite "^0.4.24"
     tmp "^0.0.33"
 
-fancy-test@^3.0.14:
-  version "3.0.14"
-  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-3.0.14.tgz#c5007291d7c36b07f0a8e7f235f2aa454bd66aac"
-  integrity sha512-FkiDltQA8PBZzw5tUnMrP1QtwIdNQWxxbZK5C22M9wu6HfFNciwkG3D9siT4l4s1fBTDaEG+Fdkbpi9FDTxtrg==
+fancy-test@^3.0.15:
+  version "3.0.16"
+  resolved "https://registry.yarnpkg.com/fancy-test/-/fancy-test-3.0.16.tgz#13f60771421ea93de94b1a1cac185c18021553bf"
+  integrity sha512-y1xZFpyYbE2TMiT+agOW2Emv8gr73zvDrKKbcXc8L+gMyIVJFn71cc4ICfzu2zEXjHirpHpdDJN0JBX99wwDXQ==
   dependencies:
     "@types/chai" "*"
     "@types/lodash" "*"
