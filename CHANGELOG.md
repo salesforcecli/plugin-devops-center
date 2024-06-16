@@ -1,3 +1,9 @@
+## [1.2.15](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.14...1.2.15) (2024-06-16)
+
+### Bug Fixes
+
+- **deps:** bump braces from 3.0.2 to 3.0.3 ([7178261](https://github.com/salesforcecli/plugin-devops-center/commit/717826170f0e2bbd512c6f735b0ddd50a0d99e0d))
+
 ## [1.2.14](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.13...1.2.14) (2024-06-09)
 
 ### Bug Fixes

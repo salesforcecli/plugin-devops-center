@@ -68,7 +68,7 @@ Quickly deploy a validated deployment to an org.
 
 ```
 USAGE
-  $ sf project deploy pipeline quick -c <value> [--json] [--concise | --verbose] [-w <value> | --async] [-i <value>]
+  $ sf project deploy pipeline quick -c <value> [--json] [--concise | --verbose] [-w <minutes> | --async] [-i <value>]
   [-r]
 
 FLAGS
@@ -133,7 +133,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/quick.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.14/src/commands/project/deploy/pipeline/quick.ts)_
+_See code: [src/commands/project/deploy/pipeline/quick.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.15/src/commands/project/deploy/pipeline/quick.ts)_
 
 ## `sf project deploy pipeline report`
 
@@ -180,7 +180,7 @@ FLAG DESCRIPTIONS
     your most recent operation was longer than 3 days ago, this flag won't find the job ID.
 ```
 
-_See code: [src/commands/project/deploy/pipeline/report.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.14/src/commands/project/deploy/pipeline/report.ts)_
+_See code: [src/commands/project/deploy/pipeline/report.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.15/src/commands/project/deploy/pipeline/report.ts)_
 
 ## `sf project deploy pipeline resume`
 
@@ -188,7 +188,7 @@ Resume watching a pipeline deploy operation.
 
 ```
 USAGE
-  $ sf project deploy pipeline resume -c <value> [--json] [-i <value>] [-r] [--concise | --verbose] [-w <value> | ]
+  $ sf project deploy pipeline resume -c <value> [--json] [-i <value>] [-r] [--concise | --verbose] [-w <minutes> | ]
 
 FLAGS
   -c, --devops-center-username=<value>  (required) Username or alias of the DevOps Center org.
@@ -245,7 +245,7 @@ FLAG DESCRIPTIONS
     returns the job ID. To check the status of the operation, run "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/resume.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.14/src/commands/project/deploy/pipeline/resume.ts)_
+_See code: [src/commands/project/deploy/pipeline/resume.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.15/src/commands/project/deploy/pipeline/resume.ts)_
 
 ## `sf project deploy pipeline start`
 
@@ -253,8 +253,8 @@ Deploy changes from a branch to the pipeline stage’s org.
 
 ```
 USAGE
-  $ sf project deploy pipeline start -b <value> -p <value> -c <value> [--json] [-v <value>] [-a] [-t <value>] [-l
-    NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg] [-w <value> | --async] [--concise | --verbose]
+  $ sf project deploy pipeline start -b <value> -p <value> -c <value> [--json] [-v <value>] [-a] [-t <value>...] [-l
+    NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg] [-w <minutes> | --async] [--concise | --verbose]
 
 FLAGS
   -a, --deploy-all                          Deploy all metadata in the branch to the stage's org.
@@ -344,7 +344,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/start.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.14/src/commands/project/deploy/pipeline/start.ts)_
+_See code: [src/commands/project/deploy/pipeline/start.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.15/src/commands/project/deploy/pipeline/start.ts)_
 
 ## `sf project deploy pipeline validate`
 
@@ -352,8 +352,8 @@ Perform a validate-only deployment from a branch to the pipeline stage’s org.
 
 ```
 USAGE
-  $ sf project deploy pipeline validate -b <value> -p <value> -c <value> [--json] [-v <value>] [-a] [-t <value>] [-l
-    NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg] [-w <value> | --async] [--concise | --verbose]
+  $ sf project deploy pipeline validate -b <value> -p <value> -c <value> [--json] [-v <value>] [-a] [-t <value>...] [-l
+    NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg] [-w <minutes> | --async] [--concise | --verbose]
 
 FLAGS
   -a, --deploy-all                          Deploy all metadata in the branch to the stage's org.
@@ -443,7 +443,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/validate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.14/src/commands/project/deploy/pipeline/validate.ts)_
+_See code: [src/commands/project/deploy/pipeline/validate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.15/src/commands/project/deploy/pipeline/validate.ts)_
 
 <!-- commandsstop -->
 
