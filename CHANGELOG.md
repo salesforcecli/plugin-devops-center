@@ -1,3 +1,9 @@
+## [1.2.17](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.16...1.2.17) (2024-06-16)
+
+### Bug Fixes
+
+- **deps:** bump @salesforce/ts-types from 2.0.9 to 2.0.10 ([eade5e7](https://github.com/salesforcecli/plugin-devops-center/commit/eade5e7a2b907876765c55b9302f341b00042992))
+
 ## [1.2.16](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.15...1.2.16) (2024-06-16)
 
 ### Bug Fixes
