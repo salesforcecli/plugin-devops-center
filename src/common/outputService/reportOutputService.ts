@@ -22,7 +22,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'proj
 /**
  * Interface for output methods for report operations.
  */
-export interface ReportOutputService extends DeploymentResultOutputService {}
+export type ReportOutputService = {} & DeploymentResultOutputService
 
 /**
  * Base class.

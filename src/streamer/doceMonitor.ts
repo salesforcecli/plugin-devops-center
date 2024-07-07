@@ -10,6 +10,7 @@ import { AnyJson } from '@salesforce/ts-types';
 /**
  * Common interface used to monitor the progress of something in the DevOps Center.
  **/
-export default interface DoceMonitor {
+type DoceMonitor = {
   monitor(): Promise<void | AnyJson>;
 }
+export default DoceMonitor
