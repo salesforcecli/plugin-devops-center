@@ -19,7 +19,7 @@ export type OutputFlags = {
  *
  * @author JuanStenghele-sf
  */
-export interface OutputService {
+export type OutputService = {
   /**
    * Prints a summary of the operation being done
    */
