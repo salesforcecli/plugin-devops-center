@@ -24,7 +24,7 @@ export type AorOutputFlags = {
  *
  * @author JuanStenghele-sf
  */
-export interface AorOutputService extends OutputService {
+export type AorOutputService = {
   /**
    * Prints the status of the given aor
    */
@@ -44,7 +44,7 @@ export interface AorOutputService extends OutputService {
    * Sets the aor id
    */
   getStatus(): AsyncOperationStatus | undefined;
-}
+} & OutputService
 
 /**
  * Abstract class that implements AorOutputService interface
