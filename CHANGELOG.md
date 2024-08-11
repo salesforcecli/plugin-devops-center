@@ -1,3 +1,9 @@
+## [1.2.20](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.19...1.2.20) (2024-08-11)
+
+### Bug Fixes
+
+- **deps:** bump @oclif/core from 3.26.6 to 3.27.0 ([b8a9b08](https://github.com/salesforcecli/plugin-devops-center/commit/b8a9b08c55ed2c9457a8a09a13ba60d22284ccbd))
+
 ## [1.2.19](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.18...1.2.19) (2024-08-04)
 
 ### Bug Fixes
