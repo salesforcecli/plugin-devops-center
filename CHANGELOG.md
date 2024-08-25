@@ -1,3 +1,9 @@
+## [1.2.21](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.20...1.2.21) (2024-08-25)
+
+### Bug Fixes
+
+- **deps:** bump micromatch from 4.0.5 to 4.0.8 ([0c6eaa7](https://github.com/salesforcecli/plugin-devops-center/commit/0c6eaa7c92e3a8a6ba3aac306d3ef7c5f79c17e0))
+
 ## [1.2.20](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.19...1.2.20) (2024-08-11)
 
 ### Bug Fixes
