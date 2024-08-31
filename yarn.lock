@@ -1562,9 +1562,9 @@
     wrap-ansi "^7.0.0"
 
 "@oclif/plugin-command-snapshot@^5":
-  version "5.2.13"
-  resolved "https://registry.yarnpkg.com/@oclif/plugin-command-snapshot/-/plugin-command-snapshot-5.2.13.tgz#d0025844865c20e38d4198c43fd6a515fedfde06"
-  integrity sha512-oCCD5DqjbK0AKonhGI+qa7ZMhvLbmdJ0kvWCoDBJyyusuxPtsGKYGrBS5LLqn6eEFIvOLbW+ZVXSOUQNK+SHRg==
+  version "5.2.14"
+  resolved "https://registry.yarnpkg.com/@oclif/plugin-command-snapshot/-/plugin-command-snapshot-5.2.14.tgz#fac3ff4657c02a4e8eaab9a62fef13f8abad30b5"
+  integrity sha512-fVGeV/dE6OhiRSL2ZN3Gn3eInGdeK4pQoCq0AB0vgvlU3tv7Ur4Vk1+5qpGazv8mAba9KjEtHySMpagDlb8H0Q==
   dependencies:
     "@oclif/core" "^4"
     ansis "^3.3.2"
