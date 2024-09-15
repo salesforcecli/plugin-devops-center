@@ -22,7 +22,7 @@
     "@salesforce/plugin-command-reference": "^3.1.20",
     "@salesforce/ts-sinon": "^1.4.26",
     "@swc/cli": "^0.4.0",
-    "@swc/core": "^1.7.23",
+    "@swc/core": "^1.7.26",
     "eslint-plugin-sf-plugin": "^1.20.7",
     "oclif": "^4",
     "ts-node": "^10.9.2",
