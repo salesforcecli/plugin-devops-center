@@ -12,12 +12,12 @@ import { AbstractOutputService, OutputFlags, OutputService } from './outputServi
 /**
  * Service interface for printing the output of a deployment result.
  */
-export interface DeploymentResultOutputService extends OutputService {
+export type DeploymentResultOutputService = {
   /**
    * Prints the deployment result.
    */
   printDeploymentResult(): void;
-}
+} & OutputService
 
 export abstract class AbstractDeploymentResultOutputService<T extends OutputFlags>
   extends AbstractOutputService<T>
