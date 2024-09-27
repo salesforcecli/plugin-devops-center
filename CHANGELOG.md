@@ -1,3 +1,9 @@
+## [1.2.24](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.23...1.2.24) (2024-09-27)
+
+### Bug Fixes
+
+- update link to MD api guide ([cb8e46d](https://github.com/salesforcecli/plugin-devops-center/commit/cb8e46d27d0f705c64ab4fc5fe603ebe217b0ae5))
+
 ## [1.2.23](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.22...1.2.23) (2024-09-15)
 
 ### Bug Fixes
