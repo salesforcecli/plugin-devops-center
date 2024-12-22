@@ -1,3 +1,9 @@
+## [1.2.27](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.26...1.2.27) (2024-12-22)
+
+### Bug Fixes
+
+- **deps:** bump cross-spawn from 7.0.3 to 7.0.6 ([8db5d1c](https://github.com/salesforcecli/plugin-devops-center/commit/8db5d1c6523e3098c4cb7553d7bf6968fe344b5a))
+
 ## [1.2.26](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.25...1.2.26) (2024-11-03)
 
 ### Bug Fixes
