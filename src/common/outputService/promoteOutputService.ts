@@ -25,7 +25,7 @@ export type PromoteOutputFlags = {
  *
  * @author JuanStenghele-sf
  */
-export interface PromoteOutputService extends ResumeOutputService {}
+export type PromoteOutputService = {} & ResumeOutputService
 
 /**
  * Abstract class that implements PromoteOutputService interface
