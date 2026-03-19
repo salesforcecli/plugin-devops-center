@@ -3,3 +3,6 @@
 # @salesforcecli/cli will be requested for
 # review when someone opens a pull request.
 *       @salesforcecli/devops-center
+
+# Comment line immediately above ownership line is reserved for related other information. Please be careful while editing.
+#ECCN:Open Source
