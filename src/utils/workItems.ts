@@ -90,8 +90,8 @@ async function fetchVcsOwnersForRecords(connection: Connection, records: any[]):
   return providerOwnerMap;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildRepositoryInfo(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   item: any,
   providerOwnerMap?: Map<string, string>
 ): { repoUrl?: string; repoType?: string } {
@@ -150,8 +150,8 @@ async function ensureProjectStages(
   return ctx;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapRawItemToWorkItem(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   item: any,
   ctx: ProjectStagesContext | null,
   providerOwnerMap?: Map<string, string>
