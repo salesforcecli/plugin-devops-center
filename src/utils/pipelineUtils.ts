@@ -13,7 +13,7 @@ export async function getPipelineIdForProject(connection: Connection, projectId:
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result: any = await connection.query(query);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-  return (result?.records || [])[0]?.DevopsPipelineId;
+  return (result?.records ?? [])[0]?.DevopsPipelineId;
 }
 
 export async function fetchPipelineStages(connection: Connection, pipelineId: string): Promise<PipelineStageRecord[]> {
@@ -21,7 +21,7 @@ export async function fetchPipelineStages(connection: Connection, pipelineId: st
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stageResult: any = await connection.query(stageQuery);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  return (stageResult?.records || []) as PipelineStageRecord[];
+  return (stageResult?.records ?? []) as PipelineStageRecord[];
 }
 
 export function computeFirstStageId(stages: PipelineStageRecord[]): string | undefined {
@@ -39,7 +39,7 @@ export function resolveTargetStageId(
   if (!stages.length) return undefined;
   if (currentStageId) {
     const current = stages.find((s) => s.Id === currentStageId);
-    return current?.NextStageId || undefined;
+    return current?.NextStageId ?? undefined;
   }
   return undefined;
 }
@@ -53,5 +53,5 @@ export function findStageById(
 }
 
 export function getBranchNameFromStage(stage: PipelineStageRecord | undefined): string | undefined {
-  return stage?.SourceCodeRepositoryBranch?.Name || undefined;
+  return stage?.SourceCodeRepositoryBranch?.Name ?? undefined;
 }

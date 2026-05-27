@@ -39,8 +39,8 @@ function extractOwnerFromVcsPayload(payload: unknown): string | undefined {
   if (typeof payload === 'string') return payload.trim() || undefined;
 
   const obj = payload as Record<string, unknown>;
-  if (typeof obj.owner === 'string' && (obj.owner as string).trim()) {
-    return (obj.owner as string).trim();
+  if (typeof obj.owner === 'string' && obj.owner.trim()) {
+    return obj.owner.trim();
   }
 
   const list = (obj.owners || obj.items || obj.records) as unknown[];
@@ -58,8 +58,7 @@ function extractOwnerFromVcsPayload(payload: unknown): string | undefined {
 
 async function fetchOwnerByVcsType(connection: Connection, vcsType: VcsType): Promise<string | undefined> {
   const path = `/services/data/${API_VERSION}/connect/devops/vcs/${vcsType}`;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const response = await (connection as any).request({ method: 'GET', url: path });
+  const response: unknown = await connection.request({ method: 'GET', url: path });
   return extractOwnerFromVcsPayload(response);
 }
 
@@ -70,7 +69,7 @@ async function fetchVcsOwnersForRecords(connection: Connection, records: any[]):
 
   for (const item of records) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const provider = item?.SourceCodeRepositoryBranch?.SourceCodeRepository?.Provider;
+    const provider: unknown = item?.SourceCodeRepositoryBranch?.SourceCodeRepository?.Provider;
     const vcsType = providerToVcsType(provider);
     if (vcsType) vcsTypes.add(vcsType);
   }
@@ -92,19 +91,24 @@ async function fetchVcsOwnersForRecords(connection: Connection, records: any[]):
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildRepositoryInfo(item: any, providerOwnerMap?: Map<string, string>): { repoUrl?: string; repoType?: string } {
+function buildRepositoryInfo(
+  item: any,
+  providerOwnerMap?: Map<string, string>
+): { repoUrl?: string; repoType?: string } {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const repoName = item?.SourceCodeRepositoryBranch?.SourceCodeRepository?.Name as string | undefined;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const provider = item?.SourceCodeRepositoryBranch?.SourceCodeRepository?.Provider;
+  const provider: unknown = item?.SourceCodeRepositoryBranch?.SourceCodeRepository?.Provider;
   const normalizedProvider = normalizeProvider(provider);
   const ownerFromConnectApi = normalizedProvider ? providerOwnerMap?.get(normalizedProvider) : undefined;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const ownerFromRepository = item?.SourceCodeRepositoryBranch?.SourceCodeRepository?.RepositoryOwner as string | undefined;
+  const ownerFromRepository = item?.SourceCodeRepositoryBranch?.SourceCodeRepository?.RepositoryOwner as
+    | string
+    | undefined;
   const repoOwner =
     normalizedProvider === 'bitbucket'
-      ? ownerFromRepository || ownerFromConnectApi
-      : ownerFromConnectApi || ownerFromRepository;
+      ? ownerFromRepository ?? ownerFromConnectApi
+      : ownerFromConnectApi ?? ownerFromRepository;
 
   let repoUrl: string | undefined;
   let repoType: string | undefined;
@@ -147,30 +151,33 @@ async function ensureProjectStages(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapRawItemToWorkItem(item: any, ctx: ProjectStagesContext | null, providerOwnerMap?: Map<string, string>): WorkItem {
+function mapRawItemToWorkItem(
+  item: any,
+  ctx: ProjectStagesContext | null,
+  providerOwnerMap?: Map<string, string>
+): WorkItem {
   const { repoUrl, repoType } = buildRepositoryInfo(item, providerOwnerMap);
 
   const mapped: WorkItem = {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-    id: item?.Id,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    name: (item?.Name as string) || '',
+    id: item?.Id as string,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    subject: (item?.Subject as string) || undefined,
+    name: (item?.Name as string) ?? '',
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    description: (item?.Description as string) || undefined,
+    subject: (item?.Subject as string) ?? undefined,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    status: (item?.Status as string) || '',
+    description: (item?.Description as string) ?? undefined,
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    owner: (item?.AssignedToId as string) || '',
-    SourceCodeRepository:
-      repoUrl || repoType ? { repoUrl: repoUrl || '', repoType: repoType || '' } : undefined,
+    status: (item?.Status as string) ?? '',
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    WorkItemBranch: (item?.SourceCodeRepositoryBranch?.Name as string) || undefined,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-    PipelineStageId: item?.DevopsPipelineStageId,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-    DevopsProjectId: item?.DevopsProjectId,
+    owner: (item?.AssignedToId as string) ?? '',
+    SourceCodeRepository: repoUrl ?? repoType ? { repoUrl: repoUrl ?? '', repoType: repoType ?? '' } : undefined,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    WorkItemBranch: (item?.SourceCodeRepositoryBranch?.Name as string) ?? undefined,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    PipelineStageId: item?.DevopsPipelineStageId as string | undefined,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    DevopsProjectId: item?.DevopsProjectId as string,
     PipelineId: ctx?.pipelineId,
   };
 
@@ -206,10 +213,10 @@ export async function fetchWorkItems(connection: Connection, projectId: string):
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result: any = await connection.query(query);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  if (!result || !result.records) return [];
+  if (!result?.records) return [];
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-  const records: any[] = result.records;
+  const records = result.records as unknown[];
   const projectStagesCache = new Map<string, ProjectStagesContext | null>();
   const ctx = await ensureProjectStages(connection, projectStagesCache, projectId);
   const providerOwnerMap = await fetchVcsOwnersForRecords(connection, records);

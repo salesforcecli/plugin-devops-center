@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-export interface WorkItem {
+export type WorkItem = {
   id: string;
   name: string;
   subject?: string;
@@ -22,14 +22,14 @@ export interface WorkItem {
   WorkItemBranch?: string;
   TargetStageId?: string;
   TargetBranch?: string;
-}
+};
 
-export interface PipelineStageRecord {
+export type PipelineStageRecord = {
   Id: string;
   Name?: string;
   NextStageId?: string | null;
   SourceCodeRepositoryBranch?: { Name?: string } | null;
-}
+};
 
 export type ProjectStagesContext = {
   pipelineId: string;

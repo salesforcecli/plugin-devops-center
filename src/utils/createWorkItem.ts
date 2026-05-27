@@ -9,20 +9,20 @@ import { Connection } from '@salesforce/core';
 
 const API_VERSION = 'v65.0';
 
-export interface CreateWorkItemParams {
+export type CreateWorkItemParams = {
   connection: Connection;
   projectId: string;
   subject: string;
   description: string;
-}
+};
 
-export interface CreateWorkItemResult {
+export type CreateWorkItemResult = {
   success: boolean;
   workItemId?: string;
   workItemName?: string;
   subject?: string;
   error?: string;
-}
+};
 
 /**
  * Creates a new DevOps Center Work Item in the specified project.
@@ -49,18 +49,20 @@ export async function createWorkItem(params: CreateWorkItemParams): Promise<Crea
       subject: (data.subject ?? data.Subject ?? subject) as string,
     };
   } catch (error: unknown) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const err = error as any;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const data = err.response?.data ?? err.body ?? err;
-    const message =
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      (typeof data === 'object' && (data?.message ?? data?.error ?? data?.errorDescription)) ??
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      err.message ??
+    const err = error as Record<string, unknown> & { response?: { data?: unknown }; body?: unknown; message?: unknown };
+    const data: unknown = (err.response?.data ?? err.body ?? err) as unknown;
+    const message: unknown =
+      (typeof data === 'object' &&
+        data !== null &&
+        ((data as Record<string, unknown>).message ??
+          (data as Record<string, unknown>).error ??
+          (data as Record<string, unknown>).errorDescription)) ||
+      err.message ||
       'Unknown error';
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const details = Array.isArray(data?.body) ? (data.body as string[]).join('; ') : undefined;
+    const details =
+      typeof data === 'object' && data !== null && Array.isArray((data as Record<string, unknown>).body)
+        ? ((data as Record<string, unknown[]>).body as string[]).join('; ')
+        : undefined;
     return {
       success: false,
       error: details ? `${String(message)}: ${details}` : String(message),

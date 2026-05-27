@@ -22,7 +22,7 @@ const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'proj
 /**
  * Interface for output methods for report operations.
  */
-export interface ReportOutputService extends DeploymentResultOutputService {}
+export type ReportOutputService = DeploymentResultOutputService;
 
 /**
  * Base class.
@@ -55,10 +55,10 @@ export class PromoteReportOutputService extends AbstractReportOutputService<Outp
     // convert every field of the deployment result record into a key:value pair.
     const formattedDeploymentResult = sObjectToArrayOfKeyValue(this.deploymentResult)
       // rename User.Name field.
-      .map((x) => {
-        x.key = x.key === 'Name' ? messages.getMessage('report.key.created-by-name') : x.key;
-        return x;
-      })
+      .map((x) => ({
+        ...x,
+        key: x.key === 'Name' ? messages.getMessage('report.key.created-by-name') : x.key,
+      }))
       // sort by key.
       .sort((a, b) => (a.key < b.key ? -1 : 1));
 

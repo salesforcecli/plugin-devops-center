@@ -182,12 +182,11 @@ export async function getFormattedDeployComponentsByAyncOpId(
     ? await selectDeployComponentsForCheckDeployByAsynchOpId(con, asyncOpId)
     : await selectDeployComponentsByAsyncOpId(con, asyncOpId);
 
-  components.forEach((component) => {
-    component.Type = component.sf_devops__Source_Component__c.split(':')[0];
-    component.Name = component.sf_devops__Source_Component__c.split(':')[1];
-  });
-
-  return components;
+  return components.map((component) => ({
+    ...component,
+    Type: component.sf_devops__Source_Component__c.split(':')[0],
+    Name: component.sf_devops__Source_Component__c.split(':')[1],
+  }));
 }
 
 /**
