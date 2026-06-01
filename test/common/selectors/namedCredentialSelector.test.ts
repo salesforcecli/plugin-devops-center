@@ -9,7 +9,7 @@
 
 import { expect } from '@oclif/test';
 import { Connection } from '@salesforce/core';
-import sinon = require('sinon');
+import * as sinon from 'sinon';
 import { selectNamedCredentialByName } from '../../../src/common/selectors/namedCredentialSelector';
 import { NamedCredential } from '../../../src/common/types';
 import * as SelectorUtils from '../../../src/common/selectors/selectorUtils';
