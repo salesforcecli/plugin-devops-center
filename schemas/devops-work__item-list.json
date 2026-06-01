@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/DevopsWorkItemListResult",
+  "definitions": {
+    "DevopsWorkItemListResult": {
+      "type": "object",
+      "properties": {
+        "workItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WorkItem"
+          }
+        }
+      },
+      "required": ["workItems"],
+      "additionalProperties": false
+    },
+    "WorkItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "DevopsProjectId": {
+          "type": "string"
+        },
+        "PipelineId": {
+          "type": "string"
+        },
+        "PipelineStageId": {
+          "type": "string"
+        },
+        "SourceCodeRepository": {
+          "type": "object",
+          "properties": {
+            "repoUrl": {
+              "type": "string"
+            },
+            "repoType": {
+              "type": "string"
+            }
+          },
+          "required": ["repoUrl", "repoType"],
+          "additionalProperties": false
+        },
+        "WorkItemBranch": {
+          "type": "string"
+        },
+        "TargetStageId": {
+          "type": "string"
+        },
+        "TargetBranch": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "name", "status", "owner", "DevopsProjectId"],
+      "additionalProperties": false
+    }
+  }
+}

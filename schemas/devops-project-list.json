@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/DevopsProjectListResult",
+  "definitions": {
+    "DevopsProjectListResult": {
+      "type": "object",
+      "properties": {
+        "projects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DevopsProject"
+          }
+        }
+      },
+      "required": ["projects"],
+      "additionalProperties": false
+    },
+    "DevopsProject": {
+      "type": "object",
+      "properties": {
+        "Id": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["Id", "Name", "Description"],
+      "additionalProperties": false
+    }
+  }
+}

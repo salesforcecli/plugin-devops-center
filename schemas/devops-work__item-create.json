@@ -1,25 +1,28 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/PromotePipelineResult",
+  "$ref": "#/definitions/CreateWorkItemResult",
   "definitions": {
-    "PromotePipelineResult": {
+    "CreateWorkItemResult": {
       "type": "object",
-      "additionalProperties": false,
       "properties": {
-        "jobId": {
+        "success": {
+          "type": "boolean"
+        },
+        "workItemId": {
           "type": "string"
         },
-        "status": {
+        "workItemName": {
           "type": "string"
         },
-        "message": {
+        "subject": {
           "type": "string"
         },
-        "errorDetails": {
+        "error": {
           "type": "string"
         }
       },
-      "required": ["jobId"]
+      "required": ["success"],
+      "additionalProperties": false
     }
   }
 }
