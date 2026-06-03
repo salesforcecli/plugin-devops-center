@@ -4,7 +4,7 @@
     "command": "devops:project:list",
     "flagAliases": [],
     "flagChars": ["o"],
-    "flags": ["json", "target-org"],
+    "flags": ["api-version", "json", "target-org"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -12,7 +12,7 @@
     "command": "devops:work-item:create",
     "flagAliases": [],
     "flagChars": ["d", "o", "p", "s"],
-    "flags": ["description", "json", "project-id", "subject", "target-org"],
+    "flags": ["api-version", "description", "json", "project-id", "subject", "target-org"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -20,7 +20,7 @@
     "command": "devops:work-item:list",
     "flagAliases": [],
     "flagChars": ["o", "p"],
-    "flags": ["json", "project-id", "target-org"],
+    "flags": ["api-version", "json", "project-id", "target-org"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {

@@ -11,7 +11,7 @@ import { DevopsProjectPipelineQueryRecord, PipelineStageRecord } from './types';
 export async function getPipelineIdForProject(connection: Connection, projectId: string): Promise<string | undefined> {
   const query = `SELECT DevopsPipelineId FROM DevopsProjectPipeline WHERE DevopsProjectId = '${projectId}' LIMIT 1`;
   const result = await connection.query<DevopsProjectPipelineQueryRecord>(query);
-  return result.records[0]?.DevopsPipelineId;
+  return (result.records ?? [])[0]?.DevopsPipelineId;
 }
 
 export async function fetchPipelineStages(connection: Connection, pipelineId: string): Promise<PipelineStageRecord[]> {

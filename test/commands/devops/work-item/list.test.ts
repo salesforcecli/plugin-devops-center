@@ -18,7 +18,7 @@ const MOCK_WORK_ITEM: WorkItem = {
   description: 'Details',
   status: 'In Progress',
   owner: 'USER001',
-  DevopsProjectId: 'PROJ001',
+  DevopsProjectId: '1Qg000000000001',
   WorkItemBranch: 'feature/branch',
   TargetBranch: 'main',
 };
@@ -43,7 +43,7 @@ describe('devops work-item list', () => {
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         sandbox.stub(workItemsModule, 'fetchWorkItems').resolves([MOCK_WORK_ITEM]);
       })
-      .command(['devops:work-item:list', '--target-org', 'testOrg', '--project-id', 'PROJ001'])
+      .command(['devops:work-item:list', '--target-org', 'testOrg', '--project-id', '1Qg000000000001'])
       .it('displays work items in table', (ctx) => {
         expect(ctx.stdout).to.contain('WI-001');
       });
@@ -57,7 +57,7 @@ describe('devops work-item list', () => {
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         sandbox.stub(workItemsModule, 'fetchWorkItems').resolves([]);
       })
-      .command(['devops:work-item:list', '--target-org', 'testOrg', '--project-id', 'PROJ001'])
+      .command(['devops:work-item:list', '--target-org', 'testOrg', '--project-id', '1Qg000000000001'])
       .it('logs message when no work items', (ctx) => {
         expect(ctx.stdout).to.contain('No work items found');
       });
@@ -72,7 +72,7 @@ describe('devops work-item list', () => {
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         sandbox.stub(workItemsModule, 'fetchWorkItems').rejects(new Error("sObject type 'WorkItem' is not supported"));
       })
-      .command(['devops:work-item:list', '--target-org', 'testOrg', '--project-id', 'PROJ001'])
+      .command(['devops:work-item:list', '--target-org', 'testOrg', '--project-id', '1Qg000000000001'])
       .catch(() => {})
       .it('shows DevOps Center not enabled error', (ctx) => {
         expect(ctx.stderr).to.contain('DevOps Center is not enabled');
@@ -88,7 +88,7 @@ describe('devops work-item list', () => {
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         sandbox.stub(workItemsModule, 'fetchWorkItems').rejects(new Error('Network error'));
       })
-      .command(['devops:work-item:list', '--target-org', 'testOrg', '--project-id', 'PROJ001'])
+      .command(['devops:work-item:list', '--target-org', 'testOrg', '--project-id', '1Qg000000000001'])
       .catch((err) => {
         expect(err.message).to.contain('Network error');
       })

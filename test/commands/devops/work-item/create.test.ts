@@ -41,7 +41,7 @@ describe('devops work-item create', () => {
         '--target-org',
         'testOrg',
         '--project-id',
-        'PROJ001',
+        '1Qg000000000001',
         '--subject',
         'Fix bug',
       ])
@@ -67,7 +67,7 @@ describe('devops work-item create', () => {
         '--target-org',
         'testOrg',
         '--project-id',
-        'PROJ001',
+        '1Qg000000000001',
         '--subject',
         'Fix bug',
       ])
@@ -93,7 +93,7 @@ describe('devops work-item create', () => {
         '--target-org',
         'testOrg',
         '--project-id',
-        'PROJ001',
+        '1Qg000000000001',
         '--subject',
         'Fix bug',
       ])
@@ -119,7 +119,7 @@ describe('devops work-item create', () => {
         '--target-org',
         'testOrg',
         '--project-id',
-        'PROJ001',
+        '1Qg000000000001',
         '--subject',
         'Fix bug',
       ])
@@ -143,7 +143,7 @@ describe('devops work-item create', () => {
         '--target-org',
         'testOrg',
         '--project-id',
-        'PROJ001',
+        '1Qg000000000001',
         '--subject',
         'Fix bug',
       ])
