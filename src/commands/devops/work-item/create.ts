@@ -11,6 +11,7 @@ import { createWorkItem, CreateWorkItemResult } from '../../../utils/createWorkI
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.work-item.create');
+const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
 export default class DevopsWorkItemCreate extends SfCommand<CreateWorkItemResult> {
   public static readonly summary = messages.getMessage('summary');
@@ -18,15 +19,13 @@ export default class DevopsWorkItemCreate extends SfCommand<CreateWorkItemResult
   public static readonly examples = messages.getMessages('examples');
 
   public static readonly flags = {
-    'target-org': Flags.requiredOrg({
-      summary: messages.getMessage('flags.target-org.summary'),
-      char: 'o',
-      required: true,
-    }),
-    'project-id': Flags.string({
+    'target-org': Flags.requiredOrg(),
+    'api-version': Flags.orgApiVersion(),
+    'project-id': Flags.salesforceId({
       summary: messages.getMessage('flags.project-id.summary'),
       char: 'p',
       required: true,
+      startsWith: '1Qg',
     }),
     subject: Flags.string({
       summary: messages.getMessage('flags.subject.summary'),
@@ -42,7 +41,7 @@ export default class DevopsWorkItemCreate extends SfCommand<CreateWorkItemResult
   public async run(): Promise<CreateWorkItemResult> {
     const { flags } = await this.parse(DevopsWorkItemCreate);
     const org: Org = flags['target-org'];
-    const connection = org.getConnection('65.0');
+    const connection = org.getConnection(flags['api-version']);
 
     let result: CreateWorkItemResult;
     try {
@@ -55,9 +54,7 @@ export default class DevopsWorkItemCreate extends SfCommand<CreateWorkItemResult
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
-        this.error(
-          'DevOps Center is not enabled in this org. Enable DevOps Center in Setup before using this command.'
-        );
+        this.error(commonErrorMessages.getMessage('error.DevopsCenterNotEnabled'));
       }
       throw error;
     }

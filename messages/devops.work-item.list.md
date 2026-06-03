@@ -4,11 +4,7 @@ List all work items for a DevOps Center project.
 
 # description
 
-Each work item displays the branch, environment, and repository details needed for checkout and promotion. Requires a project ID; run the `devops project list` command to get the IDs for all existing projects.  
-
-# flags.target-org.summary
-
-Username or alias of the DevOps Center org.
+Each work item displays the branch, environment, and repository details needed for checkout and promotion. Requires a project ID; run the `devops project list` command to get the IDs for all existing projects.
 
 # flags.project-id.summary
 

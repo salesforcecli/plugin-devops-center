@@ -6,22 +6,18 @@
  */
 
 import { Connection } from '@salesforce/core';
-import { PipelineStageRecord } from './types';
+import { DevopsProjectPipelineQueryRecord, PipelineStageRecord } from './types';
 
 export async function getPipelineIdForProject(connection: Connection, projectId: string): Promise<string | undefined> {
   const query = `SELECT DevopsPipelineId FROM DevopsProjectPipeline WHERE DevopsProjectId = '${projectId}' LIMIT 1`;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: any = await connection.query(query);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-  return (result?.records ?? [])[0]?.DevopsPipelineId;
+  const result = await connection.query<DevopsProjectPipelineQueryRecord>(query);
+  return result.records[0]?.DevopsPipelineId;
 }
 
 export async function fetchPipelineStages(connection: Connection, pipelineId: string): Promise<PipelineStageRecord[]> {
   const stageQuery = `SELECT Id, Name, NextStageId, SourceCodeRepositoryBranch.Name FROM DevopsPipelineStage WHERE DevopsPipelineId = '${pipelineId}'`;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const stageResult: any = await connection.query(stageQuery);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  return (stageResult?.records ?? []) as PipelineStageRecord[];
+  const stageResult = await connection.query<PipelineStageRecord>(stageQuery);
+  return stageResult.records ?? [];
 }
 
 export function computeFirstStageId(stages: PipelineStageRecord[]): string | undefined {

@@ -38,3 +38,32 @@ export type ProjectStagesContext = {
 };
 
 export type VcsType = 'GITHUB' | 'BITBUCKET';
+
+export type SourceCodeRepositoryQueryRecord = {
+  Name: string | null;
+  RepositoryOwner: string | null;
+  Provider: string | null;
+};
+
+export type SourceCodeRepositoryBranchQueryRecord = {
+  Name: string | null;
+  SourceCodeRepositoryId: string | null;
+  SourceCodeRepository: SourceCodeRepositoryQueryRecord | null;
+};
+
+export type WorkItemQueryRecord = {
+  Id: string;
+  Name: string;
+  Subject: string | null;
+  Description: string | null;
+  Status: string;
+  AssignedToId: string | null;
+  SourceCodeRepositoryBranchId: string | null;
+  SourceCodeRepositoryBranch: SourceCodeRepositoryBranchQueryRecord | null;
+  DevopsPipelineStageId: string | null;
+  DevopsProjectId: string;
+};
+
+export type DevopsProjectPipelineQueryRecord = {
+  DevopsPipelineId: string;
+};

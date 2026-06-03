@@ -4,11 +4,7 @@ Create a new work item in a DevOps Center project.
 
 # description
 
-The command creates the work item using the Connect API. Requires a project ID and a subject for the new work item; run the `devops project list` command to get the IDs for all existing projects. 
-
-# flags.target-org.summary
-
-Username or alias of the DevOps Center org.
+The command creates the work item using the Connect API. Requires a project ID and a subject for the new work item; run the `devops project list` command to get the IDs for all existing projects.
 
 # flags.project-id.summary
 
@@ -20,11 +16,11 @@ Subject (title) of the new work item.
 
 # flags.description.summary
 
-Description of the new work item; if not specified, the description is blank. 
+Description of the new work item; if not specified, the description is blank.
 
 # examples
 
-- Create a work item for the project with the specified ID and give the work item the specified subject (title); use the DevOps Center org with alias "my-devops-org": 
+- Create a work item for the project with the specified ID and give the work item the specified subject (title); use the DevOps Center org with alias "my-devops-org":
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --project-id 0Hn000000000001 --subject "Fix login bug"
 
