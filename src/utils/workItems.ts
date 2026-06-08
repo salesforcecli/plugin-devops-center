@@ -16,8 +16,6 @@ import {
 } from './pipelineUtils';
 import { WorkItem, ProjectStagesContext, VcsType, WorkItemQueryRecord } from './types';
 
-const API_VERSION = 'v65.0';
-
 function normalizeProvider(provider: unknown): string | undefined {
   if (!provider) return undefined;
   const normalized = String(provider).toLowerCase();
@@ -57,7 +55,7 @@ function extractOwnerFromVcsPayload(payload: unknown): string | undefined {
 }
 
 async function fetchOwnerByVcsType(connection: Connection, vcsType: VcsType): Promise<string | undefined> {
-  const path = `/services/data/${API_VERSION}/connect/devops/vcs/${vcsType}`;
+  const path = `/services/data/v${connection.getApiVersion()}/connect/devops/vcs/${vcsType}`;
   const response: unknown = await connection.request({ method: 'GET', url: path });
   return extractOwnerFromVcsPayload(response);
 }

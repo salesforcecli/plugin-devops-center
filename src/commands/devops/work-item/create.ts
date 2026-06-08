@@ -60,11 +60,11 @@ export default class DevopsWorkItemCreate extends SfCommand<CreateWorkItemResult
     }
 
     if (result.success) {
-      this.log(`Successfully created work item: ${result.workItemName ?? result.workItemId}`);
-      this.log(`  ID: ${result.workItemId}`);
-      this.log(`  Subject: ${result.subject}`);
+      this.log(`Successfully created work item: ${result.workItemName ?? result.workItemId ?? ''}`);
+      this.log(`  ID: ${result.workItemId ?? ''}`);
+      this.log(`  Subject: ${result.subject ?? ''}`);
     } else {
-      this.error(`Failed to create work item: ${result.error}`);
+      this.error(`Failed to create work item: ${result.error ?? ''}`);
     }
 
     return result;

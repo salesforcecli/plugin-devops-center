@@ -44,8 +44,8 @@ Connection is required
 
 # error.query-string-required
 
-Query string is required and must be a non-empty string
+The query string is empty or missing. Specify a query string and try again.
 
 # error.DevopsCenterNotEnabled
 
-DevOps Center is not enabled in this org. Enable DevOps Center in Setup before using this command.
+We couldn't run this command because DevOps Center isn't enabled in this org. Enable DevOps Center in Setup, and try again.

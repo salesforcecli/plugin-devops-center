@@ -14,8 +14,8 @@ ID of the DevOps Center project to list work items for.
 
 - List work items for a specific project in the DevOps org with alias "my-devops-org":
 
-      <%= config.bin %> <%= command.id %> --target-org my-devops-org --project-id 0Hn000000000001
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --project-id 1Qg000000000001
 
 - List work items using JSON output:
 
-      <%= config.bin %> <%= command.id %> --target-org my-devops-org --project-id 0Hn000000000001 --json
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --project-id 1Qg000000000001 --json

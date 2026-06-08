@@ -7,8 +7,6 @@
 
 import { Connection } from '@salesforce/core';
 
-const API_VERSION = 'v65.0';
-
 export type CreateWorkItemParams = {
   connection: Connection;
   projectId: string;
@@ -31,7 +29,7 @@ export type CreateWorkItemResult = {
 export async function createWorkItem(params: CreateWorkItemParams): Promise<CreateWorkItemResult> {
   const { connection, projectId, subject, description } = params;
 
-  const path = `/services/data/${API_VERSION}/connect/devops/projects/${projectId}/workitem`;
+  const path = `/services/data/v${connection.getApiVersion()}/connect/devops/projects/${projectId}/workitem`;
   const body = JSON.stringify({ subject, description: description ?? '' });
 
   try {
