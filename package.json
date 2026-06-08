@@ -74,6 +74,17 @@
             }
           }
         }
+      },
+      "devops": {
+        "description": "Commands for DevOps and Application Lifecycle Management.",
+        "subtopics": {
+          "project": {
+            "description": "Commands for managing DevOps Center projects."
+          },
+          "work-item": {
+            "description": "Commands for managing DevOps Center work items."
+          }
+        }
       }
     }
   },

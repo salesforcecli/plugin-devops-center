@@ -10,7 +10,7 @@
 import { expect } from '@oclif/test';
 import { Connection } from '@salesforce/core';
 import { QueryResult } from 'jsforce';
-import sinon = require('sinon');
+import * as sinon from 'sinon';
 import { EnvQueryResult, selectPipelineStageByEnvironment } from '../../../src/common/selectors/environmentSelector';
 import { PipelineStage } from '../../../src/common/types';
 import * as SelectorUtils from '../../../src/common/selectors/selectorUtils';

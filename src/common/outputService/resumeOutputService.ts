@@ -19,9 +19,9 @@ import { AorOutputService, AorOutputFlags, AbstractAorOutputService } from './ao
  *
  * @author JuanStenghele-sf
  */
-export interface ResumeOutputService extends AorOutputService {
+export type ResumeOutputService = AorOutputService & {
   displayEndResults(): void;
-}
+};
 
 /**
  * Abstract class that implements ResumeOutputService interface

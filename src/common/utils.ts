@@ -183,7 +183,9 @@ export async function getFormattedDeployComponentsByAyncOpId(
     : await selectDeployComponentsByAsyncOpId(con, asyncOpId);
 
   components.forEach((component) => {
+    // eslint-disable-next-line no-param-reassign
     component.Type = component.sf_devops__Source_Component__c.split(':')[0];
+    // eslint-disable-next-line no-param-reassign
     component.Name = component.sf_devops__Source_Component__c.split(':')[1];
   });
 

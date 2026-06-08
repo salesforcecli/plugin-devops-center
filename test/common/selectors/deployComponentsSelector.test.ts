@@ -9,7 +9,7 @@
 
 import { expect } from '@oclif/test';
 import { Connection } from '@salesforce/core';
-import sinon = require('sinon');
+import * as sinon from 'sinon';
 import {
   selectDeployComponentsByAsyncOpId,
   selectDeployComponentsForCheckDeployByAsynchOpId,

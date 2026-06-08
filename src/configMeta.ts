@@ -5,7 +5,8 @@
  * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
 
-import { spawnSync } from 'node:child_process';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const childProcess = require('node:child_process') as typeof import('node:child_process');
 import { ConfigValue, Messages } from '@salesforce/core';
 
 Messages.importMessagesDirectory(__dirname);
@@ -26,7 +27,7 @@ export default [
     hidden: false,
     input: {
       validator: (value: ConfigValue): boolean => {
-        const result = spawnSync('sf', ['force:org:display', '-u', value as string]);
+        const result = childProcess.spawnSync('sf', ['force:org:display', '-u', value as string]);
         return result.status === 0;
       },
       failedMessage: (value: ConfigValue): string =>

@@ -10,7 +10,7 @@
 import { expect } from '@oclif/test';
 import { Connection } from '@salesforce/core';
 import { QueryResult } from 'jsforce';
-import sinon = require('sinon');
+import * as sinon from 'sinon';
 import {
   DeploySummaryQueryResult,
   selectDeployAORSummaryDataById,
