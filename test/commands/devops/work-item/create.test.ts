@@ -125,7 +125,7 @@ describe('devops work-item create', () => {
       ])
       .catch(() => {})
       .it('shows DevOps Center not enabled error', (ctx) => {
-        expect(ctx.stderr).to.contain('DevOps Center is not enabled');
+        expect(ctx.stderr).to.contain("DevOps Center isn't enabled");
       });
   });
 

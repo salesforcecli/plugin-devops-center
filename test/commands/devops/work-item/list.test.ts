@@ -75,7 +75,7 @@ describe('devops work-item list', () => {
       .command(['devops:work-item:list', '--target-org', 'testOrg', '--project-id', '1Qg000000000001'])
       .catch(() => {})
       .it('shows DevOps Center not enabled error', (ctx) => {
-        expect(ctx.stderr).to.contain('DevOps Center is not enabled');
+        expect(ctx.stderr).to.contain("DevOps Center isn't enabled");
       });
   });
 

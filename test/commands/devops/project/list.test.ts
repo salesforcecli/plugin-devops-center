@@ -83,7 +83,7 @@ describe('devops project list', () => {
       .command(['devops:project:list', '--target-org', 'testOrg'])
       .catch(() => {})
       .it('shows DevOps Center not enabled error', (ctx) => {
-        expect(ctx.stderr).to.contain('DevOps Center is not enabled');
+        expect(ctx.stderr).to.contain("DevOps Center isn't enabled");
       });
   });
 
