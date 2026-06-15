@@ -1,22 +1,31 @@
 /*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 /* eslint-disable class-methods-use-this */
 
 import { Connection } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { Flags as PromoteFlags } from '../base/abstractPromote';
-import { Flags as ReportFlags } from '../base/abstractReportOnPromote';
-import { Flags as ResumeFlags } from '../base/abstractResume';
-import { Flags as QuickPromoteFlags } from '../base/abstractQuick';
-import { DeploymentResult } from '../types';
-import { DeployCommandOutputService } from './deployCommandOutputService';
-import { PromoteReportOutputService } from './reportOutputService';
-import { ResumeCommandOutputService } from './resumeCommandOutputService';
+import { Flags as PromoteFlags } from '../base/abstractPromote.js';
+import { Flags as ReportFlags } from '../base/abstractReportOnPromote.js';
+import { Flags as ResumeFlags } from '../base/abstractResume.js';
+import { Flags as QuickPromoteFlags } from '../base/abstractQuick.js';
+import { DeploymentResult } from '../types.js';
+import { DeployCommandOutputService } from './deployCommandOutputService.js';
+import { PromoteReportOutputService } from './reportOutputService.js';
+import { ResumeCommandOutputService } from './resumeCommandOutputService.js';
 
 /**
  * Factory service for creating output services

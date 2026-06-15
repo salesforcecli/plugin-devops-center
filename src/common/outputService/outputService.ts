@@ -1,13 +1,22 @@
 /*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ux } from '@oclif/core';
+import { printTable } from '@oclif/table';
 
 export type OutputFlags = {
   verbose?: boolean;
@@ -32,7 +41,6 @@ export type OutputService = {
  * @author JuanStenghele-sf
  */
 export abstract class AbstractOutputService<T extends OutputFlags> implements OutputService {
-  // We will store here the command flags
   protected flags: T;
 
   public constructor(flags: T) {
@@ -40,11 +48,11 @@ export abstract class AbstractOutputService<T extends OutputFlags> implements Ou
   }
 
   // eslint-disable-next-line class-methods-use-this
-  public displayTable(rows: any[], title: string, columns: ux.Table.table.Columns<any>): void {
-    ux.log();
-    ux.styledHeader(title);
-    ux.table(rows, columns);
-    ux.log();
+  public displayTable(rows: any[], title: string, columns: Array<keyof any | { key: string; name?: string }>): void {
+    process.stdout.write('\n');
+    process.stdout.write(`=== ${title}\n`);
+    printTable({ data: rows, columns });
+    process.stdout.write('\n');
   }
 
   public abstract printOpSummary(): void;

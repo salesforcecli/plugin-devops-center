@@ -1,26 +1,35 @@
 /*
- * Copyright (c) 2022, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 /* eslint-disable camelcase */
 import { expect, test } from '@oclif/test';
-import { TestContext } from '@salesforce/core/lib/testSetup';
+import { TestContext } from '@salesforce/core/testSetup';
 import * as sinon from 'sinon';
 import { stubMethod } from '@salesforce/ts-sinon';
 import { ConfigAggregator, Org, StreamingClient } from '@salesforce/core';
-import { HttpRequest } from 'jsforce';
-import { Spinner } from '@salesforce/sf-plugins-core/lib/ux';
-import { ConfigVars } from '../../../../../src/configMeta';
-import AsyncOpStreaming from '../../../../../src/streamer/processors/asyncOpStream';
-import { AsyncOperationStatus, PipelineStage } from '../../../../../src/common';
-import * as Utils from '../../../../../src/common/utils';
-import { REST_PROMOTE_BASE_URL } from '../../../../../src/common/constants';
-import { DeployCommandOutputService } from '../../../../../src/common/outputService';
-import { DeployPipelineCache } from '../../../../../src/common/deployPipelineCache';
-import * as AorSelector from '../../../../../src/common/selectors/asyncOperationResultsSelector';
+import { HttpRequest } from '@jsforce/jsforce-node';
+import { SfCommand } from '@salesforce/sf-plugins-core';
+import { ConfigVars } from '../../../../../src/configMeta.js';
+import AsyncOpStreaming from '../../../../../src/streamer/processors/asyncOpStream.js';
+import { AsyncOperationStatus, PipelineStage } from '../../../../../src/common/index.js';
+import * as Utils from '../../../../../src/common/utils.js';
+import { REST_PROMOTE_BASE_URL } from '../../../../../src/common/constants.js';
+import { DeployCommandOutputService } from '../../../../../src/common/outputService/index.js';
+import { DeployPipelineCache } from '../../../../../src/common/deployPipelineCache.js';
+import * as AorSelector from '../../../../../src/common/selectors/asyncOperationResultsSelector.js';
 
 let requestMock: sinon.SinonStub;
 let stubDisplayEndResults: sinon.SinonStub;
@@ -694,8 +703,10 @@ describe('project deploy pipeline start', () => {
           mockError.message = 'CONFLICT';
           mockError['errorCode'] = 'CONFLICT';
           requestMock = sinon.stub().throws(mockError);
-          spinnerStartStub = stubMethod(sandbox, Spinner.prototype, 'start');
-          spinnerStopStub = stubMethod(sandbox, Spinner.prototype, 'stop');
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+          spinnerStartStub = stubMethod(sandbox, (SfCommand.prototype as any).spinner, 'start');
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+          spinnerStopStub = stubMethod(sandbox, (SfCommand.prototype as any).spinner, 'stop');
         })
         .command(['project deploy pipeline start', '-p=testProject', '-b=testBranch'])
         .catch(() => {})

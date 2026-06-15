@@ -1,12 +1,22 @@
 /*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 /* eslint-disable camelcase */
-import { assert, expect } from 'chai';
+import { expect } from '@oclif/test';
+import { assert } from 'chai';
 import * as sinon from 'sinon';
 import { Connection, Org, SfError } from '@salesforce/core';
 import {
@@ -16,12 +26,12 @@ import {
   sObjectToArrayOfKeyValue,
   sleep,
   getFormattedDeployComponentsByAyncOpId,
-} from '../../src/common/utils';
-import { fetchAsyncOperationResult } from '../../src/common/utils';
-import { AsyncOperationResult, AsyncOperationStatus, DeployComponent, PipelineStage } from '../../src/common';
-import * as PipelineSelector from '../../src/common/selectors/pipelineStageSelector';
-import * as AorSelector from '../../src/common/selectors/asyncOperationResultsSelector';
-import * as deployComponentsSelector from '../../src/common/selectors/deployComponentsSelector';
+} from '../../src/common/utils.js';
+import { fetchAsyncOperationResult } from '../../src/common/utils.js';
+import { AsyncOperationResult, AsyncOperationStatus, DeployComponent, PipelineStage } from '../../src/common/index.js';
+import * as PipelineSelector from '../../src/common/selectors/pipelineStageSelector.js';
+import * as AorSelector from '../../src/common/selectors/asyncOperationResultsSelector.js';
+import * as deployComponentsSelector from '../../src/common/selectors/deployComponentsSelector.js';
 
 const PROJECT_NAME = 'Dummy Project Name';
 const BRANCH_NAME_1 = 'Dummy Branch Name 1';

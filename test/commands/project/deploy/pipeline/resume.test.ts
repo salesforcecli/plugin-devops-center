@@ -1,21 +1,30 @@
 /*
- * Copyright (c) 2022, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 /* eslint-disable camelcase */
 import { expect, test } from '@oclif/test';
-import { TestContext } from '@salesforce/core/lib/testSetup';
+import { TestContext } from '@salesforce/core/testSetup';
 import * as sinon from 'sinon';
 import { ConfigAggregator, Org } from '@salesforce/core';
-import { ConfigVars } from '../../../../../src/configMeta';
-import * as AorSelector from '../../../../../src/common/selectors/asyncOperationResultsSelector';
-import { AsyncOperationResult, AsyncOperationStatus } from '../../../../../src/common/types';
-import AsyncOpStreaming from '../../../../../src/streamer/processors/asyncOpStream';
-import * as Utils from '../../../../../src/common/utils';
-import { ResumeCommandOutputService } from '../../../../../src/common/outputService/resumeCommandOutputService';
+import { ConfigVars } from '../../../../../src/configMeta.js';
+import * as AorSelector from '../../../../../src/common/selectors/asyncOperationResultsSelector.js';
+import { AsyncOperationResult, AsyncOperationStatus } from '../../../../../src/common/types.js';
+import AsyncOpStreaming from '../../../../../src/streamer/processors/asyncOpStream.js';
+import * as Utils from '../../../../../src/common/utils.js';
+import { ResumeCommandOutputService } from '../../../../../src/common/outputService/resumeCommandOutputService.js';
 
 const DOCE_ORG = {
   id: '1',
