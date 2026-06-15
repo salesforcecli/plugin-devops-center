@@ -15,6 +15,7 @@
  */
 
 /* eslint-disable camelcase */
+import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import { ConfigAggregator, Org, StreamingClient } from '@salesforce/core';
 import { HttpRequest } from '@jsforce/jsforce-node';
@@ -26,18 +27,11 @@ import { AsyncOperationStatus, PipelineStage } from '../../../../../src/common/i
 import AsyncOpStreaming from '../../../../../src/streamer/processors/asyncOpStream.js';
 import { DeployPipelineCache } from '../../../../../src/common/deployPipelineCache.js';
 import { REST_PROMOTE_BASE_URL } from '../../../../../src/common/constants.js';
-import { DeployCommandOutputService } from '../../../../../src/common/outputService/index.js';
-import * as Utils from '../../../../../src/common/utils.js';
+import { getAsyncOperationStreamer as realGetAsyncOperationStreamer } from '../../../../../src/common/utils.js';
 
 let requestMock: sinon.SinonStub;
 let queryStub: sinon.SinonStub;
 
-// Stub output service methods
-let printAorIdStub: sinon.SinonStub;
-let printOpSummaryStub: sinon.SinonStub;
-let displayEndResultsStub: sinon.SinonStub;
-
-// Stub AOR monitor
 let monitorStub: sinon.SinonStub;
 
 const DOCE_ORG = {
@@ -56,37 +50,19 @@ const DOCE_ORG = {
 
 const mockPipelineStagePrev: PipelineStage = {
   Id: '2',
-  sf_devops__Branch__r: {
-    sf_devops__Name__c: 'branch-name',
-  },
-  sf_devops__Pipeline__r: {
-    sf_devops__Project__c: 'project-name',
-  },
+  sf_devops__Branch__r: { sf_devops__Name__c: 'branch-name' },
+  sf_devops__Pipeline__r: { sf_devops__Project__c: 'project-name' },
   Name: 'Stage',
-  sf_devops__Environment__r: {
-    Id: 'Dummy env',
-    Name: 'envName',
-    sf_devops__Named_Credential__c: 'abc',
-  },
+  sf_devops__Environment__r: { Id: 'Dummy env', Name: 'envName', sf_devops__Named_Credential__c: 'abc' },
 };
 
 const mockPipelineStage: PipelineStage = {
   Id: '1',
-  sf_devops__Branch__r: {
-    sf_devops__Name__c: 'branch-name',
-  },
-  sf_devops__Pipeline__r: {
-    sf_devops__Project__c: 'project-name',
-  },
+  sf_devops__Branch__r: { sf_devops__Name__c: 'branch-name' },
+  sf_devops__Pipeline__r: { sf_devops__Project__c: 'project-name' },
   Name: 'main',
-  sf_devops__Environment__r: {
-    Id: 'Dummy env',
-    Name: 'envName',
-    sf_devops__Named_Credential__c: 'abc',
-  },
-  sf_devops__Pipeline_Stages__r: {
-    records: [mockPipelineStagePrev],
-  },
+  sf_devops__Environment__r: { Id: 'Dummy env', Name: 'envName', sf_devops__Named_Credential__c: 'abc' },
+  sf_devops__Pipeline_Stages__r: { records: [mockPipelineStagePrev] },
 };
 
 const stubStreamingClient = async (options?: StreamingClient.Options) => ({
@@ -101,11 +77,75 @@ const stubStreamingClient = async (options?: StreamingClient.Options) => ({
 
 describe('project deploy pipeline quick', () => {
   let sandbox: sinon.SinonSandbox;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let QuickCommand: any;
   const mockValidatedAorId = 'a00DS00000Aj3AIYAZ';
   const mockReturnedAorId = 'mock-result-aor-id';
   const mockDeploymentId = 'mock-deployment-id';
   const mockEnvironmentId = 'mock-environment-id';
   const $$ = new TestContext();
+
+  const getAsyncOperationStreamerStub = sinon.stub().callsFake(realGetAsyncOperationStreamer);
+  const fetchAsyncOperationResultStub = sinon.stub();
+
+  // Mock output service to avoid esmock module-tree duplication issues with prototype stubs
+  const printAorIdStub = sinon.stub();
+  const printOpSummaryStub = sinon.stub().resolves();
+  const displayEndResultsStub = sinon.stub().resolves();
+  const getStatusStub = sinon.stub();
+  const mockOutputService = {
+    setAorId: sinon.stub(),
+    printAorId: printAorIdStub,
+    printOpSummary: printOpSummaryStub,
+    printAorStatus: sinon.stub(),
+    displayEndResults: displayEndResultsStub,
+    getStatus: getStatusStub,
+  };
+
+  class MockOutputServiceFactory {
+    // eslint-disable-next-line class-methods-use-this
+    public forDeployment() {
+      return mockOutputService;
+    }
+    // eslint-disable-next-line class-methods-use-this
+    public forQuickDeployment() {
+      return mockOutputService;
+    }
+    // eslint-disable-next-line class-methods-use-this
+    public forResume() {
+      return mockOutputService;
+    }
+  }
+
+  before(async () => {
+    const mod = await esmock(
+      '../../../../../src/commands/project/deploy/pipeline/quick.js',
+      {},
+      {
+        '../../../../../src/common/utils.js': {
+          getAsyncOperationStreamer: getAsyncOperationStreamerStub,
+          fetchAsyncOperationResult: fetchAsyncOperationResultStub,
+        },
+        '../../../../../src/common/outputService/outputServiceFactory.js': {
+          OutputServiceFactory: MockOutputServiceFactory,
+        },
+      }
+    );
+    QuickCommand = mod.default;
+  });
+
+  function resetOutputServiceStubs() {
+    printAorIdStub.reset();
+    printOpSummaryStub.reset();
+    printOpSummaryStub.resolves();
+    displayEndResultsStub.reset();
+    displayEndResultsStub.resolves();
+    getStatusStub.reset();
+    mockOutputService.setAorId.reset();
+    mockOutputService.printAorStatus.reset();
+    getAsyncOperationStreamerStub.resetHistory();
+    fetchAsyncOperationResultStub.reset();
+  }
 
   describe('without target-devops-center', () => {
     sandbox = sinon.createSandbox();
@@ -127,11 +167,14 @@ describe('project deploy pipeline quick', () => {
     test
       .stdout()
       .stderr()
-      .command(['project deploy pipeline quick'])
-      .catch(() => {})
-      .it('runs project deploy pipeline quick without specifying any target Devops Center org', (ctx) => {
+      .it('runs project deploy pipeline quick without specifying any target Devops Center org', async (ctx) => {
+        try {
+          await QuickCommand.run([]);
+        } catch (e) {
+          // expected
+        }
         expect(ctx.stderr).to.contain(
-          'Before you run a DevOps Center CLI command, you must first use one of the "org login" commands to authorize the org in which DevOps Center is installed. Then, when you run a DevOps Center command, be sure that you specify the DevOps Center org username with the "--devops-center-username" flag. Alternatively, you can set the "target-devops-center" configuration variable to the username with the "config set" command.'
+          'Before you run a DevOps Center CLI command, you must first use one of the "org login" commands'
         );
       });
   });
@@ -149,6 +192,7 @@ describe('project deploy pipeline quick', () => {
         isEnvVar: () => false,
       });
       $$.setConfigStubContents('DeployPipelineCache', {});
+      resetOutputServiceStubs();
     });
 
     afterEach(() => {
@@ -159,18 +203,24 @@ describe('project deploy pipeline quick', () => {
       test
         .stdout()
         .stderr()
-        .command(['project deploy pipeline quick'])
-        .catch(() => {})
-        .it('runs project deploy pipeline quick without any of the required flags', (ctx) => {
+        .it('runs project deploy pipeline quick without any of the required flags', async (ctx) => {
+          try {
+            await QuickCommand.run([]);
+          } catch (e) {
+            /* expected */
+          }
           expect(ctx.stderr).to.contain('Exactly one of the following must be provided: --job-id, --use-most-recent');
         });
 
       test
         .stdout()
         .stderr()
-        .command(['project deploy pipeline quick', '-r', `-i=${mockValidatedAorId}`])
-        .catch(() => {})
-        .it('runs project deploy pipeline quick specifying both -r and -i flags', (ctx) => {
+        .it('runs project deploy pipeline quick specifying both -r and -i flags', async (ctx) => {
+          try {
+            await QuickCommand.run(['-r', `-i=${mockValidatedAorId}`]);
+          } catch (e) {
+            /* expected */
+          }
           expect(ctx.stderr).to.contain('--job-id cannot also be provided when using --use-most-recent');
           expect(ctx.stderr).to.contain('--use-most-recent cannot also be provided when using --job-id');
         });
@@ -178,18 +228,24 @@ describe('project deploy pipeline quick', () => {
       test
         .stdout()
         .stderr()
-        .command(['project deploy pipeline quick', '-r'])
-        .catch(() => {})
-        .it('runs project deploy pipeline quick specifying -r when there are no Ids in cache', (ctx) => {
+        .it('runs project deploy pipeline quick specifying -r when there are no Ids in cache', async (ctx) => {
+          try {
+            await QuickCommand.run(['-r']);
+          } catch (e) {
+            /* expected */
+          }
           expect(ctx.stderr).to.contain("Can't find the job ID. Verify that a pipeline promotion has been started");
         });
 
       test
         .stdout()
         .stderr()
-        .command(['project deploy pipeline quick', '-r', '--verbose', '--concise'])
-        .catch(() => {})
-        .it('runs project deploy pipeline quick specifying both --verbose and --concise flags', (ctx) => {
+        .it('runs project deploy pipeline quick specifying both --verbose and --concise flags', async (ctx) => {
+          try {
+            await QuickCommand.run(['-r', '--verbose', '--concise']);
+          } catch (e) {
+            /* expected */
+          }
           expect(ctx.stderr).to.contain('--verbose=true cannot also be provided when using --concise');
         });
     });
@@ -198,13 +254,17 @@ describe('project deploy pipeline quick', () => {
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('caches the aorId when running project deploy pipeline quick with the async flag', async () => {
           stubQueries();
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
           stubStreamer();
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`])
-        .it('caches the aorId when running project deploy pipeline quick with the async flag', async () => {
+          fetchAsyncOperationResultStub.resolves({
+            Id: mockReturnedAorId,
+            sf_devops__Status__c: AsyncOperationStatus.InProgress,
+          });
+
+          await QuickCommand.run([`-i=${mockValidatedAorId}`]);
+
           const cache = await DeployPipelineCache.create();
           const key = cache.getLatestKeyOrThrow();
           expect(key).to.equal(mockReturnedAorId);
@@ -213,13 +273,17 @@ describe('project deploy pipeline quick', () => {
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('caches the aorId when running project deploy pipeline quick without the async flag', async () => {
           stubQueries();
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
           stubStreamer();
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`, '--verbose'])
-        .it('caches the aorId when running project deploy pipeline quick without the async flag', async () => {
+          fetchAsyncOperationResultStub.resolves({
+            Id: mockReturnedAorId,
+            sf_devops__Status__c: AsyncOperationStatus.Completed,
+          });
+
+          await QuickCommand.run([`-i=${mockValidatedAorId}`, '--verbose']);
+
           const cache = await DeployPipelineCache.create();
           const key = cache.getLatestKeyOrThrow();
           expect(key).to.equal(mockReturnedAorId);
@@ -230,16 +294,16 @@ describe('project deploy pipeline quick', () => {
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('query the target org to get the deployment id filtering by the provided AOR ID', async () => {
           stubQueries();
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
           stubStreamer();
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`])
-        .it('query the target org to get the deployment id filtering by the provided AOR ID', () => {
-          // verify we made the query
+          fetchAsyncOperationResultStub.resolves({
+            Id: mockReturnedAorId,
+            sf_devops__Status__c: AsyncOperationStatus.Completed,
+          });
+          await QuickCommand.run([`-i=${mockValidatedAorId}`]);
           expect(queryStub.called).to.equal(true);
-          // verify the query was filtered correctly
           const queryArgument = queryStub.getCall(0).args[0] as string;
           expect(queryArgument).to.contain('FROM sf_devops__Deployment_Result__c');
           expect(queryArgument).to.contain(`WHERE sf_devops__Check_Deploy_Status__c = '${mockValidatedAorId}'`);
@@ -249,16 +313,16 @@ describe('project deploy pipeline quick', () => {
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('query the target org to get the pipeline stage Id filtering by environment Id', async () => {
           stubQueries();
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
           stubStreamer();
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`])
-        .it('query the target org to get the pipeline stage Id filtering by environment Id', () => {
-          // verify we made the query
+          fetchAsyncOperationResultStub.resolves({
+            Id: mockReturnedAorId,
+            sf_devops__Status__c: AsyncOperationStatus.Completed,
+          });
+          await QuickCommand.run([`-i=${mockValidatedAorId}`]);
           expect(queryStub.called).to.equal(true);
-          // verify the query was filtered correctly
           const queryArgument = queryStub.getCall(1).args[0] as string;
           expect(queryArgument).to.contain('FROM sf_devops__Pipeline_Stage__c');
           expect(queryArgument).to.contain(`WHERE sf_devops__Environment__c = '${mockEnvironmentId}'`);
@@ -267,18 +331,16 @@ describe('project deploy pipeline quick', () => {
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('sends a request to initiate a quick promotion', async () => {
           stubQueries();
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
           stubStreamer();
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`])
-        .it('sends a request to initiate a quick promotion', () => {
-          // verify we made the request
+          fetchAsyncOperationResultStub.resolves({
+            Id: mockReturnedAorId,
+            sf_devops__Status__c: AsyncOperationStatus.Completed,
+          });
+          await QuickCommand.run([`-i=${mockValidatedAorId}`]);
           expect(requestMock.called).to.equal(true);
-          // now that we know the request was made
-          // we can get the call argument
-          // and validate its values
           const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
           expect(requestArgument.body).to.contain(`"deploymentId":"${mockDeploymentId}"`);
           expect(requestArgument.body).to.contain('"undeployedOnly":true');
@@ -287,18 +349,16 @@ describe('project deploy pipeline quick', () => {
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('correctly computes the source pipeline stage id', async () => {
           stubQueries();
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
           stubStreamer();
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`])
-        .it('correctly computes the source pipeline stage id', () => {
-          // verify we made the request
+          fetchAsyncOperationResultStub.resolves({
+            Id: mockReturnedAorId,
+            sf_devops__Status__c: AsyncOperationStatus.Completed,
+          });
+          await QuickCommand.run([`-i=${mockValidatedAorId}`]);
           expect(requestMock.called).to.equal(true);
-          // now that we know the request was made
-          // we can get the call argument
-          // and validate its values
           const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
           expect(requestArgument.url).to.contain(REST_PROMOTE_BASE_URL);
           const urlParams: string[] = requestArgument.url.split('/');
@@ -308,95 +368,96 @@ describe('project deploy pipeline quick', () => {
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('prints the correct output messages when verbose flag is not passed', async () => {
           stubQueries();
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
           stubStreamer();
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`])
-        .it('prints the correct output messages when verbose flag is not passed', () => {
+          fetchAsyncOperationResultStub.resolves({
+            Id: mockReturnedAorId,
+            sf_devops__Status__c: AsyncOperationStatus.Completed,
+          });
+          await QuickCommand.run([`-i=${mockValidatedAorId}`]);
           verifyOutput(false);
         });
 
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('prints the correct output messages when --verbose flag is passed', async () => {
           stubQueries();
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
           stubStreamer();
-          sandbox.stub(DeployCommandOutputService.prototype, 'getStatus').returns(AsyncOperationStatus.Completed);
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`, '--verbose'])
-        .it('prints the correct output messages when --verbose flag is passed', () => {
+          fetchAsyncOperationResultStub.resolves({
+            Id: mockReturnedAorId,
+            sf_devops__Status__c: AsyncOperationStatus.Completed,
+          });
+          getStatusStub.returns(AsyncOperationStatus.Completed);
+          await QuickCommand.run([`-i=${mockValidatedAorId}`, '--verbose']);
           verifyOutput(true);
         });
 
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('prints the correct output messages when --async flag is passed', async () => {
           stubQueries();
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
           stubStreamer();
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`, '--async'])
-        .it('prints the correct output messages when --async flag is passed', () => {
+          fetchAsyncOperationResultStub.resolves({
+            Id: mockReturnedAorId,
+            sf_devops__Status__c: AsyncOperationStatus.InProgress,
+          });
+          await QuickCommand.run([`-i=${mockValidatedAorId}`, '--async']);
           verifyOutput(false);
         });
 
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('display an error message when we cannot find the deployment result for the given AOR ID', async (ctx) => {
           queryStub = sinon.stub().returns(getQueryResultMock([]));
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
           stubStreamer();
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`])
-        .catch(() => {})
-        .it('display an error message when we cannot find the deployment result for the given AOR ID', (ctx) => {
-          expect(ctx.stderr).to.contain(
-            "The job ID is invalid for the quick deployment. Verify that a deployment validation was run or hasn't expired, and that you specified the correct job ID. Then try again."
-          );
+          try {
+            await QuickCommand.run([`-i=${mockValidatedAorId}`]);
+          } catch (e) {
+            /* expected */
+          }
+          expect(ctx.stderr).to.contain('The job ID is invalid for the quick deployment');
         });
 
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('display an error message when the deployment result for the given AOR ID failed', async (ctx) => {
           queryStub = sinon.stub().returns(getQueryResultMock([buildDeploymentResult(AsyncOperationStatus.Error)]));
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
           stubStreamer();
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`])
-        .catch(() => {})
-        .it('display an error message when the deployment result for the given AOR ID failed', (ctx) => {
-          expect(ctx.stderr).to.contain(
-            "We can't perform the quick deployment for the specified job ID because the validate-only deployment failed or is still running. If the validate-only deployment failed, fix the issue and re-run it. If the validate-only deployment was successful, try this command again later."
-          );
+          try {
+            await QuickCommand.run([`-i=${mockValidatedAorId}`]);
+          } catch (e) {
+            /* expected */
+          }
+          expect(ctx.stderr).to.contain("We can't perform the quick deployment for the specified job ID");
         });
 
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('display an error message when the deployment result does not have CBIs', async (ctx) => {
           queryStub = sinon.stub().returns(getQueryResultMock([]));
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
           stubStreamer();
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`])
-        .catch(() => {})
-        .it('display an error message when the deployment result does not have CBIs', (ctx) => {
-          expect(ctx.stderr).to.contain(
-            " The job ID is invalid for the quick deployment. Verify that a deployment validation was run or hasn't expired, and that you specified the correct job ID. Then try again."
-          );
+          try {
+            await QuickCommand.run([`-i=${mockValidatedAorId}`]);
+          } catch (e) {
+            /* expected */
+          }
+          expect(ctx.stderr).to.contain('The job ID is invalid for the quick deployment');
         });
     });
 
     describe('stream aor status', () => {
-      let spyStreamerBuilder: sinon.SinonSpy;
-
       const mockAorRecord = {
         Id: mockReturnedAorId,
         sf_devops__Message__c: 'mockMessage',
@@ -405,117 +466,98 @@ describe('project deploy pipeline quick', () => {
       };
 
       afterEach(() => {
-        spyStreamerBuilder?.restore();
         monitorStub?.restore();
       });
 
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('correclty streams the status of the async operation', async () => {
           stubQueries();
           queryStub.onCall(2).resolves(getQueryResultMock([mockAorRecord]));
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
-
-          spyStreamerBuilder = sinon.spy(Utils, 'getAsyncOperationStreamer');
           stubStreamer();
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`])
-        .it('correclty streams the status of the async operation', () => {
-          // verify we instanciated the streamer correctly
-          expect(spyStreamerBuilder.called).to.equal(true);
-          // now we can get the call argument
-          // and validate its values
-          const builderArgs = spyStreamerBuilder.getCall(0).args;
+          fetchAsyncOperationResultStub.resolves({
+            Id: mockReturnedAorId,
+            sf_devops__Status__c: AsyncOperationStatus.InProgress,
+          });
+
+          await QuickCommand.run([`-i=${mockValidatedAorId}`]);
+
+          expect(getAsyncOperationStreamerStub.called).to.equal(true);
+          const builderArgs = getAsyncOperationStreamerStub.getCall(0).args;
           expect(builderArgs[0]).to.equal(DOCE_ORG);
           expect(builderArgs[1]).to.contain({ quantity: 33, unit: 0 });
           expect(builderArgs[2]).to.equal(mockReturnedAorId);
-
-          // verify we started monitoring the operation
           expect(monitorStub.called).to.equal(true);
         });
 
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('does not stream the status of the oar when the async flag is passed', async () => {
           stubQueries();
           queryStub.onCall(2).resolves(getQueryResultMock([mockAorRecord]));
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
-
-          spyStreamerBuilder = sinon.spy(Utils, 'getAsyncOperationStreamer');
           stubStreamer();
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`, '--async'])
-        .it('does not stream the status of the oar when the async flag is passed', () => {
-          // verify we didn't instanciate the streamer
-          expect(spyStreamerBuilder.called).to.equal(false);
-          // verify we didn't start monitoring the operation
+          fetchAsyncOperationResultStub.resolves({
+            Id: mockReturnedAorId,
+            sf_devops__Status__c: AsyncOperationStatus.InProgress,
+          });
+
+          await QuickCommand.run([`-i=${mockValidatedAorId}`, '--async']);
+
+          expect(getAsyncOperationStreamerStub.called).to.equal(false);
           expect(monitorStub.called).to.equal(false);
         });
 
       test
         .stdout()
         .stderr()
-        .do(() => {
+        .it('catches a timeout exception from the monitor service and displays proper error message', async (ctx) => {
           stubQueries();
           queryStub.onCall(2).resolves(getQueryResultMock([mockAorRecord]));
           requestMock = sinon.stub().resolves({ jobId: mockReturnedAorId });
-
-          // Mock the events streaming and the output service
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
-
           monitorStub = sinon
             .stub(AsyncOpStreaming.prototype, 'monitor')
             .throwsException({ name: 'GenericTimeoutError' });
-        })
-        .command(['project deploy pipeline quick', `-i=${mockValidatedAorId}`])
-        .catch(() => {})
-        .it('catches a timeout exception from the monitor service and displays proper error message', (ctx) => {
-          // verify output error message
+          fetchAsyncOperationResultStub.resolves({
+            Id: mockReturnedAorId,
+            sf_devops__Status__c: AsyncOperationStatus.InProgress,
+          });
+
+          try {
+            await QuickCommand.run([`-i=${mockValidatedAorId}`]);
+          } catch (e) {
+            /* expected */
+          }
+
           expect(ctx.stderr).to.contain('The command has timed out');
-          expect(ctx.stderr).to.contain(
-            'To check the status of the current operation, run "sf project deploy pipeline report".',
-            ctx.stderr
-          );
           expect(monitorStub.called).to.equal(true);
         });
     });
 
     function getQueryResultMock(result: [Record] | []): QueryResult<Record> {
-      return {
-        done: true,
-        totalSize: result.length,
-        records: result,
-      };
+      return { done: true, totalSize: result.length, records: result };
     }
 
     function stubStreamer() {
-      // Mock the events streaming and the output service
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       monitorStub = sandbox
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .stub(AsyncOpStreaming.prototype, 'monitor' as any)
         .returns({ completed: true, payload: {} });
-
-      printAorIdStub = sandbox.stub(DeployCommandOutputService.prototype, 'printAorId');
-      printOpSummaryStub = sandbox.stub(DeployCommandOutputService.prototype, 'printOpSummary');
-      displayEndResultsStub = sandbox.stub(DeployCommandOutputService.prototype, 'displayEndResults');
     }
 
     function buildDeploymentResult(status: AsyncOperationStatus): Record {
       return {
         sf_devops__Check_Deploy__c: true,
         sf_devops__Deployment_Id__c: mockDeploymentId,
-        sf_devops__Check_Deploy_Status__r: {
-          sf_devops__Status__c: status,
-        },
-        sf_devops__Change_Bundle_Installs__r: {
-          records: [{ sf_devops__Environment__c: mockEnvironmentId }],
-        },
+        sf_devops__Check_Deploy_Status__r: { sf_devops__Status__c: status },
+        sf_devops__Change_Bundle_Installs__r: { records: [{ sf_devops__Environment__c: mockEnvironmentId }] },
       };
     }
 

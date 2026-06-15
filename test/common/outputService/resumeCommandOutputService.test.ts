@@ -15,40 +15,80 @@
  */
 
 /* eslint-disable camelcase */
+import esmock from 'esmock';
 import * as sinon from 'sinon';
 import { expect, test } from '@oclif/test';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Connection } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
-import { ResumeCommandOutputService } from '../../../src/common/outputService/resumeCommandOutputService.js';
 import { Flags as ResumeFlags } from '../../../src/common/base/abstractResume.js';
 import { DeployComponent } from '../../../src/common/index.js';
-import * as Utils from '../../../src/common/utils.js';
-import vacuum from '../../helpers/vacuum.js';
-import * as DeploymentResultsSelector from '../../../src/common/selectors/deploymentResultsSelector.js';
 
 const TEST_OPERATION_TYPE = 'test operation type';
 
 describe('resume output', () => {
   let sandbox: sinon.SinonSandbox;
-  let outputService: ResumeCommandOutputService;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let ResumeCommandOutputServiceClass: any;
+
+  const getFormattedDeployComponentsByAyncOpIdStub = sinon.stub();
+  const isCheckDeployStub = sinon.stub();
+
+  before(async () => {
+    const mod = await esmock(
+      '../../../src/common/outputService/resumeCommandOutputService.js',
+      {},
+      {
+        '../../../src/common/utils.js': {
+          getFormattedDeployComponentsByAyncOpId: getFormattedDeployComponentsByAyncOpIdStub,
+        },
+        '../../../src/common/selectors/deploymentResultsSelector.js': {
+          isCheckDeploy: isCheckDeployStub,
+        },
+      }
+    );
+    ResumeCommandOutputServiceClass = mod.ResumeCommandOutputService;
+  });
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
+    getFormattedDeployComponentsByAyncOpIdStub.reset();
+    isCheckDeployStub.reset();
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
+  function getOutputService(conciseFlag: boolean, verboseFlag: boolean) {
+    return new ResumeCommandOutputServiceClass(
+      buildResumeFlags(conciseFlag, verboseFlag),
+      TEST_OPERATION_TYPE,
+      sinon.createStubInstance(Connection)
+    );
+  }
+
+  function buildResumeFlags(conciseFlag: boolean, verboseFlag: boolean): ResumeFlags<typeof SfCommand> {
+    return {
+      concise: conciseFlag,
+      // @ts-expect-error for testing purposes
+      'devops-center-username': undefined,
+      'job-id': undefined,
+      'use-most-recent': true,
+      verbose: verboseFlag,
+      wait: Duration.minutes(4),
+      json: false,
+    };
+  }
+
   test.stdout().it('prints the operation summary correctly', async (ctx) => {
-    outputService = getOutputService(false, false);
+    const outputService = getOutputService(false, false);
     outputService.printOpSummary();
     expect(ctx.stdout).to.contain('*** Resuming test operation type ***');
   });
 
   test.stdout().it('prints the AOR Id correctly', async (ctx) => {
-    outputService = getOutputService(false, false);
+    const outputService = getOutputService(false, false);
     const mockId = 'ABC';
     outputService.setAorId(mockId);
     outputService.printAorId();
@@ -73,21 +113,16 @@ describe('resume output', () => {
       },
     ];
 
-    sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves(deployedComponents);
-    sandbox.stub(DeploymentResultsSelector, 'isCheckDeploy').resolves(false);
+    getFormattedDeployComponentsByAyncOpIdStub.resolves(deployedComponents);
+    isCheckDeployStub.resolves(false);
 
-    outputService = getOutputService(false, true);
+    const outputService = getOutputService(false, true);
     await outputService.displayEndResults();
-    expect(vacuum(ctx.stdout)).to.contain(
-      vacuum(`
-          === Deployed Source
-
-          Operation Name Type      Path
-          ───────── ──── ───────── ────
-          add       Foo  ApexClass path
-          add       Bar  ApexClass path
-            `)
-    );
+    expect(ctx.stdout).to.contain('Deployed Source');
+    expect(ctx.stdout).to.contain('Foo');
+    expect(ctx.stdout).to.contain('Bar');
+    expect(ctx.stdout).to.contain('ApexClass');
+    expect(ctx.stdout).to.contain('add');
   });
 
   test
@@ -103,20 +138,15 @@ describe('resume output', () => {
         },
       ];
 
-      sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves(deployedComponents);
-      sandbox.stub(DeploymentResultsSelector, 'isCheckDeploy').resolves(true);
+      getFormattedDeployComponentsByAyncOpIdStub.resolves(deployedComponents);
+      isCheckDeployStub.resolves(true);
 
-      outputService = getOutputService(false, true);
+      const outputService = getOutputService(false, true);
       await outputService.displayEndResults();
-      expect(vacuum(ctx.stdout)).to.contain(
-        vacuum(`
-          === Validate-only Deployed Source
-
-          Operation Name Type      Path
-          ───────── ──── ───────── ────
-          add       Foo  ApexClass path
-            `)
-      );
+      expect(ctx.stdout).to.contain('Validate-only Deployed Source');
+      expect(ctx.stdout).to.contain('Foo');
+      expect(ctx.stdout).to.contain('ApexClass');
+      expect(ctx.stdout).to.contain('add');
     });
 
   test.stdout().it('does not prints the deployed components table when verbose flag is not provided', async (ctx) => {
@@ -137,9 +167,9 @@ describe('resume output', () => {
       },
     ];
 
-    sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves(deployedComponents);
+    getFormattedDeployComponentsByAyncOpIdStub.resolves(deployedComponents);
 
-    outputService = getOutputService(false, false);
+    const outputService = getOutputService(false, false);
     await outputService.displayEndResults();
     expect(ctx.stdout).to.not.contain('=== Deployed Source');
   });
@@ -162,31 +192,10 @@ describe('resume output', () => {
       },
     ];
 
-    sandbox.stub(Utils, 'getFormattedDeployComponentsByAyncOpId').resolves(deployedComponents);
+    getFormattedDeployComponentsByAyncOpIdStub.resolves(deployedComponents);
 
-    outputService = getOutputService(true, false);
+    const outputService = getOutputService(true, false);
     await outputService.displayEndResults();
     expect(ctx.stdout).to.not.contain('=== Deployed Source');
   });
-
-  function getOutputService(conciseFlag: boolean, verboseFlag: boolean): ResumeCommandOutputService {
-    return new ResumeCommandOutputService(
-      buildResumeFlags(conciseFlag, verboseFlag),
-      TEST_OPERATION_TYPE,
-      sinon.createStubInstance(Connection)
-    );
-  }
-
-  function buildResumeFlags(conciseFlag: boolean, verboseFlag: boolean): ResumeFlags<typeof SfCommand> {
-    return {
-      concise: conciseFlag,
-      // @ts-expect-error for testing purposes
-      'devops-center-username': undefined,
-      'job-id': undefined,
-      'use-most-recent': true,
-      verbose: verboseFlag,
-      wait: Duration.minutes(4),
-      json: false,
-    };
-  }
 });

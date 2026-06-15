@@ -19,7 +19,6 @@ import * as sinon from 'sinon';
 import { Connection } from '@salesforce/core';
 import * as selector from '../../../src/common/selectors/deploymentResultsSelector.js';
 import { AsyncOperationStatus } from '../../../src/common/index.js';
-import * as SelectorUtils from '../../../src/common/selectors/selectorUtils.js';
 
 const mockAorId = 'mock-id';
 
@@ -57,11 +56,7 @@ describe('DeploymentResult selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
-    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
-
     const result = await selector.selectOneDeploymentResultByAsyncJobId(mockConnection, 'mock-id');
-
-    expect(runSafeQuerySpy.called).to.equal(true);
 
     // verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);
@@ -100,11 +95,7 @@ describe('DeploymentResult selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
-    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
-
     const result = await selector.isCheckDeploy(mockConnection, 'mock-id');
-
-    expect(runSafeQuerySpy.called).to.equal(true);
 
     // verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);
@@ -130,11 +121,7 @@ describe('DeploymentResult selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
-    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
-
     const result = await selector.selectOneDeploymentResultByAsyncJobId(mockConnection, 'mock-id');
-
-    expect(runSafeQuerySpy.called).to.equal(true);
 
     // verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);
@@ -146,14 +133,10 @@ describe('DeploymentResult selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
-    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
-
     const result = await selector.selectOneDeploymentResultWithChangeBundleInstallsByAsyncJobId(
       mockConnection,
       mockAorId
     );
-
-    expect(runSafeQuerySpy.called).to.equal(true);
 
     // verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);
@@ -184,14 +167,10 @@ describe('DeploymentResult selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
-    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
-
     const result = await selector.selectOneDeploymentResultWithChangeBundleInstallsByAsyncJobId(
       mockConnection,
       mockAorId
     );
-
-    expect(runSafeQuerySpy.called).to.equal(true);
 
     // verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);

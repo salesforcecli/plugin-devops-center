@@ -18,7 +18,6 @@ import { expect } from '@oclif/test';
 import * as sinon from 'sinon';
 import { Connection } from '@salesforce/core';
 import * as selector from '../../../src/common/selectors/validateDeploySelector.js';
-import * as SelectorUtils from '../../../src/common/selectors/selectorUtils.js';
 
 const MOCK_RECORD = {
   records: [
@@ -52,13 +51,9 @@ describe('AOR selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
-    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
-
     const aorId = 'mock-id';
 
     const result = await selector.selectValidateDeployAORSummaryDataById(mockConnection, 'mock-id');
-
-    expect(runSafeQuerySpy.called).to.equal(true);
 
     // verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);

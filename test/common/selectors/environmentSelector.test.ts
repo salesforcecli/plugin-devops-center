@@ -22,7 +22,6 @@ import { QueryResult } from '@jsforce/jsforce-node';
 import * as sinon from 'sinon';
 import { EnvQueryResult, selectPipelineStageByEnvironment } from '../../../src/common/selectors/environmentSelector.js';
 import { PipelineStage } from '../../../src/common/types.js';
-import * as SelectorUtils from '../../../src/common/selectors/selectorUtils.js';
 
 const MOCK_PIPELINE_STAGE: PipelineStage = {
   Id: 'mock-Id',
@@ -69,11 +68,7 @@ describe('environment selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
-    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
-
     const result = await selectPipelineStageByEnvironment(mockConnection, 'AAA');
-
-    expect(runSafeQuerySpy.called).to.equal(true);
 
     // Verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);

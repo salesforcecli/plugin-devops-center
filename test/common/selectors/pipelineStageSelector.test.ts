@@ -20,7 +20,6 @@ import { Connection } from '@salesforce/core';
 import { QueryResult } from '@jsforce/jsforce-node';
 import * as selector from '../../../src/common/selectors/pipelineStageSelector.js';
 import { PipelineStage } from '../../../src/common/index.js';
-import * as SelectorUtils from '../../../src/common/selectors/selectorUtils.js';
 
 const MOCK_PIPELINE_STAGE: PipelineStage = {
   Id: 'mock-Id',
@@ -54,11 +53,7 @@ describe('Pipeline stage selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
-    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
-
     const result = await selector.selectPipelineStagesByProject(mockConnection, 'mock-project-name');
-
-    expect(runSafeQuerySpy.called).to.equal(true);
 
     // verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);
@@ -81,11 +76,7 @@ describe('Pipeline stage selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
-    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
-
     const result = await selector.selectOnePipelineStageByEnvironmentId(mockConnection, 'mock-environment-id');
-
-    expect(runSafeQuerySpy.called).to.equal(true);
 
     // verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);

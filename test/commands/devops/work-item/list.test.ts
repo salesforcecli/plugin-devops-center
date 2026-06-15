@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import * as sinon from 'sinon';
 import { Org } from '@salesforce/core';
-import * as workItemsModule from '../../../../src/utils/workItems.js';
 import { WorkItem } from '../../../../src/utils/types.js';
 
 const MOCK_WORK_ITEM: WorkItem = {
@@ -34,10 +34,23 @@ const MOCK_WORK_ITEM: WorkItem = {
 
 describe('devops work-item list', () => {
   let sandbox: sinon.SinonSandbox;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let ListCommand: any;
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => ({ getApiVersion: () => '65.0' }) };
+  const fetchWorkItemsStub = sinon.stub();
+
+  before(async () => {
+    const mod = await esmock('../../../../src/commands/devops/work-item/list.js', {
+      '../../../../src/utils/workItems.js': {
+        fetchWorkItems: fetchWorkItemsStub,
+      },
+    });
+    ListCommand = mod.default;
+  });
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
+    fetchWorkItemsStub.reset();
   });
 
   afterEach(() => {
@@ -47,13 +60,14 @@ describe('devops work-item list', () => {
   describe('lists work items', () => {
     test
       .stdout()
-      .do(() => {
+      .stderr()
+      .it('displays work items in table', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        sandbox.stub(workItemsModule, 'fetchWorkItems').resolves([MOCK_WORK_ITEM]);
-      })
-      .command(['devops:work-item:list', '--target-org', 'testOrg', '--project-id', '1Qg000000000001'])
-      .it('displays work items in table', (ctx) => {
+        fetchWorkItemsStub.resolves([MOCK_WORK_ITEM]);
+
+        await ListCommand.run(['--target-org', 'testOrg', '--project-id', '1Qg000000000001']);
+
         expect(ctx.stdout).to.contain('WI-001');
       });
   });
@@ -61,13 +75,14 @@ describe('devops work-item list', () => {
   describe('no work items found', () => {
     test
       .stdout()
-      .do(() => {
+      .stderr()
+      .it('logs message when no work items', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        sandbox.stub(workItemsModule, 'fetchWorkItems').resolves([]);
-      })
-      .command(['devops:work-item:list', '--target-org', 'testOrg', '--project-id', '1Qg000000000001'])
-      .it('logs message when no work items', (ctx) => {
+        fetchWorkItemsStub.resolves([]);
+
+        await ListCommand.run(['--target-org', 'testOrg', '--project-id', '1Qg000000000001']);
+
         expect(ctx.stdout).to.contain('No work items found');
       });
   });
@@ -76,14 +91,17 @@ describe('devops work-item list', () => {
     test
       .stdout()
       .stderr()
-      .do(() => {
+      .it('shows DevOps Center not enabled error', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        sandbox.stub(workItemsModule, 'fetchWorkItems').rejects(new Error("sObject type 'WorkItem' is not supported"));
-      })
-      .command(['devops:work-item:list', '--target-org', 'testOrg', '--project-id', '1Qg000000000001'])
-      .catch(() => {})
-      .it('shows DevOps Center not enabled error', (ctx) => {
+        fetchWorkItemsStub.rejects(new Error("sObject type 'WorkItem' is not supported"));
+
+        try {
+          await ListCommand.run(['--target-org', 'testOrg', '--project-id', '1Qg000000000001']);
+        } catch (e) {
+          // expected
+        }
+
         expect(ctx.stderr).to.contain("DevOps Center isn't enabled");
       });
   });
@@ -92,15 +110,17 @@ describe('devops work-item list', () => {
     test
       .stdout()
       .stderr()
-      .do(() => {
+      .it('rethrows non-DevOps errors', async () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        sandbox.stub(workItemsModule, 'fetchWorkItems').rejects(new Error('Network error'));
-      })
-      .command(['devops:work-item:list', '--target-org', 'testOrg', '--project-id', '1Qg000000000001'])
-      .catch((err) => {
-        expect(err.message).to.contain('Network error');
-      })
-      .it('rethrows non-DevOps errors', () => {});
+        fetchWorkItemsStub.rejects(new Error('Network error'));
+
+        try {
+          await ListCommand.run(['--target-org', 'testOrg', '--project-id', '1Qg000000000001']);
+          expect.fail('should have thrown');
+        } catch (e: unknown) {
+          expect((e as Error).message).to.contain('Network error');
+        }
+      });
   });
 });

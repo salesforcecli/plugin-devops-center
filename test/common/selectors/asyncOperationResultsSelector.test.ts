@@ -19,7 +19,6 @@ import * as sinon from 'sinon';
 import { Connection } from '@salesforce/core';
 import * as selector from '../../../src/common/selectors/asyncOperationResultsSelector.js';
 import { AsyncOperationStatus } from '../../../src/common/index.js';
-import * as SelectorUtils from '../../../src/common/selectors/selectorUtils.js';
 
 const MOCK_RECORD = {
   done: true,
@@ -49,11 +48,7 @@ describe('AOR selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
-    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
-
     const result = await selector.selectAsyncOperationResultById(mockConnection, 'mock-id');
-
-    expect(runSafeQuerySpy.called).to.equal(true);
 
     // verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);

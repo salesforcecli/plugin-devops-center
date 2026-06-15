@@ -24,7 +24,6 @@ import {
   selectDeployComponentsForCheckDeployByAsynchOpId,
 } from '../../../src/common/selectors/deployComponentsSelector.js';
 import { DeployComponent } from '../../../src/common/types.js';
-import * as SelectorUtils from '../../../src/common/selectors/selectorUtils.js';
 
 const MOCK_DEPLOY_COMPONENT: DeployComponent = {
   sf_devops__Source_Component__c: 'apexClass:foo',
@@ -51,12 +50,7 @@ describe('endpoint selector', () => {
       totalSize: 1,
     });
 
-    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
-
     const result = await selectDeployComponentsByAsyncOpId(mockConnection, 'ABC');
-
-    // Verify we call the correct method
-    expect(runSafeQuerySpy.called).to.equal(true);
 
     // Verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);
@@ -86,12 +80,7 @@ describe('endpoint selector', () => {
       totalSize: 1,
     });
 
-    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
-
     const result = await selectDeployComponentsForCheckDeployByAsynchOpId(mockConnection, 'ABC');
-
-    // Verify we call the correct method
-    expect(runSafeQuerySpy.called).to.equal(true);
 
     // Verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);

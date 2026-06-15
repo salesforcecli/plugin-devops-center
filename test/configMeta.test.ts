@@ -14,57 +14,71 @@
  * limitations under the License.
  */
 
-import * as childProcess from 'node:child_process';
 import { expect } from '@oclif/test';
 import * as sinon from 'sinon';
-import configMeta from '../src/configMeta.js';
+import esmock from 'esmock';
 
 const SUCCESS_STATUS = 0;
 const ERROR_STATUS = 1;
 
 describe('configMeta', () => {
-  const confVarInput = configMeta[0].input;
-  let sandbox: sinon.SinonSandbox;
-
-  beforeEach(() => {
-    sandbox = sinon.createSandbox();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
-  function mockSpawnSync(status: number): sinon.SinonStub {
-    return sandbox.stub(childProcess, 'spawnSync').returns({
-      status,
+  it('considers invalid an unauthenticated org', async () => {
+    const org = 'unauthenticated-org';
+    const spawnSyncStub = sinon.stub().returns({
+      status: ERROR_STATUS,
       stdout: '',
       pid: 0,
       output: [],
       stderr: '',
       signal: null,
     });
-  }
 
-  it('considers invalid an unauthenticated org', () => {
-    const org = 'unauthenticated-org';
-    const stub = mockSpawnSync(ERROR_STATUS);
+    const { default: configMeta } = await esmock('../src/configMeta.js', {
+      'node:child_process': {
+        default: { spawnSync: spawnSyncStub },
+      },
+    });
+
+    const confVarInput = configMeta[0].input;
     const result = confVarInput.validator(org);
     expect(result).to.be.false;
-    expect(stub.called).to.be.true;
-    expect(stub.getCall(0).args[1]).to.contain(org);
+    expect(spawnSyncStub.called).to.be.true;
+    expect(spawnSyncStub.getCall(0).args[1]).to.contain(org);
   });
 
-  it('considers valid an authenticated org', () => {
+  it('considers valid an authenticated org', async () => {
     const org = 'authenticated-org';
-    const stub = mockSpawnSync(SUCCESS_STATUS);
+    const spawnSyncStub = sinon.stub().returns({
+      status: SUCCESS_STATUS,
+      stdout: '',
+      pid: 0,
+      output: [],
+      stderr: '',
+      signal: null,
+    });
+
+    const { default: configMeta } = await esmock('../src/configMeta.js', {
+      'node:child_process': {
+        default: { spawnSync: spawnSyncStub },
+      },
+    });
+
+    const confVarInput = configMeta[0].input;
     const result = confVarInput.validator(org);
     expect(result).to.be.true;
-    expect(stub.called).to.be.true;
-    expect(stub.getCall(0).args[1]).to.contain(org);
+    expect(spawnSyncStub.called).to.be.true;
+    expect(spawnSyncStub.getCall(0).args[1]).to.contain(org);
   });
 
-  it('returns the correct failed message', () => {
+  it('returns the correct failed message', async () => {
+    const { default: configMeta } = await esmock('../src/configMeta.js', {
+      'node:child_process': {
+        default: { spawnSync: sinon.stub() },
+      },
+    });
+
     const org = 'unauthenticated-org';
+    const confVarInput = configMeta[0].input;
     expect(confVarInput.failedMessage(org)).to.equal(`org "${org}" is not authenticated`);
   });
 });

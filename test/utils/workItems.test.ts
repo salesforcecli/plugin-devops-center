@@ -17,8 +17,7 @@
 import { expect } from '@oclif/test';
 import * as sinon from 'sinon';
 import { Connection } from '@salesforce/core';
-import { fetchWorkItems } from '../../src/utils/workItems.js';
-import * as pipelineUtils from '../../src/utils/pipelineUtils.js';
+import esmock from 'esmock';
 
 const MOCK_RECORD = {
   Id: 'WI001',
@@ -44,7 +43,6 @@ describe('fetchWorkItems', () => {
 
   beforeEach(() => {
     connectionStub = sinon.createStubInstance(Connection);
-    sinon.stub(pipelineUtils, 'getPipelineIdForProject').resolves(undefined);
   });
 
   afterEach(() => {
@@ -54,6 +52,13 @@ describe('fetchWorkItems', () => {
   it('returns empty array when query has no records', async () => {
     (connectionStub.query as sinon.SinonStub).resolves({ records: null });
 
+    const { fetchWorkItems } = await esmock('../../src/utils/workItems.js', {
+      '../../src/utils/pipelineUtils.js': {
+        getPipelineIdForProject: sinon.stub().resolves(undefined),
+        fetchPipelineStages: sinon.stub().resolves([]),
+      },
+    });
+
     const result = await fetchWorkItems(connectionStub as unknown as Connection, 'PROJ001');
     expect(result).to.deep.equal([]);
   });
@@ -61,6 +66,13 @@ describe('fetchWorkItems', () => {
   it('returns mapped work items', async () => {
     (connectionStub.query as sinon.SinonStub).resolves({ records: [MOCK_RECORD] });
     (connectionStub.request as sinon.SinonStub).rejects(new Error('no vcs'));
+
+    const { fetchWorkItems } = await esmock('../../src/utils/workItems.js', {
+      '../../src/utils/pipelineUtils.js': {
+        getPipelineIdForProject: sinon.stub().resolves(undefined),
+        fetchPipelineStages: sinon.stub().resolves([]),
+      },
+    });
 
     const result = await fetchWorkItems(connectionStub as unknown as Connection, 'PROJ001');
 
@@ -76,6 +88,13 @@ describe('fetchWorkItems', () => {
   it('maps work item with github repo url when vcs owner found', async () => {
     (connectionStub.query as sinon.SinonStub).resolves({ records: [MOCK_RECORD] });
     (connectionStub.request as sinon.SinonStub).resolves({ owner: 'myorg' });
+
+    const { fetchWorkItems } = await esmock('../../src/utils/workItems.js', {
+      '../../src/utils/pipelineUtils.js': {
+        getPipelineIdForProject: sinon.stub().resolves(undefined),
+        fetchPipelineStages: sinon.stub().resolves([]),
+      },
+    });
 
     const result = await fetchWorkItems(connectionStub as unknown as Connection, 'PROJ001');
 
@@ -98,6 +117,13 @@ describe('fetchWorkItems', () => {
     (connectionStub.query as sinon.SinonStub).resolves({ records: [bbRecord] });
     (connectionStub.request as sinon.SinonStub).rejects(new Error('no vcs'));
 
+    const { fetchWorkItems } = await esmock('../../src/utils/workItems.js', {
+      '../../src/utils/pipelineUtils.js': {
+        getPipelineIdForProject: sinon.stub().resolves(undefined),
+        fetchPipelineStages: sinon.stub().resolves([]),
+      },
+    });
+
     const result = await fetchWorkItems(connectionStub as unknown as Connection, 'PROJ001');
 
     expect(result[0].SourceCodeRepository?.repoUrl).to.include('bitbucket.org');
@@ -118,6 +144,13 @@ describe('fetchWorkItems', () => {
     };
     (connectionStub.query as sinon.SinonStub).resolves({ records: [bare] });
 
+    const { fetchWorkItems } = await esmock('../../src/utils/workItems.js', {
+      '../../src/utils/pipelineUtils.js': {
+        getPipelineIdForProject: sinon.stub().resolves(undefined),
+        fetchPipelineStages: sinon.stub().resolves([]),
+      },
+    });
+
     const result = await fetchWorkItems(connectionStub as unknown as Connection, 'PROJ001');
 
     expect(result[0].SourceCodeRepository).to.be.undefined;
@@ -125,13 +158,18 @@ describe('fetchWorkItems', () => {
   });
 
   it('resolves target stage when pipeline stages exist', async () => {
-    (pipelineUtils.getPipelineIdForProject as sinon.SinonStub).resolves('PIPE001');
-    sinon.stub(pipelineUtils, 'fetchPipelineStages').resolves([
-      { Id: 'S1', NextStageId: 'S2', SourceCodeRepositoryBranch: { Name: 'branch-1' } },
-      { Id: 'S2', NextStageId: null, SourceCodeRepositoryBranch: { Name: 'branch-2' } },
-    ]);
     (connectionStub.query as sinon.SinonStub).resolves({ records: [MOCK_RECORD] });
     (connectionStub.request as sinon.SinonStub).rejects(new Error('no vcs'));
+
+    const { fetchWorkItems } = await esmock('../../src/utils/workItems.js', {
+      '../../src/utils/pipelineUtils.js': {
+        getPipelineIdForProject: sinon.stub().resolves('PIPE001'),
+        fetchPipelineStages: sinon.stub().resolves([
+          { Id: 'S1', NextStageId: 'S2', SourceCodeRepositoryBranch: { Name: 'branch-1' } },
+          { Id: 'S2', NextStageId: null, SourceCodeRepositoryBranch: { Name: 'branch-2' } },
+        ]),
+      },
+    });
 
     const result = await fetchWorkItems(connectionStub as unknown as Connection, 'PROJ001');
 

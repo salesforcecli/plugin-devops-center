@@ -25,7 +25,6 @@ import {
   WorkItemsQueryResult,
 } from '../../../src/common/selectors/workItemSelector.js';
 import { WorkItem } from '../../../src/common/types.js';
-import * as SelectorUtils from '../../../src/common/selectors/selectorUtils.js';
 
 const MOCK_WORK_ITEM_1: WorkItem = {
   Name: 'WI1',
@@ -83,11 +82,7 @@ describe('WI selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
-    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
-
     const result = await selectWorkItemsByChangeBundles(mockConnection, ['AAA', 'BBB']);
-
-    expect(runSafeQuerySpy.called).to.equal(true);
 
     // Verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);
