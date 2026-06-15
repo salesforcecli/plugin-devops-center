@@ -16,7 +16,7 @@
 
 import { expect, test } from '@oclif/test';
 import { TestContext } from '@salesforce/core/testSetup';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { Org } from '@salesforce/core';
 
 describe('devops project list', () => {

@@ -18,7 +18,7 @@
 import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import { TestContext } from '@salesforce/core/testSetup';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { ConfigAggregator, Org } from '@salesforce/core';
 import { ConfigVars } from '../../../../../src/configMeta.js';
 import { AsyncOperationStatus, DeploymentResult } from '../../../../../src/common/types.js';

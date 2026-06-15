@@ -4,7 +4,7 @@
     "command": "devops:project:list",
     "flagAliases": [],
     "flagChars": ["o"],
-    "flags": ["api-version", "json", "target-org"],
+    "flags": ["api-version", "flags-dir", "json", "target-org"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -12,7 +12,7 @@
     "command": "devops:work-item:create",
     "flagAliases": [],
     "flagChars": ["d", "o", "p", "s"],
-    "flags": ["api-version", "description", "json", "project-id", "subject", "target-org"],
+    "flags": ["api-version", "description", "flags-dir", "json", "project-id", "subject", "target-org"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -20,7 +20,7 @@
     "command": "devops:work-item:list",
     "flagAliases": [],
     "flagChars": ["o", "p"],
-    "flags": ["api-version", "json", "project-id", "target-org"],
+    "flags": ["api-version", "flags-dir", "json", "project-id", "target-org"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -28,7 +28,17 @@
     "command": "project:deploy:pipeline:quick",
     "flagAliases": [],
     "flagChars": ["c", "i", "r", "w"],
-    "flags": ["async", "concise", "devops-center-username", "job-id", "json", "use-most-recent", "verbose", "wait"],
+    "flags": [
+      "async",
+      "concise",
+      "devops-center-username",
+      "flags-dir",
+      "job-id",
+      "json",
+      "use-most-recent",
+      "verbose",
+      "wait"
+    ],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -36,7 +46,7 @@
     "command": "project:deploy:pipeline:report",
     "flagAliases": [],
     "flagChars": ["c", "i", "r"],
-    "flags": ["devops-center-username", "job-id", "json", "use-most-recent"],
+    "flags": ["devops-center-username", "flags-dir", "job-id", "json", "use-most-recent"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -44,7 +54,7 @@
     "command": "project:deploy:pipeline:resume",
     "flagAliases": [],
     "flagChars": ["c", "i", "r", "w"],
-    "flags": ["concise", "devops-center-username", "job-id", "json", "use-most-recent", "verbose", "wait"],
+    "flags": ["concise", "devops-center-username", "flags-dir", "job-id", "json", "use-most-recent", "verbose", "wait"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -60,6 +70,7 @@
       "deploy-all",
       "devops-center-project-name",
       "devops-center-username",
+      "flags-dir",
       "json",
       "test-level",
       "tests",
@@ -81,6 +92,7 @@
       "deploy-all",
       "devops-center-project-name",
       "devops-center-username",
+      "flags-dir",
       "json",
       "test-level",
       "tests",

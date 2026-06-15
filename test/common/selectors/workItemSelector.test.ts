@@ -19,7 +19,7 @@
 import { expect } from '@oclif/test';
 import { Connection } from '@salesforce/core';
 import { QueryResult } from '@jsforce/jsforce-node';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import {
   selectWorkItemsByChangeBundles,
   WorkItemsQueryResult,

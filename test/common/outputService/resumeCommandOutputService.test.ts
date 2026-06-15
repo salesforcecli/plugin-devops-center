@@ -16,7 +16,7 @@
 
 /* eslint-disable camelcase */
 import esmock from 'esmock';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { expect, test } from '@oclif/test';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Connection } from '@salesforce/core';

@@ -16,7 +16,7 @@
 
 import { expect } from '@oclif/test';
 import { assert } from 'chai';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { Parser } from '@oclif/core';
 import { ConfigAggregator, Org } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';

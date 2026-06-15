@@ -17,7 +17,7 @@
 /* eslint-disable camelcase */
 import { expect } from '@oclif/test';
 import { assert } from 'chai';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { Connection, Org, SfError } from '@salesforce/core';
 import esmock from 'esmock';
 import { containsSfId, matchesSfId, sObjectToArrayOfKeyValue, sleep } from '../../src/common/utils.js';

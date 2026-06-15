@@ -15,7 +15,7 @@
  */
 
 import { expect } from '@oclif/test';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { Connection } from '@salesforce/core';
 import { createWorkItem } from '../../src/utils/createWorkItem.js';
 

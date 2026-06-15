@@ -16,7 +16,7 @@
 import { expect, test } from '@oclif/test';
 import { Duration } from '@salesforce/kit';
 import { StreamingClient, Org, StatusResult } from '@salesforce/core';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { AnyJson, JsonMap } from '@salesforce/ts-types';
 import DOCeStreaming from '../../src/streamer/doceStream.js';
 

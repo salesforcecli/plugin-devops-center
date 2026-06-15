@@ -16,7 +16,7 @@
 
 import { Connection, Messages } from '@salesforce/core';
 import { expect } from '@oclif/test';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { runSafeQuery } from '../../../src/common/selectors/selectorUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);

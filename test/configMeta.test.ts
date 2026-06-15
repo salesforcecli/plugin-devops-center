@@ -15,7 +15,7 @@
  */
 
 import { expect } from '@oclif/test';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import esmock from 'esmock';
 
 const SUCCESS_STATUS = 0;

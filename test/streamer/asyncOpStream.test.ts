@@ -17,7 +17,7 @@ import { expect, test } from '@oclif/test';
 import * as core from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { JsonMap } from '@salesforce/ts-types';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { AbstractAorOutputService, AorOutputFlags } from '../../src/common/outputService/index.js';
 import AsyncOpStreaming from '../../src/streamer/processors/asyncOpStream.js';
 

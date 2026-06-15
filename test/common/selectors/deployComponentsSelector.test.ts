@@ -18,7 +18,7 @@
 
 import { expect } from '@oclif/test';
 import { Connection } from '@salesforce/core';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import {
   selectDeployComponentsByAsyncOpId,
   selectDeployComponentsForCheckDeployByAsynchOpId,

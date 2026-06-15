@@ -19,7 +19,7 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import { ConfigAggregator, Org, StreamingClient } from '@salesforce/core';
 import { HttpRequest } from '@jsforce/jsforce-node';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { QueryResult, Record } from '@jsforce/jsforce-node';
 import { TestContext } from '@salesforce/core/testSetup';
 import { ConfigVars } from '../../../../../src/configMeta.js';

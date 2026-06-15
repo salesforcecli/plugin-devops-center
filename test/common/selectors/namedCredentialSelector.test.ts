@@ -18,7 +18,7 @@
 
 import { expect } from '@oclif/test';
 import { Connection } from '@salesforce/core';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { selectNamedCredentialByName } from '../../../src/common/selectors/namedCredentialSelector.js';
 import { NamedCredential } from '../../../src/common/types.js';
 

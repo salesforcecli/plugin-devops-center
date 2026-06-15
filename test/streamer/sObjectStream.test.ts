@@ -18,7 +18,7 @@ import * as core from '@salesforce/core';
 import { StreamingClient } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
 import { AnyJson, JsonMap } from '@salesforce/ts-types';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import SObjectStreaming from '../../src/streamer/sObjectStream.js';
 
 const DOCE_ORG = {

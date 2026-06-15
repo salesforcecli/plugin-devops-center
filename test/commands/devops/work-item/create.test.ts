@@ -16,7 +16,7 @@
 
 import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { Org } from '@salesforce/core';
 
 describe('devops work-item create', () => {

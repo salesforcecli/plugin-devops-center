@@ -15,7 +15,7 @@
  */
 /* eslint-disable camelcase */
 import { expect } from '@oclif/test';
-import * as sinon from 'sinon';
+import sinon from 'sinon';
 import { Connection } from '@salesforce/core';
 import { QueryResult } from '@jsforce/jsforce-node';
 import * as selector from '../../../src/common/selectors/pipelineStageSelector.js';
