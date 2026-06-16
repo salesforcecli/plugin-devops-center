@@ -1,0 +1,212 @@
+/*
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import esmock from 'esmock';
+import { expect, test } from '@oclif/test';
+import sinon from 'sinon';
+import { Org } from '@salesforce/core';
+
+describe('devops work-item status update', () => {
+  let sandbox: sinon.SinonSandbox;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let UpdateCommand: any;
+  const mockConnection = { getApiVersion: () => '65.0' };
+  const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
+  const updateWorkItemStatusStub = sinon.stub();
+  const resolveWorkItemByNameStub = sinon.stub();
+  const resolveProjectIdForWorkItemStub = sinon.stub();
+
+  before(async () => {
+    const mod = await esmock('../../../../../src/commands/devops/work-item/status/update.js', {
+      '../../../../../src/utils/updateWorkItemStatus.js': {
+        updateWorkItemStatus: updateWorkItemStatusStub,
+        resolveWorkItemByName: resolveWorkItemByNameStub,
+        resolveProjectIdForWorkItem: resolveProjectIdForWorkItemStub,
+      },
+    });
+    UpdateCommand = mod.default;
+  });
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+    updateWorkItemStatusStub.reset();
+    resolveWorkItemByNameStub.reset();
+    resolveProjectIdForWorkItemStub.reset();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  describe('successful update by work item ID', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('resolves project ID then logs success', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        resolveProjectIdForWorkItemStub.resolves('1Qg000000000001');
+        updateWorkItemStatusStub.resolves({ success: true, workItemId: '0Wx000000000001', status: 'In Progress' });
+
+        await UpdateCommand.run([
+          '--target-org',
+          'testOrg',
+          '--work-item-id',
+          '0Wx000000000001',
+          '--status',
+          'In Progress',
+        ]);
+
+        expect(ctx.stdout).to.contain('Successfully updated status for work item');
+        expect(ctx.stdout).to.contain('In Progress');
+        expect(resolveProjectIdForWorkItemStub.calledOnce).to.be.true;
+      });
+  });
+
+  describe('successful update by work item name', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('resolves ID and project from name then updates', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        resolveWorkItemByNameStub.resolves({ workItemId: '0Wx000000000001', projectId: '1Qg000000000001' });
+        updateWorkItemStatusStub.resolves({ success: true, workItemId: '0Wx000000000001', status: 'Ready to Promote' });
+
+        await UpdateCommand.run([
+          '--target-org',
+          'testOrg',
+          '--work-item-name',
+          'WI-000001',
+          '--status',
+          'Ready to Promote',
+        ]);
+
+        expect(ctx.stdout).to.contain('WI-000001');
+        expect(ctx.stdout).to.contain('Ready to Promote');
+        expect(resolveWorkItemByNameStub.calledOnce).to.be.true;
+      });
+  });
+
+  describe('update failure', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('shows failure error', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        resolveProjectIdForWorkItemStub.resolves('1Qg000000000001');
+        updateWorkItemStatusStub.resolves({
+          success: false,
+          workItemId: '0Wx000000000001',
+          error: 'Invalid status value',
+        });
+
+        try {
+          await UpdateCommand.run([
+            '--target-org',
+            'testOrg',
+            '--work-item-id',
+            '0Wx000000000001',
+            '--status',
+            'BadStatus',
+          ]);
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('Failed to update work item status');
+      });
+  });
+
+  describe('work item name not found', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('throws when name resolves no record', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        resolveWorkItemByNameStub.rejects(new Error("Work item with name 'WI-999999' not found."));
+
+        try {
+          await UpdateCommand.run([
+            '--target-org',
+            'testOrg',
+            '--work-item-name',
+            'WI-999999',
+            '--status',
+            'In Progress',
+          ]);
+          expect.fail('should have thrown');
+        } catch (e: unknown) {
+          expect((e as Error).message).to.contain('WI-999999');
+        }
+      });
+  });
+
+  describe('DevOps Center not enabled', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('shows DevOps Center not enabled error', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        resolveProjectIdForWorkItemStub.resolves('1Qg000000000001');
+        updateWorkItemStatusStub.rejects(new Error("sObject type 'WorkItem' is not supported"));
+
+        try {
+          await UpdateCommand.run([
+            '--target-org',
+            'testOrg',
+            '--work-item-id',
+            '0Wx000000000001',
+            '--status',
+            'In Progress',
+          ]);
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain("DevOps Center isn't enabled");
+      });
+  });
+
+  describe('rethrows other errors', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('rethrows non-DevOps errors', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        resolveProjectIdForWorkItemStub.resolves('1Qg000000000001');
+        updateWorkItemStatusStub.rejects(new Error('Network error'));
+
+        try {
+          await UpdateCommand.run([
+            '--target-org',
+            'testOrg',
+            '--work-item-id',
+            '0Wx000000000001',
+            '--status',
+            'In Progress',
+          ]);
+          expect.fail('should have thrown');
+        } catch (e: unknown) {
+          expect((e as Error).message).to.contain('Network error');
+        }
+      });
+  });
+});

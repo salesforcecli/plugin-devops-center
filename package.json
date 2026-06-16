@@ -85,7 +85,12 @@
             "description": "Commands for managing DevOps Center projects."
           },
           "work-item": {
-            "description": "Commands for managing DevOps Center work items."
+            "description": "Commands for managing DevOps Center work items.",
+            "subtopics": {
+              "status": {
+                "description": "Commands for managing DevOps Center work item statuses."
+              }
+            }
           }
         }
       }
