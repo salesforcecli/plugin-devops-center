@@ -108,24 +108,29 @@ describe('project deploy pipeline start', () => {
   }
 
   before(async () => {
-    const mod = await esmock(
-      '../../../../../src/commands/project/deploy/pipeline/start.js',
-      {},
-      {
-        '../../../../../src/common/utils.js': {
-          fetchAndValidatePipelineStage: esmockFetchAndValidateStub,
-          fetchAsyncOperationResult: esmockFetchAsyncOpResultStub,
-          sleep: esmockSleepStub,
-        },
-        '../../../../../src/common/selectors/asyncOperationResultsSelector.js': {
-          selectAsyncOperationResultById: esmockSelectAorByIdStub,
-        },
-        '../../../../../src/common/outputService/outputServiceFactory.js': {
-          OutputServiceFactory: MockOutputServiceFactory,
-        },
-        '@salesforce/core': await import('@salesforce/core'),
-      }
-    );
+    const realCommonIndex = await import('../../../../../src/common/index.js');
+    const mockedAsyncOp = await esmock('../../../../../src/common/base/abstractAsyncOperation.js', {
+      '../../../../../src/common/index.js': {
+        ...realCommonIndex,
+        fetchAsyncOperationResult: esmockFetchAsyncOpResultStub,
+      },
+    });
+    const mockedPromote = await esmock('../../../../../src/common/base/abstractPromote.js', {
+      '../../../../../src/common/base/abstractAsyncOperation.js': mockedAsyncOp,
+      '../../../../../src/common/index.js': {
+        ...realCommonIndex,
+        fetchAndValidatePipelineStage: esmockFetchAndValidateStub,
+      },
+      '../../../../../src/common/utils.js': {
+        sleep: esmockSleepStub,
+      },
+      '../../../../../src/common/outputService/index.js': {
+        OutputServiceFactory: MockOutputServiceFactory,
+      },
+    });
+    const mod = await esmock('../../../../../src/commands/project/deploy/pipeline/start.js', {
+      '../../../../../src/common/base/abstractPromote.js': mockedPromote,
+    });
     StartCommand = mod.default;
   });
 

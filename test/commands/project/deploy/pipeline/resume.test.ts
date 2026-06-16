@@ -92,20 +92,27 @@ describe('project deploy pipeline resume', () => {
   }
 
   before(async () => {
-    const mod = await esmock(
-      '../../../../../src/commands/project/deploy/pipeline/resume.js',
-      {},
-      {
-        '../../../../../src/common/utils.js': {
-          getAsyncOperationStreamer: getAsyncOperationStreamerStub,
-          fetchAsyncOperationResult: fetchAsyncOperationResultStub,
-        },
-        '../../../../../src/common/outputService/outputServiceFactory.js': {
-          OutputServiceFactory: MockOutputServiceFactory,
-        },
-        '@salesforce/core': await import('@salesforce/core'),
-      }
-    );
+    const realCommonIndex = await import('../../../../../src/common/index.js');
+    const mockedAsyncOp = await esmock('../../../../../src/common/base/abstractAsyncOperation.js', {
+      '../../../../../src/common/index.js': {
+        ...realCommonIndex,
+        fetchAsyncOperationResult: fetchAsyncOperationResultStub,
+        getAsyncOperationStreamer: getAsyncOperationStreamerStub,
+      },
+    });
+    const mockedResume = await esmock('../../../../../src/common/base/abstractResume.js', {
+      '../../../../../src/common/base/abstractAsyncOperation.js': mockedAsyncOp,
+      '../../../../../src/common/index.js': {
+        ...realCommonIndex,
+        fetchAsyncOperationResult: fetchAsyncOperationResultStub,
+      },
+      '../../../../../src/common/outputService/index.js': {
+        OutputServiceFactory: MockOutputServiceFactory,
+      },
+    });
+    const mod = await esmock('../../../../../src/commands/project/deploy/pipeline/resume.js', {
+      '../../../../../src/common/base/abstractResume.js': mockedResume,
+    });
     ResumeCmd = mod.default;
   });
 

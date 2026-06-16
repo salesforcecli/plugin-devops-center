@@ -45,16 +45,14 @@ describe('project deploy pipeline report', () => {
   const selectOneDeploymentResultByAsyncJobIdStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock(
-      '../../../../../src/commands/project/deploy/pipeline/report.js',
-      {},
-      {
-        '../../../../../src/common/selectors/deploymentResultsSelector.js': {
-          selectOneDeploymentResultByAsyncJobId: selectOneDeploymentResultByAsyncJobIdStub,
-        },
-        '@salesforce/core': await import('@salesforce/core'),
-      }
-    );
+    const mockedReportBase = await esmock('../../../../../src/common/base/abstractReportOnPromote.js', {
+      '../../../../../src/common/selectors/deploymentResultsSelector.js': {
+        selectOneDeploymentResultByAsyncJobId: selectOneDeploymentResultByAsyncJobIdStub,
+      },
+    });
+    const mod = await esmock('../../../../../src/commands/project/deploy/pipeline/report.js', {
+      '../../../../../src/common/base/abstractReportOnPromote.js': mockedReportBase,
+    });
     ReportCommand = mod.default;
   });
 

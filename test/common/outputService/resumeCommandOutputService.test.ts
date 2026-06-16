@@ -35,19 +35,17 @@ describe('resume output', () => {
   const isCheckDeployStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock(
-      '../../../src/common/outputService/resumeCommandOutputService.js',
-      {},
-      {
-        '../../../src/common/utils.js': {
-          getFormattedDeployComponentsByAyncOpId: getFormattedDeployComponentsByAyncOpIdStub,
-        },
-        '../../../src/common/selectors/deploymentResultsSelector.js': {
-          isCheckDeploy: isCheckDeployStub,
-        },
-        '@salesforce/core': await import('@salesforce/core'),
-      }
-    );
+    const mockedResumeOutputService = await esmock('../../../src/common/outputService/resumeOutputService.js', {
+      '../../../src/common/selectors/deploymentResultsSelector.js': {
+        isCheckDeploy: isCheckDeployStub,
+      },
+      '../../../src/common/utils.js': {
+        getFormattedDeployComponentsByAyncOpId: getFormattedDeployComponentsByAyncOpIdStub,
+      },
+    });
+    const mod = await esmock('../../../src/common/outputService/resumeCommandOutputService.js', {
+      '../../../src/common/outputService/resumeOutputService.js': mockedResumeOutputService,
+    });
     ResumeCommandOutputServiceClass = mod.ResumeCommandOutputService;
   });
 

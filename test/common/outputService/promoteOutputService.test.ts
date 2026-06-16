@@ -45,31 +45,37 @@ describe('promoteOutputService', () => {
   const getFormattedDeployComponentsByAyncOpIdStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock(
-      '../../../src/common/outputService/index.js',
-      {},
-      {
-        '../../../src/common/selectors/deployProgressSummarySelector.js': {
-          selectDeployAORSummaryDataById: selectDeployAORSummaryDataByIdStub,
-        },
-        '../../../src/common/selectors/environmentSelector.js': {
-          selectPipelineStageByEnvironment: selectPipelineStageByEnvironmentStub,
-        },
-        '../../../src/common/selectors/workItemSelector.js': {
-          selectWorkItemsByChangeBundles: selectWorkItemsByChangeBundlesStub,
-        },
-        '../../../src/common/selectors/deploymentResultsSelector.js': {
-          isCheckDeploy: isCheckDeployStub,
-        },
-        '../../../src/common/selectors/validateDeploySelector.js': {
-          selectValidateDeployAORSummaryDataById: selectValidateDeployAORSummaryDataByIdStub,
-        },
-        '../../../src/common/utils.js': {
-          getFormattedDeployComponentsByAyncOpId: getFormattedDeployComponentsByAyncOpIdStub,
-        },
-        '@salesforce/core': await import('@salesforce/core'),
-      }
-    );
+    const mockedDeploySummaryBuilder = await esmock('../../../src/common/outputService/deploySummaryBuilder.js', {
+      '../../../src/common/selectors/deployProgressSummarySelector.js': {
+        selectDeployAORSummaryDataById: selectDeployAORSummaryDataByIdStub,
+      },
+      '../../../src/common/selectors/environmentSelector.js': {
+        selectPipelineStageByEnvironment: selectPipelineStageByEnvironmentStub,
+      },
+      '../../../src/common/selectors/workItemSelector.js': {
+        selectWorkItemsByChangeBundles: selectWorkItemsByChangeBundlesStub,
+      },
+      '../../../src/common/selectors/validateDeploySelector.js': {
+        selectValidateDeployAORSummaryDataById: selectValidateDeployAORSummaryDataByIdStub,
+      },
+    });
+    const mockedResumeOutputService = await esmock('../../../src/common/outputService/resumeOutputService.js', {
+      '../../../src/common/selectors/deploymentResultsSelector.js': {
+        isCheckDeploy: isCheckDeployStub,
+      },
+      '../../../src/common/utils.js': {
+        getFormattedDeployComponentsByAyncOpId: getFormattedDeployComponentsByAyncOpIdStub,
+      },
+    });
+    const mockedPromoteOutputService = await esmock('../../../src/common/outputService/promoteOutputService.js', {
+      '../../../src/common/outputService/deploySummaryBuilder.js': mockedDeploySummaryBuilder,
+      '../../../src/common/outputService/resumeOutputService.js': mockedResumeOutputService,
+    });
+    const mod = await esmock('../../../src/common/outputService/index.js', {
+      '../../../src/common/outputService/deploySummaryBuilder.js': mockedDeploySummaryBuilder,
+      '../../../src/common/outputService/promoteOutputService.js': mockedPromoteOutputService,
+      '../../../src/common/outputService/resumeOutputService.js': mockedResumeOutputService,
+    });
     AbstractPromoteOutputServiceClass = mod.AbstractPromoteOutputService;
     DeploySummaryBuilderClass = mod.DeploySummaryBuilder;
   });

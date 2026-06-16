@@ -118,20 +118,21 @@ describe('project deploy pipeline quick', () => {
   }
 
   before(async () => {
-    const mod = await esmock(
-      '../../../../../src/commands/project/deploy/pipeline/quick.js',
-      {},
-      {
-        '../../../../../src/common/utils.js': {
-          getAsyncOperationStreamer: getAsyncOperationStreamerStub,
-          fetchAsyncOperationResult: fetchAsyncOperationResultStub,
-        },
-        '../../../../../src/common/outputService/outputServiceFactory.js': {
-          OutputServiceFactory: MockOutputServiceFactory,
-        },
-        '@salesforce/core': await import('@salesforce/core'),
-      }
-    );
+    const mockedAsyncOp = await esmock('../../../../../src/common/base/abstractAsyncOperation.js', {
+      '../../../../../src/common/index.js': {
+        fetchAsyncOperationResult: fetchAsyncOperationResultStub,
+        getAsyncOperationStreamer: getAsyncOperationStreamerStub,
+      },
+    });
+    const mockedQuick = await esmock('../../../../../src/common/base/abstractQuick.js', {
+      '../../../../../src/common/base/abstractAsyncOperation.js': mockedAsyncOp,
+      '../../../../../src/common/outputService/index.js': {
+        OutputServiceFactory: MockOutputServiceFactory,
+      },
+    });
+    const mod = await esmock('../../../../../src/commands/project/deploy/pipeline/quick.js', {
+      '../../../../../src/common/base/abstractQuick.js': mockedQuick,
+    });
     QuickCommand = mod.default;
   });
 
