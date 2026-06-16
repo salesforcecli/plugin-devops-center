@@ -1,5 +1,5 @@
 {
-  "node-option": ["import=tsx", "loader=esmock"],
+  "node-option": ["import=tsx", "import=esmock"],
   "recursive": true,
   "reporter": "spec",
   "timeout": 5000
