@@ -1,22 +1,34 @@
 /*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 /* eslint-disable no-console, @typescript-eslint/no-non-null-assertion */
 
 import { Connection, Messages } from '@salesforce/core';
-import { AsyncOperationType } from '../constants';
-import { DeploySummaryQueryResult, selectDeployAORSummaryDataById } from '../selectors/deployProgressSummarySelector';
-import { EnvQueryResult, selectPipelineStageByEnvironment } from '../selectors/environmentSelector';
-import { selectWorkItemsByChangeBundles, WorkItemsQueryResult } from '../selectors/workItemSelector';
-import { selectValidateDeployAORSummaryDataById } from '../selectors/validateDeploySelector';
-import { ChangeBundle, ChangeBundleInstall, WorkItem, WorkItemPromote } from '../types';
-import { AbstractOutputService, OutputFlags, OutputService } from './outputService';
+import { AsyncOperationType } from '../constants.js';
+import {
+  DeploySummaryQueryResult,
+  selectDeployAORSummaryDataById,
+} from '../selectors/deployProgressSummarySelector.js';
+import { EnvQueryResult, selectPipelineStageByEnvironment } from '../selectors/environmentSelector.js';
+import { selectWorkItemsByChangeBundles, WorkItemsQueryResult } from '../selectors/workItemSelector.js';
+import { selectValidateDeployAORSummaryDataById } from '../selectors/validateDeploySelector.js';
+import { ChangeBundle, ChangeBundleInstall, WorkItem, WorkItemPromote } from '../types.js';
+import { AbstractOutputService, OutputFlags, OutputService } from './outputService.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const output = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.output');
 
 /**

@@ -1,21 +1,30 @@
 /*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 import { Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Interfaces } from '@oclif/core';
-import { DeployPipelineCache } from '../../common/deployPipelineCache';
-import { PromotePipelineResult } from '../../common';
-import { requiredDoceOrgFlag } from '../../common/flags/flags';
-import { DeploymentResult } from './../types';
-import { selectOneDeploymentResultByAsyncJobId } from './../selectors/deploymentResultsSelector';
-import { OutputService } from './../outputService/outputService';
-import { OutputServiceFactory } from './../outputService/outputServiceFactory';
+import { DeployPipelineCache } from '../../common/deployPipelineCache.js';
+import type { PromotePipelineResult } from '../../common/index.js';
+import { requiredDoceOrgFlag } from '../../common/flags/flags.js';
+import type { DeploymentResult } from './../types.js';
+import { selectOneDeploymentResultByAsyncJobId } from './../selectors/deploymentResultsSelector.js';
+import { OutputService } from './../outputService/outputService.js';
+import { OutputServiceFactory } from './../outputService/outputServiceFactory.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
@@ -25,6 +34,7 @@ export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
 export abstract class ReportOnPromoteCommand<T extends typeof SfCommand> extends SfCommand<PromotePipelineResult> {
   public static readonly enableJsonFlag = true;
   public static baseFlags = {
+    ...SfCommand.baseFlags,
     'devops-center-username': requiredDoceOrgFlag(),
   };
   protected flags!: Flags<T>;

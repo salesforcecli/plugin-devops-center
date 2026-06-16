@@ -1,19 +1,28 @@
 /*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 /* eslint-disable no-console, @typescript-eslint/require-await */
 
 import { Connection, Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
-import { Flags } from '../base/abstractResume';
-import { AorOutputFlags } from './aorOutputService';
-import { AbstractResumeOutputService } from './resumeOutputService';
+import { Flags } from '../base/abstractResume.js';
+import { AorOutputFlags } from './aorOutputService.js';
+import { AbstractResumeOutputService } from './resumeOutputService.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const output = Messages.loadMessages('@salesforce/plugin-devops-center', 'resume.output');
 
 /**
@@ -27,8 +36,8 @@ export class ResumeCommandOutputService extends AbstractResumeOutputService<AorO
   public constructor(flags: Flags<typeof SfCommand>, operationType: string, con: Connection) {
     super(
       {
-        concise: flags['concise'],
-        verbose: flags['verbose'],
+        concise: flags['concise'] as boolean | undefined,
+        verbose: flags['verbose'] as boolean | undefined,
       },
       ''
     );

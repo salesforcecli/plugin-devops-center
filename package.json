@@ -2,36 +2,39 @@
   "name": "@salesforce/plugin-devops-center",
   "description": "The DevOps Center CLI plugin provides a command-line alternative to performing equivalent actions in the DevOps Center graphical UI",
   "version": "1.2.27",
+  "type": "module",
   "author": "Salesforce",
   "bugs": "https://github.com/forcedotcom/cli/issues",
   "dependencies": {
-    "@oclif/core": "^3",
-    "@salesforce/core": "^6.7.6",
+    "@jsforce/jsforce-node": "^3",
+    "@oclif/core": "^4",
+    "@salesforce/core": "^8.2.7",
     "@salesforce/kit": "^3.2.3",
-    "@salesforce/sf-plugins-core": "^5.0.1",
-    "@salesforce/ts-types": "^2.0.10",
-    "chalk": "^4",
-    "jsforce": "^2.0.0-beta.29",
-    "tslib": "^2"
+    "@salesforce/sf-plugins-core": "^12",
+    "@salesforce/ts-types": "^2.0.11",
+    "chalk": "^5"
   },
   "devDependencies": {
-    "@oclif/plugin-command-snapshot": "^5",
+    "@oclif/plugin-command-snapshot": "^5.2.3",
     "@oclif/test": "^3",
-    "@salesforce/cli-plugins-testkit": "^5",
-    "@salesforce/dev-scripts": "^8",
+    "@salesforce/cli-plugins-testkit": "^5.3.20",
+    "@salesforce/dev-scripts": "^11",
     "@salesforce/plugin-command-reference": "^3.1.38",
     "@salesforce/ts-sinon": "^1.4.30",
-    "@swc/cli": "^0.5.2",
-    "@swc/core": "^1.10.4",
+    "@types/chai": "^5.2.3",
+    "chai": "^6.2.2",
     "eslint-plugin-sf-plugin": "^1.20.13",
+    "esmock": "^2.7.6",
     "oclif": "^4",
-    "ts-node": "^10.9.2",
+    "tsx": "^4",
     "typescript": "^5.7.2"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "files": [
+    "/bin/dev.js",
+    "/bin/run.js",
     "/lib",
     "/messages",
     "/npm-shrinkwrap.json",
@@ -49,7 +52,7 @@
     "sf-plugin",
     "sf"
   ],
-  "license": "BSD-3-Clause",
+  "license": "Apache-2.0",
   "main": "lib/index.js",
   "oclif": {
     "commands": "./lib/commands",
@@ -95,6 +98,7 @@
     "clean-all": "sf-clean all",
     "compile": "wireit",
     "docs": "sf-docs",
+    "fix-license": "eslint src test --fix --rule \"header/header: [2]\"",
     "format": "wireit",
     "link-check": "wireit",
     "lint": "wireit",
@@ -106,6 +110,7 @@
     "test:only": "wireit",
     "version": "oclif readme"
   },
+  "exports": "./lib/index.js",
   "publishConfig": {
     "access": "public"
   },
@@ -186,7 +191,7 @@
       "output": []
     },
     "test:command-reference": {
-      "command": "\"./bin/dev\" commandreference:generate --erroronwarnings",
+      "command": "node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" commandreference:generate --erroronwarnings",
       "files": [
         "src/**/*.ts",
         "messages/**",
@@ -197,7 +202,7 @@
       ]
     },
     "test:deprecation-policy": {
-      "command": "\"./bin/dev\" snapshot:compare",
+      "command": "node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" snapshot:compare",
       "files": [
         "src/**/*.ts"
       ],
@@ -207,7 +212,7 @@
       ]
     },
     "test:json-schema": {
-      "command": "\"./bin/dev\" schema:compare",
+      "command": "node --loader ts-node/esm --no-warnings=ExperimentalWarning \"./bin/dev.js\" schema:compare",
       "files": [
         "src/**/*.ts",
         "schemas"
@@ -215,7 +220,7 @@
       "output": []
     },
     "link-check": {
-      "command": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|test/|confluence.internal.salesforce.com|my.salesforce.com|%s\" --markdown --retry --directory-listing --verbosity error",
+      "command": "node -e \"process.exit(process.env.CI ? 0 : 1)\" || linkinator \"**/*.md\" --skip \"CHANGELOG.md|node_modules|test/|confluence.internal.salesforce.com|my.salesforce.com|localhost|%s\" --markdown --retry --directory-listing --verbosity error",
       "files": [
         "./*.md",
         "./!(CHANGELOG).md",
