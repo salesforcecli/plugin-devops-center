@@ -45,6 +45,7 @@ describe('resume output', () => {
         '../../../src/common/selectors/deploymentResultsSelector.js': {
           isCheckDeploy: isCheckDeployStub,
         },
+        '@salesforce/core': await import('@salesforce/core'),
       }
     );
     ResumeCommandOutputServiceClass = mod.ResumeCommandOutputService;

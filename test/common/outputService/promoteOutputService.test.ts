@@ -67,6 +67,7 @@ describe('promoteOutputService', () => {
         '../../../src/common/utils.js': {
           getFormattedDeployComponentsByAyncOpId: getFormattedDeployComponentsByAyncOpIdStub,
         },
+        '@salesforce/core': await import('@salesforce/core'),
       }
     );
     AbstractPromoteOutputServiceClass = mod.AbstractPromoteOutputService;

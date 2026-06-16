@@ -123,6 +123,7 @@ describe('project deploy pipeline start', () => {
         '../../../../../src/common/outputService/outputServiceFactory.js': {
           OutputServiceFactory: MockOutputServiceFactory,
         },
+        '@salesforce/core': await import('@salesforce/core'),
       }
     );
     StartCommand = mod.default;

@@ -129,6 +129,7 @@ describe('project deploy pipeline quick', () => {
         '../../../../../src/common/outputService/outputServiceFactory.js': {
           OutputServiceFactory: MockOutputServiceFactory,
         },
+        '@salesforce/core': await import('@salesforce/core'),
       }
     );
     QuickCommand = mod.default;

@@ -52,6 +52,7 @@ describe('project deploy pipeline report', () => {
         '../../../../../src/common/selectors/deploymentResultsSelector.js': {
           selectOneDeploymentResultByAsyncJobId: selectOneDeploymentResultByAsyncJobIdStub,
         },
+        '@salesforce/core': await import('@salesforce/core'),
       }
     );
     ReportCommand = mod.default;

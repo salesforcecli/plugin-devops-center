@@ -103,6 +103,7 @@ describe('project deploy pipeline resume', () => {
         '../../../../../src/common/outputService/outputServiceFactory.js': {
           OutputServiceFactory: MockOutputServiceFactory,
         },
+        '@salesforce/core': await import('@salesforce/core'),
       }
     );
     ResumeCmd = mod.default;

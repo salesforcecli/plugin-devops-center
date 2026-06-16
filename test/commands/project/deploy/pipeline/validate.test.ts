@@ -99,6 +99,7 @@ describe('project deploy pipeline validate', () => {
         '../../../../../src/common/outputService/outputServiceFactory.js': {
           OutputServiceFactory: MockOutputServiceFactory,
         },
+        '@salesforce/core': await import('@salesforce/core'),
       }
     );
     ValidateCommand = mod.default;
