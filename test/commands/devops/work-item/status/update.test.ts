@@ -122,7 +122,7 @@ describe('devops work-item status update', () => {
             '--work-item-id',
             '0Wx000000000001',
             '--status',
-            'BadStatus',
+            'In Progress',
           ]);
         } catch (e) {
           // expected

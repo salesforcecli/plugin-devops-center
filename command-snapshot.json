@@ -9,6 +9,14 @@
   },
   {
     "alias": [],
+    "command": "devops:pull-request:create",
+    "flagAliases": [],
+    "flagChars": ["n", "o", "w"],
+    "flags": ["api-version", "body", "flags-dir", "json", "target-org", "title", "work-item-id", "work-item-name"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:work-item:create",
     "flagAliases": [],
     "flagChars": ["d", "o", "p", "s"],
@@ -21,6 +29,14 @@
     "flagAliases": [],
     "flagChars": ["o", "p"],
     "flags": ["api-version", "flags-dir", "json", "project-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:work-item:status:update",
+    "flagAliases": [],
+    "flagChars": ["n", "o", "w"],
+    "flags": ["api-version", "flags-dir", "json", "status", "target-org", "work-item-id", "work-item-name"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
