@@ -92,6 +92,9 @@
           },
           "pull-request": {
             "description": "Commands for managing DevOps Center pull requests."
+          },
+          "pipeline": {
+            "description": "Commands for managing DevOps Center pipelines."
           }
         }
       }

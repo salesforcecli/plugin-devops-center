@@ -1,6 +1,14 @@
 [
   {
     "alias": [],
+    "command": "devops:pipeline:attach-project",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "pipeline-id", "project-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:project:create",
     "flagAliases": [],
     "flagChars": ["d", "n", "o"],
