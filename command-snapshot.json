@@ -1,6 +1,14 @@
 [
   {
     "alias": [],
+    "command": "devops:project:create",
+    "flagAliases": [],
+    "flagChars": ["d", "n", "o"],
+    "flags": ["api-version", "description", "flags-dir", "json", "name", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:project:list",
     "flagAliases": [],
     "flagChars": ["o"],

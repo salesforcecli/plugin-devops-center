@@ -1,10 +1,10 @@
 # summary
 
-Create a DevOps Center project in a Salesforce org.
+Create a DevOps Center project in a DevOps Center org.
 
 # description
 
-Creates a new DevOps Center project with the specified name and optional description. Requires a DevOps Center org; use `--target-org` to specify the target org.
+Creates a new DevOps Center project with the specified name and optional description.
 
 # flags.target-org.summary
 
@@ -20,10 +20,10 @@ Description of the new project; if not specified, the description is blank.
 
 # examples
 
-- Create a new DevOps Center project in the specified org:
+- Create a new DevOps Center project in the specified org.
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --name "MyApp Release"
 
-- Create a project with a name and description:
+- Create a project with a name and description.
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --name "Platform Update" --description "Platform services update"
