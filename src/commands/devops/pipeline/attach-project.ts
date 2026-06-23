@@ -34,13 +34,15 @@ export default class DevopsPipelineAttachProject extends SfCommand<AttachProject
       required: true,
     }),
     'api-version': Flags.orgApiVersion(),
-    'pipeline-id': Flags.string({
+    'pipeline-id': Flags.salesforceId({
       summary: messages.getMessage('flags.pipeline-id.summary'),
       required: true,
+      char: undefined,
     }),
-    'project-id': Flags.string({
+    'project-id': Flags.salesforceId({
       summary: messages.getMessage('flags.project-id.summary'),
       required: true,
+      char: undefined,
     }),
   };
 
