@@ -9,6 +9,26 @@
   },
   {
     "alias": [],
+    "command": "devops:pipeline:create",
+    "flagAliases": [],
+    "flagChars": ["d", "n", "o", "r"],
+    "flags": [
+      "api-version",
+      "bitbucket-project",
+      "create-repo",
+      "description",
+      "flags-dir",
+      "json",
+      "name",
+      "repo",
+      "repo-owner",
+      "repo-type",
+      "target-org"
+    ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:project:create",
     "flagAliases": [],
     "flagChars": ["d", "n", "o"],
