@@ -29,6 +29,14 @@
   },
   {
     "alias": [],
+    "command": "devops:pipeline:stage:add",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": ["api-version", "flags-dir", "json", "name", "next-stage-id", "pipeline-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:project:create",
     "flagAliases": [],
     "flagChars": ["d", "n", "o"],

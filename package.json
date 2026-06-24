@@ -94,7 +94,12 @@
             "description": "Commands for managing DevOps Center pull requests."
           },
           "pipeline": {
-            "description": "Commands for managing DevOps Center pipelines."
+            "description": "Commands for managing DevOps Center pipelines.",
+            "subtopics": {
+              "stage": {
+                "description": "Commands for managing pipeline stages."
+              }
+            }
           }
         }
       }
