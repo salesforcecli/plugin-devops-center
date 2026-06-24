@@ -21,8 +21,6 @@
     "@salesforce/dev-scripts": "^11",
     "@salesforce/plugin-command-reference": "^3.1.38",
     "@salesforce/ts-sinon": "^1.4.30",
-    "@types/chai": "^5.2.3",
-    "chai": "^6.2.2",
     "eslint-plugin-sf-plugin": "^1.20.13",
     "esmock": "^2.7.6",
     "oclif": "^4",
@@ -85,7 +83,18 @@
             "description": "Commands for managing DevOps Center projects."
           },
           "work-item": {
-            "description": "Commands for managing DevOps Center work items."
+            "description": "Commands for managing DevOps Center work items.",
+            "subtopics": {
+              "status": {
+                "description": "Commands for managing DevOps Center work item statuses."
+              }
+            }
+          },
+          "pull-request": {
+            "description": "Commands for managing DevOps Center pull requests."
+          },
+          "pipeline": {
+            "description": "Commands for managing DevOps Center pipelines."
           }
         }
       }

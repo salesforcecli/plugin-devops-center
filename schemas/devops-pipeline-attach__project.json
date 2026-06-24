@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AttachProjectResult",
+  "definitions": {
+    "AttachProjectResult": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "pipelineId": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": ["success", "projectId", "pipelineId"],
+      "additionalProperties": false
+    }
+  }
+}

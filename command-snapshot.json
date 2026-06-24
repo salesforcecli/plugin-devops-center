@@ -1,10 +1,34 @@
 [
   {
     "alias": [],
+    "command": "devops:pipeline:attach-project",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "pipeline-id", "project-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:project:create",
+    "flagAliases": [],
+    "flagChars": ["d", "n", "o"],
+    "flags": ["api-version", "description", "flags-dir", "json", "name", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:project:list",
     "flagAliases": [],
     "flagChars": ["o"],
     "flags": ["api-version", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:pull-request:create",
+    "flagAliases": [],
+    "flagChars": ["n", "o", "w"],
+    "flags": ["api-version", "body", "flags-dir", "json", "target-org", "title", "work-item-id", "work-item-name"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -21,6 +45,14 @@
     "flagAliases": [],
     "flagChars": ["o", "p"],
     "flags": ["api-version", "flags-dir", "json", "project-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:work-item:status:update",
+    "flagAliases": [],
+    "flagChars": ["n", "o", "w"],
+    "flags": ["api-version", "flags-dir", "json", "status", "target-org", "work-item-id", "work-item-name"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
