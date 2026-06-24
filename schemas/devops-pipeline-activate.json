@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/ActivatePipelineResult",
+  "definitions": {
+    "ActivatePipelineResult": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "pipelineId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "stageCount": {
+          "type": "number"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": ["success", "pipelineId"],
+      "additionalProperties": false
+    }
+  }
+}
