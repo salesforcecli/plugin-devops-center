@@ -16,13 +16,15 @@
 
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { attachProject, AttachProjectResult, findExistingAttachment } from '../../../utils/attachProject.js';
+import { activatePipeline, ActivatePipelineResult } from '../../../utils/activatePipeline.js';
+import { fetchPipelineStages } from '../../../utils/pipelineUtils.js';
+import { PipelineStageRecord } from '../../../utils/types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.pipeline.attach-project');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.pipeline.activate');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export default class DevopsPipelineAttachProject extends SfCommand<AttachProjectResult> {
+export default class DevopsPipelineActivate extends SfCommand<ActivatePipelineResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -35,23 +37,17 @@ export default class DevopsPipelineAttachProject extends SfCommand<AttachProject
       required: true,
       char: undefined,
     }),
-    'project-id': Flags.salesforceId({
-      summary: messages.getMessage('flags.project-id.summary'),
-      required: true,
-      char: undefined,
-    }),
   };
 
-  public async run(): Promise<AttachProjectResult> {
-    const { flags } = await this.parse(DevopsPipelineAttachProject);
+  public async run(): Promise<ActivatePipelineResult> {
+    const { flags } = await this.parse(DevopsPipelineActivate);
     const org: Org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
-    const projectId = flags['project-id'];
     const pipelineId = flags['pipeline-id'];
 
-    let existingPipelineId: string | undefined;
+    let stages: PipelineStageRecord[];
     try {
-      existingPipelineId = await findExistingAttachment(connection, projectId);
+      stages = await fetchPipelineStages(connection, pipelineId);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
@@ -60,27 +56,32 @@ export default class DevopsPipelineAttachProject extends SfCommand<AttachProject
       throw error;
     }
 
-    if (existingPipelineId) {
-      this.error(messages.getMessage('error.AlreadyAttached', [projectId, existingPipelineId]));
+    if (stages.length === 0) {
+      this.error(messages.getMessage('error.NoStages', [pipelineId]));
     }
 
-    let result: AttachProjectResult;
+    let result: ActivatePipelineResult;
     try {
-      result = await attachProject({ connection, projectId, pipelineId });
+      result = await activatePipeline({ connection, pipelineId });
+      result.stageCount = stages.length;
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
         this.error(commonErrorMessages.getMessage('error.DevopsCenterNotEnabled'));
+      }
+      if (errMsg.includes('already active') || errMsg.includes('ALREADY_ACTIVE')) {
+        this.error(messages.getMessage('error.AlreadyActive', [pipelineId]));
       }
       throw error;
     }
 
     if (result.success) {
-      this.log('Successfully attached project to pipeline.');
-      this.log(`  Project ID:  ${projectId}`);
+      this.log('Successfully activated the pipeline.');
       this.log(`  Pipeline ID: ${pipelineId}`);
+      this.log(`  Status:      ${result.status ?? 'Active'}`);
+      this.log(`  Stages:      ${result.stageCount ?? stages.length}`);
     } else {
-      this.error(`Failed to attach project to pipeline: ${result.error ?? ''}`);
+      this.error(`Failed to activate pipeline: ${result.error ?? ''}`);
     }
 
     return result;

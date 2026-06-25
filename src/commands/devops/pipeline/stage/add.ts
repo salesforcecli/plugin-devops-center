@@ -16,13 +16,15 @@
 
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { attachProject, AttachProjectResult, findExistingAttachment } from '../../../utils/attachProject.js';
+import { addPipelineStage, AddPipelineStageResult } from '../../../../utils/addPipelineStage.js';
+import { fetchPipelineStages } from '../../../../utils/pipelineUtils.js';
+import { PipelineStageRecord } from '../../../../utils/types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.pipeline.attach-project');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.pipeline.stage.add');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export default class DevopsPipelineAttachProject extends SfCommand<AttachProjectResult> {
+export default class DevopsPipelineStageAdd extends SfCommand<AddPipelineStageResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -35,23 +37,28 @@ export default class DevopsPipelineAttachProject extends SfCommand<AttachProject
       required: true,
       char: undefined,
     }),
-    'project-id': Flags.salesforceId({
-      summary: messages.getMessage('flags.project-id.summary'),
+    name: Flags.string({
+      summary: messages.getMessage('flags.name.summary'),
+      char: 'n',
+      required: true,
+    }),
+    'next-stage-id': Flags.salesforceId({
+      summary: messages.getMessage('flags.next-stage-id.summary'),
       required: true,
       char: undefined,
     }),
   };
 
-  public async run(): Promise<AttachProjectResult> {
-    const { flags } = await this.parse(DevopsPipelineAttachProject);
+  public async run(): Promise<AddPipelineStageResult> {
+    const { flags } = await this.parse(DevopsPipelineStageAdd);
     const org: Org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
-    const projectId = flags['project-id'];
     const pipelineId = flags['pipeline-id'];
+    const nextStageId = flags['next-stage-id'];
 
-    let existingPipelineId: string | undefined;
+    let stages: PipelineStageRecord[];
     try {
-      existingPipelineId = await findExistingAttachment(connection, projectId);
+      stages = await fetchPipelineStages(connection, pipelineId);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
@@ -60,13 +67,18 @@ export default class DevopsPipelineAttachProject extends SfCommand<AttachProject
       throw error;
     }
 
-    if (existingPipelineId) {
-      this.error(messages.getMessage('error.AlreadyAttached', [projectId, existingPipelineId]));
+    if (!stages.some((s) => s.Id === nextStageId)) {
+      this.error(messages.getMessage('error.StageNotFound', [nextStageId, pipelineId]));
     }
 
-    let result: AttachProjectResult;
+    let result: AddPipelineStageResult;
     try {
-      result = await attachProject({ connection, projectId, pipelineId });
+      result = await addPipelineStage({
+        connection,
+        pipelineId,
+        name: flags['name'],
+        nextStageId,
+      });
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
@@ -76,11 +88,12 @@ export default class DevopsPipelineAttachProject extends SfCommand<AttachProject
     }
 
     if (result.success) {
-      this.log('Successfully attached project to pipeline.');
-      this.log(`  Project ID:  ${projectId}`);
+      this.log(`Successfully added stage "${result.name ?? ''}" to the pipeline.`);
+      this.log(`  Stage ID:    ${result.stageId ?? ''}`);
+      this.log(`  Position:    before "${nextStageId}"`);
       this.log(`  Pipeline ID: ${pipelineId}`);
     } else {
-      this.error(`Failed to attach project to pipeline: ${result.error ?? ''}`);
+      this.error(`Failed to add stage: ${result.error ?? ''}`);
     }
 
     return result;

@@ -34,11 +34,7 @@ export default class DevopsPullRequestCreate extends SfCommand<CreatePullRequest
   public static readonly examples = messages.getMessages('examples');
 
   public static readonly flags = {
-    'target-org': Flags.requiredOrg({
-      char: 'o',
-      summary: messages.getMessage('flags.target-org.summary'),
-      required: true,
-    }),
+    'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
     'work-item-name': Flags.string({
       summary: messages.getMessage('flags.work-item-name.summary'),

@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/CreatePipelineResult",
+  "definitions": {
+    "CreatePipelineResult": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "pipelineId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "repository": {
+          "$ref": "#/definitions/RepoInfo"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": ["success"],
+      "additionalProperties": false
+    },
+    "RepoInfo": {
+      "type": "object",
+      "properties": {
+        "repoUrl": {
+          "type": "string"
+        },
+        "repoType": {
+          "type": "string"
+        },
+        "created": {
+          "type": "boolean"
+        }
+      },
+      "required": ["repoUrl", "repoType", "created"],
+      "additionalProperties": false
+    }
+  }
+}
