@@ -96,14 +96,12 @@ export async function createPipeline(params: CreatePipelineParams): Promise<Crea
     payload.description = description;
   }
 
-  const response = await connection.request({
+  const data = await connection.request<ConnectPipelineResponse>({
     method: 'POST',
     url: path,
     body: JSON.stringify(payload),
     headers: { 'Content-Type': 'application/json' },
   });
-
-  const data = response as ConnectPipelineResponse;
 
   return {
     success: true,

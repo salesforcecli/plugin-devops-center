@@ -29,6 +29,8 @@ export type ActivatePipelineResult = {
   error?: string;
 };
 
+type ActivateResponse = { status?: string; id: string };
+
 /**
  * Activates a DevOps Center pipeline via the Connect API.
  * POST /services/data/v{version}/connect/devops/pipelines/{pipelineId}/activate
@@ -38,7 +40,7 @@ export async function activatePipeline(params: ActivatePipelineParams): Promise<
 
   const path = `/services/data/v${connection.getApiVersion()}/connect/devops/pipelines/${pipelineId}/activate`;
 
-  await connection.request({
+  const data = await connection.request<ActivateResponse>({
     method: 'POST',
     url: path,
     body: '{}',
@@ -48,6 +50,6 @@ export async function activatePipeline(params: ActivatePipelineParams): Promise<
   return {
     success: true,
     pipelineId,
-    status: 'Active',
+    status: data.status ?? 'Active',
   };
 }

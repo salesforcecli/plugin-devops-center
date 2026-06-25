@@ -28,11 +28,7 @@ export default class DevopsPipelineAttachProject extends SfCommand<AttachProject
   public static readonly examples = messages.getMessages('examples');
 
   public static readonly flags = {
-    'target-org': Flags.requiredOrg({
-      char: 'o',
-      summary: messages.getMessage('flags.target-org.summary'),
-      required: true,
-    }),
+    'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
     'pipeline-id': Flags.salesforceId({
       summary: messages.getMessage('flags.pipeline-id.summary'),
