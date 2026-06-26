@@ -4,6 +4,7 @@
   "definitions": {
     "PromotePipelineResult": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "jobId": {
           "type": "string"
@@ -18,8 +19,7 @@
           "type": "string"
         }
       },
-      "required": ["jobId"],
-      "additionalProperties": false
+      "required": ["jobId"]
     }
   }
 }

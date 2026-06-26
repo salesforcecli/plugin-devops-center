@@ -1,31 +1,135 @@
 [
   {
+    "alias": [],
+    "command": "devops:pipeline:activate",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "pipeline-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:pipeline:attach-project",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "pipeline-id", "project-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:pipeline:create",
+    "flagAliases": [],
+    "flagChars": ["d", "n", "o", "r"],
+    "flags": [
+      "api-version",
+      "bitbucket-project",
+      "create-repo",
+      "description",
+      "flags-dir",
+      "json",
+      "name",
+      "repo",
+      "repo-owner",
+      "repo-type",
+      "target-org"
+    ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:pipeline:stage:add",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": ["api-version", "flags-dir", "json", "name", "next-stage-id", "pipeline-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:project:create",
+    "flagAliases": [],
+    "flagChars": ["d", "n", "o"],
+    "flags": ["api-version", "description", "flags-dir", "json", "name", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:project:list",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:pull-request:create",
+    "flagAliases": [],
+    "flagChars": ["n", "o", "w"],
+    "flags": ["api-version", "body", "flags-dir", "json", "target-org", "title", "work-item-id", "work-item-name"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:work-item:create",
+    "flagAliases": [],
+    "flagChars": ["d", "o", "p", "s"],
+    "flags": ["api-version", "description", "flags-dir", "json", "project-id", "subject", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:work-item:list",
+    "flagAliases": [],
+    "flagChars": ["o", "p"],
+    "flags": ["api-version", "flags-dir", "json", "project-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:work-item:status:update",
+    "flagAliases": [],
+    "flagChars": ["n", "o", "w"],
+    "flags": ["api-version", "flags-dir", "json", "status", "target-org", "work-item-id", "work-item-name"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "project:deploy:pipeline:quick",
-    "plugin": "@salesforce/plugin-devops-center",
-    "flags": ["async", "concise", "devops-center-username", "job-id", "json", "use-most-recent", "verbose", "wait"],
-    "alias": [],
+    "flagAliases": [],
     "flagChars": ["c", "i", "r", "w"],
-    "flagAliases": []
+    "flags": [
+      "async",
+      "concise",
+      "devops-center-username",
+      "flags-dir",
+      "job-id",
+      "json",
+      "use-most-recent",
+      "verbose",
+      "wait"
+    ],
+    "plugin": "@salesforce/plugin-devops-center"
   },
   {
+    "alias": [],
     "command": "project:deploy:pipeline:report",
-    "plugin": "@salesforce/plugin-devops-center",
-    "flags": ["devops-center-username", "job-id", "json", "use-most-recent"],
-    "alias": [],
+    "flagAliases": [],
     "flagChars": ["c", "i", "r"],
-    "flagAliases": []
+    "flags": ["devops-center-username", "flags-dir", "job-id", "json", "use-most-recent"],
+    "plugin": "@salesforce/plugin-devops-center"
   },
   {
+    "alias": [],
     "command": "project:deploy:pipeline:resume",
-    "plugin": "@salesforce/plugin-devops-center",
-    "flags": ["concise", "devops-center-username", "job-id", "json", "use-most-recent", "verbose", "wait"],
-    "alias": [],
+    "flagAliases": [],
     "flagChars": ["c", "i", "r", "w"],
-    "flagAliases": []
+    "flags": ["concise", "devops-center-username", "flags-dir", "job-id", "json", "use-most-recent", "verbose", "wait"],
+    "plugin": "@salesforce/plugin-devops-center"
   },
   {
+    "alias": [],
     "command": "project:deploy:pipeline:start",
-    "plugin": "@salesforce/plugin-devops-center",
+    "flagAliases": [],
+    "flagChars": ["a", "b", "c", "l", "p", "t", "v", "w"],
     "flags": [
       "async",
       "branch-name",
@@ -34,19 +138,20 @@
       "deploy-all",
       "devops-center-project-name",
       "devops-center-username",
+      "flags-dir",
       "json",
       "test-level",
       "tests",
       "verbose",
       "wait"
     ],
-    "alias": [],
-    "flagChars": ["a", "b", "c", "l", "p", "t", "v", "w"],
-    "flagAliases": []
+    "plugin": "@salesforce/plugin-devops-center"
   },
   {
+    "alias": [],
     "command": "project:deploy:pipeline:validate",
-    "plugin": "@salesforce/plugin-devops-center",
+    "flagAliases": [],
+    "flagChars": ["a", "b", "c", "l", "p", "t", "v", "w"],
     "flags": [
       "async",
       "branch-name",
@@ -55,14 +160,13 @@
       "deploy-all",
       "devops-center-project-name",
       "devops-center-username",
+      "flags-dir",
       "json",
       "test-level",
       "tests",
       "verbose",
       "wait"
     ],
-    "alias": [],
-    "flagChars": ["a", "b", "c", "l", "p", "t", "v", "w"],
-    "flagAliases": []
+    "plugin": "@salesforce/plugin-devops-center"
   }
 ]

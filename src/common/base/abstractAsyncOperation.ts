@@ -1,19 +1,28 @@
 /*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 import { Messages, Org, SfError } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Duration } from '@salesforce/kit';
-import { DeployPipelineCache } from '../deployPipelineCache';
-import DoceMonitor from '../../streamer/doceMonitor';
-import { AsyncOperationResult, AsyncOperationResultJson, AsyncOperationStatus } from '../types';
-import { fetchAsyncOperationResult, getAsyncOperationStreamer } from '../../common';
-import { PromoteOutputService } from '../outputService';
+import { DeployPipelineCache } from '../deployPipelineCache.js';
+import DoceMonitor from '../../streamer/doceMonitor.js';
+import { type AsyncOperationResult, type AsyncOperationResultJson, AsyncOperationStatus } from '../types.js';
+import { fetchAsyncOperationResult, getAsyncOperationStreamer } from '../../common/index.js';
+import type { PromoteOutputService } from '../outputService/index.js';
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
 export abstract class AsyncCommand extends SfCommand<AsyncOperationResultJson> {
@@ -60,7 +69,7 @@ export abstract class AsyncCommand extends SfCommand<AsyncOperationResultJson> {
    * @param error
    * @returns
    */
-  protected catch(error: Error | SfError): Promise<SfCommand.Error> {
+  protected catch(error: Error | SfError): Promise<never> {
     if (error.name && error.name.includes('GenericTimeoutError')) {
       const err = messages.createError('error.ClientTimeout', [this.config.bin, this.baseCommand]);
       return super.catch({ ...error, name: err.name, message: err.message, code: err.code });

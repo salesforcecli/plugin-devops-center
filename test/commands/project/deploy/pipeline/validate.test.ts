@@ -1,24 +1,31 @@
 /*
- * Copyright (c) 2022, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 /* eslint-disable camelcase */
+import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
-import { TestContext } from '@salesforce/core/lib/testSetup';
-import * as sinon from 'sinon';
+import { TestContext } from '@salesforce/core/testSetup';
+import sinon from 'sinon';
 import { ConfigAggregator, Org, StreamingClient } from '@salesforce/core';
-import { HttpRequest } from 'jsforce';
-import { ConfigVars } from '../../../../../src/configMeta';
-import AsyncOpStreaming from '../../../../../src/streamer/processors/asyncOpStream';
-import * as Utils from '../../../../../src/common/utils';
-import { DeployCommandOutputService } from '../../../../../src/common/outputService';
-import { AsyncOperationStatus, PipelineStage } from '../../../../../src/common';
+import { HttpRequest } from '@jsforce/jsforce-node';
+import { ConfigVars } from '../../../../../src/configMeta.js';
+import AsyncOpStreaming from '../../../../../src/streamer/processors/asyncOpStream.js';
+import { AsyncOperationStatus, PipelineStage } from '../../../../../src/common/index.js';
 
 let requestMock: sinon.SinonStub;
-let stubDisplayEndResults: sinon.SinonStub;
 
 const DOCE_ORG = {
   id: '1',
@@ -49,10 +56,74 @@ const stubStreamingClient = async (options?: StreamingClient.Options) => ({
 describe('project deploy pipeline validate', () => {
   let sandbox: sinon.SinonSandbox;
   let pipelineStageMock: PipelineStage;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let ValidateCommand: any;
   const $$ = new TestContext();
+
+  const fetchAndValidatePipelineStageStub = sinon.stub();
+  const fetchAsyncOperationResultStub = sinon.stub();
+  const displayEndResultsStub = sinon.stub().resolves();
+  const getStatusStub = sinon.stub();
+  const printOpSummaryStub = sinon.stub().resolves();
+
+  // Mock output service factory to avoid module-tree duplication issues
+  const mockOutputService = {
+    setAorId: sinon.stub(),
+    printAorId: sinon.stub(),
+    printOpSummary: printOpSummaryStub,
+    printAorStatus: sinon.stub(),
+    displayEndResults: displayEndResultsStub,
+    getStatus: getStatusStub,
+  };
+
+  class MockOutputServiceFactory {
+    // eslint-disable-next-line class-methods-use-this
+    public forDeployment() {
+      return mockOutputService;
+    }
+    // eslint-disable-next-line class-methods-use-this
+    public forResume() {
+      return mockOutputService;
+    }
+  }
+
+  before(async () => {
+    const realCommonIndex = await import('../../../../../src/common/index.js');
+    const mockedAsyncOp = await esmock('../../../../../src/common/base/abstractAsyncOperation.js', {
+      '../../../../../src/common/index.js': {
+        ...realCommonIndex,
+        fetchAsyncOperationResult: fetchAsyncOperationResultStub,
+      },
+    });
+    const mockedPromote = await esmock('../../../../../src/common/base/abstractPromote.js', {
+      '../../../../../src/common/base/abstractAsyncOperation.js': mockedAsyncOp,
+      '../../../../../src/common/index.js': {
+        ...realCommonIndex,
+        fetchAndValidatePipelineStage: fetchAndValidatePipelineStageStub,
+      },
+      '../../../../../src/common/outputService/index.js': {
+        OutputServiceFactory: MockOutputServiceFactory,
+      },
+    });
+    const mockedStart = await esmock('../../../../../src/commands/project/deploy/pipeline/start.js', {
+      '../../../../../src/common/base/abstractPromote.js': mockedPromote,
+    });
+    const mod = await esmock('../../../../../src/commands/project/deploy/pipeline/validate.js', {
+      '../../../../../src/commands/project/deploy/pipeline/start.js': mockedStart,
+    });
+    ValidateCommand = mod.default;
+  });
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
+    fetchAndValidatePipelineStageStub.reset();
+    fetchAsyncOperationResultStub.reset();
+    displayEndResultsStub.reset();
+    getStatusStub.reset();
+    printOpSummaryStub.reset();
+    mockOutputService.setAorId.reset();
+    mockOutputService.printAorId.reset();
+    mockOutputService.printAorStatus.reset();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sandbox.stub(Org, 'create' as any).returns(DOCE_ORG);
     sandbox.stub(ConfigAggregator.prototype, 'getInfo').returns({
@@ -73,81 +144,54 @@ describe('project deploy pipeline validate', () => {
     const firstStageId = 'mock-first-stage-id';
 
     beforeEach(() => {
-      // Mock the events streaming and the output service
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sandbox.stub(StreamingClient, 'create' as any).callsFake(stubStreamingClient);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sandbox.stub(AsyncOpStreaming.prototype, 'monitor' as any).returns({ completed: true, payload: {} });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      sandbox.stub(DeployCommandOutputService.prototype, 'printOpSummary' as any).returns({});
-      sandbox.stub(Utils, 'fetchAsyncOperationResult').resolves({ Id: 'MockId' });
+      fetchAsyncOperationResultStub.resolves({ Id: 'MockId' });
     });
 
     test
       .stdout()
       .stderr()
-      .do(() => {
-        // mock the pipeline stage record
+      .it('correctly sets the promote option to perfom a checkDeploy promotion', async () => {
         pipelineStageMock = {
           Id: firstStageId,
-          sf_devops__Branch__r: {
-            sf_devops__Name__c: 'mockBranchName',
-          },
-          sf_devops__Pipeline__r: {
-            sf_devops__Project__c: 'mockProjectId',
-          },
+          sf_devops__Branch__r: { sf_devops__Name__c: 'mockBranchName' },
+          sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockProjectId' },
           sf_devops__Pipeline_Stages__r: undefined,
           Name: 'mock',
-          sf_devops__Environment__r: {
-            Id: 'envId',
-            Name: 'envName',
-            sf_devops__Named_Credential__c: 'ABC',
-          },
+          sf_devops__Environment__r: { Id: 'envId', Name: 'envName', sf_devops__Named_Credential__c: 'ABC' },
         };
-        sandbox.stub(Utils, 'fetchAndValidatePipelineStage').resolves(pipelineStageMock);
+        fetchAndValidatePipelineStageStub.resolves(pipelineStageMock);
         requestMock = sinon.stub().resolves({ jobId: 'mock-aor-id' });
-      })
-      .command(['project deploy pipeline validate', '-p=testProject', '-b=testBranch'])
-      .it('correctly sets the promote option to perfom a checkDeploy promotion', () => {
-        // verify we made the request
+
+        await ValidateCommand.run(['-p=testProject', '-b=testBranch']);
+
         expect(requestMock.called).to.equal(true);
-        // now that we know the request was made
-        // we can get the call argument
-        // and validate its values
         const requestArgument = requestMock.getCall(0).args[0] as HttpRequest;
         expect(requestArgument.body).to.contain('"checkDeploy":true');
       });
 
     test
-      .do(() => {
+      .stdout()
+      .stderr()
+      .it('runs project deploy pipeline validate and handles the verbose flag correctly ', async () => {
         pipelineStageMock = {
           Id: 'mock-id',
           Name: 'mock',
-          sf_devops__Branch__r: {
-            sf_devops__Name__c: 'mockBranchName',
-          },
-          sf_devops__Pipeline__r: {
-            sf_devops__Project__c: 'mockProjectId',
-          },
+          sf_devops__Branch__r: { sf_devops__Name__c: 'mockBranchName' },
+          sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockProjectId' },
           sf_devops__Pipeline_Stages__r: undefined,
-          sf_devops__Environment__r: {
-            Id: 'envId',
-            Name: 'envName',
-            sf_devops__Named_Credential__c: 'ABC',
-          },
+          sf_devops__Environment__r: { Id: 'envId', Name: 'envName', sf_devops__Named_Credential__c: 'ABC' },
         };
-        sandbox.stub(Utils, 'fetchAndValidatePipelineStage').resolves(pipelineStageMock);
+        fetchAndValidatePipelineStageStub.resolves(pipelineStageMock);
         requestMock = sinon.stub().resolves('MockId');
+        getStatusStub.returns(AsyncOperationStatus.Completed);
 
-        sandbox.stub(DeployCommandOutputService.prototype, 'getStatus').returns(AsyncOperationStatus.Completed);
+        await ValidateCommand.run(['-p=testProject', '-b=testBranch', '--wait=3', '--verbose']);
 
-        stubDisplayEndResults = sandbox.stub(DeployCommandOutputService.prototype, 'displayEndResults');
-      })
-      .stdout()
-      .stderr()
-      .command(['project deploy pipeline validate', '-p=testProject', '-b=testBranch', '--wait=3', '--verbose'])
-      .it('runs project deploy pipeline validate and handles the verbose flag correctly ', () => {
-        expect(stubDisplayEndResults.called).to.equal(true);
+        expect(displayEndResultsStub.called).to.equal(true);
       });
   });
 });

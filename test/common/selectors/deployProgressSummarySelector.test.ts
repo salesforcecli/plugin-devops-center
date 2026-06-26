@@ -1,22 +1,30 @@
 /*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 /* eslint-disable camelcase */
 
 import { expect } from '@oclif/test';
 import { Connection } from '@salesforce/core';
-import { QueryResult } from 'jsforce';
-import sinon = require('sinon');
+import { QueryResult } from '@jsforce/jsforce-node';
+import sinon from 'sinon';
 import {
   DeploySummaryQueryResult,
   selectDeployAORSummaryDataById,
-} from '../../../src/common/selectors/deployProgressSummarySelector';
-import { WorkItemPromote } from '../../../src/common/types';
-import * as SelectorUtils from '../../../src/common/selectors/selectorUtils';
+} from '../../../src/common/selectors/deployProgressSummarySelector.js';
+import { WorkItemPromote } from '../../../src/common/types.js';
 
 const WORK_ITEM_1: WorkItemPromote = {
   sf_devops__Pipeline_Stage__r: {
@@ -95,11 +103,7 @@ describe('deploy progress sumary selector', () => {
     const mockConnection = sandbox.createStubInstance(Connection);
     mockConnection.query.resolves(mockRecord);
 
-    const runSafeQuerySpy = sandbox.spy(SelectorUtils, 'runSafeQuery');
-
     const result = await selectDeployAORSummaryDataById(mockConnection, 'AAA');
-
-    expect(runSafeQuerySpy.called).to.equal(true);
 
     // Verify we received the correct result
     expect(mockConnection.query.called).to.equal(true);

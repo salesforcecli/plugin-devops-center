@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/CreateWorkItemResult",
+  "definitions": {
+    "CreateWorkItemResult": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "workItemId": {
+          "type": "string"
+        },
+        "workItemName": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": ["success"],
+      "additionalProperties": false
+    }
+  }
+}

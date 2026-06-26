@@ -1,37 +1,47 @@
 /*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 import { Interfaces } from '@oclif/core';
 import { Messages } from '@salesforce/core';
 import { Flags as SfFlags, SfCommand } from '@salesforce/sf-plugins-core';
-import { HttpRequest } from 'jsforce';
-import { ApiPromoteResponse, AsyncOperationStatus, PipelineStage, PromoteOptions } from '..';
-import { REST_PROMOTE_BASE_URL } from '../constants';
-import { DeployPipelineCache } from '../deployPipelineCache';
-import { async } from '../flags/promote/promoteFlags';
-import { concise, requiredDoceOrgFlag, verbose, wait } from '../flags/flags';
-import { OutputServiceFactory } from '../outputService';
-import { AsyncOperationResultJson } from '../../common';
+import { HttpRequest } from '@jsforce/jsforce-node';
+import { ApiPromoteResponse, AsyncOperationStatus, PipelineStage, PromoteOptions } from '../index.js';
+import { REST_PROMOTE_BASE_URL } from '../constants.js';
+import { DeployPipelineCache } from '../deployPipelineCache.js';
+import { async } from '../flags/promote/promoteFlags.js';
+import { concise, requiredDoceOrgFlag, verbose, wait } from '../flags/flags.js';
+import { OutputServiceFactory } from '../outputService/index.js';
+import type { AsyncOperationResultJson } from '../../common/index.js';
 import {
-  CheckDeploymentResultWithChangeBundleInstalls,
+  type CheckDeploymentResultWithChangeBundleInstalls,
   selectOneDeploymentResultWithChangeBundleInstallsByAsyncJobId,
-} from '../selectors/deploymentResultsSelector';
-import { selectOnePipelineStageByEnvironmentId } from '../selectors/pipelineStageSelector';
-import { AsyncCommand } from './abstractAsyncOperation';
+} from '../selectors/deploymentResultsSelector.js';
+import { selectOnePipelineStageByEnvironmentId } from '../selectors/pipelineStageSelector.js';
+import { AsyncCommand } from './abstractAsyncOperation.js';
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
   (typeof QuickPromotionCommand)['baseFlags'] & T['flags']
 >;
 
-Messages.importMessagesDirectory(__dirname);
+Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'project.deploy.pipeline.quick');
 
 export default abstract class QuickPromotionCommand<T extends typeof SfCommand> extends AsyncCommand {
   public static readonly enableJsonFlag = true;
   public static baseFlags = {
+    ...SfCommand.baseFlags,
     async,
     concise,
     verbose,
@@ -94,7 +104,7 @@ export default abstract class QuickPromotionCommand<T extends typeof SfCommand> 
       )
     );
 
-    return this.monitorOperation(this.flags.async, this.flags.wait);
+    return this.monitorOperation(this.flags.async as boolean, this.flags.wait);
   }
 
   protected getTargetStage(): PipelineStage {

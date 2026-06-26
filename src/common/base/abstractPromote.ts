@@ -1,14 +1,29 @@
 /*
- * Copyright (c) 2023, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Interfaces } from '@oclif/core';
-import { HttpRequest } from 'jsforce';
-import { fetchAndValidatePipelineStage, PipelineStage, PromoteOptions, validateTestFlags } from '..';
-import { devopsCenterProjectName, requiredDoceOrgFlag, wait, verbose, concise } from '../flags/flags';
+import { HttpRequest } from '@jsforce/jsforce-node';
+import {
+  fetchAndValidatePipelineStage,
+  PipelineStage,
+  PromoteOptions,
+  TestLevel,
+  validateTestFlags,
+} from '../index.js';
+import { devopsCenterProjectName, requiredDoceOrgFlag, wait, verbose, concise } from '../flags/flags.js';
 import {
   branchName,
   bundleVersionName,
@@ -16,12 +31,12 @@ import {
   specificTests,
   testLevel,
   async,
-} from '../flags/promote/promoteFlags';
-import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from '../constants';
-import { ApiError, ApiPromoteResponse, AsyncOperationResultJson } from '../../common';
-import { OutputServiceFactory } from '../outputService';
-import { sleep } from '../utils';
-import { AsyncCommand } from './abstractAsyncOperation';
+} from '../flags/promote/promoteFlags.js';
+import { REST_PROMOTE_BASE_URL, HTTP_CONFLICT_CODE } from '../constants.js';
+import type { ApiError, ApiPromoteResponse, AsyncOperationResultJson } from '../../common/index.js';
+import { OutputServiceFactory } from '../outputService/index.js';
+import { sleep } from '../utils.js';
+import { AsyncCommand } from './abstractAsyncOperation.js';
 
 export type Flags<T extends typeof SfCommand> = Interfaces.InferredFlags<
   (typeof PromoteCommand)['baseFlags'] & T['flags']
@@ -31,6 +46,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
   public static readonly enableJsonFlag = true;
   // common flags that can be inherited by any command that extends PromoteCommand
   public static baseFlags = {
+    ...SfCommand.baseFlags,
     'branch-name': branchName,
     'bundle-version-name': bundleVersionName,
     'deploy-all': deployAll,
@@ -65,7 +81,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
   }
 
   protected async executePromotion(): Promise<AsyncOperationResultJson> {
-    validateTestFlags(this.flags['test-level'], this.flags.tests);
+    validateTestFlags(this.flags['test-level'] as TestLevel | undefined, this.flags.tests);
     this.targetStage = await fetchAndValidatePipelineStage(
       this.targetOrg,
       this.flags['devops-center-project-name'],
@@ -74,7 +90,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
     this.sourceStageId = this.getSourceStageId();
     this.setAsyncOperationId(await this.requestPromotionFlow());
 
-    return this.monitorOperation(this.flags.async, this.flags.wait);
+    return this.monitorOperation(this.flags.async as boolean, this.flags.wait);
   }
 
   /**
@@ -147,8 +163,8 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
 
   private buildPromoteOptions(): void {
     this.deployOptions = {
-      fullDeploy: this.flags['deploy-all'],
-      testLevel: this.flags['test-level'] ?? 'Default',
+      fullDeploy: this.flags['deploy-all'] as boolean,
+      testLevel: (this.flags['test-level'] as string) ?? 'Default',
       runTests: this.flags.tests ? this.flags.tests.join(',') : undefined,
       // get more promote options from the concrete implementation if needed
       ...this.getPromoteOptions(),

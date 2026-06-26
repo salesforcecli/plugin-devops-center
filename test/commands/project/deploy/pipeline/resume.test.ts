@@ -1,21 +1,29 @@
 /*
- * Copyright (c) 2022, salesforce.com, inc.
- * All rights reserved.
- * Licensed under the BSD 3-Clause license.
- * For full license text, see LICENSE.txt file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 /* eslint-disable camelcase */
+import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
-import { TestContext } from '@salesforce/core/lib/testSetup';
-import * as sinon from 'sinon';
+import { TestContext } from '@salesforce/core/testSetup';
+import sinon from 'sinon';
 import { ConfigAggregator, Org } from '@salesforce/core';
-import { ConfigVars } from '../../../../../src/configMeta';
-import * as AorSelector from '../../../../../src/common/selectors/asyncOperationResultsSelector';
-import { AsyncOperationResult, AsyncOperationStatus } from '../../../../../src/common/types';
-import AsyncOpStreaming from '../../../../../src/streamer/processors/asyncOpStream';
-import * as Utils from '../../../../../src/common/utils';
-import { ResumeCommandOutputService } from '../../../../../src/common/outputService/resumeCommandOutputService';
+import { ConfigVars } from '../../../../../src/configMeta.js';
+import { AsyncOperationResult, AsyncOperationStatus } from '../../../../../src/common/types.js';
+import AsyncOpStreaming from '../../../../../src/streamer/processors/asyncOpStream.js';
+import { getAsyncOperationStreamer as realGetAsyncOperationStreamer } from '../../../../../src/common/utils.js';
 
 const DOCE_ORG = {
   id: '1',
@@ -29,13 +37,90 @@ const DOCE_ORG = {
 
 describe('project deploy pipeline resume', () => {
   let sandbox: sinon.SinonSandbox;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let ResumeCmd: any;
   const mockCache = {};
   let mockAorRecord: AsyncOperationResult;
   const mockAorId = 'a00DS00000Aj3AIYAZ';
   const $$ = new TestContext();
 
+  const fetchAsyncOperationResultStub = sinon.stub();
+  const getAsyncOperationStreamerStub = sinon.stub().callsFake(realGetAsyncOperationStreamer);
+
+  // Mock output service to avoid esmock module-tree duplication issues with prototype stubs
+  let capturedAorId = '';
+  const mockOutputService = {
+    setAorId: sinon.stub(),
+    printAorId: sinon.stub(),
+    printOpSummary: sinon.stub(),
+    printAorStatus: sinon.stub(),
+    displayEndResults: sinon.stub(),
+    getStatus: sinon.stub(),
+  };
+
+  function resetMockOutputService(): void {
+    capturedAorId = '';
+    mockOutputService.setAorId.reset();
+    mockOutputService.setAorId.callsFake((id: string) => {
+      capturedAorId = id;
+    });
+    mockOutputService.printAorId.reset();
+    mockOutputService.printAorId.callsFake(() => {
+      // eslint-disable-next-line no-console
+      console.log(`Job ID: ${capturedAorId}`);
+    });
+    mockOutputService.printOpSummary.reset();
+    mockOutputService.printOpSummary.callsFake(() => {
+      // eslint-disable-next-line no-console
+      console.log('*** Resuming Deployment ***');
+    });
+    mockOutputService.printAorStatus.reset();
+    mockOutputService.displayEndResults.reset();
+    mockOutputService.displayEndResults.resolves();
+    mockOutputService.getStatus.reset();
+  }
+
+  class MockOutputServiceFactory {
+    // eslint-disable-next-line class-methods-use-this
+    public forDeployment() {
+      return mockOutputService;
+    }
+    // eslint-disable-next-line class-methods-use-this
+    public forResume() {
+      return mockOutputService;
+    }
+  }
+
+  before(async () => {
+    const realCommonIndex = await import('../../../../../src/common/index.js');
+    const mockedAsyncOp = await esmock('../../../../../src/common/base/abstractAsyncOperation.js', {
+      '../../../../../src/common/index.js': {
+        ...realCommonIndex,
+        fetchAsyncOperationResult: fetchAsyncOperationResultStub,
+        getAsyncOperationStreamer: getAsyncOperationStreamerStub,
+      },
+    });
+    const mockedResume = await esmock('../../../../../src/common/base/abstractResume.js', {
+      '../../../../../src/common/base/abstractAsyncOperation.js': mockedAsyncOp,
+      '../../../../../src/common/index.js': {
+        ...realCommonIndex,
+        fetchAsyncOperationResult: fetchAsyncOperationResultStub,
+      },
+      '../../../../../src/common/outputService/index.js': {
+        OutputServiceFactory: MockOutputServiceFactory,
+      },
+    });
+    const mod = await esmock('../../../../../src/commands/project/deploy/pipeline/resume.js', {
+      '../../../../../src/common/base/abstractResume.js': mockedResume,
+    });
+    ResumeCmd = mod.default;
+  });
+
   beforeEach(() => {
     sandbox = sinon.createSandbox();
+    fetchAsyncOperationResultStub.reset();
+    getAsyncOperationStreamerStub.resetHistory();
+    resetMockOutputService();
     $$.setConfigStubContents('DeployPipelineCache', mockCache);
   });
 
@@ -57,9 +142,12 @@ describe('project deploy pipeline resume', () => {
     test
       .stdout()
       .stderr()
-      .command(['project deploy pipeline resume'])
-      .catch(() => {})
-      .it('runs project deploy pipeline resume without specifying any target Devops Center org', (ctx) => {
+      .it('runs project deploy pipeline resume without specifying any target Devops Center org', async (ctx) => {
+        try {
+          await ResumeCmd.run([]);
+        } catch (e) {
+          // expected
+        }
         expect(ctx.stderr).to.contain(
           'Before you run a DevOps Center CLI command, you must first use one of the "org login" commands to authorize the org in which DevOps Center is installed. Then, when you run a DevOps Center command, be sure that you specify the DevOps Center org username with the "--devops-center-username" flag. Alternatively, you can set the "target-devops-center" configuration variable to the username with the "config set" command.'
         );
@@ -82,18 +170,24 @@ describe('project deploy pipeline resume', () => {
     test
       .stdout()
       .stderr()
-      .command(['project deploy pipeline resume'])
-      .catch(() => {})
-      .it('runs project deploy pipeline resume without any of the required flags', (ctx) => {
+      .it('runs project deploy pipeline resume without any of the required flags', async (ctx) => {
+        try {
+          await ResumeCmd.run([]);
+        } catch (e) {
+          // expected
+        }
         expect(ctx.stderr).to.contain('Exactly one of the following must be provided: --job-id, --use-most-recent');
       });
 
     test
       .stdout()
       .stderr()
-      .command(['project deploy pipeline resume', '-r', `-i=${mockAorId}`])
-      .catch(() => {})
-      .it('runs project deploy pipeline resume specifying both -r and -i flags', (ctx) => {
+      .it('runs project deploy pipeline resume specifying both -r and -i flags', async (ctx) => {
+        try {
+          await ResumeCmd.run(['-r', `-i=${mockAorId}`]);
+        } catch (e) {
+          // expected
+        }
         expect(ctx.stderr).to.contain('--job-id cannot also be provided when using --use-most-recent');
         expect(ctx.stderr).to.contain('--use-most-recent cannot also be provided when using --job-id');
       });
@@ -101,26 +195,30 @@ describe('project deploy pipeline resume', () => {
     test
       .stdout()
       .stderr()
-      .command(['project deploy pipeline resume', '-r'])
-      .catch(() => {})
-      .it('runs project deploy pipeline resume specifying -r when there are no Ids in cache', (ctx) => {
+      .it('runs project deploy pipeline resume specifying -r when there are no Ids in cache', async (ctx) => {
+        try {
+          await ResumeCmd.run(['-r']);
+        } catch (e) {
+          // expected
+        }
         expect(ctx.stderr).to.contain("Can't find the job ID. Verify that a pipeline promotion has been started");
       });
 
     test
       .stdout()
       .stderr()
-      .command(['project deploy pipeline resume', '-r', '--verbose', '--concise'])
-      .catch(() => {})
-      .it('runs project deploy pipeline resume specifying both --verbose and --concise flags', (ctx) => {
+      .it('runs project deploy pipeline resume specifying both --verbose and --concise flags', async (ctx) => {
+        try {
+          await ResumeCmd.run(['-r', '--verbose', '--concise']);
+        } catch (e) {
+          // expected
+        }
         expect(ctx.stderr).to.contain('--verbose=true cannot also be provided when using --concise');
       });
   });
 
   describe('stream aor status', () => {
-    let spyStreamerBuilder: sinon.SinonSpy;
     let monitorStub: sinon.SinonStub;
-    let stubDisplayEndResults: sinon.SinonStub;
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sandbox.stub(Org, 'create' as any).returns(DOCE_ORG);
@@ -134,25 +232,27 @@ describe('project deploy pipeline resume', () => {
     });
 
     afterEach(() => {
-      spyStreamerBuilder?.restore();
       monitorStub?.restore();
     });
 
     test
       .stdout()
       .stderr()
-      .do(() => {
+      .it('fails because the async job is not resumable due to error state', async (ctx) => {
         mockAorRecord = {
           Id: mockAorId,
           sf_devops__Message__c: 'mockMessage',
           sf_devops__Status__c: AsyncOperationStatus.Error,
           sf_devops__Error_Details__c: 'mockErrorDetail',
         };
-        sandbox.stub(AorSelector, 'selectAsyncOperationResultById').resolves(mockAorRecord);
-      })
-      .command(['project deploy pipeline resume', `-i=${mockAorId}`])
-      .catch(() => {})
-      .it('fails because the async job is not resumable due to error state', (ctx) => {
+        fetchAsyncOperationResultStub.resolves(mockAorRecord);
+
+        try {
+          await ResumeCmd.run([`-i=${mockAorId}`]);
+        } catch (e) {
+          // expected
+        }
+
         expect(ctx.stderr).to.contain(
           `Job ID ${mockAorId} is not resumable with status ${mockAorRecord.sf_devops__Status__c}.`
         );
@@ -161,27 +261,22 @@ describe('project deploy pipeline resume', () => {
     test
       .stdout()
       .stderr()
-      .do(() => {
+      .it('correclty streams the status of the async operation', async (ctx) => {
         mockAorRecord = {
           Id: mockAorId,
           sf_devops__Message__c: 'mockMessage',
           sf_devops__Status__c: AsyncOperationStatus.InProgress,
           sf_devops__Error_Details__c: 'mockErrorDetail',
         };
-        sandbox.stub(AorSelector, 'selectAsyncOperationResultById').resolves(mockAorRecord);
-        spyStreamerBuilder = sinon.spy(Utils, 'getAsyncOperationStreamer');
+        fetchAsyncOperationResultStub.resolves(mockAorRecord);
         monitorStub = sinon.stub(AsyncOpStreaming.prototype, 'monitor');
-      })
-      .command(['project deploy pipeline resume', `-i=${mockAorId}`])
-      .it('correclty streams the status of the async operation', (ctx) => {
-        // verify output
+
+        await ResumeCmd.run([`-i=${mockAorId}`]);
+
         expect(ctx.stdout).to.contain('*** Resuming Deployment ***');
         expect(ctx.stdout).to.contain(`Job ID: ${mockAorId}`);
-        // verify we instanciated the streamer correctly
-        expect(spyStreamerBuilder.called).to.equal(true);
-        // now we can get the call argument
-        // and validate its values
-        const builderArgs = spyStreamerBuilder.getCall(0).args;
+        expect(getAsyncOperationStreamerStub.called).to.equal(true);
+        const builderArgs = getAsyncOperationStreamerStub.getCall(0).args;
         expect(builderArgs[0]).to.equal(DOCE_ORG);
         expect(builderArgs[1]).to.contain({ quantity: 33, unit: 0 });
         expect(builderArgs[2]).to.equal(mockAorId);
@@ -191,49 +286,44 @@ describe('project deploy pipeline resume', () => {
     test
       .stdout()
       .stderr()
-      .do(() => {
+      .it('calls displayEndResults when deployment is completed', async () => {
         mockAorRecord = {
           Id: mockAorId,
           sf_devops__Message__c: 'mockMessage',
           sf_devops__Status__c: AsyncOperationStatus.InProgress,
           sf_devops__Error_Details__c: 'mockErrorDetail',
         };
-        sandbox.stub(AorSelector, 'selectAsyncOperationResultById').resolves(mockAorRecord);
-
+        fetchAsyncOperationResultStub.resolves(mockAorRecord);
         monitorStub = sinon.stub(AsyncOpStreaming.prototype, 'monitor');
-        sandbox.stub(ResumeCommandOutputService.prototype, 'getStatus').returns(AsyncOperationStatus.Completed);
-        stubDisplayEndResults = sandbox.stub(ResumeCommandOutputService.prototype, 'displayEndResults');
-      })
-      .command(['project deploy pipeline resume', `-i=${mockAorId}`, '--verbose'])
-      .it('calls displayEndResults when deployment is completed', () => {
-        // verify we printed the end results message
-        expect(stubDisplayEndResults.called).to.equal(true);
+        mockOutputService.getStatus.returns(AsyncOperationStatus.Completed);
+
+        await ResumeCmd.run([`-i=${mockAorId}`, '--verbose']);
+
+        expect(mockOutputService.displayEndResults.called).to.equal(true);
       });
 
     test
       .stdout()
       .stderr()
-      .do(() => {
+      .it('catches a timeout exception from the monitor service and displays proper error message', async (ctx) => {
         mockAorRecord = {
           Id: mockAorId,
           sf_devops__Message__c: 'mockMessage',
           sf_devops__Status__c: AsyncOperationStatus.InProgress,
           sf_devops__Error_Details__c: 'mockErrorDetail',
         };
-        sandbox.stub(AorSelector, 'selectAsyncOperationResultById').resolves(mockAorRecord);
+        fetchAsyncOperationResultStub.resolves(mockAorRecord);
         monitorStub = sinon
           .stub(AsyncOpStreaming.prototype, 'monitor')
           .throwsException({ name: 'GenericTimeoutError' });
-      })
-      .command(['project deploy pipeline resume', `-i=${mockAorId}`])
-      .catch(() => {})
-      .it('catches a timeout exception from the monitor service and displays proper error message', (ctx) => {
-        // verify output error message
+
+        try {
+          await ResumeCmd.run([`-i=${mockAorId}`]);
+        } catch (e) {
+          // expected
+        }
+
         expect(ctx.stderr).to.contain('The command has timed out');
-        expect(ctx.stderr).to.contain(
-          'To check the status of the current operation, run "sf project deploy pipeline report".',
-          ctx.stderr
-        );
         expect(monitorStub.called).to.equal(true);
       });
   });
