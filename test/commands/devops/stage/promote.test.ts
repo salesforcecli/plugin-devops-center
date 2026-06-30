@@ -23,7 +23,7 @@ import { ConfigAggregator, Org } from '@salesforce/core';
 import { ConfigVars } from '../../../../src/configMeta.js';
 import { AsyncOperationStatus, PipelineStage } from '../../../../src/common/index.js';
 
-let requestMock: sinon.SinonStub;
+const requestMock: sinon.SinonStub = sinon.stub();
 let queryMock: sinon.SinonStub;
 
 const DOCE_ORG = {
