@@ -62,6 +62,24 @@
   },
   {
     "alias": [],
+    "command": "devops:stage:add-environment",
+    "flagAliases": [],
+    "flagChars": ["e", "o"],
+    "flags": [
+      "api-version",
+      "environment-name",
+      "flags-dir",
+      "json",
+      "no-browser",
+      "org-type",
+      "pipeline-id",
+      "stage-id",
+      "target-org"
+    ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:project:create",
     "flagAliases": [],
     "flagChars": ["d", "n", "o"],
