@@ -18,8 +18,7 @@
           "type": "string"
         },
         "orgType": {
-          "type": "string",
-          "enum": ["Production", "Sandbox"]
+          "$ref": "#/definitions/OrgType"
         },
         "pipelineId": {
           "type": "string"
@@ -39,6 +38,10 @@
       },
       "required": ["success", "stageId"],
       "additionalProperties": false
+    },
+    "OrgType": {
+      "type": "string",
+      "enum": ["Production", "Sandbox"]
     }
   }
 }

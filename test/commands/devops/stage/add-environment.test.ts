@@ -27,6 +27,7 @@ describe('devops stage add-environment', () => {
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const addStageEnvironmentStub = sinon.stub();
   const fetchPipelineStagesStub = sinon.stub();
+  const execStub = sinon.stub();
 
   before(async () => {
     const mod = await esmock('../../../../src/commands/devops/stage/add-environment.js', {
@@ -36,6 +37,9 @@ describe('devops stage add-environment', () => {
       '../../../../src/utils/pipelineUtils.js': {
         fetchPipelineStages: fetchPipelineStagesStub,
       },
+      'node:child_process': {
+        exec: execStub,
+      },
     });
     AddEnvironmentCommand = mod.default;
   });
@@ -44,6 +48,7 @@ describe('devops stage add-environment', () => {
     sandbox = sinon.createSandbox();
     addStageEnvironmentStub.reset();
     fetchPipelineStagesStub.reset();
+    execStub.reset();
   });
 
   afterEach(() => {
