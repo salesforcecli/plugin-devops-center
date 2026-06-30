@@ -1,14 +1,6 @@
 [
   {
     "alias": [],
-    "command": "devops:conflict:detect",
-    "flagAliases": [],
-    "flagChars": ["o", "p", "w"],
-    "flags": ["api-version", "flags-dir", "json", "repo-path", "target-org", "work-item-id"],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
     "command": "devops:stage:promote",
     "flagAliases": [],
     "flagChars": ["a", "b", "c", "l", "p", "t", "v", "w"],
