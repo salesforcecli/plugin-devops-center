@@ -21,6 +21,7 @@ import type { PipelineStage, PromoteOptions } from '../../../common/index.js';
 import { APPROVED } from '../../../common/constants.js';
 import type { AsyncOperationResultJson } from '../../../common/types.js';
 import { promoteStage } from '../../../utils/promoteStage.js';
+import { getPipelineIdForProject } from '../../../utils/pipelineUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.stage.promote');
@@ -38,9 +39,8 @@ export default class DevopsStagePromote extends PromoteCommand<typeof SfCommand>
 
   protected getSourceStageId(): string {
     const targetStage: PipelineStage = this.getTargetStage();
-    return targetStage.sf_devops__Pipeline_Stages__r
-      ? targetStage.sf_devops__Pipeline_Stages__r.records[0].Id
-      : APPROVED;
+    const previousStages = targetStage.sf_devops__Pipeline_Stages__r;
+    return previousStages?.records?.length ? previousStages.records[0].Id : APPROVED;
   }
 
   protected getPromoteOptions(): Partial<PromoteOptions> {
@@ -53,8 +53,13 @@ export default class DevopsStagePromote extends PromoteCommand<typeof SfCommand>
    */
   protected async requestPromotionFlow(): Promise<string> {
     const targetStage = this.getTargetStage();
-    const pipelineId = targetStage.sf_devops__Pipeline__r.sf_devops__Project__c;
+    const projectId = targetStage.sf_devops__Pipeline__r.sf_devops__Project__c;
     const connection = this.targetOrg.getConnection();
+
+    const pipelineId = await getPipelineIdForProject(connection, projectId);
+    if (!pipelineId) {
+      this.error('No pipeline found for this project. Ensure the project has an associated pipeline.');
+    }
 
     const sourceStageId = this.getSourceStageId();
 

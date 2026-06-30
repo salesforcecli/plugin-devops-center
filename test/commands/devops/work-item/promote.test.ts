@@ -28,6 +28,7 @@ describe('devops work-item promote', () => {
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const promoteStageStub = sinon.stub();
   const selectPipelineStagesStub = sinon.stub();
+  const getPipelineIdForProjectStub = sinon.stub();
 
   before(async () => {
     const mod = await esmock('../../../../src/commands/devops/work-item/promote.js', {
@@ -36,6 +37,9 @@ describe('devops work-item promote', () => {
       },
       '../../../../src/common/selectors/pipelineStageSelector.js': {
         selectPipelineStagesByProject: selectPipelineStagesStub,
+      },
+      '../../../../src/utils/pipelineUtils.js': {
+        getPipelineIdForProject: getPipelineIdForProjectStub,
       },
       '../../../../src/common/flags/flags.js': {
         requiredDoceOrgFlag: () => ({
@@ -59,6 +63,8 @@ describe('devops work-item promote', () => {
     sandbox = sinon.createSandbox();
     promoteStageStub.reset();
     selectPipelineStagesStub.reset();
+    getPipelineIdForProjectStub.reset();
+    getPipelineIdForProjectStub.resolves('PIPE001');
   });
 
   afterEach(() => {
@@ -70,7 +76,7 @@ describe('devops work-item promote', () => {
       Id: 'stage1',
       Name: 'Integration',
       sf_devops__Branch__r: { sf_devops__Name__c: 'integration' },
-      sf_devops__Pipeline__r: { sf_devops__Project__c: 'PIPE001' },
+      sf_devops__Pipeline__r: { sf_devops__Project__c: 'PROJ001' },
       sf_devops__Environment__r: { Id: 'envId', Name: 'envName', sf_devops__Named_Credential__c: 'ABC' },
     },
   ];

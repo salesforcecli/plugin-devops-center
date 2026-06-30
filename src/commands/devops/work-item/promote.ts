@@ -18,6 +18,7 @@ import { Messages } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { promoteStage, PromoteStageResult } from '../../../utils/promoteStage.js';
 import { selectPipelineStagesByProject } from '../../../common/selectors/pipelineStageSelector.js';
+import { getPipelineIdForProject } from '../../../utils/pipelineUtils.js';
 import { requiredDoceOrgFlag, devopsCenterProjectName } from '../../../common/flags/flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
@@ -97,7 +98,12 @@ export default class DevopsWorkItemPromote extends SfCommand<PromoteWorkItemsRes
       if (stages.length === 0) {
         this.error(commonErrorMessages.getMessage('error.ProjectNotFound', [projectName]));
       }
-      return stages[0].sf_devops__Pipeline__r.sf_devops__Project__c;
+      const projectId = stages[0].sf_devops__Pipeline__r.sf_devops__Project__c;
+      const pipelineId = await getPipelineIdForProject(connection, projectId);
+      if (!pipelineId) {
+        this.error(`No pipeline found for project "${projectName}". Ensure the project has an associated pipeline.`);
+      }
+      return pipelineId;
     } catch (error: unknown) {
       const err = error as Error;
       if (err.name === 'Query-failedError') {

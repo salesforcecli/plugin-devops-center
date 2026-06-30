@@ -53,6 +53,7 @@ describe('devops stage promote', () => {
   const esmockFetchAndValidateStub = sinon.stub();
   const esmockFetchAsyncOpResultStub = sinon.stub();
   const promoteStageStub = sinon.stub();
+  const getPipelineIdForProjectStub = sinon.stub();
 
   const mockOutputService = {
     setAorId: sinon.stub(),
@@ -103,6 +104,9 @@ describe('devops stage promote', () => {
       '../../../../src/utils/promoteStage.js': {
         promoteStage: promoteStageStub,
       },
+      '../../../../src/utils/pipelineUtils.js': {
+        getPipelineIdForProject: getPipelineIdForProjectStub,
+      },
     });
     PromoteCommand = mod.default;
   });
@@ -112,6 +116,8 @@ describe('devops stage promote', () => {
     esmockFetchAndValidateStub.reset();
     esmockFetchAsyncOpResultStub.reset();
     promoteStageStub.reset();
+    getPipelineIdForProjectStub.reset();
+    getPipelineIdForProjectStub.resolves('mock-pipeline-id');
     resetMockOutputService();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sandbox.stub(Org, 'create' as any).returns(DOCE_ORG);
@@ -138,14 +144,14 @@ describe('devops stage promote', () => {
           Id: 'mock-target-stage-id',
           Name: 'UAT',
           sf_devops__Branch__r: { sf_devops__Name__c: 'uat' },
-          sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockPipelineId' },
+          sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockProjectId' },
           sf_devops__Pipeline_Stages__r: {
             records: [
               {
                 Id: 'mock-source-stage-id',
                 Name: 'Integration',
                 sf_devops__Branch__r: { sf_devops__Name__c: 'integration' },
-                sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockPipelineId' },
+                sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockProjectId' },
                 sf_devops__Environment__r: { Id: 'envId', Name: 'envName', sf_devops__Named_Credential__c: 'ABC' },
               },
             ],
@@ -167,9 +173,11 @@ describe('devops stage promote', () => {
 
         await PromoteCommand.run(['-p=testProject', '-b=uat', '--async']);
 
+        expect(getPipelineIdForProjectStub.calledOnce).to.be.true;
+        expect(getPipelineIdForProjectStub.firstCall.args[1]).to.equal('mockProjectId');
         expect(promoteStageStub.calledOnce).to.be.true;
         const callArgs = promoteStageStub.firstCall.args[0];
-        expect(callArgs.pipelineId).to.equal('mockPipelineId');
+        expect(callArgs.pipelineId).to.equal('mock-pipeline-id');
         expect(callArgs.targetStageId).to.equal('mock-target-stage-id');
         expect(callArgs.workItemIds).to.deep.equal(['0Wx000000000001', '0Wx000000000002']);
       });
@@ -184,7 +192,7 @@ describe('devops stage promote', () => {
           Id: 'mock-first-stage-id',
           Name: 'Integration',
           sf_devops__Branch__r: { sf_devops__Name__c: 'integration' },
-          sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockPipelineId' },
+          sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockProjectId' },
           sf_devops__Pipeline_Stages__r: undefined,
           sf_devops__Environment__r: { Id: 'envId', Name: 'envName', sf_devops__Named_Credential__c: 'ABC' },
         };
@@ -206,7 +214,7 @@ describe('devops stage promote', () => {
         expect(queryMock.calledOnce).to.be.true;
         const query = queryMock.firstCall.args[0] as string;
         expect(query).to.contain("Status = 'Approved'");
-        expect(query).to.contain('mockPipelineId');
+        expect(query).to.contain('mockProjectId');
       });
   });
 
@@ -219,14 +227,14 @@ describe('devops stage promote', () => {
           Id: 'mock-target-stage-id',
           Name: 'UAT',
           sf_devops__Branch__r: { sf_devops__Name__c: 'uat' },
-          sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockPipelineId' },
+          sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockProjectId' },
           sf_devops__Pipeline_Stages__r: {
             records: [
               {
                 Id: 'mock-source-stage-id',
                 Name: 'Integration',
                 sf_devops__Branch__r: { sf_devops__Name__c: 'integration' },
-                sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockPipelineId' },
+                sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockProjectId' },
                 sf_devops__Environment__r: { Id: 'envId', Name: 'envName', sf_devops__Named_Credential__c: 'ABC' },
               },
             ],
