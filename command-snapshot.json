@@ -1,6 +1,36 @@
 [
   {
     "alias": [],
+    "command": "devops:conflict:detect",
+    "flagAliases": [],
+    "flagChars": ["o", "p", "w"],
+    "flags": ["api-version", "flags-dir", "json", "repo-path", "target-org", "work-item-id"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:stage:promote",
+    "flagAliases": [],
+    "flagChars": ["a", "b", "c", "l", "p", "t", "v", "w"],
+    "flags": [
+      "async",
+      "branch-name",
+      "bundle-version-name",
+      "concise",
+      "deploy-all",
+      "devops-center-project-name",
+      "devops-center-username",
+      "flags-dir",
+      "json",
+      "test-level",
+      "tests",
+      "verbose",
+      "wait"
+    ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:pipeline:activate",
     "flagAliases": [],
     "flagChars": ["o"],
@@ -81,6 +111,29 @@
     "flagAliases": [],
     "flagChars": ["o", "p"],
     "flags": ["api-version", "flags-dir", "json", "project-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:work-item:promote",
+    "flagAliases": [],
+    "flagChars": ["c", "i", "p", "t"],
+    "flags": [
+      "devops-center-project-name",
+      "devops-center-username",
+      "flags-dir",
+      "json",
+      "target-stage-id",
+      "work-item-id"
+    ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:work-item:prepare",
+    "flagAliases": [],
+    "flagChars": ["c", "i", "s", "t"],
+    "flags": ["devops-center-username", "flags-dir", "json", "source-stage-id", "target-stage-id", "work-item-id"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {

@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/PromoteWorkItemsResult",
+  "definitions": {
+    "PromoteWorkItemsResult": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "promotedWorkitemIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["status", "message", "promotedWorkitemIds"],
+      "additionalProperties": false
+    }
+  }
+}

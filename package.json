@@ -93,6 +93,12 @@
           "pull-request": {
             "description": "Commands for managing DevOps Center pull requests."
           },
+          "conflict": {
+            "description": "Commands for detecting and managing merge conflicts."
+          },
+          "stage": {
+            "description": "Commands for promoting bundles between pipeline stages."
+          },
           "pipeline": {
             "description": "Commands for managing DevOps Center pipelines.",
             "subtopics": {
