@@ -45,6 +45,23 @@
   },
   {
     "alias": [],
+    "command": "devops:stage:add-branch",
+    "flagAliases": [],
+    "flagChars": ["b", "o"],
+    "flags": [
+      "api-version",
+      "branch-name",
+      "create-vcs-branch",
+      "flags-dir",
+      "json",
+      "pipeline-id",
+      "stage-id",
+      "target-org"
+    ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:project:create",
     "flagAliases": [],
     "flagChars": ["d", "n", "o"],
