@@ -44,7 +44,7 @@ describe('devops work-item status update NUTs', () => {
   it('errors when --target-org is missing (valid flags supplied)', () => {
     // requiredOrg() resolves at parse time → NoDefaultEnvError → exit 1
     // Use a shell-quoted multi-word status value
-    const result = execCmd("devops work-item status update --work-item-name WI-001 --status 'In Progress'", {
+    const result = execCmd('devops work-item status update --work-item-name WI-001 --status "In Progress"', {
       ensureExitCode: 1,
     });
     expect(result.shellOutput.stderr).to.include('target-org');
