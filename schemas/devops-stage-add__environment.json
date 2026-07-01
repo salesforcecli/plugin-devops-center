@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/AddStageEnvironmentResult",
+  "definitions": {
+    "AddStageEnvironmentResult": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "stageId": {
+          "type": "string"
+        },
+        "environmentId": {
+          "type": "string"
+        },
+        "environmentName": {
+          "type": "string"
+        },
+        "orgType": {
+          "$ref": "#/definitions/OrgType"
+        },
+        "pipelineId": {
+          "type": "string"
+        },
+        "redirectUrl": {
+          "type": "string"
+        },
+        "namedCredential": {
+          "type": "string"
+        },
+        "organizationId": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": ["success", "stageId"],
+      "additionalProperties": false
+    },
+    "OrgType": {
+      "type": "string",
+      "enum": ["Production", "Sandbox"]
+    }
+  }
+}
