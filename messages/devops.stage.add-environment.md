@@ -1,12 +1,10 @@
 # summary
 
-Create and associate a Salesforce environment with a pipeline stage.
+Add a Salesforce environment to a pipeline stage.
 
 # description
 
-Creates a new environment and associates it with a pipeline stage. The command triggers an OAuth flow to authenticate the environment — a browser window opens automatically for you to log in. Once authenticated, the command validates the connection and prints the final environment details.
-
-Use --no-browser if you want to authenticate manually by opening the redirect URL yourself.
+This command triggers an OAuth flow to authenticate the environment. A browser window opens automatically for you to log in.
 
 # flags.pipeline-id.summary
 
@@ -14,11 +12,11 @@ ID of the pipeline that contains the stage.
 
 # flags.stage-id.summary
 
-ID of the pipeline stage to associate the environment with.
+ID of the pipeline stage.
 
 # flags.environment-name.summary
 
-Name of the environment to create and associate with the stage.
+Name of the environment.
 
 # flags.org-type.summary
 
@@ -30,17 +28,9 @@ Don't auto-open the browser for OAuth authentication. The redirect URL is printe
 
 # examples
 
-- Create a production environment and attach it to a stage:
+- Add a production environment to a stage using its ID:
 
-      <%= config.bin %> <%= command.id %> --target-org my-devops-org --pipeline-id 0Xo000000000001 --stage-id 0Xp000000000001 --environment-name Production_Org --org-type Production
-
-- Create a sandbox environment and attach it to a stage:
-
-      <%= config.bin %> <%= command.id %> --target-org my-devops-org --pipeline-id 0Xo000000000001 --stage-id 0Xp000000000002 --environment-name UAT_Sandbox --org-type Sandbox
-
-- Create an environment without opening the browser:
-
-      <%= config.bin %> <%= command.id %> --target-org my-devops-org --pipeline-id 0Xo000000000001 --stage-id 0Xp000000000001 --environment-name Production_Org --org-type Production --no-browser
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --stage-id 0Xp000000000001 --environment-name Production_Org --org-type Production
 
 # info.BrowserOpened
 
@@ -56,7 +46,7 @@ Waiting for authentication to complete...
 
 # info.Success
 
-Successfully created and authenticated the environment.
+Successfully added environment to the stage.
 
 # error.StageNotFound
 

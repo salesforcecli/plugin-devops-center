@@ -1,10 +1,11 @@
 # summary
 
-Associate a source code repository branch with a pipeline stage.
+Add a source code repository branch to a pipeline stage.
 
 # description
 
-Associates a source code repository branch with a pipeline stage. By default, the branch must already exist in the repository linked to the pipeline. Use `--create-vcs-branch` to create a new branch in the remote repository if it doesn't exist. Each stage can have at most one branch; if the stage already has a branch, the command replaces it.
+By default, the branch must exist in the repository. Use --create-vcs-branch to create a branch if it doesn't exist.
+Each pipeline stage supports only one branch. Adding a branch replaces any existing branch linked to the pipeline stage.
 
 # flags.pipeline-id.summary
 
@@ -24,11 +25,11 @@ Create the branch in the remote repository if it doesn't already exist.
 
 # examples
 
-- Attach an existing branch to a stage:
+- Add an existing branch to a stage:
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --pipeline-id 0Xo000000000001 --stage-id 0Xp000000000001 --branch-name main
 
-- Create a new branch in the remote repository and attach it to a stage:
+- Create and add a branch to a pipeline stage:
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --pipeline-id 0Xo000000000001 --stage-id 0Xp000000000002 --branch-name integration --create-vcs-branch
 
