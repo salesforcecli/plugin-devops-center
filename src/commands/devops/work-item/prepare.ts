@@ -22,7 +22,6 @@ import {
   resolveProjectIdFromWorkItem,
 } from '../../../utils/prepareWorkItem.js';
 import { getPipelineIdForProject } from '../../../utils/pipelineUtils.js';
-import { requiredDoceOrgFlag } from '../../../common/flags/flags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.work-item.prepare');
@@ -34,7 +33,8 @@ export default class DevopsWorkItemPrepare extends SfCommand<PrepareWorkItemResu
   public static readonly examples = messages.getMessages('examples');
 
   public static readonly flags = {
-    'devops-center-username': requiredDoceOrgFlag(),
+    'target-org': Flags.requiredOrg(),
+    'api-version': Flags.orgApiVersion(),
     'work-item-id': Flags.string({
       summary: messages.getMessage('flags.work-item-id.summary'),
       char: 'i',
@@ -54,8 +54,8 @@ export default class DevopsWorkItemPrepare extends SfCommand<PrepareWorkItemResu
 
   public async run(): Promise<PrepareWorkItemResult> {
     const { flags } = await this.parse(DevopsWorkItemPrepare);
-    const org = flags['devops-center-username'];
-    const connection = org.getConnection();
+    const org = flags['target-org'];
+    const connection = org.getConnection(flags['api-version']);
     const workItemId = flags['work-item-id'];
 
     let projectId: string;

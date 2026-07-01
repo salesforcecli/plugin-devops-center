@@ -27,7 +27,7 @@ describe('devops work-item promote', () => {
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const promoteStageStub = sinon.stub();
-  const selectPipelineStagesStub = sinon.stub();
+  const resolveProjectIdFromWorkItemStub = sinon.stub();
   const getPipelineIdForProjectStub = sinon.stub();
 
   before(async () => {
@@ -35,24 +35,28 @@ describe('devops work-item promote', () => {
       '../../../../src/utils/promoteStage.js': {
         promoteStage: promoteStageStub,
       },
-      '../../../../src/common/selectors/pipelineStageSelector.js': {
-        selectPipelineStagesByProject: selectPipelineStagesStub,
+      '../../../../src/utils/prepareWorkItem.js': {
+        resolveProjectIdFromWorkItem: resolveProjectIdFromWorkItemStub,
       },
       '../../../../src/utils/pipelineUtils.js': {
         getPipelineIdForProject: getPipelineIdForProjectStub,
       },
-      '../../../../src/common/flags/flags.js': {
-        requiredDoceOrgFlag: () => ({
-          type: 'option' as const,
-          char: 'c' as const,
-          parse: async () => mockOrg,
-          default: async () => mockOrg,
-          required: true,
-        }),
-        devopsCenterProjectName: {
-          type: 'option' as const,
-          char: 'p' as const,
-          required: true,
+      '@salesforce/sf-plugins-core': {
+        ...(await import('@salesforce/sf-plugins-core')),
+        Flags: {
+          ...(await import('@salesforce/sf-plugins-core')).Flags,
+          requiredOrg: () => ({
+            type: 'option' as const,
+            char: 'o' as const,
+            parse: async () => mockOrg,
+            default: async () => mockOrg,
+            required: true,
+          }),
+          orgApiVersion: () => ({
+            type: 'option' as const,
+            parse: async () => '65.0',
+            required: false,
+          }),
         },
       },
     });
@@ -62,24 +66,15 @@ describe('devops work-item promote', () => {
   beforeEach(() => {
     sandbox = sinon.createSandbox();
     promoteStageStub.reset();
-    selectPipelineStagesStub.reset();
+    resolveProjectIdFromWorkItemStub.reset();
     getPipelineIdForProjectStub.reset();
+    resolveProjectIdFromWorkItemStub.resolves('PROJ001');
     getPipelineIdForProjectStub.resolves('PIPE001');
   });
 
   afterEach(() => {
     sandbox.restore();
   });
-
-  const mockStages = [
-    {
-      Id: 'stage1',
-      Name: 'Integration',
-      sf_devops__Branch__r: { sf_devops__Name__c: 'integration' },
-      sf_devops__Pipeline__r: { sf_devops__Project__c: 'PROJ001' },
-      sf_devops__Environment__r: { Id: 'envId', Name: 'envName', sf_devops__Named_Credential__c: 'ABC' },
-    },
-  ];
 
   describe('successful promotion', () => {
     test
@@ -88,7 +83,6 @@ describe('devops work-item promote', () => {
       .it('promotes a single work item and displays output', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        selectPipelineStagesStub.resolves(mockStages);
         promoteStageStub.resolves({
           jobId: '0Af000000000001',
           status: 'Completed',
@@ -96,16 +90,7 @@ describe('devops work-item promote', () => {
           errorDetails: '',
         });
 
-        await PromoteCommand.run([
-          '-c',
-          'testOrg',
-          '-p',
-          'MyApp Release',
-          '-i',
-          '0Wx000000000001',
-          '-t',
-          '05S000000000002',
-        ]);
+        await PromoteCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
 
         expect(ctx.stdout).to.contain('Completed');
         expect(ctx.stdout).to.contain('0Wx000000000001');
@@ -122,7 +107,6 @@ describe('devops work-item promote', () => {
       .it('promotes multiple work items', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        selectPipelineStagesStub.resolves(mockStages);
         promoteStageStub.resolves({
           jobId: '0Af000000000001',
           status: 'Completed',
@@ -131,10 +115,8 @@ describe('devops work-item promote', () => {
         });
 
         await PromoteCommand.run([
-          '-c',
+          '-o',
           'testOrg',
-          '-p',
-          'MyApp Release',
           '-i',
           '0Wx000000000001',
           '-i',
@@ -150,34 +132,23 @@ describe('devops work-item promote', () => {
       });
   });
 
-  describe('project not found', () => {
+  describe('work item not found', () => {
     test
       .stdout()
       .stderr()
-      .it('errors when project is not found', async (ctx) => {
+      .it('errors when work item is not found', async () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        const err = new Error('No results found');
-        err.name = 'No-results-foundError';
-        selectPipelineStagesStub.rejects(err);
+        resolveProjectIdFromWorkItemStub.rejects(
+          new Error("Work item '0WxBAD' not found. Verify the work item ID and try again.")
+        );
 
         try {
-          await PromoteCommand.run([
-            '-c',
-            'testOrg',
-            '-p',
-            'NonExistent',
-            '-i',
-            '0Wx000000000001',
-            '-t',
-            '05S000000000002',
-          ]);
+          await PromoteCommand.run(['-o', 'testOrg', '-i', '0WxBAD', '-t', '05S000000000002']);
           expect.fail('should have thrown');
-        } catch (e) {
-          // expected
+        } catch (e: unknown) {
+          expect((e as Error).message).to.contain('not found');
         }
-
-        expect(ctx.stderr).to.contain("doesn't exist");
       });
   });
 
@@ -188,20 +159,10 @@ describe('devops work-item promote', () => {
       .it('errors when promote API fails', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        selectPipelineStagesStub.resolves(mockStages);
         promoteStageStub.rejects(new Error('Bad Request'));
 
         try {
-          await PromoteCommand.run([
-            '-c',
-            'testOrg',
-            '-p',
-            'MyApp Release',
-            '-i',
-            '0Wx000000000001',
-            '-t',
-            '05S000000000002',
-          ]);
+          await PromoteCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
           expect.fail('should have thrown');
         } catch (e) {
           // expected

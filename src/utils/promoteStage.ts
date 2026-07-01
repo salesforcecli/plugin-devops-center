@@ -21,6 +21,8 @@ export type PromoteStageParams = {
   pipelineId: string;
   workItemIds: string[];
   targetStageId: string;
+  testLevel?: string;
+  fullDeploy?: boolean;
 };
 
 export type PromoteStageResult = {
@@ -42,14 +44,20 @@ type ConnectPromoteResponse = {
  * POST /services/data/v{version}/connect/devops/pipelines/{pipelineId}/promote
  */
 export async function promoteStage(params: PromoteStageParams): Promise<PromoteStageResult> {
-  const { connection, pipelineId, workItemIds, targetStageId } = params;
+  const { connection, pipelineId, workItemIds, targetStageId, testLevel = 'Default', fullDeploy = false } = params;
 
   const path = `/services/data/v${connection.getApiVersion()}/connect/devops/pipelines/${pipelineId}/promote`;
 
   const data = await connection.request<ConnectPromoteResponse>({
     method: 'POST',
     url: path,
-    body: JSON.stringify({ workitemIds: workItemIds, targetStageId }),
+    body: JSON.stringify({
+      workitemIds: workItemIds,
+      targetStageId,
+      allWorkItemsInStage: false,
+      isCheckDeploy: false,
+      deployOptions: { testLevel, isFullDeploy: fullDeploy },
+    }),
     headers: { 'Content-Type': 'application/json' },
   });
 

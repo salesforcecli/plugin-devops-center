@@ -38,14 +38,23 @@ describe('devops work-item prepare', () => {
       '../../../../src/utils/pipelineUtils.js': {
         getPipelineIdForProject: getPipelineIdForProjectStub,
       },
-      '../../../../src/common/flags/flags.js': {
-        requiredDoceOrgFlag: () => ({
-          type: 'option' as const,
-          char: 'c' as const,
-          parse: async () => mockOrg,
-          default: async () => mockOrg,
-          required: true,
-        }),
+      '@salesforce/sf-plugins-core': {
+        ...(await import('@salesforce/sf-plugins-core')),
+        Flags: {
+          ...(await import('@salesforce/sf-plugins-core')).Flags,
+          requiredOrg: () => ({
+            type: 'option' as const,
+            char: 'o' as const,
+            parse: async () => mockOrg,
+            default: async () => mockOrg,
+            required: true,
+          }),
+          orgApiVersion: () => ({
+            type: 'option' as const,
+            parse: async () => '65.0',
+            required: false,
+          }),
+        },
       },
     });
     PrepareCommand = mod.default;
@@ -79,7 +88,7 @@ describe('devops work-item prepare', () => {
         });
 
         await PrepareCommand.run([
-          '-c',
+          '-o',
           'testOrg',
           '-i',
           '0Wx000000000001',
@@ -111,7 +120,7 @@ describe('devops work-item prepare', () => {
         });
 
         await PrepareCommand.run([
-          '-c',
+          '-o',
           'testOrg',
           '-i',
           '0Wx000000000001',
@@ -139,7 +148,7 @@ describe('devops work-item prepare', () => {
 
         try {
           await PrepareCommand.run([
-            '-c',
+            '-o',
             'testOrg',
             '-i',
             '0Wx000000000001',
@@ -168,7 +177,7 @@ describe('devops work-item prepare', () => {
 
         try {
           await PrepareCommand.run([
-            '-c',
+            '-o',
             'testOrg',
             '-i',
             '0Wx000000000001',
@@ -198,7 +207,7 @@ describe('devops work-item prepare', () => {
 
         try {
           await PrepareCommand.run([
-            '-c',
+            '-o',
             'testOrg',
             '-i',
             '0Wx000000000001',

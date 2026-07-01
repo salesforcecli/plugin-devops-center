@@ -17,9 +17,9 @@
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { promoteStage, PromoteStageResult } from '../../../utils/promoteStage.js';
-import { selectPipelineStagesByProject } from '../../../common/selectors/pipelineStageSelector.js';
+import { resolveProjectIdFromWorkItem } from '../../../utils/prepareWorkItem.js';
 import { getPipelineIdForProject } from '../../../utils/pipelineUtils.js';
-import { requiredDoceOrgFlag, devopsCenterProjectName } from '../../../common/flags/flags.js';
+import { testLevel as testLevelFlag } from '../../../common/flags/promote/promoteFlags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.work-item.promote');
@@ -37,10 +37,11 @@ export default class DevopsWorkItemPromote extends SfCommand<PromoteWorkItemsRes
   public static readonly examples = messages.getMessages('examples');
 
   public static readonly flags = {
-    'devops-center-username': requiredDoceOrgFlag(),
-    'devops-center-project-name': devopsCenterProjectName,
+    'target-org': Flags.requiredOrg(),
+    'api-version': Flags.orgApiVersion(),
     'work-item-id': Flags.string({
       summary: messages.getMessage('flags.work-item-id.summary'),
+      description: messages.getMessage('flags.work-item-id.description'),
       char: 'i',
       required: true,
       multiple: true,
@@ -50,17 +51,17 @@ export default class DevopsWorkItemPromote extends SfCommand<PromoteWorkItemsRes
       char: 't',
       required: true,
     }),
+    'test-level': testLevelFlag(),
   };
 
   public async run(): Promise<PromoteWorkItemsResult> {
     const { flags } = await this.parse(DevopsWorkItemPromote);
-    const org = flags['devops-center-username'];
-    const connection = org.getConnection();
-    const projectName = flags['devops-center-project-name'];
+    const org = flags['target-org'];
+    const connection = org.getConnection(flags['api-version']);
     const workItemIds = flags['work-item-id'];
     const targetStageId = flags['target-stage-id'];
 
-    const pipelineId = await this.resolvePipelineId(connection, projectName);
+    const pipelineId = await this.resolvePipelineId(connection, workItemIds[0]);
 
     let apiResult: PromoteStageResult;
     try {
@@ -69,13 +70,15 @@ export default class DevopsWorkItemPromote extends SfCommand<PromoteWorkItemsRes
         pipelineId,
         workItemIds,
         targetStageId,
+        testLevel: (flags['test-level'] as string | undefined) ?? 'Default',
       });
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
         this.error(commonErrorMessages.getMessage('error.DevopsCenterNotEnabled'));
       }
-      this.error(messages.getMessage('error.PromoteFailed', [errMsg]));
+      const cleanMsg = errMsg.split('<')[0].trim();
+      this.error(messages.getMessage('error.PromoteFailed', [cleanMsg]));
     }
 
     const result: PromoteWorkItemsResult = {
@@ -90,30 +93,15 @@ export default class DevopsWorkItemPromote extends SfCommand<PromoteWorkItemsRes
   }
 
   private async resolvePipelineId(
-    connection: Parameters<typeof selectPipelineStagesByProject>[0],
-    projectName: string
+    connection: Parameters<typeof getPipelineIdForProject>[0],
+    workItemId: string
   ): Promise<string> {
-    try {
-      const stages = await selectPipelineStagesByProject(connection, projectName);
-      if (stages.length === 0) {
-        this.error(commonErrorMessages.getMessage('error.ProjectNotFound', [projectName]));
-      }
-      const projectId = stages[0].sf_devops__Pipeline__r.sf_devops__Project__c;
-      const pipelineId = await getPipelineIdForProject(connection, projectId);
-      if (!pipelineId) {
-        this.error(`No pipeline found for project "${projectName}". Ensure the project has an associated pipeline.`);
-      }
-      return pipelineId;
-    } catch (error: unknown) {
-      const err = error as Error;
-      if (err.name === 'Query-failedError') {
-        this.error(commonErrorMessages.getMessage('error.DevopsAppNotInstalled'));
-      }
-      if (err.name === 'No-results-foundError') {
-        this.error(commonErrorMessages.getMessage('error.ProjectNotFound', [projectName]));
-      }
-      throw error;
+    const projectId = await resolveProjectIdFromWorkItem(connection, workItemId);
+    const pipelineId = await getPipelineIdForProject(connection, projectId);
+    if (!pipelineId) {
+      this.error(`No pipeline found for work item "${workItemId}". Ensure the project has an associated pipeline.`);
     }
+    return pipelineId;
   }
 
   private printOutput(result: PromoteWorkItemsResult): void {

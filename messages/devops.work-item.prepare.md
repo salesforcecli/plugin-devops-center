@@ -24,8 +24,8 @@ ID of the pipeline stage to promote the work item to.
 
 - Prepare a work item for one-off promotion from the integration stage to the UAT stage:
 
-      <%= config.bin %> <%= command.id %> --devops-center-username my-devops-org --work-item-id 0Wx000000000001 --source-stage-id 05S000000000001 --target-stage-id 05S000000000002
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --work-item-id 0Wx000000000001 --source-stage-id 05S000000000001 --target-stage-id 05S000000000002
 
 - Prepare a work item using a DevOps Center org username:
 
-      <%= config.bin %> <%= command.id %> --devops-center-username devops-center@example.com --work-item-id 0Wx000000000001 --source-stage-id 05S000000000001 --target-stage-id 05S000000000002
+      <%= config.bin %> <%= command.id %> --target-org devops-center@example.com --work-item-id 0Wx000000000001 --source-stage-id 05S000000000001 --target-stage-id 05S000000000002
