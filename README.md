@@ -63,6 +63,8 @@ sf plugins
 - [`sf devops project create`](#sf-devops-project-create)
 - [`sf devops project list`](#sf-devops-project-list)
 - [`sf devops pull-request create`](#sf-devops-pull-request-create)
+- [`sf devops stage add-branch`](#sf-devops-stage-add-branch)
+- [`sf devops stage add-environment`](#sf-devops-stage-add-environment)
 - [`sf devops work-item create`](#sf-devops-work-item-create)
 - [`sf devops work-item list`](#sf-devops-work-item-list)
 - [`sf devops work-item status update`](#sf-devops-work-item-status-update)
@@ -102,7 +104,7 @@ EXAMPLES
     $ sf devops pipeline activate --target-org my-devops-org --pipeline-id 0XB000000000001
 ```
 
-_See code: [src/commands/devops/pipeline/activate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/devops/pipeline/activate.ts)_
+_See code: [src/commands/devops/pipeline/activate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/devops/pipeline/activate.ts)_
 
 ## `sf devops pipeline attach-project`
 
@@ -136,7 +138,7 @@ EXAMPLES
       0Hn000000000001
 ```
 
-_See code: [src/commands/devops/pipeline/attach-project.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/devops/pipeline/attach-project.ts)_
+_See code: [src/commands/devops/pipeline/attach-project.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/devops/pipeline/attach-project.ts)_
 
 ## `sf devops pipeline create`
 
@@ -190,7 +192,7 @@ EXAMPLES
       https://bitbucket.org/myorg/myrepo --description "Main CI/CD pipeline for production releases"
 ```
 
-_See code: [src/commands/devops/pipeline/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/devops/pipeline/create.ts)_
+_See code: [src/commands/devops/pipeline/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/devops/pipeline/create.ts)_
 
 ## `sf devops pipeline stage add`
 
@@ -231,7 +233,7 @@ EXAMPLES
       --next-stage-id 0Xc000000000003
 ```
 
-_See code: [src/commands/devops/pipeline/stage/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/devops/pipeline/stage/add.ts)_
+_See code: [src/commands/devops/pipeline/stage/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/devops/pipeline/stage/add.ts)_
 
 ## `sf devops project create`
 
@@ -268,7 +270,7 @@ EXAMPLES
       update"
 ```
 
-_See code: [src/commands/devops/project/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/devops/project/create.ts)_
+_See code: [src/commands/devops/project/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/devops/project/create.ts)_
 
 ## `sf devops project list`
 
@@ -303,7 +305,7 @@ EXAMPLES
     $ sf devops project list --target-org devops-center@example.com
 ```
 
-_See code: [src/commands/devops/project/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/devops/project/list.ts)_
+_See code: [src/commands/devops/project/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/devops/project/list.ts)_
 
 ## `sf devops pull-request create`
 
@@ -345,7 +347,90 @@ EXAMPLES
       timeout" --body "Resolves the 30s timeout on the login page"
 ```
 
-_See code: [src/commands/devops/pull-request/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/devops/pull-request/create.ts)_
+_See code: [src/commands/devops/pull-request/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/devops/pull-request/create.ts)_
+
+## `sf devops stage add-branch`
+
+Add a source code repository branch to a pipeline stage.
+
+```
+USAGE
+  $ sf devops stage add-branch -o <value> --pipeline-id <value> --stage-id <value> -b <value> [--json] [--flags-dir <value>]
+    [--api-version <value>] [--create-vcs-branch]
+
+FLAGS
+  -b, --branch-name=<value>  (required) Name of the repository branch to assign to the stage.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --create-vcs-branch    Create the branch in the remote repository if it doesn't already exist.
+      --pipeline-id=<value>  (required) ID of the pipeline that contains the stage.
+      --stage-id=<value>     (required) ID of the pipeline stage to associate the branch with.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Add a source code repository branch to a pipeline stage.
+
+  By default, the branch must exist in the repository. Use --create-vcs-branch to create a branch if it doesn't exist.
+  Each pipeline stage supports only one branch. Adding a branch replaces any existing branch linked to the pipeline
+  stage.
+
+EXAMPLES
+  Add an existing branch to a stage:
+
+    $ sf devops stage add-branch --target-org my-devops-org --pipeline-id 0Xo000000000001 --stage-id 0Xp000000000001 \
+      --branch-name main
+
+  Create and add a branch to a pipeline stage:
+
+    $ sf devops stage add-branch --target-org my-devops-org --pipeline-id 0Xo000000000001 --stage-id 0Xp000000000002 \
+      --branch-name integration --create-vcs-branch
+```
+
+_See code: [src/commands/devops/stage/add-branch.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/devops/stage/add-branch.ts)_
+
+## `sf devops stage add-environment`
+
+Add a Salesforce environment to a pipeline stage.
+
+```
+USAGE
+  $ sf devops stage add-environment -o <value> --pipeline-id <value> --stage-id <value> -e <value> --org-type Production|Sandbox
+    [--json] [--flags-dir <value>] [--api-version <value>] [--no-browser]
+
+FLAGS
+  -e, --environment-name=<value>  (required) Name of the environment.
+  -o, --target-org=<value>        (required) Username or alias of the target org. Not required if the `target-org`
+                                  configuration variable is already set.
+      --api-version=<value>       Override the api version used for api requests made by this command
+      --no-browser                Don't auto-open the browser for OAuth authentication. The redirect URL is printed for
+                                  manual use.
+      --org-type=<option>         (required) Type of the Salesforce org. Valid values: Production, Sandbox.
+                                  <options: Production|Sandbox>
+      --pipeline-id=<value>       (required) ID of the pipeline that contains the stage.
+      --stage-id=<value>          (required) ID of the pipeline stage.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Add a Salesforce environment to a pipeline stage.
+
+  This command triggers an OAuth flow to authenticate the environment. A browser window opens automatically for you to
+  log in.
+
+EXAMPLES
+  Add a production environment to a stage using its ID:
+
+    $ sf devops stage add-environment --target-org my-devops-org --stage-id 0Xp000000000001 --environment-name \
+      Production_Org --org-type Production
+```
+
+_See code: [src/commands/devops/stage/add-environment.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/devops/stage/add-environment.ts)_
 
 ## `sf devops work-item create`
 
@@ -386,7 +471,7 @@ EXAMPLES
       --description "Implement dark mode toggle in settings page"
 ```
 
-_See code: [src/commands/devops/work-item/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/devops/work-item/create.ts)_
+_See code: [src/commands/devops/work-item/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/devops/work-item/create.ts)_
 
 ## `sf devops work-item list`
 
@@ -422,7 +507,7 @@ EXAMPLES
     $ sf devops work-item list --target-org my-devops-org --project-id 1Qg000000000001 --json
 ```
 
-_See code: [src/commands/devops/work-item/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/devops/work-item/list.ts)_
+_See code: [src/commands/devops/work-item/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/devops/work-item/list.ts)_
 
 ## `sf devops work-item status update`
 
@@ -463,7 +548,7 @@ EXAMPLES
       Promote"
 ```
 
-_See code: [src/commands/devops/work-item/status/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/devops/work-item/status/update.ts)_
+_See code: [src/commands/devops/work-item/status/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/devops/work-item/status/update.ts)_
 
 ## `sf project deploy pipeline quick`
 
@@ -537,7 +622,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/quick.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/project/deploy/pipeline/quick.ts)_
+_See code: [src/commands/project/deploy/pipeline/quick.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/project/deploy/pipeline/quick.ts)_
 
 ## `sf project deploy pipeline report`
 
@@ -585,7 +670,7 @@ FLAG DESCRIPTIONS
     your most recent operation was longer than 3 days ago, this flag won't find the job ID.
 ```
 
-_See code: [src/commands/project/deploy/pipeline/report.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/project/deploy/pipeline/report.ts)_
+_See code: [src/commands/project/deploy/pipeline/report.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/project/deploy/pipeline/report.ts)_
 
 ## `sf project deploy pipeline resume`
 
@@ -652,7 +737,7 @@ FLAG DESCRIPTIONS
     returns the job ID. To check the status of the operation, run "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/resume.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/project/deploy/pipeline/resume.ts)_
+_See code: [src/commands/project/deploy/pipeline/resume.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/project/deploy/pipeline/resume.ts)_
 
 ## `sf project deploy pipeline start`
 
@@ -752,7 +837,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/start.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/project/deploy/pipeline/start.ts)_
+_See code: [src/commands/project/deploy/pipeline/start.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/project/deploy/pipeline/start.ts)_
 
 ## `sf project deploy pipeline validate`
 
@@ -852,7 +937,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/validate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.2.28/src/commands/project/deploy/pipeline/validate.ts)_
+_See code: [src/commands/project/deploy/pipeline/validate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.3.0/src/commands/project/deploy/pipeline/validate.ts)_
 
 <!-- commandsstop -->
 

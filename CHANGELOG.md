@@ -1,3 +1,16 @@
+# [1.3.0](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.28...1.3.0) (2026-07-01)
+
+### Bug Fixes
+
+- clean up flag definitions and example formatting ([d13ed63](https://github.com/salesforcecli/plugin-devops-center/commit/d13ed634a8fab80c801ff9079b4b260b9d7af522))
+- test ([14703b6](https://github.com/salesforcecli/plugin-devops-center/commit/14703b62045ca80f61fa6617960bb4290662657e))
+- test ([15c0ce8](https://github.com/salesforcecli/plugin-devops-center/commit/15c0ce831718dd825859bf96137e3e5702e84f4d))
+
+### Features
+
+- add-environment command ([f76e6cf](https://github.com/salesforcecli/plugin-devops-center/commit/f76e6cf6d4962a89571272ff2fcb37730c980482))
+- stage add-branch ([916fc5f](https://github.com/salesforcecli/plugin-devops-center/commit/916fc5f8fa0291fc9b884e6c0527c4bde822032d))
+
 ## [1.2.28](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.27...1.2.28) (2026-06-26)
 
 ### Bug Fixes
