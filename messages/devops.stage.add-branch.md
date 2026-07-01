@@ -24,11 +24,11 @@ Create the branch in the remote repository if it doesn't already exist.
 
 # examples
 
-- Attach an existing branch to a stage.
+- Attach an existing branch to a stage:
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --pipeline-id 0Xo000000000001 --stage-id 0Xp000000000001 --branch-name main
 
-- Create a new branch in the remote repository and attach it to a stage.
+- Create a new branch in the remote repository and attach it to a stage:
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --pipeline-id 0Xo000000000001 --stage-id 0Xp000000000002 --branch-name integration --create-vcs-branch
 

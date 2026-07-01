@@ -46,12 +46,10 @@ export default class DevopsStageAddEnvironment extends SfCommand<AddStageEnviron
     'pipeline-id': Flags.salesforceId({
       summary: messages.getMessage('flags.pipeline-id.summary'),
       required: true,
-      char: undefined,
     }),
     'stage-id': Flags.salesforceId({
       summary: messages.getMessage('flags.stage-id.summary'),
       required: true,
-      char: undefined,
     }),
     'environment-name': Flags.string({
       summary: messages.getMessage('flags.environment-name.summary'),

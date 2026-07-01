@@ -30,15 +30,15 @@ Don't auto-open the browser for OAuth authentication. The redirect URL is printe
 
 # examples
 
-- Create a production environment and attach it to a stage.
+- Create a production environment and attach it to a stage:
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --pipeline-id 0Xo000000000001 --stage-id 0Xp000000000001 --environment-name Production_Org --org-type Production
 
-- Create a sandbox environment and attach it to a stage.
+- Create a sandbox environment and attach it to a stage:
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --pipeline-id 0Xo000000000001 --stage-id 0Xp000000000002 --environment-name UAT_Sandbox --org-type Sandbox
 
-- Create an environment without opening the browser.
+- Create an environment without opening the browser:
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --pipeline-id 0Xo000000000001 --stage-id 0Xp000000000001 --environment-name Production_Org --org-type Production --no-browser
 

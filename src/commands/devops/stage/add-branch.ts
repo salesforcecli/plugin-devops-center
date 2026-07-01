@@ -35,12 +35,10 @@ export default class DevopsStageAddBranch extends SfCommand<AddStageBranchResult
     'pipeline-id': Flags.salesforceId({
       summary: messages.getMessage('flags.pipeline-id.summary'),
       required: true,
-      char: undefined,
     }),
     'stage-id': Flags.salesforceId({
       summary: messages.getMessage('flags.stage-id.summary'),
       required: true,
-      char: undefined,
     }),
     'branch-name': Flags.string({
       summary: messages.getMessage('flags.branch-name.summary'),
