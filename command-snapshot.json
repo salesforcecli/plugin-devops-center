@@ -1,28 +1,6 @@
 [
   {
     "alias": [],
-    "command": "devops:stage:promote",
-    "flagAliases": [],
-    "flagChars": ["a", "b", "c", "l", "p", "t", "v", "w"],
-    "flags": [
-      "async",
-      "branch-name",
-      "bundle-version-name",
-      "concise",
-      "deploy-all",
-      "devops-center-project-name",
-      "devops-center-username",
-      "flags-dir",
-      "json",
-      "test-level",
-      "tests",
-      "verbose",
-      "wait"
-    ],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
     "command": "devops:pipeline:activate",
     "flagAliases": [],
     "flagChars": ["o"],
@@ -91,6 +69,28 @@
   },
   {
     "alias": [],
+    "command": "devops:stage:promote",
+    "flagAliases": [],
+    "flagChars": ["a", "b", "c", "l", "p", "t", "v", "w"],
+    "flags": [
+      "async",
+      "branch-name",
+      "bundle-version-name",
+      "concise",
+      "deploy-all",
+      "devops-center-project-name",
+      "devops-center-username",
+      "flags-dir",
+      "json",
+      "test-level",
+      "tests",
+      "verbose",
+      "wait"
+    ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:work-item:create",
     "flagAliases": [],
     "flagChars": ["d", "o", "p", "s"],
@@ -107,25 +107,18 @@
   },
   {
     "alias": [],
-    "command": "devops:work-item:promote",
+    "command": "devops:work-item:prepare",
     "flagAliases": [],
-    "flagChars": ["c", "i", "p", "t"],
-    "flags": [
-      "devops-center-project-name",
-      "devops-center-username",
-      "flags-dir",
-      "json",
-      "target-stage-id",
-      "work-item-id"
-    ],
+    "flagChars": ["i", "o", "s", "t"],
+    "flags": ["api-version", "flags-dir", "json", "source-stage-id", "target-org", "target-stage-id", "work-item-id"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
     "alias": [],
-    "command": "devops:work-item:prepare",
+    "command": "devops:work-item:promote",
     "flagAliases": [],
-    "flagChars": ["c", "i", "s", "t"],
-    "flags": ["devops-center-username", "flags-dir", "json", "source-stage-id", "target-stage-id", "work-item-id"],
+    "flagChars": ["i", "l", "o", "t"],
+    "flags": ["api-version", "flags-dir", "json", "target-org", "target-stage-id", "test-level", "work-item-id"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
