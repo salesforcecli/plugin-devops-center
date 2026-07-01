@@ -98,7 +98,7 @@ describe('devops stage add-environment', () => {
           'Production',
         ]);
 
-        expect(ctx.stdout).to.contain('Successfully created and authenticated the environment.');
+        expect(ctx.stdout).to.contain('Successfully added environment to the stage.');
         expect(ctx.stdout).to.contain('0Xp000000000001');
         expect(ctx.stdout).to.contain('0Hi000000000001');
         expect(ctx.stdout).to.contain('Production_Org');
@@ -152,7 +152,7 @@ describe('devops stage add-environment', () => {
 
         expect(ctx.stdout).to.contain('Open the following URL');
         expect(ctx.stdout).to.contain('login.salesforce.com');
-        expect(ctx.stdout).to.contain('Successfully created and authenticated the environment.');
+        expect(ctx.stdout).to.contain('Successfully added environment to the stage.');
       });
   });
 
@@ -199,7 +199,7 @@ describe('devops stage add-environment', () => {
           'Sandbox',
         ]);
 
-        expect(ctx.stdout).to.contain('Successfully created and authenticated the environment.');
+        expect(ctx.stdout).to.contain('Successfully added environment to the stage.');
         expect(ctx.stdout).to.contain('UAT_Sandbox');
         expect(ctx.stdout).to.contain('00D000000000002');
       });

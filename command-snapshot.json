@@ -45,6 +45,30 @@
   },
   {
     "alias": [],
+    "command": "devops:project:create",
+    "flagAliases": [],
+    "flagChars": ["d", "n", "o"],
+    "flags": ["api-version", "description", "flags-dir", "json", "name", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:project:list",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:pull-request:create",
+    "flagAliases": [],
+    "flagChars": ["n", "o", "w"],
+    "flags": ["api-version", "body", "flags-dir", "json", "target-org", "title", "work-item-id", "work-item-name"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:stage:add-branch",
     "flagAliases": [],
     "flagChars": ["b", "o"],
@@ -76,30 +100,6 @@
       "stage-id",
       "target-org"
     ],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
-    "command": "devops:project:create",
-    "flagAliases": [],
-    "flagChars": ["d", "n", "o"],
-    "flags": ["api-version", "description", "flags-dir", "json", "name", "target-org"],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
-    "command": "devops:project:list",
-    "flagAliases": [],
-    "flagChars": ["o"],
-    "flags": ["api-version", "flags-dir", "json", "target-org"],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
-    "command": "devops:pull-request:create",
-    "flagAliases": [],
-    "flagChars": ["n", "o", "w"],
-    "flags": ["api-version", "body", "flags-dir", "json", "target-org", "title", "work-item-id", "work-item-name"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
