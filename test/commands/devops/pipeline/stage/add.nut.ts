@@ -32,7 +32,7 @@ describe('devops pipeline stage add NUTs', () => {
 
   before(async () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
-    orgFlag = `--target-org ${session.hubOrg.username ?? ''}`;
+    orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
     if (REAL_ORG) {
       const name = genUniqueString('NUT-stage-add-%s');

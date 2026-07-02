@@ -28,7 +28,7 @@ describe('devops work-item list NUTs', () => {
 
   before(async () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
-    orgFlag = `--target-org ${session.hubOrg.username ?? ''}`;
+    orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
     if (REAL_ORG) {
       // Create a project and seed one work item so the list is non-empty

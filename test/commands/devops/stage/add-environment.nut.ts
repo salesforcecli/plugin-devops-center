@@ -30,7 +30,7 @@ describe('devops stage add-environment NUTs', () => {
 
   before(async () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
-    orgFlag = `--target-org ${session.hubOrg.username ?? ''}`;
+    orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
     if (REAL_ORG) {
       const name = genUniqueString('NUT-add-env-%s');

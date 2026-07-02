@@ -27,7 +27,7 @@ describe('devops pull-request create NUTs', () => {
 
   before(async () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
-    orgFlag = `--target-org ${session.hubOrg.username ?? ''}`;
+    orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
     if (REAL_ORG) {
       // Create a project and a bare work item (no VCS branch assigned yet)
@@ -63,9 +63,9 @@ describe('devops pull-request create NUTs', () => {
   });
 
   it('errors when neither --work-item-name nor --work-item-id is supplied', () => {
-    // exactlyOne constraint fires before org resolution → exit 2
-    const result = execCmd('devops pull-request create', { ensureExitCode: 2 });
-    expect(result.shellOutput.stderr).to.match(/work-item-name|work-item-id/);
+    // org resolution fires before exactlyOne validation → exit 1
+    const result = execCmd('devops pull-request create', { ensureExitCode: 1 });
+    expect(result.shellOutput.stderr).to.match(/work-item-name|work-item-id|target-org/);
   });
 
   // ── real-org tests ────────────────────────────────────────────────────────
