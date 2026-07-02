@@ -32,7 +32,7 @@ describe('devops pipeline attach-project NUTs', () => {
 
   before(async () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
-    orgFlag = `--target-org ${session.hubOrg.username ?? ''}`;
+    orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
     if (REAL_ORG) {
       const pipelineName = genUniqueString('NUT-attach-%s');

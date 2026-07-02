@@ -27,7 +27,7 @@ describe('devops project list NUTs', () => {
 
   before(async () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
-    orgFlag = `--target-org ${session.hubOrg.username ?? ''}`;
+    orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
     if (REAL_ORG) {
       // Seed a project so the list is guaranteed non-empty

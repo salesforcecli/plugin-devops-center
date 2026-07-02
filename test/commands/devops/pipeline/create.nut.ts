@@ -29,7 +29,7 @@ describe('devops pipeline create NUTs', () => {
 
   before(async () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
-    orgFlag = `--target-org ${session.hubOrg.username ?? ''}`;
+    orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
   });
 
   after(async () => {
