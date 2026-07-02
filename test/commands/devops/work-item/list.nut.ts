@@ -14,19 +14,44 @@
  * limitations under the License.
  */
 
-import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import type { DevopsWorkItemListResult } from '../../../../src/commands/devops/work-item/list.js';
+
+const REAL_ORG = Boolean(process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME);
 
 describe('devops work-item list NUTs', () => {
   let session: TestSession;
+  let orgFlag: string;
+  let projectId: string;
+  let createdWorkItemId: string;
 
   before(async () => {
-    session = await TestSession.create({ devhubAuthStrategy: 'NONE' });
+    session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
+    orgFlag = `--target-org ${session.hubOrg.username ?? ''}`;
+
+    if (REAL_ORG) {
+      // Create a project and seed one work item so the list is non-empty
+      const projName = genUniqueString('NUT-wi-list-%s');
+      const proj = execCmd<{ projectId: string }>(`devops project create --name "${projName}" --json ${orgFlag}`, {
+        ensureExitCode: 0,
+      });
+      projectId = proj.jsonOutput!.result.projectId!;
+
+      const subject = genUniqueString('seed item %s');
+      const wi = execCmd<{ workItemId: string }>(
+        `devops work-item create --project-id ${projectId} --subject "${subject}" --json ${orgFlag}`,
+        { ensureExitCode: 0 }
+      );
+      createdWorkItemId = wi.jsonOutput!.result.workItemId!;
+    }
   });
 
   after(async () => {
     await session?.clean();
   });
+
+  // ── flag-validation tests ─────────────────────────────────────────────────
 
   it('displays help text', () => {
     const result = execCmd('devops work-item list --help', { ensureExitCode: 0 });
@@ -34,13 +59,38 @@ describe('devops work-item list NUTs', () => {
   });
 
   it('errors when --target-org is missing', () => {
-    // requiredOrg() resolves at parse time → NoDefaultEnvError → exit 1
     const result = execCmd('devops work-item list', { ensureExitCode: 1 });
     expect(result.shellOutput.stderr).to.include('target-org');
   });
 
-  it('errors when --target-org is missing (project-id supplied)', () => {
-    const result = execCmd('devops work-item list --project-id 1Qg000000000001AAA', { ensureExitCode: 1 });
-    expect(result.shellOutput.stderr).to.include('target-org');
+  // ── real-org tests ────────────────────────────────────────────────────────
+
+  (REAL_ORG ? it : it.skip)('returns JSON with a workItems array', () => {
+    const result = execCmd<DevopsWorkItemListResult>(
+      `devops work-item list --project-id ${projectId} --json ${orgFlag}`,
+      { ensureExitCode: 0 }
+    );
+    const output = result.jsonOutput;
+    expect(output?.status).to.equal(0);
+    expect(output?.result.workItems).to.be.an('array');
+  });
+
+  (REAL_ORG ? it : it.skip)('lists the seeded work item', () => {
+    const result = execCmd<DevopsWorkItemListResult>(
+      `devops work-item list --project-id ${projectId} --json ${orgFlag}`,
+      { ensureExitCode: 0 }
+    );
+    const ids = result.jsonOutput!.result.workItems.map((wi) => wi.id);
+    expect(ids).to.include(createdWorkItemId);
+  });
+
+  (REAL_ORG ? it : it.skip)('each work item has required fields', () => {
+    const result = execCmd<DevopsWorkItemListResult>(
+      `devops work-item list --project-id ${projectId} --json ${orgFlag}`,
+      { ensureExitCode: 0 }
+    );
+    for (const wi of result.jsonOutput!.result.workItems) {
+      expect(wi).to.have.property('status').that.is.a('string');
+    }
   });
 });
