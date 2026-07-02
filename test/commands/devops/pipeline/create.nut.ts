@@ -14,19 +14,29 @@
  * limitations under the License.
  */
 
-import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import type { CreatePipelineResult } from '../../../../src/utils/createPipeline.js';
+
+const REAL_ORG = Boolean(process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME);
+
+// Use a real GitHub repo URL that DevOps Center can validate without creating anything
+const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops pipeline create NUTs', () => {
   let session: TestSession;
+  let orgFlag: string;
 
   before(async () => {
-    session = await TestSession.create({ devhubAuthStrategy: 'NONE' });
+    session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
+    orgFlag = `--target-org ${session.hubOrg.username ?? ''}`;
   });
 
   after(async () => {
     await session?.clean();
   });
+
+  // ── flag-validation tests ─────────────────────────────────────────────────
 
   it('displays help text', () => {
     const result = execCmd('devops pipeline create --help', { ensureExitCode: 0 });
@@ -34,24 +44,39 @@ describe('devops pipeline create NUTs', () => {
   });
 
   it('errors when --target-org is missing', () => {
-    // requiredOrg() resolves at parse time → NoDefaultEnvError → exit 1
     const result = execCmd('devops pipeline create', { ensureExitCode: 1 });
     expect(result.shellOutput.stderr).to.include('target-org');
   });
 
-  it('errors when --target-org is missing (required flags supplied)', () => {
-    const result = execCmd('devops pipeline create --name MyPipeline --repo https://github.com/org/repo', {
-      ensureExitCode: 1,
+  it('rejects invalid --repo-type values', () => {
+    const result = execCmd(`devops pipeline create --name MyPipeline --repo ${GITHUB_REPO} --repo-type notavalidtype`, {
+      ensureExitCode: 2,
     });
-    expect(result.shellOutput.stderr).to.include('target-org');
+    expect(result.shellOutput.stderr).to.include('notavalidtype');
   });
 
-  it('rejects invalid --repo-type values', () => {
-    // enum validation fires before org resolution → exit 2
-    const result = execCmd(
-      'devops pipeline create --name MyPipeline --repo https://github.com/org/repo --repo-type notavalidtype',
-      { ensureExitCode: 2 }
+  // ── real-org tests ────────────────────────────────────────────────────────
+
+  (REAL_ORG ? it : it.skip)('creates a pipeline and returns structured JSON', () => {
+    const name = genUniqueString('NUT-pipeline-%s');
+    const result = execCmd<CreatePipelineResult>(
+      `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
+      { ensureExitCode: 0 }
     );
-    expect(result.shellOutput.stderr).to.include('notavalidtype');
+    const output = result.jsonOutput;
+    expect(output?.status).to.equal(0);
+    expect(output?.result.success).to.be.true;
+    expect(output?.result.pipelineId).to.match(/^[a-zA-Z0-9]{15,18}$/);
+    expect(output?.result.name).to.equal(name);
+    expect(output?.result.repository?.repoType).to.equal('github');
+  });
+
+  (REAL_ORG ? it : it.skip)('new pipeline starts in Inactive status', () => {
+    const name = genUniqueString('NUT-pipeline-inactive-%s');
+    const result = execCmd<CreatePipelineResult>(
+      `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
+      { ensureExitCode: 0 }
+    );
+    expect(result.jsonOutput?.result.status).to.equal('Inactive');
   });
 });

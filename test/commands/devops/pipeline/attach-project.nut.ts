@@ -14,19 +14,53 @@
  * limitations under the License.
  */
 
-import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import type { AttachProjectResult } from '../../../../src/utils/attachProject.js';
+
+const REAL_ORG = Boolean(process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME);
+
+const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops pipeline attach-project NUTs', () => {
   let session: TestSession;
+  let orgFlag: string;
+  let pipelineId: string;
+  let projectId: string;
+  // Second project to test the idempotency / double-attach error path
+  let secondProjectId: string;
 
   before(async () => {
-    session = await TestSession.create({ devhubAuthStrategy: 'NONE' });
+    session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
+    orgFlag = `--target-org ${session.hubOrg.username ?? ''}`;
+
+    if (REAL_ORG) {
+      const pipelineName = genUniqueString('NUT-attach-%s');
+      const pipeline = execCmd<{ pipelineId: string }>(
+        `devops pipeline create --name "${pipelineName}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
+        { ensureExitCode: 0 }
+      );
+      pipelineId = pipeline.jsonOutput!.result.pipelineId!;
+
+      const projName = genUniqueString('NUT-attach-proj-%s');
+      const proj = execCmd<{ projectId: string }>(`devops project create --name "${projName}" --json ${orgFlag}`, {
+        ensureExitCode: 0,
+      });
+      projectId = proj.jsonOutput!.result.projectId!;
+
+      const projName2 = genUniqueString('NUT-attach-proj2-%s');
+      const proj2 = execCmd<{ projectId: string }>(`devops project create --name "${projName2}" --json ${orgFlag}`, {
+        ensureExitCode: 0,
+      });
+      secondProjectId = proj2.jsonOutput!.result.projectId!;
+    }
   });
 
   after(async () => {
     await session?.clean();
   });
+
+  // ── flag-validation tests ─────────────────────────────────────────────────
 
   it('displays help text', () => {
     const result = execCmd('devops pipeline attach-project --help', { ensureExitCode: 0 });
@@ -34,16 +68,39 @@ describe('devops pipeline attach-project NUTs', () => {
   });
 
   it('errors when --target-org is missing', () => {
-    // requiredOrg() resolves at parse time → NoDefaultEnvError → exit 1
     const result = execCmd('devops pipeline attach-project', { ensureExitCode: 1 });
     expect(result.shellOutput.stderr).to.include('target-org');
   });
 
-  it('errors when --target-org is missing (all IDs supplied)', () => {
+  // ── real-org tests ────────────────────────────────────────────────────────
+
+  (REAL_ORG ? it : it.skip)('attaches a project to a pipeline and returns structured JSON', () => {
+    const result = execCmd<AttachProjectResult>(
+      `devops pipeline attach-project --pipeline-id ${pipelineId} --project-id ${projectId} --json ${orgFlag}`,
+      { ensureExitCode: 0 }
+    );
+    const output = result.jsonOutput;
+    expect(output?.status).to.equal(0);
+    expect(output?.result.success).to.be.true;
+    expect(output?.result.projectId).to.equal(projectId);
+    expect(output?.result.pipelineId).to.equal(pipelineId);
+  });
+
+  (REAL_ORG ? it : it.skip)('errors when attaching the same project a second time', () => {
+    // The first attachment was done in the previous test; re-attaching should fail
     const result = execCmd(
-      'devops pipeline attach-project --pipeline-id 0XB000000000001AAA --project-id 1Qg000000000001AAA',
+      `devops pipeline attach-project --pipeline-id ${pipelineId} --project-id ${projectId} ${orgFlag}`,
       { ensureExitCode: 1 }
     );
-    expect(result.shellOutput.stderr).to.include('target-org');
+    expect(result.shellOutput.stderr).to.include('already attached');
+  });
+
+  (REAL_ORG ? it : it.skip)('attaches a second project to the same pipeline', () => {
+    const result = execCmd<AttachProjectResult>(
+      `devops pipeline attach-project --pipeline-id ${pipelineId} --project-id ${secondProjectId} --json ${orgFlag}`,
+      { ensureExitCode: 0 }
+    );
+    expect(result.jsonOutput?.result.success).to.be.true;
+    expect(result.jsonOutput?.result.projectId).to.equal(secondProjectId);
   });
 });

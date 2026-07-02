@@ -14,19 +14,48 @@
  * limitations under the License.
  */
 
-import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import type { AddPipelineStageResult } from '../../../../src/utils/addPipelineStage.js';
+import type { CreatePipelineResult } from '../../../../src/utils/createPipeline.js';
+
+const REAL_ORG = Boolean(process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME);
+
+const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops pipeline stage add NUTs', () => {
   let session: TestSession;
+  let orgFlag: string;
+  let pipelineId: string;
+  // One of the default stage IDs seeded by pipeline create, used as the `--next-stage-id`
+  let existingStageId: string;
 
   before(async () => {
-    session = await TestSession.create({ devhubAuthStrategy: 'NONE' });
+    session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
+    orgFlag = `--target-org ${session.hubOrg.username ?? ''}`;
+
+    if (REAL_ORG) {
+      const name = genUniqueString('NUT-stage-add-%s');
+      const pipeline = execCmd<CreatePipelineResult>(
+        `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
+        { ensureExitCode: 0 }
+      );
+      pipelineId = pipeline.jsonOutput!.result.pipelineId!;
+
+      // Retrieve the first stage ID from the newly created pipeline via sf data query
+      const stagesResult = execCmd<{ records: Array<{ Id: string }> }>(
+        `data query --query "SELECT Id FROM DevopsPipelineStage WHERE DevopsPipelineId='${pipelineId}' ORDER BY CreatedDate ASC LIMIT 1" --json ${orgFlag}`,
+        { ensureExitCode: 0, cli: 'sf' }
+      );
+      existingStageId = stagesResult.jsonOutput!.result.records[0].Id;
+    }
   });
 
   after(async () => {
     await session?.clean();
   });
+
+  // ── flag-validation tests ─────────────────────────────────────────────────
 
   it('displays help text', () => {
     const result = execCmd('devops pipeline stage add --help', { ensureExitCode: 0 });
@@ -34,16 +63,31 @@ describe('devops pipeline stage add NUTs', () => {
   });
 
   it('errors when --target-org is missing', () => {
-    // requiredOrg() resolves at parse time → NoDefaultEnvError → exit 1
     const result = execCmd('devops pipeline stage add', { ensureExitCode: 1 });
     expect(result.shellOutput.stderr).to.include('target-org');
   });
 
-  it('errors when --target-org is missing (all flags supplied)', () => {
+  // ── real-org tests ────────────────────────────────────────────────────────
+
+  (REAL_ORG ? it : it.skip)('adds a stage before an existing stage and returns structured JSON', () => {
+    const stageName = genUniqueString('NUT-stage-%s');
+    const result = execCmd<AddPipelineStageResult>(
+      `devops pipeline stage add --pipeline-id ${pipelineId} --name "${stageName}" --next-stage-id ${existingStageId} --json ${orgFlag}`,
+      { ensureExitCode: 0 }
+    );
+    const output = result.jsonOutput;
+    expect(output?.status).to.equal(0);
+    expect(output?.result.success).to.be.true;
+    expect(output?.result.stageId).to.match(/^[a-zA-Z0-9]{15,18}$/);
+    expect(output?.result.name).to.equal(stageName);
+    expect(output?.result.nextStageId).to.equal(existingStageId);
+  });
+
+  (REAL_ORG ? it : it.skip)('errors when --next-stage-id does not belong to the pipeline', () => {
     const result = execCmd(
-      'devops pipeline stage add --pipeline-id 0XB000000000001AAA --name StageName --next-stage-id 0XC000000000001AAA',
+      `devops pipeline stage add --pipeline-id ${pipelineId} --name NewStage --next-stage-id 0XC000000000001AAA ${orgFlag}`,
       { ensureExitCode: 1 }
     );
-    expect(result.shellOutput.stderr).to.include('target-org');
+    expect(result.shellOutput.stderr).to.include('0XC000000000001AAA');
   });
 });

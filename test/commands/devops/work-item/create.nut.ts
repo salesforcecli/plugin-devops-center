@@ -14,19 +14,36 @@
  * limitations under the License.
  */
 
-import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
+import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import type { CreateWorkItemResult } from '../../../../src/utils/createWorkItem.js';
+
+const REAL_ORG = Boolean(process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME);
 
 describe('devops work-item create NUTs', () => {
   let session: TestSession;
+  let orgFlag: string;
+  // Project created in before() to host work items
+  let projectId: string;
 
   before(async () => {
-    session = await TestSession.create({ devhubAuthStrategy: 'NONE' });
+    session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
+    orgFlag = `--target-org ${session.hubOrg.username ?? ''}`;
+
+    if (REAL_ORG) {
+      const name = genUniqueString('NUT-wi-create-%s');
+      const create = execCmd<{ projectId: string }>(`devops project create --name "${name}" --json ${orgFlag}`, {
+        ensureExitCode: 0,
+      });
+      projectId = create.jsonOutput!.result.projectId!;
+    }
   });
 
   after(async () => {
     await session?.clean();
   });
+
+  // ── flag-validation tests ─────────────────────────────────────────────────
 
   it('displays help text', () => {
     const result = execCmd('devops work-item create --help', { ensureExitCode: 0 });
@@ -34,15 +51,41 @@ describe('devops work-item create NUTs', () => {
   });
 
   it('errors when --target-org is missing', () => {
-    // requiredOrg() resolves at parse time → NoDefaultEnvError → exit 1
     const result = execCmd('devops work-item create', { ensureExitCode: 1 });
     expect(result.shellOutput.stderr).to.include('target-org');
   });
 
-  it('errors when --target-org is missing (required flags supplied)', () => {
-    const result = execCmd('devops work-item create --project-id 1Qg000000000001AAA --subject MyWorkItem', {
+  it('errors when --project-id prefix is wrong', () => {
+    // salesforceId flag with startsWith:'1Qg' rejects IDs that start with something else
+    const result = execCmd('devops work-item create --project-id 0XB000000000001AAA --subject Foo', {
       ensureExitCode: 1,
     });
-    expect(result.shellOutput.stderr).to.include('target-org');
+    expect(result.shellOutput.stderr).to.include('1Qg');
+  });
+
+  // ── real-org tests ────────────────────────────────────────────────────────
+
+  (REAL_ORG ? it : it.skip)('creates a work item and returns structured JSON', () => {
+    const subject = genUniqueString('NUT work item %s');
+    const result = execCmd<CreateWorkItemResult>(
+      `devops work-item create --project-id ${projectId} --subject "${subject}" --json ${orgFlag}`,
+      { ensureExitCode: 0 }
+    );
+    const output = result.jsonOutput;
+    expect(output?.status).to.equal(0);
+    expect(output?.result.success).to.be.true;
+    expect(output?.result.workItemId).to.match(/^[a-zA-Z0-9]{15,18}$/);
+    expect(output?.result.subject).to.equal(subject);
+  });
+
+  (REAL_ORG ? it : it.skip)('creates a work item with a description', () => {
+    const subject = genUniqueString('NUT wi desc %s');
+    const description = 'NUT description text';
+    const result = execCmd<CreateWorkItemResult>(
+      `devops work-item create --project-id ${projectId} --subject "${subject}" --description "${description}" --json ${orgFlag}`,
+      { ensureExitCode: 0 }
+    );
+    // The workItemId proves the record was persisted; the API echoes subject back
+    expect(result.jsonOutput?.result.workItemId).to.match(/^[a-zA-Z0-9]{15,18}$/);
   });
 });
