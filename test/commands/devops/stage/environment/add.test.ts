@@ -19,7 +19,7 @@ import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
 
-describe('devops stage add-environment', () => {
+describe('devops stage environment add', () => {
   let sandbox: sinon.SinonSandbox;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let AddEnvironmentCommand: any;
@@ -30,11 +30,11 @@ describe('devops stage add-environment', () => {
   const execStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/stage/add-environment.js', {
-      '../../../../src/utils/addStageEnvironment.js': {
+    const mod = await esmock('../../../../../src/commands/devops/stage/environment/add.js', {
+      '../../../../../src/utils/addStageEnvironment.js': {
         addStageEnvironment: addStageEnvironmentStub,
       },
-      '../../../../src/utils/pipelineUtils.js': {
+      '../../../../../src/utils/pipelineUtils.js': {
         fetchPipelineStages: fetchPipelineStagesStub,
       },
       'node:child_process': {

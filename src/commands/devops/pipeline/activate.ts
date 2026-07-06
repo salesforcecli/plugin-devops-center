@@ -60,6 +60,14 @@ export default class DevopsPipelineActivate extends SfCommand<ActivatePipelineRe
       this.error(messages.getMessage('error.NoStages', [pipelineId]));
     }
 
+    const pipelineQueryResult = await connection.query(
+      `SELECT IsActive FROM DevopsPipeline WHERE Id = '${pipelineId}' LIMIT 1`
+    );
+    const pipelineRecord = (pipelineQueryResult.records ?? [])[0] as { IsActive?: boolean } | undefined;
+    if (pipelineRecord?.IsActive) {
+      this.error(messages.getMessage('error.AlreadyActive', [pipelineId]));
+    }
+
     let result: ActivatePipelineResult;
     try {
       result = await activatePipeline({ connection, pipelineId });

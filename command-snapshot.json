@@ -65,25 +65,7 @@
     "command": "devops:pull-request:create",
     "flagAliases": [],
     "flagChars": ["n", "o", "w"],
-    "flags": ["api-version", "body", "flags-dir", "json", "target-org", "title", "work-item-id", "work-item-name"],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
-    "command": "devops:stage:add-environment",
-    "flagAliases": [],
-    "flagChars": ["e", "o"],
-    "flags": [
-      "api-version",
-      "environment-name",
-      "flags-dir",
-      "json",
-      "no-browser",
-      "org-type",
-      "pipeline-id",
-      "stage-id",
-      "target-org"
-    ],
+    "flags": ["api-version", "flags-dir", "json", "target-org", "work-item-id", "work-item-name"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -97,6 +79,24 @@
       "create-vcs-branch",
       "flags-dir",
       "json",
+      "pipeline-id",
+      "stage-id",
+      "target-org"
+    ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:stage:environment:add",
+    "flagAliases": [],
+    "flagChars": ["e", "o"],
+    "flags": [
+      "api-version",
+      "environment-name",
+      "flags-dir",
+      "json",
+      "no-browser",
+      "org-type",
       "pipeline-id",
       "stage-id",
       "target-org"

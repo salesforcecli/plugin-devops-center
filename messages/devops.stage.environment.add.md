@@ -48,6 +48,10 @@ Waiting for authentication to complete...
 
 Successfully added environment to the stage.
 
+# error.PipelineAlreadyActive
+
+Pipeline %s is already active. Environments can only be added to inactive pipelines.
+
 # error.StageNotFound
 
 Pipeline stage "%s" doesn't exist in pipeline "%s". Check the stage ID and try again.
