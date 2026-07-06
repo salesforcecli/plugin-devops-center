@@ -18,6 +18,7 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import { GitHubOwnerNotFoundError } from '../../../../src/utils/createPipeline.js';
 
 describe('devops pipeline create', () => {
   let sandbox: sinon.SinonSandbox;
@@ -27,12 +28,15 @@ describe('devops pipeline create', () => {
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const createPipelineStub = sinon.stub();
   const detectRepoTypeStub = sinon.stub();
+  const validateGitHubOwnerStub = sinon.stub();
 
   before(async () => {
     const mod = await esmock('../../../../src/commands/devops/pipeline/create.js', {
       '../../../../src/utils/createPipeline.js': {
         createPipeline: createPipelineStub,
         detectRepoType: detectRepoTypeStub,
+        validateGitHubOwner: validateGitHubOwnerStub,
+        GitHubOwnerNotFoundError,
       },
     });
     CreateCommand = mod.default;
@@ -42,6 +46,8 @@ describe('devops pipeline create', () => {
     sandbox = sinon.createSandbox();
     createPipelineStub.reset();
     detectRepoTypeStub.reset();
+    validateGitHubOwnerStub.reset();
+    validateGitHubOwnerStub.resolves();
   });
 
   afterEach(() => {
@@ -82,7 +88,7 @@ describe('devops pipeline create', () => {
         expect(ctx.stdout).to.contain('https://github.com/myorg/myrepo');
         expect(ctx.stdout).to.contain('Next steps');
         expect(ctx.stdout).to.contain('sf devops pipeline stage add');
-        expect(ctx.stdout).to.contain('sf devops pipeline attach-project');
+        expect(ctx.stdout).to.contain('sf devops pipeline project add');
       });
   });
 
@@ -151,11 +157,11 @@ describe('devops pipeline create', () => {
       });
   });
 
-  describe('--create-repo without --repo-owner', () => {
+  describe('--create-repo without --repo-owner for github', () => {
     test
       .stdout()
       .stderr()
-      .it('errors when --repo-owner is missing', async (ctx) => {
+      .it('errors when --repo-owner is missing for github', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
 
@@ -177,6 +183,188 @@ describe('devops pipeline create', () => {
         }
 
         expect(ctx.stderr).to.contain('--repo-owner flag is required');
+      });
+  });
+
+  describe('--create-repo without --bitbucket-workspace for bitbucket', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('errors when --bitbucket-workspace is missing for bitbucket', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+
+        try {
+          await CreateCommand.run([
+            '--target-org',
+            'testOrg',
+            '--name',
+            'Pipeline',
+            '--repo',
+            'my-repo',
+            '--repo-type',
+            'bitbucket',
+            '--create-repo',
+          ]);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('--bitbucket-workspace flag is required');
+      });
+  });
+
+  describe('create with --create-repo for bitbucket', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('creates bitbucket pipeline with workspace and project key', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        createPipelineStub.resolves({
+          success: true,
+          pipelineId: '0XB000000000003',
+          name: 'Release Pipeline',
+          status: 'Inactive',
+          repository: {
+            repoUrl: 'https://bitbucket.org/myworkspace/my-new-repo',
+            repoType: 'bitbucket',
+            created: true,
+          },
+        });
+
+        await CreateCommand.run([
+          '--target-org',
+          'testOrg',
+          '--name',
+          'Release Pipeline',
+          '--repo',
+          'my-new-repo',
+          '--repo-type',
+          'bitbucket',
+          '--bitbucket-workspace',
+          'myworkspace',
+          '--bitbucket-project-key',
+          'PROJ',
+          '--create-repo',
+        ]);
+
+        expect(ctx.stdout).to.contain('Created repository: my-new-repo (bitbucket)');
+        expect(ctx.stdout).to.contain('Successfully created pipeline: Release Pipeline');
+        expect(createPipelineStub.calledWithMatch({ bitbucketWorkspace: 'myworkspace', bitbucketProjectKey: 'PROJ' }))
+          .to.be.true;
+      });
+  });
+
+  describe('--create-repo with invalid GitHub owner (API fallback)', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('shows owner-not-found error when pre-flight was skipped and API returns init failure', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        validateGitHubOwnerStub.resolves(); // pre-flight skipped (e.g. rate-limited)
+        createPipelineStub.rejects(
+          new Error(
+            "REPOSITORY_CREATION_FAILED:Failed to create VCS repository: - SFAP API call failed with status code: 500, Response: {success=false, error=Error creating repository: Pushing to https://github.com/ash/repoooo1.git\nremote: Repository not found.\nfatal: repository 'https://github.com/ash/repoooo1.git/' not found\n}"
+          )
+        );
+
+        try {
+          await CreateCommand.run([
+            '--target-org',
+            'testOrg',
+            '--name',
+            'Pipeline',
+            '--repo',
+            'repoooo1',
+            '--repo-type',
+            'github',
+            '--repo-owner',
+            'ash',
+            '--create-repo',
+          ]);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('does not exist or is not accessible');
+        expect(ctx.stderr).to.not.contain('Details:');
+      });
+  });
+
+  describe('--create-repo with invalid GitHub owner', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('errors before calling the API when owner does not exist on GitHub', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        validateGitHubOwnerStub.rejects(new GitHubOwnerNotFoundError('ash'));
+
+        try {
+          await CreateCommand.run([
+            '--target-org',
+            'testOrg',
+            '--name',
+            'Pipeline',
+            '--repo',
+            'repoooo1',
+            '--repo-type',
+            'github',
+            '--repo-owner',
+            'ash',
+            '--create-repo',
+          ]);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('ash');
+        expect(ctx.stderr).to.contain('does not exist or is not accessible');
+        expect(createPipelineStub.called).to.be.false;
+      });
+  });
+
+  describe('--create-repo with already existing repo name', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('shows repo-name-already-exists error', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        validateGitHubOwnerStub.resolves();
+        createPipelineStub.rejects(
+          new Error(
+            'REPOSITORY_CREATION_FAILED:Failed to create VCS repository: - SFAP API call failed with status code: 500, Response: {success=false, error=Error creating repository: Failed to create repository: name already exists on this account}'
+          )
+        );
+
+        try {
+          await CreateCommand.run([
+            '--target-org',
+            'testOrg',
+            '--name',
+            'Pipeline',
+            '--repo',
+            'existing-repo',
+            '--repo-type',
+            'github',
+            '--repo-owner',
+            'myorg',
+            '--create-repo',
+          ]);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('already exists on this account');
+        expect(ctx.stderr).to.contain('existing-repo');
+        expect(ctx.stderr).to.not.contain('Details:');
       });
   });
 

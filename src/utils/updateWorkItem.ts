@@ -21,48 +21,24 @@ export type WorkItemContext = {
   projectId: string;
 };
 
-export type UpdateWorkItemStatusParams = {
+export type UpdateWorkItemParams = {
   connection: Connection;
   workItemId: string;
   projectId: string;
-  status: string;
+  status?: string;
+  subject?: string;
+  description?: string;
 };
 
-export type UpdateWorkItemStatusResult = {
+export type UpdateWorkItemResult = {
   success: boolean;
   workItemId: string;
   workItemName?: string;
   status?: string;
+  subject?: string;
+  description?: string;
   error?: string;
 };
-
-/**
- * Resolves a work item's Salesforce ID and project ID from its Name (e.g. WI-000001) via SOQL.
- */
-export async function resolveWorkItemByName(connection: Connection, workItemName: string): Promise<WorkItemContext> {
-  const result = await connection.query<{ Id: string; DevopsProjectId: string }>(
-    `SELECT Id, DevopsProjectId FROM WorkItem WHERE Name = '${workItemName}' LIMIT 1`
-  );
-  const record = (result.records ?? [])[0];
-  if (!record) {
-    throw new Error(`Work item with name '${workItemName}' not found.`);
-  }
-  return { workItemId: record.Id, projectId: record.DevopsProjectId };
-}
-
-/**
- * Fetches the project ID for a given work item ID via SOQL.
- */
-export async function resolveProjectIdForWorkItem(connection: Connection, workItemId: string): Promise<string> {
-  const result = await connection.query<{ DevopsProjectId: string }>(
-    `SELECT DevopsProjectId FROM WorkItem WHERE Id = '${workItemId}' LIMIT 1`
-  );
-  const record = (result.records ?? [])[0];
-  if (!record) {
-    throw new Error(`Work item with ID '${workItemId}' not found.`);
-  }
-  return record.DevopsProjectId;
-}
 
 export const ALLOWED_STATUSES = ['In Progress', 'Ready to Promote'] as const;
 export type AllowedStatus = (typeof ALLOWED_STATUSES)[number];
@@ -80,20 +56,45 @@ export function toApiStatus(status: string): string {
   return apiStatus;
 }
 
+export async function resolveWorkItemByName(connection: Connection, workItemName: string): Promise<WorkItemContext> {
+  const result = await connection.query<{ Id: string; DevopsProjectId: string }>(
+    `SELECT Id, DevopsProjectId FROM WorkItem WHERE Name = '${workItemName}' LIMIT 1`
+  );
+  const record = (result.records ?? [])[0];
+  if (!record) {
+    throw new Error(`Work item with name '${workItemName}' not found.`);
+  }
+  return { workItemId: record.Id, projectId: record.DevopsProjectId };
+}
+
+export async function resolveProjectIdForWorkItem(connection: Connection, workItemId: string): Promise<string> {
+  const result = await connection.query<{ DevopsProjectId: string }>(
+    `SELECT DevopsProjectId FROM WorkItem WHERE Id = '${workItemId}' LIMIT 1`
+  );
+  const record = (result.records ?? [])[0];
+  if (!record) {
+    throw new Error(`Work item with ID '${workItemId}' not found.`);
+  }
+  return record.DevopsProjectId;
+}
+
 /**
- * Updates the status of a DevOps Center work item via the Connect API.
- * API: PATCH /services/data/v{version}/connect/devops/projects/{projectId}/workitem/{workItemId}
+ * Updates fields on a DevOps Center work item via the Connect API.
+ * PATCH /services/data/v{version}/connect/devops/projects/{projectId}/workitem/{workItemId}
  */
-export async function updateWorkItemStatus(params: UpdateWorkItemStatusParams): Promise<UpdateWorkItemStatusResult> {
-  const { connection, workItemId, projectId, status } = params;
+export async function updateWorkItem(params: UpdateWorkItemParams): Promise<UpdateWorkItemResult> {
+  const { connection, workItemId, projectId, status, subject, description } = params;
 
   const path = `/services/data/v${connection.getApiVersion()}/connect/devops/projects/${projectId}/workitem/${workItemId}`;
-  const body = JSON.stringify({ status: toApiStatus(status) });
+  const payload: Record<string, string> = {};
+  if (status !== undefined) payload.status = toApiStatus(status);
+  if (subject !== undefined) payload.subject = subject;
+  if (description !== undefined) payload.description = description;
 
   const response = await connection.request({
     method: 'PATCH',
     url: path,
-    body,
+    body: JSON.stringify(payload),
     headers: { 'Content-Type': 'application/json' },
   });
 
@@ -101,6 +102,9 @@ export async function updateWorkItemStatus(params: UpdateWorkItemStatusParams): 
   return {
     success: true,
     workItemId,
-    status: (data.status ?? data.Status ?? status) as string,
+    status: status !== undefined ? ((data.status ?? data.Status ?? status) as string) : undefined,
+    subject: subject !== undefined ? ((data.subject ?? data.Subject ?? subject) as string) : undefined,
+    description:
+      description !== undefined ? ((data.description ?? data.Description ?? description) as string) : undefined,
   };
 }

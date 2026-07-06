@@ -16,15 +16,15 @@
 
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { addStageBranch, AddStageBranchResult } from '../../../utils/addStageBranch.js';
-import { fetchPipelineStages } from '../../../utils/pipelineUtils.js';
-import { PipelineStageRecord } from '../../../utils/types.js';
+import { addStageBranch, AddStageBranchResult } from '../../../../utils/addStageBranch.js';
+import { fetchPipelineStages } from '../../../../utils/pipelineUtils.js';
+import { PipelineStageRecord } from '../../../../utils/types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.stage.add-branch');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.stage.branch.add');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export default class DevopsStageAddBranch extends SfCommand<AddStageBranchResult> {
+export default class DevopsStageBranchAdd extends SfCommand<AddStageBranchResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -54,7 +54,7 @@ export default class DevopsStageAddBranch extends SfCommand<AddStageBranchResult
   };
 
   public async run(): Promise<AddStageBranchResult> {
-    const { flags } = await this.parse(DevopsStageAddBranch);
+    const { flags } = await this.parse(DevopsStageBranchAdd);
     const org: Org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
     const pipelineId = flags['pipeline-id'];

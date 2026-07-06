@@ -19,7 +19,7 @@ import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
 
-describe('devops stage add-branch', () => {
+describe('devops stage branch add', () => {
   let sandbox: sinon.SinonSandbox;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let AddBranchCommand: any;
@@ -29,11 +29,11 @@ describe('devops stage add-branch', () => {
   const fetchPipelineStagesStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/stage/add-branch.js', {
-      '../../../../src/utils/addStageBranch.js': {
+    const mod = await esmock('../../../../../src/commands/devops/stage/branch/add.js', {
+      '../../../../../src/utils/addStageBranch.js': {
         addStageBranch: addStageBranchStub,
       },
-      '../../../../src/utils/pipelineUtils.js': {
+      '../../../../../src/utils/pipelineUtils.js': {
         fetchPipelineStages: fetchPipelineStagesStub,
       },
     });
@@ -127,7 +127,6 @@ describe('devops stage add-branch', () => {
       .it('blocks branch setup when next stage has no branch configured', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        // A -> B -> Production; B has no branch, trying to set A
         fetchPipelineStagesStub.resolves([
           {
             Id: '0Xp000000000001',
