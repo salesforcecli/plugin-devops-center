@@ -9,20 +9,13 @@
   },
   {
     "alias": [],
-    "command": "devops:pipeline:attach-project",
-    "flagAliases": [],
-    "flagChars": ["o"],
-    "flags": ["api-version", "flags-dir", "json", "pipeline-id", "project-id", "target-org"],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
     "command": "devops:pipeline:create",
     "flagAliases": [],
     "flagChars": ["d", "n", "o", "r"],
     "flags": [
       "api-version",
-      "bitbucket-project",
+      "bitbucket-project-key",
+      "bitbucket-workspace",
       "create-repo",
       "description",
       "flags-dir",
@@ -33,6 +26,14 @@
       "repo-type",
       "target-org"
     ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:pipeline:project:add",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "pipeline-id", "project-id", "target-org"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -69,23 +70,6 @@
   },
   {
     "alias": [],
-    "command": "devops:stage:add-branch",
-    "flagAliases": [],
-    "flagChars": ["b", "o"],
-    "flags": [
-      "api-version",
-      "branch-name",
-      "create-vcs-branch",
-      "flags-dir",
-      "json",
-      "pipeline-id",
-      "stage-id",
-      "target-org"
-    ],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
     "command": "devops:stage:add-environment",
     "flagAliases": [],
     "flagChars": ["e", "o"],
@@ -96,6 +80,23 @@
       "json",
       "no-browser",
       "org-type",
+      "pipeline-id",
+      "stage-id",
+      "target-org"
+    ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:stage:branch:add",
+    "flagAliases": [],
+    "flagChars": ["b", "o"],
+    "flags": [
+      "api-version",
+      "branch-name",
+      "create-vcs-branch",
+      "flags-dir",
+      "json",
       "pipeline-id",
       "stage-id",
       "target-org"
@@ -120,10 +121,20 @@
   },
   {
     "alias": [],
-    "command": "devops:work-item:status:update",
+    "command": "devops:work-item:update",
     "flagAliases": [],
     "flagChars": ["n", "o", "w"],
-    "flags": ["api-version", "flags-dir", "json", "status", "target-org", "work-item-id", "work-item-name"],
+    "flags": [
+      "api-version",
+      "description",
+      "flags-dir",
+      "json",
+      "status",
+      "subject",
+      "target-org",
+      "work-item-id",
+      "work-item-name"
+    ],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {

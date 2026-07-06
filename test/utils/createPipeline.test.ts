@@ -73,7 +73,7 @@ describe('createPipeline utilities', () => {
         expect.fail('should have thrown');
       } catch (e: unknown) {
         expect(e).to.be.instanceOf(GitHubOwnerNotFoundError);
-        expect((e as GitHubOwnerNotFoundError).owner).to.equal('ghost-org');
+        expect((e as InstanceType<typeof GitHubOwnerNotFoundError>).owner).to.equal('ghost-org');
       }
     });
 
