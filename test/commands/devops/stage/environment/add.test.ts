@@ -23,7 +23,8 @@ describe('devops stage environment add', () => {
   let sandbox: sinon.SinonSandbox;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let AddEnvironmentCommand: any;
-  const mockConnection = { getApiVersion: () => '65.0' };
+  const queryStub = sinon.stub().resolves({ records: [{ IsActive: false }] });
+  const mockConnection = { getApiVersion: () => '65.0', query: queryStub };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const addStageEnvironmentStub = sinon.stub();
   const fetchPipelineStagesStub = sinon.stub();
@@ -49,6 +50,8 @@ describe('devops stage environment add', () => {
     addStageEnvironmentStub.reset();
     fetchPipelineStagesStub.reset();
     execStub.reset();
+    queryStub.reset();
+    queryStub.resolves({ records: [{ IsActive: false }] });
   });
 
   afterEach(() => {

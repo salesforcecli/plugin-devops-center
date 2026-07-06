@@ -27,14 +27,12 @@ describe('devops pull-request create', () => {
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
   const fetchDetailStub = sinon.stub();
   const createPrStub = sinon.stub();
-  const resolveTokenStub = sinon.stub();
 
   before(async () => {
     const mod = await esmock('../../../../src/commands/devops/pull-request/create.js', {
       '../../../../src/utils/createPullRequest.js': {
         fetchWorkItemDetail: fetchDetailStub,
         createPullRequest: createPrStub,
-        resolveGitHubToken: resolveTokenStub,
       },
     });
     CreateCommand = mod.default;
@@ -44,8 +42,6 @@ describe('devops pull-request create', () => {
     sandbox = sinon.createSandbox();
     fetchDetailStub.reset();
     createPrStub.reset();
-    resolveTokenStub.reset();
-    resolveTokenStub.resolves('ghp_test_token');
   });
 
   afterEach(() => {
@@ -59,8 +55,6 @@ describe('devops pull-request create', () => {
     branchName: 'feature/WI-000001',
     targetBranch: 'integration',
     projectId: '1Qg000000000001',
-    repoOwner: 'myorg',
-    repoName: 'myrepo',
     provider: 'github',
   };
 
@@ -68,28 +62,25 @@ describe('devops pull-request create', () => {
     test
       .stdout()
       .stderr()
-      .it('creates PR and logs success', async (ctx) => {
+      .it('creates PR via Connect API and logs success with URL', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         fetchDetailStub.resolves(fullDetail);
         createPrStub.resolves({
           success: true,
-          title: 'Fix login bug',
           url: 'https://github.com/myorg/myrepo/pull/42',
-          sourceBranch: 'feature/WI-000001',
-          targetBranch: 'integration',
         });
 
         await CreateCommand.run(['--target-org', 'testOrg', '--work-item-name', 'WI-000001']);
 
         expect(ctx.stdout).to.contain('Successfully created pull request for WI-000001');
-        expect(ctx.stdout).to.contain('Title: Fix login bug');
         expect(ctx.stdout).to.contain('https://github.com/myorg/myrepo/pull/42');
-        expect(ctx.stdout).to.contain('WI-000001 → integration');
+        expect(ctx.stdout).to.contain('feature/WI-000001 → integration');
+        expect(createPrStub.calledWithMatch(mockConnection, '0Wx000000000001')).to.be.true;
       });
   });
 
-  describe('successful creation by work-item-id with custom title', () => {
+  describe('successful creation by work-item-id', () => {
     test
       .stdout()
       .stderr()
@@ -97,26 +88,11 @@ describe('devops pull-request create', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         fetchDetailStub.resolves(fullDetail);
-        createPrStub.resolves({
-          success: true,
-          title: 'Custom title',
-          url: 'https://github.com/myorg/myrepo/pull/99',
-          targetBranch: 'integration',
-        });
+        createPrStub.resolves({ success: true, url: 'https://github.com/myorg/myrepo/pull/99' });
 
-        await CreateCommand.run([
-          '--target-org',
-          'testOrg',
-          '--work-item-id',
-          '0Wx000000000001',
-          '--title',
-          'Custom title',
-          '--body',
-          'Custom body',
-        ]);
+        await CreateCommand.run(['--target-org', 'testOrg', '--work-item-id', '0Wx000000000001']);
 
-        expect(ctx.stdout).to.contain('Successfully created pull request');
-        expect(ctx.stdout).to.contain('Custom title');
+        expect(ctx.stdout).to.contain('Successfully created pull request for WI-000001');
       });
   });
 
@@ -140,15 +116,17 @@ describe('devops pull-request create', () => {
       });
   });
 
-  describe('no VCS token available', () => {
+  describe('Connect API returns no-changes error', () => {
     test
       .stdout()
       .stderr()
-      .it('errors when no auth token is found', async (ctx) => {
+      .it('surfaces a clean error message', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         fetchDetailStub.resolves(fullDetail);
-        resolveTokenStub.resolves(undefined);
+        createPrStub.rejects(
+          new Error('The branch has no commits ahead of the target branch. Push your changes and try again.')
+        );
 
         try {
           await CreateCommand.run(['--target-org', 'testOrg', '--work-item-name', 'WI-000001']);
@@ -157,7 +135,7 @@ describe('devops pull-request create', () => {
           // expected
         }
 
-        expect(ctx.stderr).to.contain('No authentication token found');
+        expect(ctx.stderr).to.contain('Push your changes and try again');
       });
   });
 
