@@ -17,12 +17,12 @@
 import { exec } from 'node:child_process';
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { addStageEnvironment, AddStageEnvironmentResult, OrgType } from '../../../utils/addStageEnvironment.js';
-import { fetchPipelineStages } from '../../../utils/pipelineUtils.js';
-import { PipelineStageRecord } from '../../../utils/types.js';
+import { addStageEnvironment, AddStageEnvironmentResult, OrgType } from '../../../../utils/addStageEnvironment.js';
+import { fetchPipelineStages } from '../../../../utils/pipelineUtils.js';
+import { PipelineStageRecord } from '../../../../utils/types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.stage.add-environment');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.stage.environment.add');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
 function openUrl(url: string): void {
@@ -35,7 +35,7 @@ function decodeRedirectUrl(url: string): string {
   return url.replace(/&amp;/g, '&');
 }
 
-export default class DevopsStageAddEnvironment extends SfCommand<AddStageEnvironmentResult> {
+export default class DevopsStageEnvironmentAdd extends SfCommand<AddStageEnvironmentResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -70,7 +70,7 @@ export default class DevopsStageAddEnvironment extends SfCommand<AddStageEnviron
   };
 
   public async run(): Promise<AddStageEnvironmentResult> {
-    const { flags } = await this.parse(DevopsStageAddEnvironment);
+    const { flags } = await this.parse(DevopsStageEnvironmentAdd);
     const org: Org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
     const pipelineId = flags['pipeline-id'];
@@ -92,6 +92,14 @@ export default class DevopsStageAddEnvironment extends SfCommand<AddStageEnviron
 
     if (!stages.some((s) => s.Id === stageId)) {
       this.error(messages.getMessage('error.StageNotFound', [stageId, pipelineId]));
+    }
+
+    const pipelineQueryResult = await connection.query(
+      `SELECT IsActive FROM DevopsPipeline WHERE Id = '${pipelineId}' LIMIT 1`
+    );
+    const pipelineRecord = (pipelineQueryResult.records ?? [])[0] as { IsActive?: boolean } | undefined;
+    if (pipelineRecord?.IsActive) {
+      this.error(messages.getMessage('error.PipelineAlreadyActive', [pipelineId]));
     }
 
     let result: AddStageEnvironmentResult;

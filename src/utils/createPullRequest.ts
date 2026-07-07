@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { execSync } from 'node:child_process';
 import { Connection } from '@salesforce/core';
 import {
   getPipelineIdForProject,
@@ -23,7 +24,7 @@ import {
   getBranchNameFromStage,
   resolveTargetStageId,
 } from './pipelineUtils.js';
-import { WorkItemQueryRecord, VcsType } from './types.js';
+import { WorkItemQueryRecord } from './types.js';
 
 export type WorkItemDetail = {
   workItemId: string;
@@ -32,37 +33,25 @@ export type WorkItemDetail = {
   branchName?: string;
   targetBranch?: string;
   projectId: string;
-  repoOwner?: string;
-  repoName?: string;
   provider?: string;
-};
-
-export type CreatePullRequestParams = {
-  owner: string;
-  repo: string;
-  head: string;
-  base: string;
-  title: string;
-  body?: string;
-  provider: string;
-  token: string;
 };
 
 export type CreatePullRequestResult = {
   success: boolean;
   workItemName?: string;
-  title?: string;
   url?: string;
   sourceBranch?: string;
   targetBranch?: string;
   error?: string;
 };
 
-type VcsOwnerPayload = {
-  owner?: string;
-  owners?: unknown[];
-  items?: unknown[];
-  records?: unknown[];
+type ReviewResponse = {
+  reviewUrl?: string;
+  status?: string;
+  success?: boolean;
+  errorMessage?: string;
+  error?: string;
+  message?: string;
 };
 
 function normalizeProvider(provider: unknown): string | undefined {
@@ -72,40 +61,8 @@ function normalizeProvider(provider: unknown): string | undefined {
   return normalized;
 }
 
-function providerToVcsType(provider: unknown): VcsType | undefined {
-  const normalized = normalizeProvider(provider);
-  if (normalized === 'github') return 'GITHUB';
-  if (normalized === 'bitbucket') return 'BITBUCKET';
-  return undefined;
-}
-
-function extractOwnerFromVcsPayload(payload: unknown): string | undefined {
-  if (!payload) return undefined;
-  if (typeof payload === 'string') return payload.trim() || undefined;
-  const obj = payload as VcsOwnerPayload;
-  if (typeof obj.owner === 'string' && obj.owner.trim()) return obj.owner.trim();
-  const list = (obj.owners ?? obj.items ?? obj.records) as unknown[];
-  if (Array.isArray(list)) {
-    for (const candidate of list) {
-      if (typeof candidate === 'string' && candidate.trim()) return candidate.trim();
-      if (candidate && typeof candidate === 'object') {
-        const ownerVal = (candidate as Record<string, unknown>).owner;
-        if (typeof ownerVal === 'string' && ownerVal.trim()) return ownerVal.trim();
-      }
-    }
-  }
-  return undefined;
-}
-
-async function fetchOwnerByVcsType(connection: Connection, vcsType: VcsType): Promise<string | undefined> {
-  const path = `/services/data/v${connection.getApiVersion()}/connect/devops/vcs/${vcsType}`;
-  const response: unknown = await connection.request({ method: 'GET', url: path });
-  return extractOwnerFromVcsPayload(response);
-}
-
 /**
- * Queries a work item (by Name or Id) and resolves all info needed
- * to create a pull request: branch, repo, owner, provider, and target branch.
+ * Queries a work item (by Name or Id) and resolves info needed to create a pull request.
  */
 export async function fetchWorkItemDetail(
   connection: Connection,
@@ -117,8 +74,6 @@ export async function fetchWorkItemDetail(
   const result = await connection.query<WorkItemQueryRecord>(
     `SELECT Id, Name, Subject, DevopsProjectId, DevopsPipelineStageId,
             SourceCodeRepositoryBranch.Name,
-            SourceCodeRepositoryBranch.SourceCodeRepository.Name,
-            SourceCodeRepositoryBranch.SourceCodeRepository.RepositoryOwner,
             SourceCodeRepositoryBranch.SourceCodeRepository.Provider
      FROM WorkItem
      WHERE ${whereClause}
@@ -130,16 +85,6 @@ export async function fetchWorkItemDetail(
   }
 
   const provider = normalizeProvider(record.SourceCodeRepositoryBranch?.SourceCodeRepository?.Provider);
-  let repoOwner = record.SourceCodeRepositoryBranch?.SourceCodeRepository?.RepositoryOwner ?? undefined;
-
-  const vcsType = providerToVcsType(provider);
-  if (vcsType && !repoOwner) {
-    try {
-      repoOwner = (await fetchOwnerByVcsType(connection, vcsType)) ?? undefined;
-    } catch {
-      // owner lookup is best-effort
-    }
-  }
 
   const detail: WorkItemDetail = {
     workItemId: record.Id,
@@ -147,8 +92,6 @@ export async function fetchWorkItemDetail(
     subject: record.Subject ?? '',
     branchName: record.SourceCodeRepositoryBranch?.Name ?? undefined,
     projectId: record.DevopsProjectId,
-    repoOwner,
-    repoName: record.SourceCodeRepositoryBranch?.SourceCodeRepository?.Name ?? undefined,
     provider,
   };
 
@@ -167,119 +110,71 @@ export async function fetchWorkItemDetail(
   return detail;
 }
 
-/**
- * Creates a pull request on GitHub or Bitbucket using their REST APIs.
- */
-export async function createPullRequest(params: CreatePullRequestParams): Promise<CreatePullRequestResult> {
-  const { owner, repo, head, base, title, body, provider, token } = params;
-
-  if (provider === 'github') {
-    return createGitHubPullRequest({ owner, repo, head, base, title, body, token });
-  } else if (provider === 'bitbucket') {
-    return createBitbucketPullRequest({ owner, repo, head, base, title, body, token });
+function extractPrError(response: ReviewResponse): string {
+  const raw = String(response.errorMessage ?? response.error ?? response.message ?? 'Pull request creation failed');
+  // Try to extract inner VCS error from "REVIEW_CREATION_FAILED:Failed to create pull request: ..."
+  const innerMatch = raw.match(/Failed to create pull request:\s*(.+)/s);
+  const inner = innerMatch ? innerMatch[1].trim() : raw;
+  // Try to parse JSON error body from named credential callout responses
+  try {
+    const parsed = JSON.parse(inner) as { error?: { message?: string }; message?: string };
+    const msg = parsed?.error?.message ?? parsed?.message;
+    if (msg) return String(msg);
+  } catch {
+    // not JSON, use as-is
   }
-  throw new Error(`Unsupported VCS provider: ${provider ?? 'unknown'}. Supported providers are GitHub and Bitbucket.`);
+  if (inner.includes('no changes')) {
+    return 'The branch has no commits ahead of the target branch. Push your changes and try again.';
+  }
+  return inner;
 }
 
-async function createGitHubPullRequest(params: {
-  owner: string;
-  repo: string;
-  head: string;
-  base: string;
-  title: string;
-  body?: string;
-  token: string;
-}): Promise<CreatePullRequestResult> {
-  const { owner, repo, head, base, title, body, token } = params;
-  const url = `https://api.github.com/repos/${owner}/${repo}/pulls`;
+/**
+ * Creates a pull request via the Salesforce Connect API.
+ * POST /connect/devops/workItems/{workItemId}/review
+ * Salesforce handles VCS authentication and workspace resolution.
+ */
+export async function createPullRequest(connection: Connection, workItemId: string): Promise<CreatePullRequestResult> {
+  const path = `/services/data/v${connection.getApiVersion()}/connect/devops/workItems/${workItemId}/review`;
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/vnd.github+json',
-      'Content-Type': 'application/json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
-    body: JSON.stringify({ title, body: body ?? '', head, base }),
-  });
+  let response: ReviewResponse;
+  try {
+    response = await connection.request<ReviewResponse>({
+      method: 'POST',
+      url: path,
+      body: JSON.stringify({}),
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (e: unknown) {
+    const raw = e instanceof Error ? e.message : String(e);
+    throw new Error(extractPrError({ errorMessage: raw }));
+  }
 
-  const data = (await response.json()) as Record<string, unknown>;
-
-  if (!response.ok) {
-    const errors = Array.isArray(data.errors)
-      ? (data.errors as Array<Record<string, unknown>>).map((e) => e.message ?? JSON.stringify(e)).join('; ')
-      : undefined;
-    const msg = (data.message as string) ?? `HTTP ${response.status}`;
-    throw new Error(errors ? `${msg}: ${errors}` : msg);
+  const isError = response.status === 'Error' || response.success === false || !!response.errorMessage;
+  if (isError) {
+    throw new Error(extractPrError(response));
   }
 
   return {
     success: true,
-    title: data.title as string,
-    url: data.html_url as string,
-    sourceBranch: head,
-    targetBranch: base,
-  };
-}
-
-async function createBitbucketPullRequest(params: {
-  owner: string;
-  repo: string;
-  head: string;
-  base: string;
-  title: string;
-  body?: string;
-  token: string;
-}): Promise<CreatePullRequestResult> {
-  const { owner, repo, head, base, title, body, token } = params;
-  const url = `https://api.bitbucket.org/2.0/repositories/${owner}/${repo}/pullrequests`;
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      title,
-      description: body ?? '',
-      source: { branch: { name: head } },
-      destination: { branch: { name: base } },
-    }),
-  });
-
-  const data = (await response.json()) as Record<string, unknown>;
-
-  if (!response.ok) {
-    const errorMsg = (data.error as Record<string, unknown>)?.message ?? data.message ?? `HTTP ${response.status}`;
-    throw new Error(String(errorMsg));
-  }
-
-  const links = data.links as Record<string, Record<string, string>> | undefined;
-  return {
-    success: true,
-    title: data.title as string,
-    url: links?.html?.href ?? (data.url as string) ?? '',
-    sourceBranch: head,
-    targetBranch: base,
+    url: response.reviewUrl,
   };
 }
 
 /**
- * Attempts to resolve a VCS authentication token from the environment
- * or the `gh` CLI (for GitHub).
+ * Attempts to resolve a GitHub authentication token from the environment or the gh CLI.
+ * Used by pipeline create for pre-flight owner validation.
  */
-export async function resolveGitHubToken(): Promise<string | undefined> {
+export function resolveGitHubToken(): Promise<string | undefined> {
   const envToken = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
-  if (envToken) return envToken;
+  if (envToken) return Promise.resolve(envToken);
 
   try {
-    const { execSync } = await import('node:child_process');
+    // execSync with a fixed string — no user input, no injection risk
     const token = execSync('gh auth token', { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
-    if (token) return token;
+    if (token) return Promise.resolve(token);
   } catch {
     // gh CLI not installed or not authenticated
   }
-  return undefined;
+  return Promise.resolve(undefined);
 }
