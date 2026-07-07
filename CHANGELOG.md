@@ -1,3 +1,14 @@
+# [1.4.0](https://github.com/salesforcecli/plugin-devops-center/compare/1.3.0...1.4.0) (2026-07-07)
+
+### Bug Fixes
+
+- fix tests ([cd3667a](https://github.com/salesforcecli/plugin-devops-center/commit/cd3667a2c5608c3a721174c04e7cc4e81ed4e8e2))
+
+### Features
+
+- add and restructure devops center commands ([82048cf](https://github.com/salesforcecli/plugin-devops-center/commit/82048cf777b85cb01696c7b91d81eda0b75f57fe))
+- devops stage environment add ([3a63552](https://github.com/salesforcecli/plugin-devops-center/commit/3a63552e1ad67de3c67224c10c27f00f86811850))
+
 # [1.3.0](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.28...1.3.0) (2026-07-01)
 
 ### Bug Fixes
