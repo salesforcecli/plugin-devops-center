@@ -1,30 +1,33 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/CreatePullRequestResult",
+  "$ref": "#/definitions/AddStageBranchResult",
   "definitions": {
-    "CreatePullRequestResult": {
+    "AddStageBranchResult": {
       "type": "object",
       "properties": {
         "success": {
           "type": "boolean"
         },
-        "workItemName": {
+        "stageId": {
           "type": "string"
         },
-        "url": {
+        "branchName": {
           "type": "string"
         },
-        "sourceBranch": {
+        "branchCreated": {
+          "type": "boolean"
+        },
+        "repoBranchId": {
           "type": "string"
         },
-        "targetBranch": {
+        "pipelineId": {
           "type": "string"
         },
         "error": {
           "type": "string"
         }
       },
-      "required": ["success"],
+      "required": ["success", "stageId"],
       "additionalProperties": false
     }
   }

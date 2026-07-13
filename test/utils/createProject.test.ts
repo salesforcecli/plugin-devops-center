@@ -50,6 +50,7 @@ describe('createProject', () => {
     expect(result.name).to.equal('MyApp Release');
     expect(result.description).to.equal('My description');
     expect(sobjectStub.calledWith('DevopsProject')).to.be.true;
+    expect(createStub.calledWithMatch({ IsActive: true })).to.be.true;
   });
 
   it('returns success without description when empty', async () => {

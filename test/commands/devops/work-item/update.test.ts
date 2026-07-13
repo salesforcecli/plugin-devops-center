@@ -19,22 +19,23 @@ import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
 
-describe('devops work-item status update', () => {
+describe('devops work-item update', () => {
   let sandbox: sinon.SinonSandbox;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let UpdateCommand: any;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
-  const updateWorkItemStatusStub = sinon.stub();
+  const updateWorkItemStub = sinon.stub();
   const resolveWorkItemByNameStub = sinon.stub();
   const resolveProjectIdForWorkItemStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../../src/commands/devops/work-item/status/update.js', {
-      '../../../../../src/utils/updateWorkItemStatus.js': {
-        updateWorkItemStatus: updateWorkItemStatusStub,
+    const mod = await esmock('../../../../src/commands/devops/work-item/update.js', {
+      '../../../../src/utils/updateWorkItem.js': {
+        updateWorkItem: updateWorkItemStub,
         resolveWorkItemByName: resolveWorkItemByNameStub,
         resolveProjectIdForWorkItem: resolveProjectIdForWorkItemStub,
+        ALLOWED_STATUSES: ['In Progress', 'Ready to Promote'],
       },
     });
     UpdateCommand = mod.default;
@@ -42,7 +43,7 @@ describe('devops work-item status update', () => {
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
-    updateWorkItemStatusStub.reset();
+    updateWorkItemStub.reset();
     resolveWorkItemByNameStub.reset();
     resolveProjectIdForWorkItemStub.reset();
   });
@@ -51,15 +52,15 @@ describe('devops work-item status update', () => {
     sandbox.restore();
   });
 
-  describe('successful update by work item ID', () => {
+  describe('update status by ID', () => {
     test
       .stdout()
       .stderr()
-      .it('resolves project ID then logs success', async (ctx) => {
+      .it('updates status and logs success', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         resolveProjectIdForWorkItemStub.resolves('1Qg000000000001');
-        updateWorkItemStatusStub.resolves({ success: true, workItemId: '0Wx000000000001', status: 'In Progress' });
+        updateWorkItemStub.resolves({ success: true, workItemId: '0Wx000000000001', status: 'In Progress' });
 
         await UpdateCommand.run([
           '--target-org',
@@ -70,69 +71,100 @@ describe('devops work-item status update', () => {
           'In Progress',
         ]);
 
-        expect(ctx.stdout).to.contain('Successfully updated status for work item');
+        expect(ctx.stdout).to.contain('Successfully updated work item 0Wx000000000001');
         expect(ctx.stdout).to.contain('In Progress');
-        expect(resolveProjectIdForWorkItemStub.calledOnce).to.be.true;
+        expect(updateWorkItemStub.calledWithMatch({ status: 'In Progress' })).to.be.true;
       });
   });
 
-  describe('successful update by work item name', () => {
+  describe('update subject by name', () => {
     test
       .stdout()
       .stderr()
-      .it('resolves ID and project from name then updates', async (ctx) => {
+      .it('updates subject and logs success', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         resolveWorkItemByNameStub.resolves({ workItemId: '0Wx000000000001', projectId: '1Qg000000000001' });
-        updateWorkItemStatusStub.resolves({ success: true, workItemId: '0Wx000000000001', status: 'Ready to Promote' });
+        updateWorkItemStub.resolves({ success: true, workItemId: '0Wx000000000001', subject: 'Fix login bug' });
 
         await UpdateCommand.run([
           '--target-org',
           'testOrg',
           '--work-item-name',
           'WI-000001',
-          '--status',
-          'Ready to Promote',
+          '--subject',
+          'Fix login bug',
         ]);
 
-        expect(ctx.stdout).to.contain('WI-000001');
-        expect(ctx.stdout).to.contain('Ready to Promote');
-        expect(resolveWorkItemByNameStub.calledOnce).to.be.true;
+        expect(ctx.stdout).to.contain('Successfully updated work item WI-000001');
+        expect(ctx.stdout).to.contain('Fix login bug');
+        expect(updateWorkItemStub.calledWithMatch({ subject: 'Fix login bug' })).to.be.true;
       });
   });
 
-  describe('update failure', () => {
+  describe('update multiple fields', () => {
     test
       .stdout()
       .stderr()
-      .it('shows failure error', async (ctx) => {
+      .it('passes all provided fields to the util', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        resolveProjectIdForWorkItemStub.resolves('1Qg000000000001');
-        updateWorkItemStatusStub.resolves({
-          success: false,
+        resolveWorkItemByNameStub.resolves({ workItemId: '0Wx000000000001', projectId: '1Qg000000000001' });
+        updateWorkItemStub.resolves({
+          success: true,
           workItemId: '0Wx000000000001',
-          error: 'Invalid status value',
+          subject: 'Fix login bug',
+          description: 'Users cannot log in on mobile',
+          status: 'In Progress',
         });
 
+        await UpdateCommand.run([
+          '--target-org',
+          'testOrg',
+          '--work-item-name',
+          'WI-000001',
+          '--subject',
+          'Fix login bug',
+          '--description',
+          'Users cannot log in on mobile',
+          '--status',
+          'In Progress',
+        ]);
+
+        expect(ctx.stdout).to.contain('Fix login bug');
+        expect(ctx.stdout).to.contain('Users cannot log in on mobile');
+        expect(ctx.stdout).to.contain('In Progress');
+        expect(
+          updateWorkItemStub.calledWithMatch({
+            subject: 'Fix login bug',
+            description: 'Users cannot log in on mobile',
+            status: 'In Progress',
+          })
+        ).to.be.true;
+      });
+  });
+
+  describe('no fields provided', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('errors when no update flags are given', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+
         try {
-          await UpdateCommand.run([
-            '--target-org',
-            'testOrg',
-            '--work-item-id',
-            '0Wx000000000001',
-            '--status',
-            'In Progress',
-          ]);
+          await UpdateCommand.run(['--target-org', 'testOrg', '--work-item-id', '0Wx000000000001']);
+          expect.fail('should have thrown');
         } catch (e) {
           // expected
         }
 
-        expect(ctx.stderr).to.contain('Failed to update work item status');
+        expect(ctx.stderr).to.contain('at least one of --subject, --description, or --status');
+        expect(updateWorkItemStub.called).to.be.false;
       });
   });
 
-  describe('work item name not found', () => {
+  describe('work item not found', () => {
     test
       .stdout()
       .stderr()
@@ -165,7 +197,7 @@ describe('devops work-item status update', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         resolveProjectIdForWorkItemStub.resolves('1Qg000000000001');
-        updateWorkItemStatusStub.rejects(new Error("sObject type 'WorkItem' is not supported"));
+        updateWorkItemStub.rejects(new Error("sObject type 'WorkItem' is not supported"));
 
         try {
           await UpdateCommand.run([
@@ -192,7 +224,7 @@ describe('devops work-item status update', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         resolveProjectIdForWorkItemStub.resolves('1Qg000000000001');
-        updateWorkItemStatusStub.rejects(new Error('Network error'));
+        updateWorkItemStub.rejects(new Error('Network error'));
 
         try {
           await UpdateCommand.run([

@@ -19,16 +19,16 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import {
   resolveWorkItemByName,
   resolveProjectIdForWorkItem,
-  updateWorkItemStatus,
-  UpdateWorkItemStatusResult,
+  updateWorkItem,
+  UpdateWorkItemResult,
   ALLOWED_STATUSES,
-} from '../../../../utils/updateWorkItemStatus.js';
+} from '../../../utils/updateWorkItem.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.work-item.status.update');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.work-item.update');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export default class DevopsWorkItemStatusUpdate extends SfCommand<UpdateWorkItemStatusResult> {
+export default class DevopsWorkItemUpdate extends SfCommand<UpdateWorkItemResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -46,15 +46,25 @@ export default class DevopsWorkItemStatusUpdate extends SfCommand<UpdateWorkItem
       char: 'w',
       exactlyOne: ['work-item-name', 'work-item-id'],
     }),
+    subject: Flags.string({
+      summary: messages.getMessage('flags.subject.summary'),
+    }),
+    description: Flags.string({
+      summary: messages.getMessage('flags.description.summary'),
+    }),
     status: Flags.string({
       summary: messages.getMessage('flags.status.summary'),
-      required: true,
       options: [...ALLOWED_STATUSES],
     }),
   };
 
-  public async run(): Promise<UpdateWorkItemStatusResult> {
-    const { flags } = await this.parse(DevopsWorkItemStatusUpdate);
+  public async run(): Promise<UpdateWorkItemResult> {
+    const { flags } = await this.parse(DevopsWorkItemUpdate);
+
+    if (!flags['subject'] && !flags['description'] && !flags['status']) {
+      this.error(messages.getMessage('error.NoFieldsProvided'));
+    }
+
     const org: Org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
 
@@ -77,9 +87,16 @@ export default class DevopsWorkItemStatusUpdate extends SfCommand<UpdateWorkItem
       throw error;
     }
 
-    let result: UpdateWorkItemStatusResult;
+    let result: UpdateWorkItemResult;
     try {
-      result = await updateWorkItemStatus({ connection, workItemId, projectId, status: flags['status'] });
+      result = await updateWorkItem({
+        connection,
+        workItemId,
+        projectId,
+        status: flags['status'],
+        subject: flags['subject'],
+        description: flags['description'],
+      });
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
@@ -89,10 +106,13 @@ export default class DevopsWorkItemStatusUpdate extends SfCommand<UpdateWorkItem
     }
 
     if (result.success) {
-      const identifier = flags['work-item-name'] ?? result.workItemId;
-      this.log(`Successfully updated status for work item ${identifier} to "${result.status ?? flags['status']}".`);
+      const identifier = flags['work-item-name'] ?? workItemId;
+      this.log(`Successfully updated work item ${identifier}.`);
+      if (result.subject !== undefined) this.log(`  Subject:     ${result.subject}`);
+      if (result.description !== undefined) this.log(`  Description: ${result.description}`);
+      if (result.status !== undefined) this.log(`  Status:      ${result.status}`);
     } else {
-      this.error(`Failed to update work item status: ${result.error ?? ''}`);
+      this.error(`Failed to update work item: ${result.error ?? ''}`);
     }
 
     return result;

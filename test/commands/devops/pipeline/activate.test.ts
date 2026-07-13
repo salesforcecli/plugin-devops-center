@@ -23,7 +23,8 @@ describe('devops pipeline activate', () => {
   let sandbox: sinon.SinonSandbox;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let ActivateCommand: any;
-  const mockConnection = { getApiVersion: () => '65.0' };
+  const queryStub = sinon.stub().resolves({ records: [{ IsActive: false }] });
+  const mockConnection = { getApiVersion: () => '65.0', query: queryStub };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const activatePipelineStub = sinon.stub();
   const fetchPipelineStagesStub = sinon.stub();
@@ -44,6 +45,8 @@ describe('devops pipeline activate', () => {
     sandbox = sinon.createSandbox();
     activatePipelineStub.reset();
     fetchPipelineStagesStub.reset();
+    queryStub.reset();
+    queryStub.resolves({ records: [{ IsActive: false }] });
   });
 
   afterEach(() => {
@@ -105,7 +108,7 @@ describe('devops pipeline activate', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         fetchPipelineStagesStub.resolves([{ Id: '1', Name: 'Integration' }]);
-        activatePipelineStub.rejects(new Error('Pipeline is already active'));
+        queryStub.resolves({ records: [{ IsActive: true }] });
 
         try {
           await ActivateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001']);

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { execSync } from 'node:child_process';
 import { Connection } from '@salesforce/core';
 
 export type RepoInfo = {
@@ -30,7 +31,8 @@ export type CreatePipelineParams = {
   repoType: string;
   createRepo?: boolean;
   repoOwner?: string;
-  bitbucketProject?: string;
+  bitbucketWorkspace?: string;
+  bitbucketProjectKey?: string;
 };
 
 export type CreatePipelineResult = {
@@ -62,11 +64,64 @@ export function detectRepoType(repoUrl: string): string | undefined {
 }
 
 /**
+ * Validates that a GitHub owner (org or user) exists.
+ * Primary: uses `gh api` which handles keyring-based auth automatically.
+ * Fallback: direct GitHub API call with token (for environments without gh CLI).
+ * Skips validation silently when neither mechanism can authenticate, so we
+ * don't block the command when the check itself is unavailable.
+ */
+export async function validateGitHubOwner(owner: string, token?: string, fetchFn: typeof fetch = fetch): Promise<void> {
+  try {
+    execSync(`gh api users/${encodeURIComponent(owner)}`, {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    return;
+  } catch (e: unknown) {
+    const stderr = String((e as { stderr?: string }).stderr ?? '');
+    const stdout = String((e as { stdout?: string }).stdout ?? '');
+    if (stderr.includes('404') || stdout.includes('"Not Found"')) {
+      throw new GitHubOwnerNotFoundError(owner);
+    }
+    // gh not available or not authenticated — fall through to token-based check
+  }
+
+  if (!token) return;
+  const response = await fetchFn(`https://api.github.com/users/${encodeURIComponent(owner)}`, {
+    headers: {
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (response.status === 404) throw new GitHubOwnerNotFoundError(owner);
+  // 403 or other non-404: skip validation
+}
+
+export class GitHubOwnerNotFoundError extends Error {
+  public readonly owner: string;
+  public constructor(owner: string) {
+    super(`GitHub owner "${owner}" does not exist`);
+    this.owner = owner;
+  }
+}
+
+/**
  * Creates a new DevOps Center pipeline via the Connect API.
  * POST /services/data/v{version}/connect/devops/pipelines
  */
 export async function createPipeline(params: CreatePipelineParams): Promise<CreatePipelineResult> {
-  const { connection, name, description, repo, repoType, createRepo, repoOwner, bitbucketProject } = params;
+  const {
+    connection,
+    name,
+    description,
+    repo,
+    repoType,
+    createRepo,
+    repoOwner,
+    bitbucketWorkspace,
+    bitbucketProjectKey,
+  } = params;
 
   const path = `/services/data/v${connection.getApiVersion()}/connect/devops/pipelines`;
 
@@ -79,14 +134,15 @@ export async function createPipeline(params: CreatePipelineParams): Promise<Crea
   if (createRepo) {
     payload.createVcsRepo = true;
     payload.vcsRepoName = repo;
-    payload.vcsRepoOwner = repoOwner;
 
-    if (repoType === 'bitbucket' && repoOwner) {
-      const providerInfo: Record<string, string> = { bitbucketWorkspace: repoOwner };
-      if (bitbucketProject) {
-        providerInfo.bitbucketProject = bitbucketProject;
+    if (repoType === 'bitbucket') {
+      const providerInfo: Record<string, string> = { bitbucketWorkspace: bitbucketWorkspace! };
+      if (bitbucketProjectKey) {
+        providerInfo.bitbucketProjectKey = bitbucketProjectKey;
       }
       payload.repoProviderInfo = JSON.stringify(providerInfo);
+    } else {
+      payload.vcsRepoOwner = repoOwner;
     }
   } else {
     payload.vcsRepoUrl = repo;

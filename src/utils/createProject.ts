@@ -39,6 +39,7 @@ export async function createProject(params: CreateProjectParams): Promise<Create
   const result = await connection.sobject('DevopsProject').create({
     Name: name,
     Description: description || null,
+    IsActive: true,
   });
 
   if (result.success) {

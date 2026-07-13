@@ -1,3 +1,46 @@
+# [1.4.0](https://github.com/salesforcecli/plugin-devops-center/compare/1.3.0...1.4.0) (2026-07-07)
+
+### Bug Fixes
+
+- fix tests ([cd3667a](https://github.com/salesforcecli/plugin-devops-center/commit/cd3667a2c5608c3a721174c04e7cc4e81ed4e8e2))
+
+### Features
+
+- add and restructure devops center commands ([82048cf](https://github.com/salesforcecli/plugin-devops-center/commit/82048cf777b85cb01696c7b91d81eda0b75f57fe))
+- devops stage environment add ([3a63552](https://github.com/salesforcecli/plugin-devops-center/commit/3a63552e1ad67de3c67224c10c27f00f86811850))
+
+# [1.3.0](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.28...1.3.0) (2026-07-01)
+
+### Bug Fixes
+
+- clean up flag definitions and example formatting ([d13ed63](https://github.com/salesforcecli/plugin-devops-center/commit/d13ed634a8fab80c801ff9079b4b260b9d7af522))
+- test ([14703b6](https://github.com/salesforcecli/plugin-devops-center/commit/14703b62045ca80f61fa6617960bb4290662657e))
+- test ([15c0ce8](https://github.com/salesforcecli/plugin-devops-center/commit/15c0ce831718dd825859bf96137e3e5702e84f4d))
+
+### Features
+
+- add-environment command ([f76e6cf](https://github.com/salesforcecli/plugin-devops-center/commit/f76e6cf6d4962a89571272ff2fcb37730c980482))
+- stage add-branch ([916fc5f](https://github.com/salesforcecli/plugin-devops-center/commit/916fc5f8fa0291fc9b884e6c0527c4bde822032d))
+
+## [1.2.28](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.27...1.2.28) (2026-06-26)
+
+### Bug Fixes
+
+- pr review ([fe691ed](https://github.com/salesforcecli/plugin-devops-center/commit/fe691ed7892c87fc3c99e599de36cb9b3bb8e99e))
+- regenerate json schemas for new commands ([6aab096](https://github.com/salesforcecli/plugin-devops-center/commit/6aab09629317e5f9b086702de943249498ee1b36))
+- review fix ([5964639](https://github.com/salesforcecli/plugin-devops-center/commit/596463952db0d0d9b149de6e2db0951cfa976735))
+- review refactor ([ea07b40](https://github.com/salesforcecli/plugin-devops-center/commit/ea07b404f5c7f2aeef1b829f135d6dd879b46425))
+- test failure ([0b93b69](https://github.com/salesforcecli/plugin-devops-center/commit/0b93b690ba55d254122f754322aa465d9414a9fe))
+- test failure ([e440a6b](https://github.com/salesforcecli/plugin-devops-center/commit/e440a6bc4997cebcea468899360104a6412f7176))
+- test failure ([c4bd6e0](https://github.com/salesforcecli/plugin-devops-center/commit/c4bd6e0cf86ff87323ee491ee13dff17967c8303))
+- test failures ([827f907](https://github.com/salesforcecli/plugin-devops-center/commit/827f907323f86d2ab08a407d754e5c3e44e336b7))
+- test fixes ([2343a11](https://github.com/salesforcecli/plugin-devops-center/commit/2343a117804ab2b9a90b18c6b6a4589ce764954c))
+- tests ([ec0bb9b](https://github.com/salesforcecli/plugin-devops-center/commit/ec0bb9bfcefb938296e158884ecece361d65e099))
+- tests ([f6d1aee](https://github.com/salesforcecli/plugin-devops-center/commit/f6d1aee1f648c66cc141e4251ced6720634b4b39))
+- tests ([bf63989](https://github.com/salesforcecli/plugin-devops-center/commit/bf63989803aebfea13f4c791e2dbb27e036176bd))
+- unit test ([93bd6d1](https://github.com/salesforcecli/plugin-devops-center/commit/93bd6d1871e8c02585b148d1c75e538cb8577b8d))
+- unit tests ([3910d11](https://github.com/salesforcecli/plugin-devops-center/commit/3910d114229a16057ec04129cda0cc1b1413f5c5))
+
 ## [1.2.27](https://github.com/salesforcecli/plugin-devops-center/compare/1.2.26...1.2.27) (2024-12-22)
 
 ### Bug Fixes
