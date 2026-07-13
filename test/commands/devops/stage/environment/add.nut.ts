@@ -16,7 +16,7 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import type { CreatePipelineResult } from '../../../../src/utils/createPipeline.js';
+import type { CreatePipelineResult } from '../../../../../src/utils/createPipeline.js';
 
 const REAL_ORG = Boolean(
   process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME ?? process.env.TESTKIT_AUTH_URL
@@ -24,7 +24,7 @@ const REAL_ORG = Boolean(
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
-describe('devops stage add-environment NUTs', () => {
+describe('devops stage environment add NUTs', () => {
   let session: TestSession;
   let orgFlag: string;
   let pipelineId: string;
@@ -57,18 +57,18 @@ describe('devops stage add-environment NUTs', () => {
   // ── flag-validation tests ─────────────────────────────────────────────────
 
   it('displays help text', () => {
-    const result = execCmd('devops stage add-environment --help', { ensureExitCode: 0 });
+    const result = execCmd('devops stage environment add --help', { ensureExitCode: 0 });
     expect(result.shellOutput.stdout).to.include('Add a Salesforce environment to a pipeline stage');
   });
 
   it('errors when --target-org is missing', () => {
-    const result = execCmd('devops stage add-environment', { ensureExitCode: 1 });
+    const result = execCmd('devops stage environment add', { ensureExitCode: 1 });
     expect(result.shellOutput.stderr).to.include('target-org');
   });
 
   it('rejects invalid --org-type values', () => {
     const result = execCmd(
-      'devops stage add-environment --pipeline-id 0XB000000000001AAA --stage-id 0XC000000000001AAA --environment-name myEnv --org-type NotValid',
+      'devops stage environment add --pipeline-id 0XB000000000001AAA --stage-id 0XC000000000001AAA --environment-name myEnv --org-type NotValid',
       { ensureExitCode: 2 }
     );
     expect(result.shellOutput.stderr).to.include('NotValid');
@@ -81,7 +81,7 @@ describe('devops stage add-environment NUTs', () => {
   // checking the error when a non-existent stage ID is supplied.
   (REAL_ORG ? it : it.skip)('errors when --stage-id does not belong to the pipeline', () => {
     const result = execCmd(
-      `devops stage add-environment --pipeline-id ${pipelineId} --stage-id 0XC000000000001AAA --environment-name myEnv --org-type Sandbox --no-browser ${orgFlag}`,
+      `devops stage environment add --pipeline-id ${pipelineId} --stage-id 0XC000000000001AAA --environment-name myEnv --org-type Sandbox --no-browser ${orgFlag}`,
       { ensureExitCode: 1 }
     );
     expect(result.shellOutput.stderr).to.include('0XC000000000001AAA');
@@ -89,11 +89,9 @@ describe('devops stage add-environment NUTs', () => {
 
   (REAL_ORG ? it : it.skip)('errors with valid stage when no org auth is completed (timeout)', () => {
     // With --no-browser the command waits for auth but no callback arrives → auth timeout error.
-    // We use a very short wait by setting the async flag; if the command has no --async,
-    // the timeout comes from the server side after the OAuth session expires.
     // This confirms the command reaches DevOps Center and attempts the environment-creation flow.
     const result = execCmd(
-      `devops stage add-environment --pipeline-id ${pipelineId} --stage-id ${validStageId} --environment-name NUT-env --org-type Sandbox --no-browser ${orgFlag}`,
+      `devops stage environment add --pipeline-id ${pipelineId} --stage-id ${validStageId} --environment-name NUT-env --org-type Sandbox --no-browser ${orgFlag}`,
       { ensureExitCode: 1 }
     );
     expect(result.shellOutput.stderr).to.match(/timed out|auth|AuthTimeout/i);
