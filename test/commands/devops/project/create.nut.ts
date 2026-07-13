@@ -20,7 +20,9 @@ import type { CreateProjectResult } from '../../../../src/utils/createProject.js
 
 // These tests require a real org. Set TESTKIT_HUB_USERNAME (and TESTKIT_AUTH_URL or JWT vars)
 // before running. CI sets these via secrets; locally use `sf org login web` and export the username.
-const REAL_ORG = Boolean(process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME);
+const REAL_ORG = Boolean(
+  process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME ?? process.env.TESTKIT_AUTH_URL
+);
 
 describe('devops project create NUTs', () => {
   let session: TestSession;
