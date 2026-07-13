@@ -16,13 +16,13 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import type { UpdateWorkItemStatusResult } from '../../../../../src/utils/updateWorkItemStatus.js';
+import type { UpdateWorkItemResult } from '../../../../src/utils/updateWorkItem.js';
 
 const REAL_ORG = Boolean(
   process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME ?? process.env.TESTKIT_AUTH_URL
 );
 
-describe('devops work-item status update NUTs', () => {
+describe('devops work-item update NUTs', () => {
   let session: TestSession;
   let orgFlag: string;
   let workItemName: string;
@@ -57,19 +57,19 @@ describe('devops work-item status update NUTs', () => {
   // ── flag-validation tests ─────────────────────────────────────────────────
 
   it('displays help text', () => {
-    const result = execCmd('devops work-item status update --help', { ensureExitCode: 0 });
+    const result = execCmd('devops work-item update --help', { ensureExitCode: 0 });
     expect(result.shellOutput.stdout).to.include('Update the status of a work item');
   });
 
   it('errors with invalid --status value', () => {
-    const result = execCmd('devops work-item status update --work-item-name WI-001 --status InvalidStatus', {
+    const result = execCmd('devops work-item update --work-item-name WI-001 --status InvalidStatus', {
       ensureExitCode: 2,
     });
     expect(result.shellOutput.stderr).to.include('InvalidStatus');
   });
 
   it('errors when --target-org is missing (valid flags supplied)', () => {
-    const result = execCmd('devops work-item status update --work-item-name WI-001 --status "In Progress"', {
+    const result = execCmd('devops work-item update --work-item-name WI-001 --status "In Progress"', {
       ensureExitCode: 1,
     });
     expect(result.shellOutput.stderr).to.include('target-org');
@@ -78,8 +78,8 @@ describe('devops work-item status update NUTs', () => {
   // ── real-org tests ────────────────────────────────────────────────────────
 
   (REAL_ORG ? it : it.skip)('updates work item status by ID and returns structured JSON', () => {
-    const result = execCmd<UpdateWorkItemStatusResult>(
-      `devops work-item status update --work-item-id ${workItemId} --status "In Progress" --json ${orgFlag}`,
+    const result = execCmd<UpdateWorkItemResult>(
+      `devops work-item update --work-item-id ${workItemId} --status "In Progress" --json ${orgFlag}`,
       { ensureExitCode: 0 }
     );
     const output = result.jsonOutput;
@@ -90,8 +90,8 @@ describe('devops work-item status update NUTs', () => {
   });
 
   (REAL_ORG ? it : it.skip)('updates work item status by name', () => {
-    const result = execCmd<UpdateWorkItemStatusResult>(
-      `devops work-item status update --work-item-name ${workItemName} --status "Ready to Promote" --json ${orgFlag}`,
+    const result = execCmd<UpdateWorkItemResult>(
+      `devops work-item update --work-item-name ${workItemName} --status "Ready to Promote" --json ${orgFlag}`,
       { ensureExitCode: 0 }
     );
     expect(result.jsonOutput?.result.success).to.be.true;

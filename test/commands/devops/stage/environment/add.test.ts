@@ -19,22 +19,23 @@ import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
 
-describe('devops stage add-environment', () => {
+describe('devops stage environment add', () => {
   let sandbox: sinon.SinonSandbox;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let AddEnvironmentCommand: any;
-  const mockConnection = { getApiVersion: () => '65.0' };
+  const queryStub = sinon.stub().resolves({ records: [{ IsActive: false }] });
+  const mockConnection = { getApiVersion: () => '65.0', query: queryStub };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const addStageEnvironmentStub = sinon.stub();
   const fetchPipelineStagesStub = sinon.stub();
   const execStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/stage/add-environment.js', {
-      '../../../../src/utils/addStageEnvironment.js': {
+    const mod = await esmock('../../../../../src/commands/devops/stage/environment/add.js', {
+      '../../../../../src/utils/addStageEnvironment.js': {
         addStageEnvironment: addStageEnvironmentStub,
       },
-      '../../../../src/utils/pipelineUtils.js': {
+      '../../../../../src/utils/pipelineUtils.js': {
         fetchPipelineStages: fetchPipelineStagesStub,
       },
       'node:child_process': {
@@ -49,6 +50,8 @@ describe('devops stage add-environment', () => {
     addStageEnvironmentStub.reset();
     fetchPipelineStagesStub.reset();
     execStub.reset();
+    queryStub.reset();
+    queryStub.resolves({ records: [{ IsActive: false }] });
   });
 
   afterEach(() => {

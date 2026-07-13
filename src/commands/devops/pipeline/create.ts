@@ -16,7 +16,14 @@
 
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { createPipeline, CreatePipelineResult, detectRepoType } from '../../../utils/createPipeline.js';
+import {
+  createPipeline,
+  CreatePipelineResult,
+  detectRepoType,
+  validateGitHubOwner,
+  GitHubOwnerNotFoundError,
+} from '../../../utils/createPipeline.js';
+import { resolveGitHubToken } from '../../../utils/createPullRequest.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.pipeline.create');
@@ -51,8 +58,11 @@ export default class DevopsPipelineCreate extends SfCommand<CreatePipelineResult
     'repo-owner': Flags.string({
       summary: messages.getMessage('flags.repo-owner.summary'),
     }),
-    'bitbucket-project': Flags.string({
-      summary: messages.getMessage('flags.bitbucket-project.summary'),
+    'bitbucket-workspace': Flags.string({
+      summary: messages.getMessage('flags.bitbucket-workspace.summary'),
+    }),
+    'bitbucket-project-key': Flags.string({
+      summary: messages.getMessage('flags.bitbucket-project-key.summary'),
     }),
     description: Flags.string({
       summary: messages.getMessage('flags.description.summary'),
@@ -66,8 +76,25 @@ export default class DevopsPipelineCreate extends SfCommand<CreatePipelineResult
     const connection = org.getConnection(flags['api-version']);
     const repoType = this.resolveRepoType(flags['repo-type'], flags['repo'], flags['create-repo']);
 
-    if (flags['create-repo'] && !flags['repo-owner']) {
-      this.error(messages.getMessage('error.RepoOwnerRequired'));
+    if (flags['create-repo']) {
+      if (repoType === 'bitbucket') {
+        if (!flags['bitbucket-workspace']) {
+          this.error(messages.getMessage('error.BitbucketWorkspaceRequired'));
+        }
+      } else {
+        if (!flags['repo-owner']) {
+          this.error(messages.getMessage('error.RepoOwnerRequired'));
+        }
+        try {
+          const token = await resolveGitHubToken();
+          await validateGitHubOwner(flags['repo-owner'], token);
+        } catch (error: unknown) {
+          if (error instanceof GitHubOwnerNotFoundError) {
+            this.error(messages.getMessage('error.RepoOwnerNotFound', [flags['repo-owner']]));
+          }
+          throw error;
+        }
+      }
     }
 
     let result: CreatePipelineResult;
@@ -80,7 +107,8 @@ export default class DevopsPipelineCreate extends SfCommand<CreatePipelineResult
         repoType,
         createRepo: flags['create-repo'],
         repoOwner: flags['repo-owner'],
-        bitbucketProject: flags['bitbucket-project'],
+        bitbucketWorkspace: flags['bitbucket-workspace'],
+        bitbucketProjectKey: flags['bitbucket-project-key'],
       });
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
@@ -115,6 +143,12 @@ export default class DevopsPipelineCreate extends SfCommand<CreatePipelineResult
 
   private handleApiError(errMsg: string, repo: string): void {
     if (errMsg.includes('REPOSITORY_CREATION_FAILED')) {
+      if (errMsg.includes('Repository not found') || errMsg.includes('fatal: repository')) {
+        this.error(messages.getMessage('error.RepoOwnerNotFound', [repo]));
+      }
+      if (errMsg.includes('name already exists on this account')) {
+        this.error(messages.getMessage('error.RepoNameAlreadyExists', [repo]));
+      }
       this.error(messages.getMessage('error.RepoCreationFailed', [repo, errMsg]));
     }
     if (errMsg.includes('REPO_NOT_FOUND_OR_UNAUTHORIZED')) {
@@ -143,7 +177,7 @@ export default class DevopsPipelineCreate extends SfCommand<CreatePipelineResult
       `    Add pipeline stages: sf devops pipeline stage add --target-org ${orgLabel} --pipeline-id ${pipelineIdLabel}`
     );
     this.log(
-      `    Attach a project: sf devops pipeline attach-project --target-org ${orgLabel} --pipeline-id ${pipelineIdLabel} --project-id <ID>`
+      `    Attach a project: sf devops pipeline project add --target-org ${orgLabel} --pipeline-id ${pipelineIdLabel} --project-id <ID>`
     );
   }
 }

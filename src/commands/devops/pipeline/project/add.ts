@@ -16,13 +16,13 @@
 
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { attachProject, AttachProjectResult, findExistingAttachment } from '../../../utils/attachProject.js';
+import { attachProject, AttachProjectResult, findExistingAttachment } from '../../../../utils/attachProject.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.pipeline.attach-project');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.pipeline.project.add');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export default class DevopsPipelineAttachProject extends SfCommand<AttachProjectResult> {
+export default class DevopsPipelineProjectAdd extends SfCommand<AttachProjectResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -43,7 +43,7 @@ export default class DevopsPipelineAttachProject extends SfCommand<AttachProject
   };
 
   public async run(): Promise<AttachProjectResult> {
-    const { flags } = await this.parse(DevopsPipelineAttachProject);
+    const { flags } = await this.parse(DevopsPipelineProjectAdd);
     const org: Org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
     const projectId = flags['project-id'];

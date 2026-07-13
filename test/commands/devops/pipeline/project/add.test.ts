@@ -19,23 +19,23 @@ import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
 
-describe('devops pipeline attach-project', () => {
+describe('devops pipeline project add', () => {
   let sandbox: sinon.SinonSandbox;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let AttachCommand: any;
+  let AddCommand: any;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
   const attachProjectStub = sinon.stub();
   const findExistingStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/pipeline/attach-project.js', {
-      '../../../../src/utils/attachProject.js': {
+    const mod = await esmock('../../../../../src/commands/devops/pipeline/project/add.js', {
+      '../../../../../src/utils/attachProject.js': {
         attachProject: attachProjectStub,
         findExistingAttachment: findExistingStub,
       },
     });
-    AttachCommand = mod.default;
+    AddCommand = mod.default;
   });
 
   beforeEach(() => {
@@ -62,7 +62,7 @@ describe('devops pipeline attach-project', () => {
           pipelineId: '0XB000000000001',
         });
 
-        await AttachCommand.run([
+        await AddCommand.run([
           '--target-org',
           'testOrg',
           '--pipeline-id',
@@ -87,7 +87,7 @@ describe('devops pipeline attach-project', () => {
         findExistingStub.resolves('0XB000000000002');
 
         try {
-          await AttachCommand.run([
+          await AddCommand.run([
             '--target-org',
             'testOrg',
             '--pipeline-id',
@@ -121,7 +121,7 @@ describe('devops pipeline attach-project', () => {
         });
 
         try {
-          await AttachCommand.run([
+          await AddCommand.run([
             '--target-org',
             'testOrg',
             '--pipeline-id',
@@ -147,7 +147,7 @@ describe('devops pipeline attach-project', () => {
         findExistingStub.rejects(new Error("sObject type 'DevopsProjectPipeline' is not supported"));
 
         try {
-          await AttachCommand.run([
+          await AddCommand.run([
             '--target-org',
             'testOrg',
             '--pipeline-id',
@@ -173,7 +173,7 @@ describe('devops pipeline attach-project', () => {
         findExistingStub.rejects(new Error('Network error'));
 
         try {
-          await AttachCommand.run([
+          await AddCommand.run([
             '--target-org',
             'testOrg',
             '--pipeline-id',

@@ -20,7 +20,6 @@ import {
   createPullRequest,
   CreatePullRequestResult,
   fetchWorkItemDetail,
-  resolveGitHubToken,
   WorkItemDetail,
 } from '../../../utils/createPullRequest.js';
 
@@ -46,12 +45,6 @@ export default class DevopsPullRequestCreate extends SfCommand<CreatePullRequest
       char: 'w',
       exactlyOne: ['work-item-name', 'work-item-id'],
     }),
-    title: Flags.string({
-      summary: messages.getMessage('flags.title.summary'),
-    }),
-    body: Flags.string({
-      summary: messages.getMessage('flags.body.summary'),
-    }),
   };
 
   public async run(): Promise<CreatePullRequestResult> {
@@ -75,44 +68,17 @@ export default class DevopsPullRequestCreate extends SfCommand<CreatePullRequest
     if (!detail.branchName) {
       this.error(messages.getMessage('error.NoBranch', [detail.workItemName]));
     }
-    if (!detail.repoOwner || !detail.repoName) {
-      this.error(messages.getMessage('error.NoRepo', [detail.workItemName]));
-    }
-    if (!detail.targetBranch) {
-      this.error(messages.getMessage('error.NoTargetBranch', [detail.workItemName]));
-    }
-    if (!detail.provider) {
-      this.error(messages.getMessage('error.NoProvider', [detail.workItemName]));
-    }
 
-    let token: string | undefined;
-    if (detail.provider === 'github') {
-      token = await resolveGitHubToken();
-    } else {
-      token = process.env.BITBUCKET_TOKEN;
-    }
-    if (!token) {
-      this.error(messages.getMessage('error.NoToken', [detail.provider]));
-    }
-
-    const prTitle = flags['title'] ?? detail.subject;
-
-    const result = await createPullRequest({
-      owner: detail.repoOwner,
-      repo: detail.repoName,
-      head: detail.branchName,
-      base: detail.targetBranch,
-      title: prTitle,
-      body: flags['body'],
-      provider: detail.provider,
-      token,
-    });
+    const result = await createPullRequest(connection, detail.workItemId);
 
     if (result.success) {
       this.log(`Successfully created pull request for ${detail.workItemName}.`);
-      this.log(`  Title: ${result.title ?? prTitle}`);
-      this.log(`  URL: ${result.url ?? ''}`);
-      this.log(`  Source: ${detail.workItemName} → ${result.targetBranch ?? detail.targetBranch}`);
+      if (result.url) {
+        this.log(`  URL: ${result.url}`);
+      }
+      if (detail.branchName && detail.targetBranch) {
+        this.log(`  Source: ${detail.branchName} → ${detail.targetBranch}`);
+      }
     }
 
     return result;

@@ -28,11 +28,15 @@ Create a repository if it doesn't exist.
 
 # flags.repo-owner.summary
 
-Owner (organization or user) of the repository. Required when creating a repository using '--create-repo'.
+Owner (organization or user) of the GitHub repository. Required when creating a GitHub repository using '--create-repo'.
 
-# flags.bitbucket-project.summary
+# flags.bitbucket-workspace.summary
 
-Bitbucket project key for the repository. Used when creating a Bitbucket repository with '--create-repo'.
+Bitbucket workspace that will own the repository. Required when creating a Bitbucket repository using '--create-repo'.
+
+# flags.bitbucket-project-key.summary
+
+Bitbucket project key to associate with the repository. Optional when creating a Bitbucket repository using '--create-repo'.
 
 # flags.description.summary
 
@@ -48,13 +52,25 @@ Description of the pipeline.
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --name "Release Pipeline" --repo my-new-repo --repo-type github --repo-owner myorg --create-repo
 
-- Create a pipeline with a description and associate it with a Bitbucket repository.
+- Create a pipeline and create a new Bitbucket repository.
 
-      <%= config.bin %> <%= command.id %> --target-org my-devops-org --name "Release Pipeline" --repo https://bitbucket.org/myorg/myrepo --description "Main CI/CD pipeline for production releases"
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --name "Release Pipeline" --repo my-new-repo --repo-type bitbucket --bitbucket-workspace myworkspace --bitbucket-project-key PROJ --create-repo
+
+- Create a pipeline with a description and associate it with an existing Bitbucket repository.
+
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --name "Release Pipeline" --repo https://bitbucket.org/myworkspace/myrepo --description "Main CI/CD pipeline for production releases"
 
 # error.RepoTypeRequired
 
 The --repo-type flag is required when using --create-repo. Specify --repo-type github or --repo-type bitbucket.
+
+# error.RepoOwnerNotFound
+
+The repository "%s" could not be initialized because the --repo-owner does not exist or is not accessible on GitHub. Verify the --repo-owner value is a valid GitHub organization or user.
+
+# error.RepoNameAlreadyExists
+
+A repository named "%s" already exists on this account. Choose a different name or use the existing repository URL with --repo instead of --create-repo.
 
 # error.RepoCreationFailed
 
@@ -70,7 +86,11 @@ Failed to validate repository "%s". When using an existing repository, provide t
 
 # error.RepoOwnerRequired
 
-The --repo-owner flag is required when using --create-repo. Specify the GitHub or Bitbucket organization or user that will own the repository.
+The --repo-owner flag is required when creating a GitHub repository with --create-repo. Specify the GitHub organization or user that will own the repository.
+
+# error.BitbucketWorkspaceRequired
+
+The --bitbucket-workspace flag is required when creating a Bitbucket repository with --create-repo. Specify the Bitbucket workspace that will own the repository.
 
 # error.VcsCredentialsMissing
 
