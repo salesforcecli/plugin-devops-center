@@ -18,7 +18,9 @@ import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-t
 import { expect } from 'chai';
 import type { ActivatePipelineResult } from '../../../../src/utils/activatePipeline.js';
 
-const REAL_ORG = Boolean(process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME);
+const REAL_ORG = Boolean(
+  process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME ?? process.env.TESTKIT_AUTH_URL
+);
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 

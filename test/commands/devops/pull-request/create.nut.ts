@@ -17,7 +17,9 @@
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
 
-const REAL_ORG = Boolean(process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME);
+const REAL_ORG = Boolean(
+  process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME ?? process.env.TESTKIT_AUTH_URL
+);
 
 describe('devops pull-request create NUTs', () => {
   let session: TestSession;
