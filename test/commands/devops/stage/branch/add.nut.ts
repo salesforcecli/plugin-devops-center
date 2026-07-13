@@ -16,8 +16,8 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import type { AddStageBranchResult } from '../../../../src/utils/addStageBranch.js';
-import type { CreatePipelineResult } from '../../../../src/utils/createPipeline.js';
+import type { AddStageBranchResult } from '../../../../../src/utils/addStageBranch.js';
+import type { CreatePipelineResult } from '../../../../../src/utils/createPipeline.js';
 
 const REAL_ORG = Boolean(
   process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME ?? process.env.TESTKIT_AUTH_URL
@@ -25,7 +25,7 @@ const REAL_ORG = Boolean(
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
-describe('devops stage add-branch NUTs', () => {
+describe('devops stage branch add NUTs', () => {
   let session: TestSession;
   let orgFlag: string;
   // The last stage of the pipeline (no NextStageId) — branch setup must start right-to-left
@@ -60,18 +60,18 @@ describe('devops stage add-branch NUTs', () => {
   // ── flag-validation tests ─────────────────────────────────────────────────
 
   it('displays help text', () => {
-    const result = execCmd('devops stage add-branch --help', { ensureExitCode: 0 });
+    const result = execCmd('devops stage branch add --help', { ensureExitCode: 0 });
     expect(result.shellOutput.stdout).to.include('Add a source code repository branch to a pipeline stage');
   });
 
   it('errors when --target-org is missing', () => {
-    const result = execCmd('devops stage add-branch', { ensureExitCode: 1 });
+    const result = execCmd('devops stage branch add', { ensureExitCode: 1 });
     expect(result.shellOutput.stderr).to.include('target-org');
   });
 
   it('errors when --pipeline-id is an invalid Salesforce ID', () => {
     const result = execCmd(
-      'devops stage add-branch --pipeline-id not-an-id --stage-id 0XC000000000001AAA --branch-name main',
+      'devops stage branch add --pipeline-id not-an-id --stage-id 0XC000000000001AAA --branch-name main',
       { ensureExitCode: 1 }
     );
     expect(result.shellOutput.stderr).to.include('15 or 18 characters');
@@ -81,7 +81,7 @@ describe('devops stage add-branch NUTs', () => {
 
   (REAL_ORG ? it : it.skip)('adds a branch to the last stage and returns structured JSON', () => {
     const result = execCmd<AddStageBranchResult>(
-      `devops stage add-branch --pipeline-id ${pipelineId} --stage-id ${lastStageId} --branch-name main --json ${orgFlag}`,
+      `devops stage branch add --pipeline-id ${pipelineId} --stage-id ${lastStageId} --branch-name main --json ${orgFlag}`,
       { ensureExitCode: 0 }
     );
     const output = result.jsonOutput;
@@ -93,7 +93,7 @@ describe('devops stage add-branch NUTs', () => {
 
   (REAL_ORG ? it : it.skip)('errors when --stage-id does not belong to the pipeline', () => {
     const result = execCmd(
-      `devops stage add-branch --pipeline-id ${pipelineId} --stage-id 0XC000000000001AAA --branch-name main ${orgFlag}`,
+      `devops stage branch add --pipeline-id ${pipelineId} --stage-id 0XC000000000001AAA --branch-name main ${orgFlag}`,
       { ensureExitCode: 1 }
     );
     expect(result.shellOutput.stderr).to.include('0XC000000000001AAA');
