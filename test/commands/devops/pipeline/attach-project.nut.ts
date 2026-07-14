@@ -65,12 +65,12 @@ describe('devops pipeline attach-project NUTs', () => {
   // ── flag-validation tests ─────────────────────────────────────────────────
 
   it('displays help text', () => {
-    const result = execCmd('devops pipeline attach-project --help', { ensureExitCode: 0 });
+    const result = execCmd('devops pipeline project add --help', { ensureExitCode: 0 });
     expect(result.shellOutput.stdout).to.include('Attach a DevOps Center project to a pipeline');
   });
 
   it('errors when --target-org is missing', () => {
-    const result = execCmd('devops pipeline attach-project', { ensureExitCode: 1 });
+    const result = execCmd('devops pipeline project add', { ensureExitCode: 1 });
     expect(result.shellOutput.stderr).to.include('target-org');
   });
 
@@ -78,7 +78,7 @@ describe('devops pipeline attach-project NUTs', () => {
 
   (REAL_ORG ? it : it.skip)('attaches a project to a pipeline and returns structured JSON', () => {
     const result = execCmd<AttachProjectResult>(
-      `devops pipeline attach-project --pipeline-id ${pipelineId} --project-id ${projectId} --json ${orgFlag}`,
+      `devops pipeline project add --pipeline-id ${pipelineId} --project-id ${projectId} --json ${orgFlag}`,
       { ensureExitCode: 0 }
     );
     const output = result.jsonOutput;
@@ -91,7 +91,7 @@ describe('devops pipeline attach-project NUTs', () => {
   (REAL_ORG ? it : it.skip)('errors when attaching the same project a second time', () => {
     // The first attachment was done in the previous test; re-attaching should fail
     const result = execCmd(
-      `devops pipeline attach-project --pipeline-id ${pipelineId} --project-id ${projectId} ${orgFlag}`,
+      `devops pipeline project add --pipeline-id ${pipelineId} --project-id ${projectId} ${orgFlag}`,
       { ensureExitCode: 1 }
     );
     expect(result.shellOutput.stderr).to.include('already attached');
@@ -99,7 +99,7 @@ describe('devops pipeline attach-project NUTs', () => {
 
   (REAL_ORG ? it : it.skip)('attaches a second project to the same pipeline', () => {
     const result = execCmd<AttachProjectResult>(
-      `devops pipeline attach-project --pipeline-id ${pipelineId} --project-id ${secondProjectId} --json ${orgFlag}`,
+      `devops pipeline project add --pipeline-id ${pipelineId} --project-id ${secondProjectId} --json ${orgFlag}`,
       { ensureExitCode: 0 }
     );
     expect(result.jsonOutput?.result.success).to.be.true;
