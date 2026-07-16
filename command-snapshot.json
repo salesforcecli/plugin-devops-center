@@ -124,7 +124,7 @@
     "command": "devops:stage:promote",
     "flagAliases": [],
     "flagChars": ["a", "l", "o", "t"],
-    "flags": ["deploy-all", "flags-dir", "json", "target-org", "target-stage-id", "test-level", "tests"],
+    "flags": ["api-version", "deploy-all", "flags-dir", "json", "target-org", "target-stage-id", "test-level", "tests"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
