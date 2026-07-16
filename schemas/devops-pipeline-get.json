@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/PipelineGetResult",
+  "definitions": {
+    "PipelineGetResult": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": ["string", "null"]
+        },
+        "isActive": {
+          "type": "boolean"
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PipelineStageDetail"
+          }
+        },
+        "connectedProjects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ConnectedProject"
+          }
+        }
+      },
+      "required": ["id", "name", "description", "isActive", "stages", "connectedProjects"],
+      "additionalProperties": false
+    },
+    "PipelineStageDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": ["string", "null"]
+        },
+        "nextStageId": {
+          "type": ["string", "null"]
+        },
+        "branchName": {
+          "type": ["string", "null"]
+        },
+        "repositoryName": {
+          "type": ["string", "null"]
+        },
+        "repositoryOwner": {
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["id", "name", "nextStageId", "branchName", "repositoryName", "repositoryOwner"],
+      "additionalProperties": false
+    },
+    "ConnectedProject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["id", "name"],
+      "additionalProperties": false
+    }
+  }
+}
