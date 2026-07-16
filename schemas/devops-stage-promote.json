@@ -1,11 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/AsyncOperationResultJson",
+  "$ref": "#/definitions/PromoteStageCommandResult",
   "definitions": {
-    "AsyncOperationResultJson": {
+    "PromoteStageCommandResult": {
       "type": "object",
       "properties": {
-        "jobId": {
+        "requestId": {
           "type": "string"
         },
         "status": {
@@ -14,11 +14,14 @@
         "message": {
           "type": "string"
         },
-        "errorDetails": {
-          "type": "string"
+        "promotedWorkitemIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
-      "required": ["jobId", "status", "message", "errorDetails"],
+      "required": ["requestId", "status", "message", "promotedWorkitemIds"],
       "additionalProperties": false
     }
   }

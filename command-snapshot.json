@@ -87,22 +87,6 @@
   },
   {
     "alias": [],
-    "command": "devops:stage:deploy",
-    "flagAliases": [],
-    "flagChars": ["o", "s", "w"],
-    "flags": ["async", "concise", "flags-dir", "json", "named-credential", "stage-id", "target-org", "verbose", "wait"],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
-    "command": "devops:stage:deploy:status",
-    "flagAliases": [],
-    "flagChars": ["i", "o"],
-    "flags": ["concise", "flags-dir", "json", "request-id", "target-org", "verbose"],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
     "command": "devops:stage:environment:add",
     "flagAliases": [],
     "flagChars": ["e", "o"],
