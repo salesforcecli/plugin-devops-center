@@ -4,15 +4,15 @@ Update a DevOps Center project.
 
 # description
 
-Update the description or active status of a DevOps Center project. At least one of --description or --is-active must be provided.
-
-# flags.project-name.summary
-
-Name of the DevOps Center project to update.
+Update the name, description, or active status of a DevOps Center project. At least one of --name, --description, or --is-active must be provided.
 
 # flags.project-id.summary
 
 ID of the DevOps Center project to update.
+
+# flags.name.summary
+
+New name for the project.
 
 # flags.description.summary
 
@@ -24,18 +24,22 @@ Set the project active status. Use --is-active to activate or --no-is-active to 
 
 # examples
 
-- Update the description of a project by name:
+- Rename a project:
 
-      <%= config.bin %> <%= command.id %> --target-org my-devops-org --project-name "MyApp Release" --description "Updated release description"
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --project-id 1Qg000000000001 --name "MyApp Release v2"
 
-- Deactivate a project by ID:
+- Update the description of a project:
+
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --project-id 1Qg000000000001 --description "Updated release description"
+
+- Deactivate a project:
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --project-id 1Qg000000000001 --no-is-active
 
-- Update both description and active status:
+- Update all fields at once:
 
-      <%= config.bin %> <%= command.id %> --target-org my-devops-org --project-name "MyApp Release" --description "Archived" --no-is-active
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --project-id 1Qg000000000001 --name "Archived App" --description "Archived" --no-is-active
 
 # error.NoFieldsProvided
 
-Provide at least one of --description or --is-active/--no-is-active.
+Provide at least one of --name, --description, or --is-active/--no-is-active.

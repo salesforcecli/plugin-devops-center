@@ -26,13 +26,11 @@ describe('devops project update', () => {
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
   const updateProjectStub = sinon.stub();
-  const resolveProjectByNameStub = sinon.stub();
 
   before(async () => {
     const mod = await esmock('../../../../src/commands/devops/project/update.js', {
       '../../../../src/utils/updateProject.js': {
         updateProject: updateProjectStub,
-        resolveProjectByName: resolveProjectByNameStub,
       },
     });
     UpdateCommand = mod.default;
@@ -41,14 +39,40 @@ describe('devops project update', () => {
   beforeEach(() => {
     sandbox = sinon.createSandbox();
     updateProjectStub.reset();
-    resolveProjectByNameStub.reset();
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  describe('successful update by ID — description only', () => {
+  describe('successful update — name only', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('logs success with updated name', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        updateProjectStub.resolves({
+          success: true,
+          projectId: '1Qg000000000001',
+          name: 'MyApp Release v2',
+        });
+
+        await UpdateCommand.run([
+          '--target-org',
+          'testOrg',
+          '--project-id',
+          '1Qg000000000001',
+          '--name',
+          'MyApp Release v2',
+        ]);
+
+        expect(ctx.stdout).to.contain('Successfully updated project');
+        expect(ctx.stdout).to.contain('MyApp Release v2');
+      });
+  });
+
+  describe('successful update — description only', () => {
     test
       .stdout()
       .stderr()
@@ -75,37 +99,37 @@ describe('devops project update', () => {
       });
   });
 
-  describe('successful update by name — isActive only', () => {
+  describe('successful update — isActive only', () => {
     test
       .stdout()
       .stderr()
       .it('logs success with updated isActive', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        resolveProjectByNameStub.resolves('1Qg000000000001');
         updateProjectStub.resolves({
           success: true,
           projectId: '1Qg000000000001',
           isActive: false,
         });
 
-        await UpdateCommand.run(['--target-org', 'testOrg', '--project-name', 'MyApp Release', '--no-is-active']);
+        await UpdateCommand.run(['--target-org', 'testOrg', '--project-id', '1Qg000000000001', '--no-is-active']);
 
-        expect(ctx.stdout).to.contain('Successfully updated project: MyApp Release');
+        expect(ctx.stdout).to.contain('Successfully updated project');
         expect(ctx.stdout).to.contain('IsActive:    false');
       });
   });
 
-  describe('successful update — both fields', () => {
+  describe('successful update — all fields', () => {
     test
       .stdout()
       .stderr()
-      .it('logs both description and isActive', async (ctx) => {
+      .it('logs name, description, and isActive', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         updateProjectStub.resolves({
           success: true,
           projectId: '1Qg000000000001',
+          name: 'Archived App',
           description: 'Archived',
           isActive: false,
         });
@@ -115,11 +139,14 @@ describe('devops project update', () => {
           'testOrg',
           '--project-id',
           '1Qg000000000001',
+          '--name',
+          'Archived App',
           '--description',
           'Archived',
           '--no-is-active',
         ]);
 
+        expect(ctx.stdout).to.contain('Name:        Archived App');
         expect(ctx.stdout).to.contain('Description: Archived');
         expect(ctx.stdout).to.contain('IsActive:    false');
       });
@@ -129,7 +156,7 @@ describe('devops project update', () => {
     test
       .stdout()
       .stderr()
-      .it('errors when neither description nor is-active is given', async (ctx) => {
+      .it('errors when no update fields are given', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
 
@@ -139,7 +166,7 @@ describe('devops project update', () => {
           // expected
         }
 
-        expect(ctx.stderr).to.contain('--description');
+        expect(ctx.stderr).to.contain('--name');
       });
   });
 
@@ -176,13 +203,20 @@ describe('devops project update', () => {
     test
       .stdout()
       .stderr()
-      .it('shows DevOps Center not enabled error on resolve', async (ctx) => {
+      .it('shows DevOps Center not enabled error', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        resolveProjectByNameStub.rejects(new Error("sObject type 'DevopsProject' is not supported"));
+        updateProjectStub.rejects(new Error("sObject type 'DevopsProject' is not supported"));
 
         try {
-          await UpdateCommand.run(['--target-org', 'testOrg', '--project-name', 'MyProject', '--description', 'test']);
+          await UpdateCommand.run([
+            '--target-org',
+            'testOrg',
+            '--project-id',
+            '1Qg000000000001',
+            '--description',
+            'test',
+          ]);
         } catch (e) {
           // expected
         }

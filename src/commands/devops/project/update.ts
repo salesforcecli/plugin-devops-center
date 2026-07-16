@@ -16,7 +16,7 @@
 
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { resolveProjectByName, updateProject, UpdateProjectResult } from '../../../utils/updateProject.js';
+import { updateProject, UpdateProjectResult } from '../../../utils/updateProject.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.project.update');
@@ -30,15 +30,14 @@ export default class DevopsProjectUpdate extends SfCommand<UpdateProjectResult> 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    'project-name': Flags.string({
-      summary: messages.getMessage('flags.project-name.summary'),
-      char: 'n',
-      exactlyOne: ['project-name', 'project-id'],
-    }),
     'project-id': Flags.salesforceId({
       summary: messages.getMessage('flags.project-id.summary'),
       char: 'i',
-      exactlyOne: ['project-name', 'project-id'],
+      required: true,
+    }),
+    name: Flags.string({
+      summary: messages.getMessage('flags.name.summary'),
+      char: 'n',
     }),
     description: Flags.string({
       summary: messages.getMessage('flags.description.summary'),
@@ -53,33 +52,19 @@ export default class DevopsProjectUpdate extends SfCommand<UpdateProjectResult> 
   public async run(): Promise<UpdateProjectResult> {
     const { flags } = await this.parse(DevopsProjectUpdate);
 
-    if (flags['description'] === undefined && flags['is-active'] === undefined) {
+    if (flags['name'] === undefined && flags['description'] === undefined && flags['is-active'] === undefined) {
       this.error(messages.getMessage('error.NoFieldsProvided'));
     }
 
     const org: Org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
 
-    let projectId: string;
-    try {
-      if (flags['project-name']) {
-        projectId = await resolveProjectByName(connection, flags['project-name']);
-      } else {
-        projectId = flags['project-id']!;
-      }
-    } catch (error: unknown) {
-      const errMsg = error instanceof Error ? error.message : String(error);
-      if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
-        this.error(commonErrorMessages.getMessage('error.DevopsCenterNotEnabled'));
-      }
-      throw error;
-    }
-
     let result: UpdateProjectResult;
     try {
       result = await updateProject({
         connection,
-        projectId,
+        projectId: flags['project-id'],
+        name: flags['name'],
         description: flags['description'],
         isActive: flags['is-active'],
       });
@@ -92,8 +77,8 @@ export default class DevopsProjectUpdate extends SfCommand<UpdateProjectResult> 
     }
 
     if (result.success) {
-      const identifier = flags['project-name'] ?? projectId;
-      this.log(`Successfully updated project: ${identifier}`);
+      this.log(`Successfully updated project: ${flags['project-id']}`);
+      if (result.name !== undefined) this.log(`  Name:        ${result.name}`);
       if (result.description !== undefined) this.log(`  Description: ${result.description}`);
       if (result.isActive !== undefined) this.log(`  IsActive:    ${result.isActive}`);
     } else {

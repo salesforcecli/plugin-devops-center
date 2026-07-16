@@ -19,6 +19,7 @@ import { Connection } from '@salesforce/core';
 export type UpdateProjectParams = {
   connection: Connection;
   projectId: string;
+  name?: string;
   description?: string;
   isActive?: boolean;
 };
@@ -26,25 +27,17 @@ export type UpdateProjectParams = {
 export type UpdateProjectResult = {
   success: boolean;
   projectId?: string;
+  name?: string;
   description?: string;
   isActive?: boolean;
   error?: string;
 };
 
-export async function resolveProjectByName(connection: Connection, projectName: string): Promise<string> {
-  const result = await connection.query<{ Id: string }>(
-    `SELECT Id FROM DevopsProject WHERE Name = '${projectName.replace(/'/g, "\\'")}' LIMIT 1`
-  );
-  if (!result.records.length) {
-    throw new Error(`Project not found: ${projectName}`);
-  }
-  return result.records[0].Id;
-}
-
 export async function updateProject(params: UpdateProjectParams): Promise<UpdateProjectResult> {
-  const { connection, projectId, description, isActive } = params;
+  const { connection, projectId, name, description, isActive } = params;
 
-  const updatePayload: { Id: string; Description?: string; IsActive?: boolean } = { Id: projectId };
+  const updatePayload: { Id: string; Name?: string; Description?: string; IsActive?: boolean } = { Id: projectId };
+  if (name !== undefined) updatePayload.Name = name;
   if (description !== undefined) updatePayload.Description = description;
   if (isActive !== undefined) updatePayload.IsActive = isActive;
 
@@ -54,6 +47,7 @@ export async function updateProject(params: UpdateProjectParams): Promise<Update
     return {
       success: true,
       projectId,
+      name,
       description,
       isActive,
     };
