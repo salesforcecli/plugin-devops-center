@@ -19,7 +19,11 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { promoteStage, PromoteStageResult } from '../../../utils/promoteStage.js';
 import { resolveProjectIdFromWorkItem } from '../../../utils/prepareWorkItem.js';
 import { getPipelineIdForProject } from '../../../utils/pipelineUtils.js';
-import { testLevel as testLevelFlag, deployAll, specificTests } from '../../../common/flags/promote/promoteFlags.js';
+import {
+  testLevel as testLevelFlag,
+  deployAll,
+  specificTestsNoChar,
+} from '../../../common/flags/promote/promoteFlags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.work-item.promote');
@@ -54,7 +58,7 @@ export default class DevopsWorkItemPromote extends SfCommand<PromoteWorkItemsRes
     }),
     'deploy-all': deployAll,
     'test-level': testLevelFlag(),
-    tests: { ...specificTests, char: undefined },
+    tests: specificTestsNoChar,
   };
 
   public async run(): Promise<PromoteWorkItemsResult> {
@@ -73,9 +77,9 @@ export default class DevopsWorkItemPromote extends SfCommand<PromoteWorkItemsRes
         pipelineId,
         workItemIds,
         targetStageId,
-        fullDeploy: flags['deploy-all'] as boolean,
-        testLevel: flags['test-level'] as string | undefined,
-        runTests: flags.tests as string[] | undefined,
+        fullDeploy: flags['deploy-all'],
+        testLevel: flags['test-level'],
+        runTests: flags.tests,
       });
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);

@@ -17,7 +17,7 @@
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { promoteStage, PromoteStageResult } from '../../../utils/promoteStage.js';
-import { deployAll, testLevel, specificTests } from '../../../common/flags/promote/promoteFlags.js';
+import { deployAll, testLevel, specificTestsNoChar } from '../../../common/flags/promote/promoteFlags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.stage.promote');
@@ -38,6 +38,7 @@ export default class DevopsStagePromote extends SfCommand<PromoteStageCommandRes
   public static readonly flags = {
     ...SfCommand.baseFlags,
     'target-org': Flags.requiredOrg(),
+    'api-version': Flags.orgApiVersion(),
     'target-stage-id': Flags.string({
       char: 't',
       summary: messages.getMessage('flags.target-stage-id.summary'),
@@ -45,12 +46,12 @@ export default class DevopsStagePromote extends SfCommand<PromoteStageCommandRes
     }),
     'deploy-all': deployAll,
     'test-level': testLevel(),
-    tests: { ...specificTests, char: undefined },
+    tests: specificTestsNoChar,
   };
 
   public async run(): Promise<PromoteStageCommandResult> {
     const { flags } = await this.parse(DevopsStagePromote);
-    const connection = flags['target-org'].getConnection();
+    const connection = flags['target-org'].getConnection(flags['api-version']);
     const targetStageId = flags['target-stage-id'];
 
     // Get pipelineId directly from the target stage
@@ -87,9 +88,9 @@ export default class DevopsStagePromote extends SfCommand<PromoteStageCommandRes
         pipelineId,
         workItemIds,
         targetStageId,
-        fullDeploy: flags['deploy-all'] as boolean,
-        testLevel: flags['test-level'] as string | undefined,
-        runTests: flags.tests as string[] | undefined,
+        fullDeploy: flags['deploy-all'],
+        testLevel: flags['test-level'],
+        runTests: flags.tests,
       });
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
