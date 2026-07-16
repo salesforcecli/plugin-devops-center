@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { SfCommand } from '@salesforce/sf-plugins-core';
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { Interfaces } from '@oclif/core';
 import { HttpRequest } from '@jsforce/jsforce-node';
 import {
@@ -23,7 +23,7 @@ import {
   TestLevel,
   validateTestFlags,
 } from '../index.js';
-import { devopsCenterProjectName, requiredDoceOrgFlag, wait, verbose, concise } from '../flags/flags.js';
+import { devopsCenterProjectName, wait, verbose, concise } from '../flags/flags.js';
 import {
   branchName,
   bundleVersionName,
@@ -51,7 +51,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
     'bundle-version-name': bundleVersionName,
     'deploy-all': deployAll,
     'devops-center-project-name': devopsCenterProjectName,
-    'devops-center-username': requiredDoceOrgFlag(),
+    'target-org': Flags.requiredOrg(),
     tests: specificTests,
     'test-level': testLevel(),
     async,
@@ -76,7 +76,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
     });
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.flags = flags as Flags<T>;
-    this.targetOrg = this.flags['devops-center-username'];
+    this.targetOrg = this.flags['target-org'];
     this.setOutputService(new OutputServiceFactory().forDeployment(this.flags, this.targetOrg.getConnection()));
   }
 

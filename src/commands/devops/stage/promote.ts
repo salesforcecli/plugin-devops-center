@@ -15,85 +15,110 @@
  */
 
 import { Messages } from '@salesforce/core';
-import { SfCommand } from '@salesforce/sf-plugins-core';
-import { PromoteCommand } from '../../../common/base/abstractPromote.js';
-import type { PipelineStage, PromoteOptions } from '../../../common/index.js';
-import { APPROVED } from '../../../common/constants.js';
-import type { AsyncOperationResultJson } from '../../../common/types.js';
-import { promoteStage } from '../../../utils/promoteStage.js';
-import { getPipelineIdForProject } from '../../../utils/pipelineUtils.js';
+import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
+import { promoteStage, PromoteStageResult } from '../../../utils/promoteStage.js';
+import { deployAll, testLevel, specificTests } from '../../../common/flags/promote/promoteFlags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.stage.promote');
+const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export default class DevopsStagePromote extends PromoteCommand<typeof SfCommand> {
+export type PromoteStageCommandResult = {
+  requestId: string;
+  status: string;
+  message: string;
+  promotedWorkitemIds: string[];
+};
+
+export default class DevopsStagePromote extends SfCommand<PromoteStageCommandResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
-  protected baseCommand = 'devops stage promote';
-  private readonly isUndeployedOnly = true;
 
-  public async run(): Promise<AsyncOperationResultJson> {
-    return this.executePromotion();
-  }
+  public static readonly flags = {
+    ...SfCommand.baseFlags,
+    'target-org': Flags.requiredOrg(),
+    'target-stage-id': Flags.string({
+      char: 't',
+      summary: messages.getMessage('flags.target-stage-id.summary'),
+      required: true,
+    }),
+    'deploy-all': deployAll,
+    'test-level': testLevel(),
+    tests: { ...specificTests, char: undefined },
+  };
 
-  protected getSourceStageId(): string {
-    const targetStage: PipelineStage = this.getTargetStage();
-    const previousStages = targetStage.sf_devops__Pipeline_Stages__r;
-    return previousStages?.records?.length ? previousStages.records[0].Id : APPROVED;
-  }
+  public async run(): Promise<PromoteStageCommandResult> {
+    const { flags } = await this.parse(DevopsStagePromote);
+    const connection = flags['target-org'].getConnection();
+    const targetStageId = flags['target-stage-id'];
 
-  protected getPromoteOptions(): Partial<PromoteOptions> {
-    return { undeployedOnly: this.isUndeployedOnly };
-  }
-
-  /**
-   * Override the promotion request to use the Connect API endpoint
-   * instead of the legacy Apex REST endpoint.
-   */
-  protected async requestPromotionFlow(): Promise<string> {
-    const targetStage = this.getTargetStage();
-    const projectId = targetStage.sf_devops__Pipeline__r.sf_devops__Project__c;
-    const connection = this.targetOrg.getConnection();
-
-    const pipelineId = await getPipelineIdForProject(connection, projectId);
+    // Get pipelineId directly from the target stage
+    const stageResult = await connection.query<{ DevopsPipelineId: string }>(
+      `SELECT DevopsPipelineId FROM DevopsPipelineStage WHERE Id = '${targetStageId}' LIMIT 1`
+    );
+    const pipelineId = stageResult.records[0]?.DevopsPipelineId;
     if (!pipelineId) {
-      this.error('No pipeline found for this project. Ensure the project has an associated pipeline.');
+      this.error(`Stage '${targetStageId}' not found or has no associated pipeline.`);
     }
 
-    const sourceStageId = this.getSourceStageId();
+    // Find the source stage (the one whose NextStageId points to the target stage)
+    const sourceStageResult = await connection.query<{ Id: string }>(
+      `SELECT Id FROM DevopsPipelineStage WHERE DevopsPipelineId = '${pipelineId}' AND NextStageId = '${targetStageId}' LIMIT 1`
+    );
+    const sourceStageId = sourceStageResult.records[0]?.Id;
+    if (!sourceStageId) {
+      this.error(`No source stage found that feeds into stage '${targetStageId}'.`);
+    }
 
-    const workItemIds = await this.fetchWorkItemIdsForStage(connection, sourceStageId);
+    // Fetch all work items in the source stage — the API enforces promotion eligibility
+    const workItemResult = await connection.query<{ Id: string }>(
+      `SELECT Id FROM WorkItem WHERE DevopsPipelineStageId = '${sourceStageId}' LIMIT 200`
+    );
+    const workItemIds = workItemResult.records.map((r) => r.Id);
     if (workItemIds.length === 0) {
       this.error(messages.getMessage('error.NoWorkItems'));
     }
 
-    const result = await promoteStage({
-      connection,
-      pipelineId,
-      workItemIds,
-      targetStageId: targetStage.Id,
-    });
-
-    return result.jobId;
-  }
-
-  private async fetchWorkItemIdsForStage(
-    connection: Parameters<typeof promoteStage>[0]['connection'],
-    stageId: string
-  ): Promise<string[]> {
-    if (stageId === APPROVED) {
-      const targetStage = this.getTargetStage();
-      const projectId = targetStage.sf_devops__Pipeline__r.sf_devops__Project__c;
-      const result = await connection.query<{ Id: string }>(
-        `SELECT Id FROM WorkItem WHERE DevopsProjectId = '${projectId}' AND Status = 'Approved'`
-      );
-      return (result.records ?? []).map((r) => r.Id);
+    let apiResult: PromoteStageResult;
+    try {
+      apiResult = await promoteStage({
+        connection,
+        pipelineId,
+        workItemIds,
+        targetStageId,
+        fullDeploy: flags['deploy-all'] as boolean,
+        testLevel: flags['test-level'] as string | undefined,
+        runTests: flags.tests as string[] | undefined,
+      });
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
+        this.error(commonErrorMessages.getMessage('error.DevopsCenterNotEnabled'));
+      }
+      const cleanMsg = errMsg.split('<')[0].trim();
+      this.error(messages.getMessage('error.PromoteFailed', [cleanMsg]));
     }
 
-    const result = await connection.query<{ Id: string }>(
-      `SELECT Id FROM WorkItem WHERE DevopsPipelineStageId = '${stageId}'`
-    );
-    return (result.records ?? []).map((r) => r.Id);
+    this.printOutput(apiResult);
+
+    return {
+      requestId: apiResult.requestId,
+      status: apiResult.status,
+      message: apiResult.message,
+      promotedWorkitemIds: apiResult.promotedWorkitemIds,
+    };
+  }
+
+  private printOutput(result: PromoteStageResult): void {
+    this.log(`Status: ${result.status}`);
+    this.log(`Message: ${result.message}`);
+    this.log(`Request ID: ${result.requestId}`);
+    this.log('');
+    this.log('Promoted Work Items');
+    this.log('───────────────────');
+    for (const id of result.promotedWorkitemIds) {
+      this.log(id);
+    }
   }
 }

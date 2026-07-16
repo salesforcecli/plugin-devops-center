@@ -29,6 +29,8 @@ describe('devops work-item prepare', () => {
   const resolveProjectIdFromWorkItemStub = sinon.stub();
   const getPipelineIdForProjectStub = sinon.stub();
 
+  const mockWorkItemContext = { projectId: 'PROJ001', pipelineStageId: '05S000000000001' };
+
   before(async () => {
     const mod = await esmock('../../../../src/commands/devops/work-item/prepare.js', {
       '../../../../src/utils/prepareWorkItem.js': {
@@ -65,6 +67,8 @@ describe('devops work-item prepare', () => {
     prepareWorkItemStub.reset();
     resolveProjectIdFromWorkItemStub.reset();
     getPipelineIdForProjectStub.reset();
+    resolveProjectIdFromWorkItemStub.resolves(mockWorkItemContext);
+    getPipelineIdForProjectStub.resolves('PIPE001');
   });
 
   afterEach(() => {
@@ -75,11 +79,9 @@ describe('devops work-item prepare', () => {
     test
       .stdout()
       .stderr()
-      .it('logs success message with request token', async (ctx) => {
+      .it('logs success message with request token and resolves sourceStageId from work item', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        resolveProjectIdFromWorkItemStub.resolves('PROJ001');
-        getPipelineIdForProjectStub.resolves('PIPE001');
         prepareWorkItemStub.resolves({
           success: true,
           requestToken: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
@@ -87,19 +89,14 @@ describe('devops work-item prepare', () => {
           errorMessage: null,
         });
 
-        await PrepareCommand.run([
-          '-o',
-          'testOrg',
-          '-i',
-          '0Wx000000000001',
-          '-s',
-          '05S000000000001',
-          '-t',
-          '05S000000000002',
-        ]);
+        await PrepareCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
 
         expect(ctx.stdout).to.contain('prepared for one-off promotion');
         expect(ctx.stdout).to.contain('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+
+        const callArgs = prepareWorkItemStub.firstCall.args[0];
+        expect(callArgs.sourceStageId).to.equal('05S000000000001');
+        expect(callArgs.targetStageId).to.equal('05S000000000002');
       });
   });
 
@@ -110,8 +107,6 @@ describe('devops work-item prepare', () => {
       .it('logs failure message with error code and message', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        resolveProjectIdFromWorkItemStub.resolves('PROJ001');
-        getPipelineIdForProjectStub.resolves('PIPE001');
         prepareWorkItemStub.resolves({
           success: false,
           requestToken: null,
@@ -119,16 +114,7 @@ describe('devops work-item prepare', () => {
           errorMessage: 'Source stage and target stage are not compatible for one-off promotion.',
         });
 
-        await PrepareCommand.run([
-          '-o',
-          'testOrg',
-          '-i',
-          '0Wx000000000001',
-          '-s',
-          '05S000000000001',
-          '-t',
-          '05S000000000002',
-        ]);
+        await PrepareCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
 
         expect(ctx.stdout).to.contain('Failed to prepare work item');
         expect(ctx.stdout).to.contain('ALM_ERR_001');
@@ -143,20 +129,10 @@ describe('devops work-item prepare', () => {
       .it('errors when no pipeline is associated with the project', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        resolveProjectIdFromWorkItemStub.resolves('PROJ001');
         getPipelineIdForProjectStub.resolves(undefined);
 
         try {
-          await PrepareCommand.run([
-            '-o',
-            'testOrg',
-            '-i',
-            '0Wx000000000001',
-            '-s',
-            '05S000000000001',
-            '-t',
-            '05S000000000002',
-          ]);
+          await PrepareCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
           expect.fail('should have thrown');
         } catch (e) {
           // expected
@@ -176,16 +152,7 @@ describe('devops work-item prepare', () => {
         resolveProjectIdFromWorkItemStub.rejects(new Error("sObject type 'WorkItem' is not supported"));
 
         try {
-          await PrepareCommand.run([
-            '-o',
-            'testOrg',
-            '-i',
-            '0Wx000000000001',
-            '-s',
-            '05S000000000001',
-            '-t',
-            '05S000000000002',
-          ]);
+          await PrepareCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
         } catch (e) {
           // expected
         }
@@ -201,21 +168,10 @@ describe('devops work-item prepare', () => {
       .it('rethrows non-DevOps errors from prepare call', async () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        resolveProjectIdFromWorkItemStub.resolves('PROJ001');
-        getPipelineIdForProjectStub.resolves('PIPE001');
         prepareWorkItemStub.rejects(new Error('Network error'));
 
         try {
-          await PrepareCommand.run([
-            '-o',
-            'testOrg',
-            '-i',
-            '0Wx000000000001',
-            '-s',
-            '05S000000000001',
-            '-t',
-            '05S000000000002',
-          ]);
+          await PrepareCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
           expect.fail('should have thrown');
         } catch (e: unknown) {
           expect((e as Error).message).to.contain('Network error');

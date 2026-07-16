@@ -17,14 +17,22 @@
 /* eslint-disable camelcase */
 import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
-import { TestContext } from '@salesforce/core/testSetup';
 import sinon from 'sinon';
-import { ConfigAggregator, Org } from '@salesforce/core';
-import { ConfigVars } from '../../../../src/configMeta.js';
-import { AsyncOperationStatus, PipelineStage } from '../../../../src/common/index.js';
+import { Org } from '@salesforce/core';
 
-const requestMock: sinon.SinonStub = sinon.stub();
 let queryMock: sinon.SinonStub;
+
+// Query 1: target stage → pipelineId, Query 2: source stage lookup, Query 3: work items in source stage
+const mockStageQueryRecord = { DevopsPipelineId: 'mock-pipeline-id' };
+const mockSourceStageRecord = { Id: 'mock-source-stage-id' };
+const mockWorkItemRecords = [{ Id: 'mock-work-item-id-1' }, { Id: 'mock-work-item-id-2' }];
+
+const mockPromoteResult = {
+  requestId: 'mock-request-id',
+  status: 'SUBMITTED',
+  message: 'Submitted for promotion',
+  promotedWorkitemIds: ['mock-work-item-id-1', 'mock-work-item-id-2'],
+};
 
 const DOCE_ORG = {
   id: '1',
@@ -36,7 +44,6 @@ const DOCE_ORG = {
   },
   getConnection() {
     return {
-      request: requestMock,
       query: queryMock,
       getApiVersion: () => '65.0',
     };
@@ -45,67 +52,14 @@ const DOCE_ORG = {
 
 describe('devops stage promote', () => {
   let sandbox: sinon.SinonSandbox;
-  let pipelineStageMock: PipelineStage;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let PromoteCommand: any;
-  const $$ = new TestContext();
-
-  const esmockFetchAndValidateStub = sinon.stub();
-  const esmockFetchAsyncOpResultStub = sinon.stub();
   const promoteStageStub = sinon.stub();
-  const getPipelineIdForProjectStub = sinon.stub();
-
-  const mockOutputService = {
-    setAorId: sinon.stub(),
-    printAorId: sinon.stub(),
-    printOpSummary: sinon.stub(),
-    printAorStatus: sinon.stub(),
-    displayEndResults: sinon.stub(),
-    getStatus: sinon.stub(),
-  };
-
-  function resetMockOutputService(): void {
-    mockOutputService.setAorId.reset();
-    mockOutputService.printAorId.reset();
-    mockOutputService.printOpSummary.reset();
-    mockOutputService.printAorStatus.reset();
-    mockOutputService.displayEndResults.reset();
-    mockOutputService.displayEndResults.resolves();
-    mockOutputService.getStatus.reset();
-  }
-
-  class MockOutputServiceFactory {
-    // eslint-disable-next-line class-methods-use-this
-    public forDeployment() {
-      return mockOutputService;
-    }
-  }
 
   before(async () => {
-    const realCommonIndex = await import('../../../../src/common/index.js');
-    const mockedAsyncOp = await esmock('../../../../src/common/base/abstractAsyncOperation.js', {
-      '../../../../src/common/index.js': {
-        ...realCommonIndex,
-        fetchAsyncOperationResult: esmockFetchAsyncOpResultStub,
-      },
-    });
-    const mockedPromote = await esmock('../../../../src/common/base/abstractPromote.js', {
-      '../../../../src/common/base/abstractAsyncOperation.js': mockedAsyncOp,
-      '../../../../src/common/index.js': {
-        ...realCommonIndex,
-        fetchAndValidatePipelineStage: esmockFetchAndValidateStub,
-      },
-      '../../../../src/common/outputService/index.js': {
-        OutputServiceFactory: MockOutputServiceFactory,
-      },
-    });
     const mod = await esmock('../../../../src/commands/devops/stage/promote.js', {
-      '../../../../src/common/base/abstractPromote.js': mockedPromote,
       '../../../../src/utils/promoteStage.js': {
         promoteStage: promoteStageStub,
-      },
-      '../../../../src/utils/pipelineUtils.js': {
-        getPipelineIdForProject: getPipelineIdForProjectStub,
       },
     });
     PromoteCommand = mod.default;
@@ -113,171 +67,119 @@ describe('devops stage promote', () => {
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
-    esmockFetchAndValidateStub.reset();
-    esmockFetchAsyncOpResultStub.reset();
     promoteStageStub.reset();
-    getPipelineIdForProjectStub.reset();
-    getPipelineIdForProjectStub.resolves('mock-pipeline-id');
-    resetMockOutputService();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sandbox.stub(Org, 'create' as any).returns(DOCE_ORG);
-    sandbox.stub(ConfigAggregator.prototype, 'getInfo').returns({
-      value: 'TARGET_DEVOPS_CENTER_ALIAS',
-      key: ConfigVars.TARGET_DEVOPS_CENTER,
-      isLocal: () => false,
-      isGlobal: () => true,
-      isEnvVar: () => false,
-    });
-    $$.setConfigStubContents('DeployPipelineCache', {});
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
+  function setupQueryMock(): void {
+    queryMock = sinon
+      .stub()
+      .onFirstCall()
+      .resolves({ records: [mockStageQueryRecord] })
+      .onSecondCall()
+      .resolves({ records: [mockSourceStageRecord] })
+      .onThirdCall()
+      .resolves({ records: mockWorkItemRecords });
+    DOCE_ORG.getConnection = () => ({ query: queryMock, getApiVersion: () => '65.0' } as never);
+    promoteStageStub.resolves(mockPromoteResult);
+  }
+
   describe('successful promotion', () => {
     test
       .stdout()
       .stderr()
-      .it('promotes work items using the Connect API', async () => {
-        pipelineStageMock = {
-          Id: 'mock-target-stage-id',
-          Name: 'UAT',
-          sf_devops__Branch__r: { sf_devops__Name__c: 'uat' },
-          sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockProjectId' },
-          sf_devops__Pipeline_Stages__r: {
-            records: [
-              {
-                Id: 'mock-source-stage-id',
-                Name: 'Integration',
-                sf_devops__Branch__r: { sf_devops__Name__c: 'integration' },
-                sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockProjectId' },
-                sf_devops__Environment__r: { Id: 'envId', Name: 'envName', sf_devops__Named_Credential__c: 'ABC' },
-              },
-            ],
-          },
-          sf_devops__Environment__r: { Id: 'envId', Name: 'envName', sf_devops__Named_Credential__c: 'ABC' },
-        };
-        esmockFetchAndValidateStub.resolves(pipelineStageMock);
-        queryMock = sinon.stub().resolves({
-          records: [{ Id: '0Wx000000000001' }, { Id: '0Wx000000000002' }],
-        });
-        promoteStageStub.resolves({ jobId: 'mock-aor-id', status: '', message: '', errorDetails: '' });
+      .it('calls promoteStage with pipeline ID, work item IDs, and target stage ID', async (ctx) => {
+        setupQueryMock();
 
-        const aorMock = {
-          Id: 'mock-aor-id',
-          sf_devops__Status__c: AsyncOperationStatus.Completed,
-          sf_devops__Message__c: '',
-        };
-        esmockFetchAsyncOpResultStub.resolves(aorMock);
+        await PromoteCommand.run(['-o', 'doceOrg', '-t', 'mock-target-stage-id']);
 
-        await PromoteCommand.run(['-p=testProject', '-b=uat', '--async']);
-
-        expect(getPipelineIdForProjectStub.calledOnce).to.be.true;
-        expect(getPipelineIdForProjectStub.firstCall.args[1]).to.equal('mockProjectId');
         expect(promoteStageStub.calledOnce).to.be.true;
         const callArgs = promoteStageStub.firstCall.args[0];
         expect(callArgs.pipelineId).to.equal('mock-pipeline-id');
         expect(callArgs.targetStageId).to.equal('mock-target-stage-id');
-        expect(callArgs.workItemIds).to.deep.equal(['0Wx000000000001', '0Wx000000000002']);
+        expect(callArgs.workItemIds).to.deep.equal(['mock-work-item-id-1', 'mock-work-item-id-2']);
+        expect(ctx.stdout).to.contain('SUBMITTED');
+        expect(ctx.stdout).to.contain('mock-request-id');
       });
-  });
 
-  describe('first stage promotion (Approved)', () => {
     test
       .stdout()
       .stderr()
-      .it('queries approved work items when promoting to first stage', async () => {
-        pipelineStageMock = {
-          Id: 'mock-first-stage-id',
-          Name: 'Integration',
-          sf_devops__Branch__r: { sf_devops__Name__c: 'integration' },
-          sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockProjectId' },
-          sf_devops__Pipeline_Stages__r: undefined,
-          sf_devops__Environment__r: { Id: 'envId', Name: 'envName', sf_devops__Named_Credential__c: 'ABC' },
-        };
-        esmockFetchAndValidateStub.resolves(pipelineStageMock);
-        queryMock = sinon.stub().resolves({
-          records: [{ Id: '0Wx000000000001' }],
-        });
-        promoteStageStub.resolves({ jobId: 'mock-aor-id', status: '', message: '', errorDetails: '' });
+      .it('passes deploy-all, test-level, and tests flags to promoteStage', async () => {
+        setupQueryMock();
 
-        const aorMock = {
-          Id: 'mock-aor-id',
-          sf_devops__Status__c: AsyncOperationStatus.Completed,
-          sf_devops__Message__c: '',
-        };
-        esmockFetchAsyncOpResultStub.resolves(aorMock);
+        await PromoteCommand.run([
+          '-o',
+          'doceOrg',
+          '-t',
+          'mock-target-stage-id',
+          '--deploy-all',
+          '--test-level',
+          'RunLocalTests',
+          '--tests',
+          'MyTest',
+        ]);
 
-        await PromoteCommand.run(['-p=testProject', '-b=integration', '--async']);
-
-        expect(queryMock.calledOnce).to.be.true;
-        const query = queryMock.firstCall.args[0] as string;
-        expect(query).to.contain("Status = 'Approved'");
-        expect(query).to.contain('mockProjectId');
+        const callArgs = promoteStageStub.firstCall.args[0];
+        expect(callArgs.fullDeploy).to.be.true;
+        expect(callArgs.testLevel).to.equal('RunLocalTests');
+        expect(callArgs.runTests).to.deep.equal(['MyTest']);
       });
   });
 
-  describe('no work items error', () => {
+  describe('error cases', () => {
     test
       .stdout()
       .stderr()
-      .it('errors when no work items found in source stage', async (ctx) => {
-        pipelineStageMock = {
-          Id: 'mock-target-stage-id',
-          Name: 'UAT',
-          sf_devops__Branch__r: { sf_devops__Name__c: 'uat' },
-          sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockProjectId' },
-          sf_devops__Pipeline_Stages__r: {
-            records: [
-              {
-                Id: 'mock-source-stage-id',
-                Name: 'Integration',
-                sf_devops__Branch__r: { sf_devops__Name__c: 'integration' },
-                sf_devops__Pipeline__r: { sf_devops__Project__c: 'mockProjectId' },
-                sf_devops__Environment__r: { Id: 'envId', Name: 'envName', sf_devops__Named_Credential__c: 'ABC' },
-              },
-            ],
-          },
-          sf_devops__Environment__r: { Id: 'envId', Name: 'envName', sf_devops__Named_Credential__c: 'ABC' },
-        };
-        esmockFetchAndValidateStub.resolves(pipelineStageMock);
+      .it('errors when stage is not found', async () => {
         queryMock = sinon.stub().resolves({ records: [] });
+        DOCE_ORG.getConnection = () => ({ query: queryMock, getApiVersion: () => '65.0' } as never);
 
         try {
-          await PromoteCommand.run(['-p=testProject', '-b=uat', '--async']);
+          await PromoteCommand.run(['-o', 'doceOrg', '-t', 'bad-stage-id']);
           expect.fail('should have thrown');
-        } catch (e) {
-          // expected
+        } catch (e: unknown) {
+          expect((e as Error).message).to.contain('bad-stage-id');
         }
-
-        expect(ctx.stderr).to.contain('No work items found');
-      });
-  });
-
-  describe('flag validation', () => {
-    test
-      .stdout()
-      .stderr()
-      .it('errors when branch name is missing', async (ctx) => {
-        try {
-          await PromoteCommand.run(['-p=testProject']);
-        } catch (e) {
-          // expected
-        }
-        expect(ctx.stderr).to.contain('Missing required flag branch-name');
       });
 
     test
       .stdout()
       .stderr()
-      .it('errors when project name is missing', async (ctx) => {
+      .it('errors when no work items exist in the source stage', async () => {
+        queryMock = sinon
+          .stub()
+          .onFirstCall()
+          .resolves({ records: [mockStageQueryRecord] })
+          .onSecondCall()
+          .resolves({ records: [mockSourceStageRecord] })
+          .onThirdCall()
+          .resolves({ records: [] });
+        DOCE_ORG.getConnection = () => ({ query: queryMock, getApiVersion: () => '65.0' } as never);
+
         try {
-          await PromoteCommand.run(['-b=testBranch']);
+          await PromoteCommand.run(['-o', 'doceOrg', '-t', 'mock-target-stage-id']);
+          expect.fail('should have thrown');
+        } catch (e: unknown) {
+          expect((e as Error).message).to.contain('No work items found');
+        }
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('errors when --target-stage-id is missing', async (ctx) => {
+        try {
+          await PromoteCommand.run([]);
         } catch (e) {
           // expected
         }
-        expect(ctx.stderr).to.contain('Missing required flag devops-center-project-name');
+        expect(ctx.stderr).to.contain('Missing required flag target-stage-id');
       });
   });
 });

@@ -87,6 +87,9 @@
             "subtopics": {
               "status": {
                 "description": "Commands for managing DevOps Center work item statuses."
+              },
+              "combine": {
+                "description": "Commands for combining work items for custom promotion."
               }
             }
           },
@@ -97,7 +100,12 @@
             "description": "Commands for detecting and managing merge conflicts."
           },
           "stage": {
-            "description": "Commands for promoting bundles between pipeline stages."
+            "description": "Commands for promoting bundles between pipeline stages.",
+            "subtopics": {
+              "deploy": {
+                "description": "Commands for deploying changes to a pipeline stage org."
+              }
+            }
           },
           "pipeline": {
             "description": "Commands for managing DevOps Center pipelines.",

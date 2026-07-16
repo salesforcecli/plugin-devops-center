@@ -18,6 +18,10 @@ Specify this flag multiple times to promote multiple work items in a single oper
 
 ID of the pipeline stage to promote the work items to.
 
+# flags.deploy-all.summary
+
+Deploy all metadata in the source branch rather than only changes not yet in the target stage.
+
 # examples
 
 - Promote a work item to UAT:

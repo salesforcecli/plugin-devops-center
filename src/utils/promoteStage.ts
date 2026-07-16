@@ -21,34 +21,43 @@ export type PromoteStageParams = {
   pipelineId: string;
   workItemIds: string[];
   targetStageId: string;
-  testLevel?: string;
   fullDeploy?: boolean;
+  testLevel?: string;
+  runTests?: string[];
 };
 
 export type PromoteStageResult = {
-  jobId: string;
+  requestId: string;
   status: string;
   message: string;
-  errorDetails: string;
+  promotedWorkitemIds: string[];
 };
 
-type ConnectPromoteResponse = {
-  jobId?: string;
+type PromoteStageResponse = {
+  requestId?: string;
   status?: string;
   message?: string;
-  errorDetails?: string;
+  promotedWorkitemIds?: string[];
 };
 
 /**
- * Promotes work items to a target stage via the Connect API.
+ * Promotes work items to a target pipeline stage via the Connect API.
  * POST /services/data/v{version}/connect/devops/pipelines/{pipelineId}/promote
  */
 export async function promoteStage(params: PromoteStageParams): Promise<PromoteStageResult> {
-  const { connection, pipelineId, workItemIds, targetStageId, testLevel = 'Default', fullDeploy = false } = params;
+  const {
+    connection,
+    pipelineId,
+    workItemIds,
+    targetStageId,
+    fullDeploy = false,
+    testLevel = 'Default',
+    runTests,
+  } = params;
 
   const path = `/services/data/v${connection.getApiVersion()}/connect/devops/pipelines/${pipelineId}/promote`;
 
-  const data = await connection.request<ConnectPromoteResponse>({
+  const response = await connection.request<PromoteStageResponse>({
     method: 'POST',
     url: path,
     body: JSON.stringify({
@@ -56,15 +65,19 @@ export async function promoteStage(params: PromoteStageParams): Promise<PromoteS
       targetStageId,
       allWorkItemsInStage: false,
       isCheckDeploy: false,
-      deployOptions: { testLevel, isFullDeploy: fullDeploy },
+      deployOptions: {
+        testLevel,
+        isFullDeploy: fullDeploy,
+        runTests: runTests ?? [],
+      },
     }),
     headers: { 'Content-Type': 'application/json' },
   });
 
   return {
-    jobId: data.jobId ?? '',
-    status: data.status ?? '',
-    message: data.message ?? '',
-    errorDetails: data.errorDetails ?? '',
+    requestId: response.requestId ?? '',
+    status: response.status ?? '',
+    message: response.message ?? '',
+    promotedWorkitemIds: response.promotedWorkitemIds ?? [],
   };
 }

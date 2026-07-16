@@ -111,13 +111,14 @@ describe('resolveProjectIdFromWorkItem', () => {
     sinon.restore();
   });
 
-  it('returns project ID from work item', async () => {
+  it('returns project ID and pipeline stage ID from work item', async () => {
     (connectionStub.query as sinon.SinonStub).resolves({
-      records: [{ DevopsProjectId: 'PROJ001' }],
+      records: [{ DevopsProjectId: 'PROJ001', DevopsPipelineStageId: '05S000000000001' }],
     });
 
     const result = await resolveProjectIdFromWorkItem(connectionStub as unknown as Connection, '0Wx000000000001');
-    expect(result).to.equal('PROJ001');
+    expect(result.projectId).to.equal('PROJ001');
+    expect(result.pipelineStageId).to.equal('05S000000000001');
   });
 
   it('throws when work item is not found', async () => {

@@ -68,7 +68,7 @@ describe('devops work-item promote', () => {
     promoteStageStub.reset();
     resolveProjectIdFromWorkItemStub.reset();
     getPipelineIdForProjectStub.reset();
-    resolveProjectIdFromWorkItemStub.resolves('PROJ001');
+    resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
     getPipelineIdForProjectStub.resolves('PIPE001');
   });
 
@@ -84,15 +84,15 @@ describe('devops work-item promote', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         promoteStageStub.resolves({
-          jobId: '0Af000000000001',
-          status: 'Completed',
+          requestId: 'mock-request-id',
+          status: 'SUBMITTED',
           message: 'Work items successfully promoted to UAT.',
-          errorDetails: '',
+          promotedWorkitemIds: ['0Wx000000000001'],
         });
 
         await PromoteCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
 
-        expect(ctx.stdout).to.contain('Completed');
+        expect(ctx.stdout).to.contain('SUBMITTED');
         expect(ctx.stdout).to.contain('0Wx000000000001');
         expect(promoteStageStub.calledOnce).to.be.true;
         const callArgs = promoteStageStub.firstCall.args[0];
@@ -104,14 +104,47 @@ describe('devops work-item promote', () => {
     test
       .stdout()
       .stderr()
+      .it('passes deploy-all, test-level, and tests flags to promoteStage', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        promoteStageStub.resolves({
+          requestId: 'mock-request-id',
+          status: 'SUBMITTED',
+          message: 'Work items successfully promoted.',
+          promotedWorkitemIds: ['0Wx000000000001'],
+        });
+
+        await PromoteCommand.run([
+          '-o',
+          'testOrg',
+          '-i',
+          '0Wx000000000001',
+          '-t',
+          '05S000000000002',
+          '--deploy-all',
+          '--test-level',
+          'RunLocalTests',
+          '--tests',
+          'MyTest',
+        ]);
+
+        const callArgs = promoteStageStub.firstCall.args[0];
+        expect(callArgs.fullDeploy).to.be.true;
+        expect(callArgs.testLevel).to.equal('RunLocalTests');
+        expect(callArgs.runTests).to.deep.equal(['MyTest']);
+      });
+
+    test
+      .stdout()
+      .stderr()
       .it('promotes multiple work items', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         promoteStageStub.resolves({
-          jobId: '0Af000000000001',
-          status: 'Completed',
+          requestId: 'mock-request-id',
+          status: 'SUBMITTED',
           message: 'Work items successfully promoted.',
-          errorDetails: '',
+          promotedWorkitemIds: ['0Wx000000000001', '0Wx000000000002'],
         });
 
         await PromoteCommand.run([

@@ -19,13 +19,14 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { promoteStage, PromoteStageResult } from '../../../utils/promoteStage.js';
 import { resolveProjectIdFromWorkItem } from '../../../utils/prepareWorkItem.js';
 import { getPipelineIdForProject } from '../../../utils/pipelineUtils.js';
-import { testLevel as testLevelFlag } from '../../../common/flags/promote/promoteFlags.js';
+import { testLevel as testLevelFlag, deployAll, specificTests } from '../../../common/flags/promote/promoteFlags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.work-item.promote');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
 export type PromoteWorkItemsResult = {
+  requestId: string;
   status: string;
   message: string;
   promotedWorkitemIds: string[];
@@ -51,7 +52,9 @@ export default class DevopsWorkItemPromote extends SfCommand<PromoteWorkItemsRes
       char: 't',
       required: true,
     }),
+    'deploy-all': deployAll,
     'test-level': testLevelFlag(),
+    tests: { ...specificTests, char: undefined },
   };
 
   public async run(): Promise<PromoteWorkItemsResult> {
@@ -70,7 +73,9 @@ export default class DevopsWorkItemPromote extends SfCommand<PromoteWorkItemsRes
         pipelineId,
         workItemIds,
         targetStageId,
-        testLevel: (flags['test-level'] as string | undefined) ?? 'Default',
+        fullDeploy: flags['deploy-all'] as boolean,
+        testLevel: flags['test-level'] as string | undefined,
+        runTests: flags.tests as string[] | undefined,
       });
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
@@ -82,9 +87,10 @@ export default class DevopsWorkItemPromote extends SfCommand<PromoteWorkItemsRes
     }
 
     const result: PromoteWorkItemsResult = {
-      status: apiResult.status || 'Completed',
-      message: apiResult.message || 'Work items successfully promoted.',
-      promotedWorkitemIds: workItemIds,
+      requestId: apiResult.requestId,
+      status: apiResult.status,
+      message: apiResult.message,
+      promotedWorkitemIds: apiResult.promotedWorkitemIds,
     };
 
     this.printOutput(result);
@@ -96,7 +102,7 @@ export default class DevopsWorkItemPromote extends SfCommand<PromoteWorkItemsRes
     connection: Parameters<typeof getPipelineIdForProject>[0],
     workItemId: string
   ): Promise<string> {
-    const projectId = await resolveProjectIdFromWorkItem(connection, workItemId);
+    const { projectId } = await resolveProjectIdFromWorkItem(connection, workItemId);
     const pipelineId = await getPipelineIdForProject(connection, projectId);
     if (!pipelineId) {
       this.error(`No pipeline found for work item "${workItemId}". Ensure the project has an associated pipeline.`);
@@ -107,6 +113,7 @@ export default class DevopsWorkItemPromote extends SfCommand<PromoteWorkItemsRes
   private printOutput(result: PromoteWorkItemsResult): void {
     this.log(`Status: ${result.status}`);
     this.log(`Message: ${result.message}`);
+    this.log(`Request ID: ${result.requestId}`);
     this.log('');
     this.log('Promoted Work Items');
     this.log('───────────────────');

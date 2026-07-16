@@ -87,6 +87,22 @@
   },
   {
     "alias": [],
+    "command": "devops:stage:deploy",
+    "flagAliases": [],
+    "flagChars": ["o", "s", "w"],
+    "flags": ["async", "concise", "flags-dir", "json", "named-credential", "stage-id", "target-org", "verbose", "wait"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:stage:deploy:status",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["concise", "flags-dir", "json", "request-id", "target-org", "verbose"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:stage:environment:add",
     "flagAliases": [],
     "flagChars": ["e", "o"],
@@ -107,22 +123,16 @@
     "alias": [],
     "command": "devops:stage:promote",
     "flagAliases": [],
-    "flagChars": ["a", "b", "c", "l", "p", "t", "v", "w"],
-    "flags": [
-      "async",
-      "branch-name",
-      "bundle-version-name",
-      "concise",
-      "deploy-all",
-      "devops-center-project-name",
-      "devops-center-username",
-      "flags-dir",
-      "json",
-      "test-level",
-      "tests",
-      "verbose",
-      "wait"
-    ],
+    "flagChars": ["a", "l", "o", "t"],
+    "flags": ["deploy-all", "flags-dir", "json", "target-org", "target-stage-id", "test-level", "tests"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:work-item:combine:prepare",
+    "flagAliases": [],
+    "flagChars": ["o", "t"],
+    "flags": ["child-work-item-id", "flags-dir", "json", "parent-work-item-id", "target-org", "target-stage-id"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -145,32 +155,26 @@
     "alias": [],
     "command": "devops:work-item:prepare",
     "flagAliases": [],
-    "flagChars": ["i", "o", "s", "t"],
-    "flags": ["api-version", "flags-dir", "json", "source-stage-id", "target-org", "target-stage-id", "work-item-id"],
+    "flagChars": ["i", "o", "t"],
+    "flags": ["api-version", "flags-dir", "json", "target-org", "target-stage-id", "work-item-id"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
     "alias": [],
     "command": "devops:work-item:promote",
     "flagAliases": [],
-    "flagChars": ["i", "l", "o", "t"],
-    "flags": ["api-version", "flags-dir", "json", "target-org", "target-stage-id", "test-level", "work-item-id"],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
-    "command": "devops:work-item:prepare",
-    "flagAliases": [],
-    "flagChars": ["i", "o", "s", "t"],
-    "flags": ["api-version", "flags-dir", "json", "source-stage-id", "target-org", "target-stage-id", "work-item-id"],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
-    "command": "devops:work-item:promote",
-    "flagAliases": [],
-    "flagChars": ["i", "l", "o", "t"],
-    "flags": ["api-version", "flags-dir", "json", "target-org", "target-stage-id", "test-level", "work-item-id"],
+    "flagChars": ["a", "i", "l", "o", "t"],
+    "flags": [
+      "api-version",
+      "deploy-all",
+      "flags-dir",
+      "json",
+      "target-org",
+      "target-stage-id",
+      "test-level",
+      "tests",
+      "work-item-id"
+    ],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -229,7 +233,7 @@
     "alias": [],
     "command": "project:deploy:pipeline:start",
     "flagAliases": [],
-    "flagChars": ["a", "b", "c", "l", "p", "t", "v", "w"],
+    "flagChars": ["a", "b", "l", "o", "p", "t", "v", "w"],
     "flags": [
       "async",
       "branch-name",
@@ -237,9 +241,9 @@
       "concise",
       "deploy-all",
       "devops-center-project-name",
-      "devops-center-username",
       "flags-dir",
       "json",
+      "target-org",
       "test-level",
       "tests",
       "verbose",
@@ -251,7 +255,7 @@
     "alias": [],
     "command": "project:deploy:pipeline:validate",
     "flagAliases": [],
-    "flagChars": ["a", "b", "c", "l", "p", "t", "v", "w"],
+    "flagChars": ["a", "b", "l", "o", "p", "t", "v", "w"],
     "flags": [
       "async",
       "branch-name",
@@ -259,9 +263,9 @@
       "concise",
       "deploy-all",
       "devops-center-project-name",
-      "devops-center-username",
       "flags-dir",
       "json",
+      "target-org",
       "test-level",
       "tests",
       "verbose",

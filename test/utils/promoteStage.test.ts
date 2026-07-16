@@ -32,10 +32,10 @@ describe('promoteStage utilities', () => {
 
   it('calls promote endpoint with correct payload', async () => {
     const mockResponse = {
-      jobId: '0Af000000000001',
-      status: 'InProgress',
-      message: '',
-      errorDetails: '',
+      requestId: 'f43953d8-9b20-4dc3-8830-5ade632db0b1',
+      status: 'SUBMITTED',
+      message: 'Submitted for promotion',
+      promotedWorkitemIds: ['0Wx000000000001', '0Wx000000000002'],
     };
     (connectionStub.request as sinon.SinonStub).resolves(mockResponse);
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
@@ -47,8 +47,9 @@ describe('promoteStage utilities', () => {
       targetStageId: '05S000000000002',
     });
 
-    expect(result.jobId).to.equal('0Af000000000001');
-    expect(result.status).to.equal('InProgress');
+    expect(result.requestId).to.equal('f43953d8-9b20-4dc3-8830-5ade632db0b1');
+    expect(result.status).to.equal('SUBMITTED');
+    expect(result.promotedWorkitemIds).to.deep.equal(['0Wx000000000001', '0Wx000000000002']);
 
     const callArgs = (connectionStub.request as sinon.SinonStub).firstCall.args[0];
     expect(callArgs.url).to.contain('/connect/devops/pipelines/0XB000000000001/promote');
@@ -57,6 +58,38 @@ describe('promoteStage utilities', () => {
     const body = JSON.parse(callArgs.body as string) as Record<string, unknown>;
     expect(body.workitemIds).to.deep.equal(['0Wx000000000001', '0Wx000000000002']);
     expect(body.targetStageId).to.equal('05S000000000002');
+    expect(body.allWorkItemsInStage).to.equal(false);
+    expect(body.isCheckDeploy).to.equal(false);
+    expect(body).to.not.have.property('promoteOptions');
+    expect(body).to.not.have.property('fullDeploy');
+    expect(body).to.not.have.property('testLevel');
+    expect(body.deployOptions).to.deep.equal({ testLevel: 'Default', isFullDeploy: false, runTests: [] });
+  });
+
+  it('passes fullDeploy, testLevel, and runTests into deployOptions', async () => {
+    (connectionStub.request as sinon.SinonStub).resolves({
+      requestId: 'abc',
+      status: 'SUBMITTED',
+      message: '',
+      promotedWorkitemIds: [],
+    });
+    (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
+
+    await promoteStage({
+      connection: connectionStub as unknown as Connection,
+      pipelineId: '0XB000000000001',
+      workItemIds: ['0Wx000000000001'],
+      targetStageId: '05S000000000002',
+      fullDeploy: true,
+      testLevel: 'RunLocalTests',
+      runTests: ['MyTest'],
+    });
+
+    const body = JSON.parse((connectionStub.request as sinon.SinonStub).firstCall.args[0].body as string) as Record<
+      string,
+      unknown
+    >;
+    expect(body.deployOptions).to.deep.equal({ testLevel: 'RunLocalTests', isFullDeploy: true, runTests: ['MyTest'] });
   });
 
   it('propagates API errors', async () => {
@@ -87,9 +120,9 @@ describe('promoteStage utilities', () => {
       targetStageId: '05S000000000002',
     });
 
-    expect(result.jobId).to.equal('');
+    expect(result.requestId).to.equal('');
     expect(result.status).to.equal('');
     expect(result.message).to.equal('');
-    expect(result.errorDetails).to.equal('');
+    expect(result.promotedWorkitemIds).to.deep.equal([]);
   });
 });

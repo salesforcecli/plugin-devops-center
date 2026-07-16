@@ -68,13 +68,24 @@ export async function prepareWorkItem(params: PrepareWorkItemParams): Promise<Pr
   };
 }
 
-export async function resolveProjectIdFromWorkItem(connection: Connection, workItemId: string): Promise<string> {
-  const result = await connection.query<{ DevopsProjectId: string }>(
-    `SELECT DevopsProjectId FROM WorkItem WHERE Id = '${workItemId}' LIMIT 1`
+export type WorkItemContext = {
+  projectId: string;
+  pipelineStageId: string;
+};
+
+export async function resolveProjectIdFromWorkItem(
+  connection: Connection,
+  workItemId: string
+): Promise<WorkItemContext> {
+  const result = await connection.query<{ DevopsProjectId: string; DevopsPipelineStageId: string }>(
+    `SELECT DevopsProjectId, DevopsPipelineStageId FROM WorkItem WHERE Id = '${workItemId}' LIMIT 1`
   );
   const records = result.records ?? [];
   if (records.length === 0) {
     throw new Error(`Work item '${workItemId}' not found. Verify the work item ID and try again.`);
   }
-  return records[0].DevopsProjectId;
+  return {
+    projectId: records[0].DevopsProjectId,
+    pipelineStageId: records[0].DevopsPipelineStageId ?? '',
+  };
 }

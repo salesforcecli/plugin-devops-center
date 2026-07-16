@@ -16,29 +16,31 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import {
-  prepareWorkItem,
-  PrepareWorkItemResult,
-  resolveProjectIdFromWorkItem,
-} from '../../../utils/prepareWorkItem.js';
-import { getPipelineIdForProject } from '../../../utils/pipelineUtils.js';
+import { combineWorkItemsPrepare, CombineWorkItemsPrepareResult } from '../../../../utils/combineWorkItems.js';
+import { getPipelineIdForProject } from '../../../../utils/pipelineUtils.js';
+import { resolveProjectIdFromWorkItem } from '../../../../utils/prepareWorkItem.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.work-item.prepare');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.work-item.combine.prepare');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export default class DevopsWorkItemPrepare extends SfCommand<PrepareWorkItemResult> {
+export default class DevopsWorkItemCombinePrepare extends SfCommand<CombineWorkItemsPrepareResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
-    'api-version': Flags.orgApiVersion(),
-    'work-item-id': Flags.string({
-      summary: messages.getMessage('flags.work-item-id.summary'),
-      char: 'i',
+    'parent-work-item-id': Flags.string({
+      summary: messages.getMessage('flags.parent-work-item-id.summary'),
+      description: messages.getMessage('flags.parent-work-item-id.description'),
       required: true,
+    }),
+    'child-work-item-id': Flags.string({
+      summary: messages.getMessage('flags.child-work-item-id.summary'),
+      description: messages.getMessage('flags.child-work-item-id.description'),
+      required: true,
+      multiple: true,
     }),
     'target-stage-id': Flags.string({
       summary: messages.getMessage('flags.target-stage-id.summary'),
@@ -47,18 +49,19 @@ export default class DevopsWorkItemPrepare extends SfCommand<PrepareWorkItemResu
     }),
   };
 
-  public async run(): Promise<PrepareWorkItemResult> {
-    const { flags } = await this.parse(DevopsWorkItemPrepare);
+  public async run(): Promise<CombineWorkItemsPrepareResult> {
+    const { flags } = await this.parse(DevopsWorkItemCombinePrepare);
     const org = flags['target-org'];
-    const connection = org.getConnection(flags['api-version']);
-    const workItemId = flags['work-item-id'];
+    const connection = org.getConnection();
+    const parentWorkItemId = flags['parent-work-item-id'];
+    const childWorkItemIds = flags['child-work-item-id'];
 
-    let projectId: string;
+    let pipelineId: string | undefined;
     let sourceStageId: string;
     try {
-      const workItem = await resolveProjectIdFromWorkItem(connection, workItemId);
-      projectId = workItem.projectId;
-      sourceStageId = workItem.pipelineStageId;
+      const { projectId, pipelineStageId } = await resolveProjectIdFromWorkItem(connection, parentWorkItemId);
+      sourceStageId = pipelineStageId;
+      pipelineId = await getPipelineIdForProject(connection, projectId);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
@@ -67,21 +70,17 @@ export default class DevopsWorkItemPrepare extends SfCommand<PrepareWorkItemResu
       throw error;
     }
 
-    if (!sourceStageId) {
-      this.error(`Work item '${workItemId}' is not currently assigned to a pipeline stage.`);
-    }
-
-    const pipelineId = await getPipelineIdForProject(connection, projectId);
     if (!pipelineId) {
-      this.error(`No pipeline found for work item ${workItemId}. Ensure the project has an associated pipeline.`);
+      this.error(messages.getMessage('error.NoPipeline'));
     }
 
-    let result: PrepareWorkItemResult;
+    let result: CombineWorkItemsPrepareResult;
     try {
-      result = await prepareWorkItem({
+      result = await combineWorkItemsPrepare({
         connection,
         pipelineId,
-        workItemId,
+        parentWorkItemId,
+        childWorkItemIds,
         sourceStageId,
         targetStageId: flags['target-stage-id'],
       });
@@ -94,10 +93,17 @@ export default class DevopsWorkItemPrepare extends SfCommand<PrepareWorkItemResu
     }
 
     if (result.success) {
-      this.log(`Work item ${workItemId} prepared for one-off promotion.`);
+      this.log('Work items prepared for custom promotion.');
       this.log(`  Request Token: ${result.requestToken ?? ''}`);
+      this.log('');
+      this.log('To complete the promotion, run:');
+      this.log(
+        `  sf devops work-item promote --target-org ${
+          org.getUsername() ?? '<org>'
+        } --work-item-id ${parentWorkItemId} --target-stage-id ${flags['target-stage-id']}`
+      );
     } else {
-      this.log('Failed to prepare work item for one-off promotion.');
+      this.log('Failed to prepare work items for custom promotion.');
       this.log(`  Error Code:    ${result.errorCode ?? ''}`);
       this.log(`  Error Message: ${result.errorMessage ?? ''}`);
     }

@@ -1,26 +1,24 @@
 # summary
 
-Promote a bundle from one pipeline stage to the next.
+Promote approved work items to a target pipeline stage.
 
 # description
 
-Promotes a bundle from one pipeline stage to the next stage in the pipeline. Changes in the source stage's branch must be merged in the source control repository before running this command.
+Promotes all approved work items in a project to the specified target stage. Specify the ID of the target pipeline stage to promote to.
 
-Specify --bundle-version-name when promoting to the environment that corresponds to the first stage after the bundling stage.
+# flags.target-stage-id.summary
+
+ID of the pipeline stage to promote work items to.
 
 # examples
 
-- Promote a bundle to the staging stage.
+- Promote all approved work items to a stage:
 
-      <%= config.bin %> <%= command.id %> --devops-center-username my-devops-org --devops-center-project-name "MyApp Release" --branch-name staging
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --target-stage-id 05S000000000001
 
-- Promote a bundle into the first stage after the bundling stage, specifying the bundle version.
+- Promote and deploy all metadata, running all local tests:
 
-      <%= config.bin %> <%= command.id %> --devops-center-username my-devops-org --devops-center-project-name "MyApp Release" --branch-name staging --bundle-version-name 1.0
-
-- Promote a bundle and deploy all metadata, running all local tests.
-
-      <%= config.bin %> <%= command.id %> --devops-center-username my-devops-org --devops-center-project-name "MyApp Release" --branch-name main --deploy-all --test-level RunLocalTests
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --target-stage-id 05S000000000001 --deploy-all --test-level RunLocalTests
 
 # error.NoWorkItems
 

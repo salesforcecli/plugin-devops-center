@@ -5,6 +5,9 @@
     "PromoteWorkItemsResult": {
       "type": "object",
       "properties": {
+        "requestId": {
+          "type": "string"
+        },
         "status": {
           "type": "string"
         },
@@ -18,7 +21,7 @@
           }
         }
       },
-      "required": ["status", "message", "promotedWorkitemIds"],
+      "required": ["requestId", "status", "message", "promotedWorkitemIds"],
       "additionalProperties": false
     }
   }
