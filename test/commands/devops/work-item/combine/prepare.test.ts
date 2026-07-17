@@ -80,13 +80,13 @@ describe('devops work-item combine prepare', () => {
           '-o',
           'my-devops-org',
           '--parent-work-item-id',
-          '0Wx000000000001',
+          '1fkxx0000000001',
           '--child-work-item-id',
-          '0Wx000000000002',
+          '1fkxx0000000002',
           '--child-work-item-id',
-          '0Wx000000000003',
+          '1fkxx0000000003',
           '-t',
-          '05S000000000002',
+          '1QVxx0000000002',
         ]);
 
         expect(ctx.stdout).to.contain('Work items prepared for custom promotion.');
@@ -95,7 +95,7 @@ describe('devops work-item combine prepare', () => {
 
         const callArgs = combineWorkItemsPrepareStub.firstCall.args[0];
         expect(callArgs.sourceStageId).to.equal('05S000000000001');
-        expect(callArgs.targetStageId).to.equal('05S000000000002');
+        expect(callArgs.targetStageId).to.equal('1QVxx0000000002');
       });
   });
 
@@ -117,11 +117,11 @@ describe('devops work-item combine prepare', () => {
           '-o',
           'my-devops-org',
           '--parent-work-item-id',
-          '0Wx000000000001',
+          '1fkxx0000000001',
           '--child-work-item-id',
-          '0Wx000000000002',
+          '1fkxx0000000002',
           '-t',
-          '05S000000000002',
+          '1QVxx0000000002',
         ]);
 
         expect(ctx.stdout).to.contain('Failed to prepare work items for custom promotion.');
@@ -143,11 +143,11 @@ describe('devops work-item combine prepare', () => {
             '-o',
             'my-devops-org',
             '--parent-work-item-id',
-            '0Wx000000000001',
+            '1fkxx0000000001',
             '--child-work-item-id',
-            '0Wx000000000002',
+            '1fkxx0000000002',
             '-t',
-            '05S000000000002',
+            '1QVxx0000000002',
           ]);
           expect.fail('should have thrown');
         } catch (e) {
@@ -170,11 +170,11 @@ describe('devops work-item combine prepare', () => {
             '-o',
             'my-devops-org',
             '--parent-work-item-id',
-            '0Wx000000000001',
+            '1fkxx0000000001',
             '--child-work-item-id',
-            '0Wx000000000002',
+            '1fkxx0000000002',
             '-t',
-            '05S000000000002',
+            '1QVxx0000000002',
           ]);
         } catch (e) {
           // expected
@@ -196,11 +196,11 @@ describe('devops work-item combine prepare', () => {
             '-o',
             'my-devops-org',
             '--parent-work-item-id',
-            '0Wx000000000001',
+            '1fkxx0000000001',
             '--child-work-item-id',
-            '0Wx000000000002',
+            '1fkxx0000000002',
             '-t',
-            '05S000000000002',
+            '1QVxx0000000002',
           ]);
         } catch (e) {
           // expected
@@ -224,11 +224,11 @@ describe('devops work-item combine prepare', () => {
             '-o',
             'my-devops-org',
             '--parent-work-item-id',
-            '0Wx000000000001',
+            '1fkxx0000000001',
             '--child-work-item-id',
-            '0Wx000000000002',
+            '1fkxx0000000002',
             '-t',
-            '05S000000000002',
+            '1QVxx0000000002',
           ]);
           expect.fail('should have thrown');
         } catch (e: unknown) {

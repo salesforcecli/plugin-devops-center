@@ -89,14 +89,14 @@ describe('devops work-item prepare', () => {
           errorMessage: null,
         });
 
-        await PrepareCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
+        await PrepareCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000002']);
 
         expect(ctx.stdout).to.contain('prepared for one-off promotion');
         expect(ctx.stdout).to.contain('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
 
         const callArgs = prepareWorkItemStub.firstCall.args[0];
         expect(callArgs.sourceStageId).to.equal('05S000000000001');
-        expect(callArgs.targetStageId).to.equal('05S000000000002');
+        expect(callArgs.targetStageId).to.equal('1QVxx0000000002');
       });
   });
 
@@ -114,7 +114,7 @@ describe('devops work-item prepare', () => {
           errorMessage: 'Source stage and target stage are not compatible for one-off promotion.',
         });
 
-        await PrepareCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
+        await PrepareCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000002']);
 
         expect(ctx.stdout).to.contain('Failed to prepare work item');
         expect(ctx.stdout).to.contain('ALM_ERR_001');
@@ -132,7 +132,7 @@ describe('devops work-item prepare', () => {
         getPipelineIdForProjectStub.resolves(undefined);
 
         try {
-          await PrepareCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
+          await PrepareCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000002']);
           expect.fail('should have thrown');
         } catch (e) {
           // expected
@@ -152,7 +152,7 @@ describe('devops work-item prepare', () => {
         resolveProjectIdFromWorkItemStub.rejects(new Error("sObject type 'WorkItem' is not supported"));
 
         try {
-          await PrepareCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
+          await PrepareCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000002']);
         } catch (e) {
           // expected
         }
@@ -171,7 +171,7 @@ describe('devops work-item prepare', () => {
         prepareWorkItemStub.rejects(new Error('Network error'));
 
         try {
-          await PrepareCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
+          await PrepareCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000002']);
           expect.fail('should have thrown');
         } catch (e: unknown) {
           expect((e as Error).message).to.contain('Network error');

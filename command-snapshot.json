@@ -116,7 +116,15 @@
     "command": "devops:work-item:combine:prepare",
     "flagAliases": [],
     "flagChars": ["o", "t"],
-    "flags": ["child-work-item-id", "flags-dir", "json", "parent-work-item-id", "target-org", "target-stage-id"],
+    "flags": [
+      "api-version",
+      "child-work-item-id",
+      "flags-dir",
+      "json",
+      "parent-work-item-id",
+      "target-org",
+      "target-stage-id"
+    ],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {

@@ -23,15 +23,15 @@ import { Org } from '@salesforce/core';
 let queryMock: sinon.SinonStub;
 
 // Query 1: target stage → pipelineId, Query 2: source stage lookup, Query 3: work items in source stage
-const mockStageQueryRecord = { DevopsPipelineId: 'mock-pipeline-id' };
-const mockSourceStageRecord = { Id: 'mock-source-stage-id' };
-const mockWorkItemRecords = [{ Id: 'mock-work-item-id-1' }, { Id: 'mock-work-item-id-2' }];
+const mockStageQueryRecord = { DevopsPipelineId: '1QVxx0000000001' };
+const mockSourceStageRecord = { Id: '1QVxx0000000002' };
+const mockWorkItemRecords = [{ Id: '1fkxx0000000001' }, { Id: '1fkxx0000000002' }];
 
 const mockPromoteResult = {
   requestId: 'mock-request-id',
   status: 'SUBMITTED',
   message: 'Submitted for promotion',
-  promotedWorkitemIds: ['mock-work-item-id-1', 'mock-work-item-id-2'],
+  promotedWorkitemIds: ['1fkxx0000000001', '1fkxx0000000002'],
 };
 
 const DOCE_ORG = {
@@ -96,13 +96,13 @@ describe('devops stage promote', () => {
       .it('calls promoteStage with pipeline ID, work item IDs, and target stage ID', async (ctx) => {
         setupQueryMock();
 
-        await PromoteCommand.run(['-o', 'doceOrg', '-t', 'mock-target-stage-id']);
+        await PromoteCommand.run(['-o', 'doceOrg', '-t', '1QVxx0000000003']);
 
         expect(promoteStageStub.calledOnce).to.be.true;
         const callArgs = promoteStageStub.firstCall.args[0];
-        expect(callArgs.pipelineId).to.equal('mock-pipeline-id');
-        expect(callArgs.targetStageId).to.equal('mock-target-stage-id');
-        expect(callArgs.workItemIds).to.deep.equal(['mock-work-item-id-1', 'mock-work-item-id-2']);
+        expect(callArgs.pipelineId).to.equal('1QVxx0000000001');
+        expect(callArgs.targetStageId).to.equal('1QVxx0000000003');
+        expect(callArgs.workItemIds).to.deep.equal(['1fkxx0000000001', '1fkxx0000000002']);
         expect(ctx.stdout).to.contain('SUBMITTED');
         expect(ctx.stdout).to.contain('mock-request-id');
       });
@@ -117,7 +117,7 @@ describe('devops stage promote', () => {
           '-o',
           'doceOrg',
           '-t',
-          'mock-target-stage-id',
+          '1QVxx0000000003',
           '--deploy-all',
           '--test-level',
           'RunLocalTests',
@@ -141,10 +141,10 @@ describe('devops stage promote', () => {
         DOCE_ORG.getConnection = () => ({ query: queryMock, getApiVersion: () => '65.0' } as never);
 
         try {
-          await PromoteCommand.run(['-o', 'doceOrg', '-t', 'bad-stage-id']);
+          await PromoteCommand.run(['-o', 'doceOrg', '-t', '1QVxx0000000099']);
           expect.fail('should have thrown');
         } catch (e: unknown) {
-          expect((e as Error).message).to.contain('bad-stage-id');
+          expect((e as Error).message).to.contain('1QVxx0000000099');
         }
       });
 
@@ -163,7 +163,7 @@ describe('devops stage promote', () => {
         DOCE_ORG.getConnection = () => ({ query: queryMock, getApiVersion: () => '65.0' } as never);
 
         try {
-          await PromoteCommand.run(['-o', 'doceOrg', '-t', 'mock-target-stage-id']);
+          await PromoteCommand.run(['-o', 'doceOrg', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
         } catch (e: unknown) {
           expect((e as Error).message).to.contain('No work items found');

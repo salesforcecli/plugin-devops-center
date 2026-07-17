@@ -87,18 +87,18 @@ describe('devops work-item promote', () => {
           requestId: 'mock-request-id',
           status: 'SUBMITTED',
           message: 'Work items successfully promoted to UAT.',
-          promotedWorkitemIds: ['0Wx000000000001'],
+          promotedWorkitemIds: ['1fkxx0000000001'],
         });
 
-        await PromoteCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
+        await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000002']);
 
         expect(ctx.stdout).to.contain('SUBMITTED');
-        expect(ctx.stdout).to.contain('0Wx000000000001');
+        expect(ctx.stdout).to.contain('1fkxx0000000001');
         expect(promoteStageStub.calledOnce).to.be.true;
         const callArgs = promoteStageStub.firstCall.args[0];
         expect(callArgs.pipelineId).to.equal('PIPE001');
-        expect(callArgs.workItemIds).to.deep.equal(['0Wx000000000001']);
-        expect(callArgs.targetStageId).to.equal('05S000000000002');
+        expect(callArgs.workItemIds).to.deep.equal(['1fkxx0000000001']);
+        expect(callArgs.targetStageId).to.equal('1QVxx0000000002');
       });
 
     test
@@ -111,16 +111,16 @@ describe('devops work-item promote', () => {
           requestId: 'mock-request-id',
           status: 'SUBMITTED',
           message: 'Work items successfully promoted.',
-          promotedWorkitemIds: ['0Wx000000000001'],
+          promotedWorkitemIds: ['1fkxx0000000001'],
         });
 
         await PromoteCommand.run([
           '-o',
           'testOrg',
           '-i',
-          '0Wx000000000001',
+          '1fkxx0000000001',
           '-t',
-          '05S000000000002',
+          '1QVxx0000000002',
           '--deploy-all',
           '--test-level',
           'RunLocalTests',
@@ -144,24 +144,24 @@ describe('devops work-item promote', () => {
           requestId: 'mock-request-id',
           status: 'SUBMITTED',
           message: 'Work items successfully promoted.',
-          promotedWorkitemIds: ['0Wx000000000001', '0Wx000000000002'],
+          promotedWorkitemIds: ['1fkxx0000000001', '1fkxx0000000002'],
         });
 
         await PromoteCommand.run([
           '-o',
           'testOrg',
           '-i',
-          '0Wx000000000001',
+          '1fkxx0000000001',
           '-i',
-          '0Wx000000000002',
+          '1fkxx0000000002',
           '-t',
-          '05S000000000002',
+          '1QVxx0000000002',
         ]);
 
-        expect(ctx.stdout).to.contain('0Wx000000000001');
-        expect(ctx.stdout).to.contain('0Wx000000000002');
+        expect(ctx.stdout).to.contain('1fkxx0000000001');
+        expect(ctx.stdout).to.contain('1fkxx0000000002');
         const callArgs = promoteStageStub.firstCall.args[0];
-        expect(callArgs.workItemIds).to.deep.equal(['0Wx000000000001', '0Wx000000000002']);
+        expect(callArgs.workItemIds).to.deep.equal(['1fkxx0000000001', '1fkxx0000000002']);
       });
   });
 
@@ -173,11 +173,11 @@ describe('devops work-item promote', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         resolveProjectIdFromWorkItemStub.rejects(
-          new Error("Work item '0WxBAD' not found. Verify the work item ID and try again.")
+          new Error("Work item '1fkxx0000000099' not found. Verify the work item ID and try again.")
         );
 
         try {
-          await PromoteCommand.run(['-o', 'testOrg', '-i', '0WxBAD', '-t', '05S000000000002']);
+          await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000099', '-t', '1QVxx0000000002']);
           expect.fail('should have thrown');
         } catch (e: unknown) {
           expect((e as Error).message).to.contain('not found');
@@ -195,7 +195,7 @@ describe('devops work-item promote', () => {
         promoteStageStub.rejects(new Error('Bad Request'));
 
         try {
-          await PromoteCommand.run(['-o', 'testOrg', '-i', '0Wx000000000001', '-t', '05S000000000002']);
+          await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000002']);
           expect.fail('should have thrown');
         } catch (e) {
           // expected

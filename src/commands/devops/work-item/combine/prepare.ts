@@ -37,6 +37,7 @@ export default class DevopsWorkItemCombinePrepare extends SfCommand<CombineWorkI
       description: messages.getMessage('flags.parent-work-item-id.description'),
       required: true,
       startsWith: '1fk',
+      char: undefined,
     }),
     'child-work-item-id': Flags.salesforceId({
       summary: messages.getMessage('flags.child-work-item-id.summary'),
@@ -44,6 +45,7 @@ export default class DevopsWorkItemCombinePrepare extends SfCommand<CombineWorkI
       required: true,
       multiple: true,
       startsWith: '1fk',
+      char: undefined,
     }),
     'target-stage-id': Flags.salesforceId({
       summary: messages.getMessage('flags.target-stage-id.summary'),
