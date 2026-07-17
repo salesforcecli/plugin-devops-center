@@ -77,6 +77,10 @@ export async function resolveProjectIdFromWorkItem(
   connection: Connection,
   workItemId: string
 ): Promise<WorkItemContext> {
+  // Validate workItemId format before using in SOQL
+  if (!/^[a-zA-Z0-9]{15,18}$/.test(workItemId)) {
+    throw new Error('Invalid work item ID format.');
+  }
   const result = await connection.query<{ DevopsProjectId: string; DevopsPipelineStageId: string }>(
     `SELECT DevopsProjectId, DevopsPipelineStageId FROM WorkItem WHERE Id = '${workItemId}' LIMIT 1`
   );

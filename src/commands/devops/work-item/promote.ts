@@ -44,17 +44,19 @@ export default class DevopsWorkItemPromote extends SfCommand<PromoteWorkItemsRes
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    'work-item-id': Flags.string({
+    'work-item-id': Flags.salesforceId({
       summary: messages.getMessage('flags.work-item-id.summary'),
       description: messages.getMessage('flags.work-item-id.description'),
       char: 'i',
       required: true,
       multiple: true,
+      startsWith: '1fk',
     }),
-    'target-stage-id': Flags.string({
+    'target-stage-id': Flags.salesforceId({
       summary: messages.getMessage('flags.target-stage-id.summary'),
       char: 't',
       required: true,
+      startsWith: '1QV',
     }),
     'deploy-all': deployAll,
     'test-level': testLevelFlag(),

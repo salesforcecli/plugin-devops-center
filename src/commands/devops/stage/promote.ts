@@ -39,10 +39,11 @@ export default class DevopsStagePromote extends SfCommand<PromoteStageCommandRes
     ...SfCommand.baseFlags,
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    'target-stage-id': Flags.string({
+    'target-stage-id': Flags.salesforceId({
       char: 't',
       summary: messages.getMessage('flags.target-stage-id.summary'),
       required: true,
+      startsWith: '1QV',
     }),
     'deploy-all': deployAll,
     'test-level': testLevel(),
@@ -62,6 +63,10 @@ export default class DevopsStagePromote extends SfCommand<PromoteStageCommandRes
     if (!pipelineId) {
       this.error(`Stage '${targetStageId}' not found or has no associated pipeline.`);
     }
+    // Validate pipelineId format before using in SOQL
+    if (!/^[a-zA-Z0-9]{15,18}$/.test(pipelineId)) {
+      this.error('Invalid pipeline ID format.');
+    }
 
     // Find the source stage (the one whose NextStageId points to the target stage)
     const sourceStageResult = await connection.query<{ Id: string }>(
@@ -70,6 +75,10 @@ export default class DevopsStagePromote extends SfCommand<PromoteStageCommandRes
     const sourceStageId = sourceStageResult.records[0]?.Id;
     if (!sourceStageId) {
       this.error(`No source stage found that feeds into stage '${targetStageId}'.`);
+    }
+    // Validate sourceStageId format before using in SOQL
+    if (!/^[a-zA-Z0-9]{15,18}$/.test(sourceStageId)) {
+      this.error('Invalid source stage ID format.');
     }
 
     // Fetch all work items in the source stage — the API enforces promotion eligibility

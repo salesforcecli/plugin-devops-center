@@ -31,28 +31,32 @@ export default class DevopsWorkItemCombinePrepare extends SfCommand<CombineWorkI
 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
-    'parent-work-item-id': Flags.string({
+    'api-version': Flags.orgApiVersion(),
+    'parent-work-item-id': Flags.salesforceId({
       summary: messages.getMessage('flags.parent-work-item-id.summary'),
       description: messages.getMessage('flags.parent-work-item-id.description'),
       required: true,
+      startsWith: '1fk',
     }),
-    'child-work-item-id': Flags.string({
+    'child-work-item-id': Flags.salesforceId({
       summary: messages.getMessage('flags.child-work-item-id.summary'),
       description: messages.getMessage('flags.child-work-item-id.description'),
       required: true,
       multiple: true,
+      startsWith: '1fk',
     }),
-    'target-stage-id': Flags.string({
+    'target-stage-id': Flags.salesforceId({
       summary: messages.getMessage('flags.target-stage-id.summary'),
       char: 't',
       required: true,
+      startsWith: '1QV',
     }),
   };
 
   public async run(): Promise<CombineWorkItemsPrepareResult> {
     const { flags } = await this.parse(DevopsWorkItemCombinePrepare);
     const org = flags['target-org'];
-    const connection = org.getConnection();
+    const connection = org.getConnection(flags['api-version']);
     const parentWorkItemId = flags['parent-work-item-id'];
     const childWorkItemIds = flags['child-work-item-id'];
 
