@@ -53,9 +53,32 @@
         },
         "repositoryOwner": {
           "type": ["string", "null"]
+        },
+        "environment": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/StageEnvironment"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
-      "required": ["id", "name", "nextStageId", "branchName", "repositoryName", "repositoryOwner"],
+      "required": ["id", "name", "nextStageId", "branchName", "repositoryName", "repositoryOwner", "environment"],
+      "additionalProperties": false
+    },
+    "StageEnvironment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "name"],
       "additionalProperties": false
     },
     "ConnectedProject": {
