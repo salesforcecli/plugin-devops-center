@@ -16,13 +16,13 @@
 
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { getPipeline, PipelineGetResult } from '../../../utils/getPipeline.js';
+import { deleteStageEnvironment, DeleteStageEnvironmentResult } from '../../../../utils/deleteStageEnvironment.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.pipeline.get');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.stage.environment.delete');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export default class DevopsPipelineGet extends SfCommand<PipelineGetResult> {
+export default class DevopsStageEnvironmentDelete extends SfCommand<DeleteStageEnvironmentResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -32,57 +32,49 @@ export default class DevopsPipelineGet extends SfCommand<PipelineGetResult> {
     'api-version': Flags.orgApiVersion(),
     'pipeline-id': Flags.salesforceId({
       summary: messages.getMessage('flags.pipeline-id.summary'),
-      char: 'i',
       required: true,
+      char: undefined,
+    }),
+    'environment-id': Flags.salesforceId({
+      summary: messages.getMessage('flags.environment-id.summary'),
+      required: true,
+      char: 'e',
     }),
   };
 
-  public async run(): Promise<PipelineGetResult> {
-    const { flags } = await this.parse(DevopsPipelineGet);
+  public async run(): Promise<DeleteStageEnvironmentResult> {
+    const { flags } = await this.parse(DevopsStageEnvironmentDelete);
     const org: Org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
+    const pipelineId = flags['pipeline-id'];
+    const environmentId = flags['environment-id'];
 
-    let result: PipelineGetResult;
+    const pipelineQueryResult = await connection.query(
+      `SELECT IsActive FROM DevopsPipeline WHERE Id = '${pipelineId}' LIMIT 1`
+    );
+    const pipelineRecord = (pipelineQueryResult.records ?? [])[0] as { IsActive?: boolean } | undefined;
+    if (pipelineRecord?.IsActive) {
+      this.error(messages.getMessage('error.PipelineAlreadyActive', [pipelineId]));
+    }
+
+    let result: DeleteStageEnvironmentResult;
     try {
-      result = await getPipeline(connection, flags['pipeline-id']);
+      result = await deleteStageEnvironment(connection, environmentId);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
         this.error(commonErrorMessages.getMessage('error.DevopsCenterNotEnabled'));
       }
+      if (errMsg.includes('entity is deleted')) {
+        this.error(messages.getMessage('error.EnvironmentNotFound', [environmentId]));
+      }
       throw error;
     }
 
-    this.styledHeader(`Pipeline: ${result.name}`);
-    this.log(`  ID:          ${result.id}`);
-    this.log(`  Description: ${result.description ?? ''}`);
-    this.log(`  Active:      ${result.isActive}`);
-
-    if (result.stages.length > 0) {
-      this.log('');
-      this.styledHeader('Stages');
-      this.table({
-        data: result.stages.map((s) => ({
-          ID: s.id,
-          Name: s.name ?? '',
-          'Next Stage ID': s.nextStageId ?? '',
-          Branch: s.branchName ?? '',
-          Repository:
-            s.repositoryOwner && s.repositoryName ? `${s.repositoryOwner}/${s.repositoryName}` : s.repositoryName ?? '',
-          Environment: s.environment?.name ?? '',
-          'Environment ID': s.environment?.id ?? '',
-        })),
-        columns: ['ID', 'Name', 'Next Stage ID', 'Branch', 'Repository', 'Environment', 'Environment ID'],
-      });
-    }
-
-    if (result.connectedProjects.length > 0) {
-      this.log('');
-      this.styledHeader('Connected Projects');
-      this.table({
-        data: result.connectedProjects.map((p) => ({ ID: p.id, Name: p.name ?? '' })),
-        columns: ['ID', 'Name'],
-      });
+    if (result.success) {
+      this.log(`Successfully deleted environment ${environmentId}.`);
+    } else {
+      this.error(`Failed to delete environment: ${result.error ?? ''}`);
     }
 
     return result;

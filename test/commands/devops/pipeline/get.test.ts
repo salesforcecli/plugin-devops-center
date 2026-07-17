@@ -65,6 +65,7 @@ describe('devops pipeline get', () => {
               branchName: 'int',
               repositoryName: 'myrepo',
               repositoryOwner: 'myorg',
+              environment: { id: '0Xe000000000001', name: 'Integration_Org' },
             },
             {
               id: 'stage2',
@@ -73,6 +74,7 @@ describe('devops pipeline get', () => {
               branchName: 'main',
               repositoryName: 'myrepo',
               repositoryOwner: 'myorg',
+              environment: null,
             },
           ],
           connectedProjects: [{ id: 'proj1', name: 'MyApp' }],
@@ -85,6 +87,8 @@ describe('devops pipeline get', () => {
         expect(ctx.stdout).to.contain('Integration');
         expect(ctx.stdout).to.contain('Production');
         expect(ctx.stdout).to.contain('myorg/myrepo');
+        expect(ctx.stdout).to.contain('Integration_Org');
+        expect(ctx.stdout).to.contain('0Xe000000000001');
         expect(ctx.stdout).to.contain('MyApp');
       });
   });

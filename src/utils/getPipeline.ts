@@ -35,11 +35,20 @@ type StageQueryRecord = {
       RepositoryOwner: string | null;
     } | null;
   } | null;
+  DevOpsEnvironment: {
+    Id: string;
+    Name: string;
+  } | null;
 };
 
 type ProjectPipelineRecord = {
   DevopsProjectId: string;
   DevopsProject: { Name: string } | null;
+};
+
+export type StageEnvironment = {
+  id: string;
+  name: string;
 };
 
 export type PipelineStageDetail = {
@@ -49,6 +58,7 @@ export type PipelineStageDetail = {
   branchName: string | null;
   repositoryName: string | null;
   repositoryOwner: string | null;
+  environment: StageEnvironment | null;
 };
 
 export type ConnectedProject = {
@@ -91,7 +101,7 @@ export async function getPipeline(connection: Connection, pipelineId: string): P
 
   const [stageResult, junctionResult] = await Promise.all([
     connection.query<StageQueryRecord>(
-      `SELECT Id, Name, NextStageId, DevopsPipelineId, SourceCodeRepositoryBranch.Name, SourceCodeRepositoryBranch.SourceCodeRepository.Name, SourceCodeRepositoryBranch.SourceCodeRepository.RepositoryOwner FROM DevopsPipelineStage WHERE DevopsPipelineId = '${pipelineId}'`
+      `SELECT Id, Name, NextStageId, DevopsPipelineId, SourceCodeRepositoryBranch.Name, SourceCodeRepositoryBranch.SourceCodeRepository.Name, SourceCodeRepositoryBranch.SourceCodeRepository.RepositoryOwner, DevOpsEnvironment.Id, DevOpsEnvironment.Name FROM DevopsPipelineStage WHERE DevopsPipelineId = '${pipelineId}'`
     ),
     connection.query<ProjectPipelineRecord>(
       `SELECT DevopsProjectId, DevopsProject.Name FROM DevopsProjectPipeline WHERE DevopsPipelineId = '${pipelineId}'`
@@ -106,6 +116,7 @@ export async function getPipeline(connection: Connection, pipelineId: string): P
       branchName: s.SourceCodeRepositoryBranch?.Name ?? null,
       repositoryName: s.SourceCodeRepositoryBranch?.SourceCodeRepository?.Name ?? null,
       repositoryOwner: s.SourceCodeRepositoryBranch?.SourceCodeRepository?.RepositoryOwner ?? null,
+      environment: s.DevOpsEnvironment ? { id: s.DevOpsEnvironment.Id, name: s.DevOpsEnvironment.Name } : null,
     }))
   );
 
