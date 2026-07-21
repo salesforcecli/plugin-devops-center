@@ -36,4 +36,4 @@ ID of the pipeline stage to promote the combined work item to.
 
 # error.NoPipeline
 
-No pipeline found for this project. Ensure the project has an associated pipeline.
+No pipeline found for this project. Make sure the project has an associated pipeline.

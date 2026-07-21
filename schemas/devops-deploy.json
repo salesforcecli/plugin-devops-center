@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/DeployCommandResult",
+  "definitions": {
+    "DeployCommandResult": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "promotedWorkitemIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "undeployedWorkitemIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["requestId", "status", "message", "promotedWorkitemIds", "undeployedWorkitemIds"],
+      "additionalProperties": false
+    }
+  }
+}

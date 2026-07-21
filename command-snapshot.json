@@ -1,6 +1,14 @@
 [
   {
     "alias": [],
+    "command": "devops:deploy",
+    "flagAliases": [],
+    "flagChars": ["a", "l", "o", "t"],
+    "flags": ["api-version", "deploy-all", "flags-dir", "json", "target-org", "target-stage-id", "test-level", "tests"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:pipeline:activate",
     "flagAliases": [],
     "flagChars": ["o"],
