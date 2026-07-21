@@ -19,10 +19,10 @@ import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
 
-describe('devops work-item combine prepare', () => {
+describe('devops work-item combine', () => {
   let sandbox: sinon.SinonSandbox;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let PrepareCommand: any;
+  let CombineCommand: any;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = {
     id: '1',
@@ -35,18 +35,18 @@ describe('devops work-item combine prepare', () => {
   const resolveProjectIdFromWorkItemStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../../src/commands/devops/work-item/combine/prepare.js', {
-      '../../../../../src/utils/combineWorkItems.js': {
+    const mod = await esmock('../../../../src/commands/devops/work-item/combine.js', {
+      '../../../../src/utils/combineWorkItems.js': {
         combineWorkItemsPrepare: combineWorkItemsPrepareStub,
       },
-      '../../../../../src/utils/pipelineUtils.js': {
+      '../../../../src/utils/pipelineUtils.js': {
         getPipelineIdForProject: getPipelineIdForProjectStub,
       },
-      '../../../../../src/utils/prepareWorkItem.js': {
+      '../../../../src/utils/prepareWorkItem.js': {
         resolveProjectIdFromWorkItem: resolveProjectIdFromWorkItemStub,
       },
     });
-    PrepareCommand = mod.default;
+    CombineCommand = mod.default;
   });
 
   beforeEach(() => {
@@ -62,7 +62,7 @@ describe('devops work-item combine prepare', () => {
     sandbox.restore();
   });
 
-  describe('successful combine prepare', () => {
+  describe('successful combine', () => {
     test
       .stdout()
       .stderr()
@@ -76,7 +76,7 @@ describe('devops work-item combine prepare', () => {
           errorMessage: null,
         });
 
-        await PrepareCommand.run([
+        await CombineCommand.run([
           '-o',
           'my-devops-org',
           '--parent-work-item-id',
@@ -99,7 +99,7 @@ describe('devops work-item combine prepare', () => {
       });
   });
 
-  describe('failed combine prepare', () => {
+  describe('failed combine', () => {
     test
       .stdout()
       .stderr()
@@ -113,7 +113,7 @@ describe('devops work-item combine prepare', () => {
           errorMessage: 'One or more work items have conflicting components.',
         });
 
-        await PrepareCommand.run([
+        await CombineCommand.run([
           '-o',
           'my-devops-org',
           '--parent-work-item-id',
@@ -139,7 +139,7 @@ describe('devops work-item combine prepare', () => {
         getPipelineIdForProjectStub.resolves(undefined);
 
         try {
-          await PrepareCommand.run([
+          await CombineCommand.run([
             '-o',
             'my-devops-org',
             '--parent-work-item-id',
@@ -166,7 +166,7 @@ describe('devops work-item combine prepare', () => {
         resolveProjectIdFromWorkItemStub.rejects(new Error("sObject type 'WorkItem' is not supported"));
 
         try {
-          await PrepareCommand.run([
+          await CombineCommand.run([
             '-o',
             'my-devops-org',
             '--parent-work-item-id',
@@ -192,7 +192,7 @@ describe('devops work-item combine prepare', () => {
         combineWorkItemsPrepareStub.rejects(new Error("sObject type 'WorkItem' is not supported"));
 
         try {
-          await PrepareCommand.run([
+          await CombineCommand.run([
             '-o',
             'my-devops-org',
             '--parent-work-item-id',
@@ -220,7 +220,7 @@ describe('devops work-item combine prepare', () => {
         combineWorkItemsPrepareStub.rejects(new Error('Network error'));
 
         try {
-          await PrepareCommand.run([
+          await CombineCommand.run([
             '-o',
             'my-devops-org',
             '--parent-work-item-id',

@@ -85,13 +85,10 @@
             "subtopics": {
               "status": {
                 "description": "Commands for managing DevOps Center work item statuses."
-              },
-              "combine": {
-                "description": "Commands for combining work items for custom promotion."
               }
             }
           },
-          "pull-request": {
+          "review": {
             "description": "Commands for managing DevOps Center pull requests."
           },
           "conflict": {
@@ -112,6 +109,9 @@
                 "description": "Commands for managing pipeline stages."
               }
             }
+          },
+          "request": {
+            "description": "Commands for querying DevOps Center request status."
           }
         }
       }

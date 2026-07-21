@@ -62,7 +62,7 @@ sf plugins
 - [`sf devops pipeline stage add`](#sf-devops-pipeline-stage-add)
 - [`sf devops project create`](#sf-devops-project-create)
 - [`sf devops project list`](#sf-devops-project-list)
-- [`sf devops pull-request create`](#sf-devops-pull-request-create)
+- [`sf devops review create`](#sf-devops-review-create)
 - [`sf devops stage branch add`](#sf-devops-stage-branch-add)
 - [`sf devops stage environment add`](#sf-devops-stage-environment-add)
 - [`sf devops work-item create`](#sf-devops-work-item-create)
@@ -315,13 +315,13 @@ EXAMPLES
 
 _See code: [src/commands/devops/project/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/project/list.ts)_
 
-## `sf devops pull-request create`
+## `sf devops review create`
 
 Create a pull request for a work item branch.
 
 ```
 USAGE
-  $ sf devops pull-request create -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>] [-w
+  $ sf devops review create -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>] [-w
   <value>]
 
 FLAGS
@@ -344,14 +344,14 @@ DESCRIPTION
 EXAMPLES
   Create a pull request for a work item.
 
-    $ sf devops pull-request create --target-org my-devops-org --work-item-name WI-000001
+    $ sf devops review create --target-org my-devops-org --work-item-name WI-000001
 
   Create a pull request using the work item ID.
 
-    $ sf devops pull-request create --target-org my-devops-org --work-item-id 0Wx000000000001
+    $ sf devops review create --target-org my-devops-org --work-item-id 0Wx000000000001
 ```
 
-_See code: [src/commands/devops/pull-request/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/pull-request/create.ts)_
+_See code: [src/commands/devops/review/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/review/create.ts)_
 
 ## `sf devops stage branch add`
 

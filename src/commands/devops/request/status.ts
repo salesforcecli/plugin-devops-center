@@ -16,18 +16,15 @@
 
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import {
-  createPullRequest,
-  CreatePullRequestResult,
-  fetchWorkItemDetail,
-  WorkItemDetail,
-} from '../../../utils/createPullRequest.js';
+import { getPromotionStatus, PromotionStatusResult } from '../../../utils/getPromotionStatus.js';
+import { colorStatus } from '../../../common/outputService/outputUtils.js';
+import { AsyncOperationStatus } from '../../../common/types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.pull-request.create');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.request.status');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export default class DevopsPullRequestCreate extends SfCommand<CreatePullRequestResult> {
+export default class DevopsRequestStatus extends SfCommand<PromotionStatusResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -35,51 +32,43 @@ export default class DevopsPullRequestCreate extends SfCommand<CreatePullRequest
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    'work-item-name': Flags.string({
-      summary: messages.getMessage('flags.work-item-name.summary'),
-      char: 'n',
-      exactlyOne: ['work-item-name', 'work-item-id'],
-    }),
-    'work-item-id': Flags.salesforceId({
-      summary: messages.getMessage('flags.work-item-id.summary'),
-      char: 'w',
-      exactlyOne: ['work-item-name', 'work-item-id'],
+    'request-token': Flags.string({
+      summary: messages.getMessage('flags.request-token.summary'),
+      required: true,
+      char: 'i',
     }),
   };
 
-  public async run(): Promise<CreatePullRequestResult> {
-    const { flags } = await this.parse(DevopsPullRequestCreate);
+  public async run(): Promise<PromotionStatusResult> {
+    const { flags } = await this.parse(DevopsRequestStatus);
     const org: Org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
+    const requestToken = flags['request-token'];
 
-    const filter = flags['work-item-name'] ? { name: flags['work-item-name'] } : { id: flags['work-item-id']! };
-
-    let detail: WorkItemDetail;
+    let result: PromotionStatusResult;
     try {
-      detail = await fetchWorkItemDetail(connection, filter);
+      result = await getPromotionStatus(connection, requestToken);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
         this.error(commonErrorMessages.getMessage('error.DevopsCenterNotEnabled'));
       }
+      if (errMsg.startsWith('RequestNotFound:') || errMsg.includes('entity is deleted')) {
+        this.error(messages.getMessage('error.RequestNotFound', [requestToken]));
+      }
       throw error;
     }
 
-    if (!detail.branchName) {
-      this.error(messages.getMessage('error.NoBranch', [detail.workItemName]));
-    }
+    const statusStr = Object.values(AsyncOperationStatus).includes(result.status as AsyncOperationStatus)
+      ? colorStatus(result.status as AsyncOperationStatus)
+      : result.status;
 
-    const result = await createPullRequest(connection, detail.workItemId);
-
-    if (result.success) {
-      this.log(`Successfully created pull request for ${detail.workItemName}.`);
-      if (result.url) {
-        this.log(`  URL: ${result.url}`);
-      }
-      if (detail.branchName && detail.targetBranch) {
-        this.log(`  Source: ${detail.branchName} → ${detail.targetBranch}`);
-      }
-    }
+    this.log(`  Request Token:      ${result.requestToken}`);
+    this.log(`  ID:                 ${result.id}`);
+    this.log(`  Status:             ${statusStr}`);
+    if (result.message) this.log(`  Message:            ${result.message}`);
+    if (result.errorDetails) this.log(`  Error Details:      ${result.errorDetails}`);
+    if (result.requestCompletionDate) this.log(`  Completion Date:    ${result.requestCompletionDate}`);
 
     return result;
   }

@@ -16,15 +16,15 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { combineWorkItemsPrepare, CombineWorkItemsPrepareResult } from '../../../../utils/combineWorkItems.js';
-import { getPipelineIdForProject } from '../../../../utils/pipelineUtils.js';
-import { resolveProjectIdFromWorkItem } from '../../../../utils/prepareWorkItem.js';
+import { combineWorkItemsPrepare, CombineWorkItemsPrepareResult } from '../../../utils/combineWorkItems.js';
+import { getPipelineIdForProject } from '../../../utils/pipelineUtils.js';
+import { resolveProjectIdFromWorkItem } from '../../../utils/prepareWorkItem.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.work-item.combine.prepare');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.work-item.combine');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export default class DevopsWorkItemCombinePrepare extends SfCommand<CombineWorkItemsPrepareResult> {
+export default class DevopsWorkItemCombine extends SfCommand<CombineWorkItemsPrepareResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -56,7 +56,7 @@ export default class DevopsWorkItemCombinePrepare extends SfCommand<CombineWorkI
   };
 
   public async run(): Promise<CombineWorkItemsPrepareResult> {
-    const { flags } = await this.parse(DevopsWorkItemCombinePrepare);
+    const { flags } = await this.parse(DevopsWorkItemCombine);
     const org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
     const parentWorkItemId = flags['parent-work-item-id'];

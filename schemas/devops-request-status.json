@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/PromotionStatusResult",
+  "definitions": {
+    "PromotionStatusResult": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "message": {
+          "type": ["string", "null"]
+        },
+        "errorDetails": {
+          "type": ["string", "null"]
+        },
+        "requestToken": {
+          "type": "string"
+        },
+        "requestCompletionDate": {
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["id", "status", "message", "errorDetails", "requestToken", "requestCompletionDate"],
+      "additionalProperties": false
+    }
+  }
+}
