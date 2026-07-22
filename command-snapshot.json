@@ -9,14 +9,6 @@
   },
   {
     "alias": [],
-    "command": "devops:pipeline:update",
-    "flagAliases": [],
-    "flagChars": ["n", "o"],
-    "flags": ["active", "api-version", "flags-dir", "json", "name", "pipeline-id", "target-org"],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
     "command": "devops:pipeline:create",
     "flagAliases": [],
     "flagChars": ["d", "n", "o", "r"],
@@ -54,6 +46,14 @@
   },
   {
     "alias": [],
+    "command": "devops:pipeline:update",
+    "flagAliases": [],
+    "flagChars": ["n", "o"],
+    "flags": ["active", "api-version", "flags-dir", "json", "name", "pipeline-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:project:create",
     "flagAliases": [],
     "flagChars": ["d", "n", "o"],
@@ -66,6 +66,24 @@
     "flagAliases": [],
     "flagChars": ["o"],
     "flags": ["api-version", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:promote",
+    "flagAliases": [],
+    "flagChars": ["a", "i", "l", "o", "t"],
+    "flags": [
+      "api-version",
+      "deploy-all",
+      "flags-dir",
+      "json",
+      "target-org",
+      "target-stage-id",
+      "test-level",
+      "tests",
+      "work-item-id"
+    ],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -121,14 +139,6 @@
   },
   {
     "alias": [],
-    "command": "devops:stage:promote",
-    "flagAliases": [],
-    "flagChars": ["a", "l", "o", "t"],
-    "flags": ["api-version", "deploy-all", "flags-dir", "json", "target-org", "target-stage-id", "test-level", "tests"],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
     "command": "devops:work-item:combine",
     "flagAliases": [],
     "flagChars": ["o", "t"],
@@ -165,24 +175,6 @@
     "flagAliases": [],
     "flagChars": ["i", "o", "t"],
     "flags": ["api-version", "flags-dir", "json", "target-org", "target-stage-id", "work-item-id"],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
-    "command": "devops:work-item:promote",
-    "flagAliases": [],
-    "flagChars": ["a", "i", "l", "o", "t"],
-    "flags": [
-      "api-version",
-      "deploy-all",
-      "flags-dir",
-      "json",
-      "target-org",
-      "target-stage-id",
-      "test-level",
-      "tests",
-      "work-item-id"
-    ],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
