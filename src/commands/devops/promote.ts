@@ -53,41 +53,40 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
       required: false,
       multiple: true,
       startsWith: '1fk',
+      exclusive: ['stage-id'],
+    }),
+    'stage-id': Flags.salesforceId({
+      char: 's',
+      summary: messages.getMessage('flags.stage-id.summary'),
+      required: false,
+      startsWith: '1QV',
+      exclusive: ['work-item-id'],
     }),
     'deploy-all': deployAll,
     'test-level': testLevelFlag(),
     tests: specificTestsNoChar,
   };
 
-  private static async resolvePipelineIdFromStage(connection: Connection, targetStageId: string): Promise<string> {
-    const result = await connection.query<{ DevopsPipelineId: string }>(
-      `SELECT DevopsPipelineId FROM DevopsPipelineStage WHERE Id = '${targetStageId}' LIMIT 1`
-    );
-    const pipelineId = result.records[0]?.DevopsPipelineId;
-    if (!pipelineId) {
-      throw new Error(`Stage '${targetStageId}' not found or has no associated pipeline.`);
-    }
-    return pipelineId;
-  }
-
   private static async fetchStageWorkItems(
     connection: Connection,
     pipelineId: string,
+    sourceStageId: string,
     targetStageId: string
   ): Promise<string[]> {
     if (!/^[a-zA-Z0-9]{15,18}$/.test(pipelineId)) {
       throw new Error('Invalid pipeline ID format.');
     }
 
-    const sourceStageResult = await connection.query<{ Id: string }>(
-      `SELECT Id FROM DevopsPipelineStage WHERE DevopsPipelineId = '${pipelineId}' AND NextStageId = '${targetStageId}' LIMIT 1`
+    // Verify the source stage feeds into the target stage
+    const stageResult = await connection.query<{ NextStageId: string }>(
+      `SELECT NextStageId FROM DevopsPipelineStage WHERE Id = '${sourceStageId}' AND DevopsPipelineId = '${pipelineId}' LIMIT 1`
     );
-    const sourceStageId = sourceStageResult.records[0]?.Id;
-    if (!sourceStageId) {
-      throw new Error(`No source stage found that feeds into stage '${targetStageId}'.`);
+    const nextStageId = stageResult.records[0]?.NextStageId;
+    if (!nextStageId) {
+      throw new Error(`Stage '${sourceStageId}' not found in the pipeline or has no next stage.`);
     }
-    if (!/^[a-zA-Z0-9]{15,18}$/.test(sourceStageId)) {
-      throw new Error('Invalid source stage ID format.');
+    if (nextStageId !== targetStageId) {
+      throw new Error(`Stage '${sourceStageId}' does not feed into target stage '${targetStageId}'.`);
     }
 
     const workItemResult = await connection.query<{ Id: string }>(
@@ -101,6 +100,11 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
     const connection = flags['target-org'].getConnection(flags['api-version']);
     const targetStageId = flags['target-stage-id'];
     const workItemIds = flags['work-item-id'];
+    const sourceStageId = flags['stage-id'];
+
+    if (!workItemIds?.length && !sourceStageId) {
+      this.error(messages.getMessage('error.NoModeFlag'));
+    }
 
     let pipelineId: string;
     let resolvedWorkItemIds: string[];
@@ -116,8 +120,17 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
       pipelineId = pid;
       resolvedWorkItemIds = workItemIds;
     } else {
-      pipelineId = await DevopsPromote.resolvePipelineIdFromStage(connection, targetStageId);
-      resolvedWorkItemIds = await DevopsPromote.fetchStageWorkItems(connection, pipelineId, targetStageId);
+      // Stage path: resolve pipelineId from the source stage
+      const sid = sourceStageId!;
+      const stageQueryResult = await connection.query<{ DevopsPipelineId: string }>(
+        `SELECT DevopsPipelineId FROM DevopsPipelineStage WHERE Id = '${sid}' LIMIT 1`
+      );
+      const pid = stageQueryResult.records[0]?.DevopsPipelineId;
+      if (!pid) {
+        this.error(`Stage '${sid}' not found or has no associated pipeline.`);
+      }
+      pipelineId = pid;
+      resolvedWorkItemIds = await DevopsPromote.fetchStageWorkItems(connection, pipelineId, sid, targetStageId);
       if (resolvedWorkItemIds.length === 0) {
         this.error(messages.getMessage('error.NoWorkItems'));
       }

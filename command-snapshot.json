@@ -1,14 +1,6 @@
 [
   {
     "alias": [],
-    "command": "devops:deploy",
-    "flagAliases": [],
-    "flagChars": ["a", "l", "o", "t"],
-    "flags": ["api-version", "deploy-all", "flags-dir", "json", "target-org", "target-stage-id", "test-level", "tests"],
-    "plugin": "@salesforce/plugin-devops-center"
-  },
-  {
-    "alias": [],
     "command": "devops:pipeline:create",
     "flagAliases": [],
     "flagChars": ["d", "n", "o", "r"],
@@ -71,6 +63,25 @@
   {
     "alias": [],
     "command": "devops:promote",
+    "flagAliases": [],
+    "flagChars": ["a", "i", "l", "o", "s", "t"],
+    "flags": [
+      "api-version",
+      "deploy-all",
+      "flags-dir",
+      "json",
+      "stage-id",
+      "target-org",
+      "target-stage-id",
+      "test-level",
+      "tests",
+      "work-item-id"
+    ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:promotion:complete",
     "flagAliases": [],
     "flagChars": ["a", "i", "l", "o", "t"],
     "flags": [

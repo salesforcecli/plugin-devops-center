@@ -19,10 +19,10 @@ import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
 
-describe('devops deploy', () => {
+describe('devops promotion complete', () => {
   let sandbox: sinon.SinonSandbox;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let DeployCommand: any;
+  let CompleteCommand: any;
   const getUndeployedWorkItemsStub = sinon.stub();
   const validateDeployStub = sinon.stub();
   const executeDeployStub = sinon.stub();
@@ -33,14 +33,14 @@ describe('devops deploy', () => {
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
 
   before(async () => {
-    const mod = await esmock('../../../src/commands/devops/deploy.js', {
-      '../../../src/utils/deployStage.js': {
+    const mod = await esmock('../../../../src/commands/devops/promotion/complete.js', {
+      '../../../../src/utils/deployStage.js': {
         getUndeployedWorkItems: getUndeployedWorkItemsStub,
         validateDeploy: validateDeployStub,
         executeDeploy: executeDeployStub,
       },
     });
-    DeployCommand = mod.default;
+    CompleteCommand = mod.default;
   });
 
   beforeEach(() => {
@@ -72,7 +72,7 @@ describe('devops deploy', () => {
           promotedWorkitemIds: ['a1B000000000001', 'a1B000000000002'],
         });
 
-        const result = await DeployCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
+        const result = await CompleteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
 
         expect(ctx.stdout).to.contain('SUBMITTED');
         expect(ctx.stdout).to.contain('req-token-001');
@@ -91,7 +91,7 @@ describe('devops deploy', () => {
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         getUndeployedWorkItemsStub.resolves({ undeployedWorkitemIds: [] });
 
-        const result = await DeployCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
+        const result = await CompleteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
 
         expect(ctx.stdout).to.contain('No undeployed work items found for this stage.');
         expect(result.status).to.equal('NoOp');
@@ -115,7 +115,7 @@ describe('devops deploy', () => {
         });
 
         try {
-          await DeployCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
+          await CompleteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
           expect.fail('should have thrown');
         } catch (e) {
           // expected
@@ -136,7 +136,7 @@ describe('devops deploy', () => {
         mockConnection.query.resolves({ records: [] });
 
         try {
-          await DeployCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
+          await CompleteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
           expect.fail('should have thrown');
         } catch (e) {
           // expected
@@ -156,7 +156,7 @@ describe('devops deploy', () => {
         mockConnection.query.rejects(new Error("sObject type 'DevopsPipelineStage' is not supported"));
 
         try {
-          await DeployCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
+          await CompleteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
         } catch (e) {
           // expected
         }
@@ -177,7 +177,7 @@ describe('devops deploy', () => {
         executeDeployStub.rejects(new Error('Invalid stage configuration'));
 
         try {
-          await DeployCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
+          await CompleteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
           expect.fail('should have thrown');
         } catch (e) {
           // expected

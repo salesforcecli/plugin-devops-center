@@ -88,7 +88,8 @@ export async function validateDeploy(
 
 /**
  * POST /services/data/vXX.X/connect/devops/pipelines/{pipelineId}/promote
- * Uses workitemIds: [] so Core fills IDs from undeployed/external-merge state.
+ * When workItemIds are provided, targets those specific items (allWorkItemsInStage: false).
+ * When omitted, lets Core fill IDs from undeployed/external-merge state (allWorkItemsInStage: true).
  */
 export async function executeDeploy(
   connection: Connection,
@@ -96,16 +97,18 @@ export async function executeDeploy(
   targetStageId: string,
   fullDeploy = false,
   testLevel = 'Default',
-  runTests: string[] = []
+  runTests: string[] = [],
+  workItemIds?: string[]
 ): Promise<DeployStageResult> {
   const path = `/services/data/v${connection.getApiVersion()}/connect/devops/pipelines/${pipelineId}/promote`;
+  const explicitIds = workItemIds && workItemIds.length > 0;
   const response = await connection.request<DeployStageResponse>({
     method: 'POST',
     url: path,
     body: JSON.stringify({
-      workitemIds: [],
+      workitemIds: explicitIds ? workItemIds : [],
       targetStageId,
-      allWorkItemsInStage: true,
+      allWorkItemsInStage: !explicitIds,
       isCheckDeploy: false,
       deployOptions: { testLevel, isFullDeploy: fullDeploy, runTests },
     }),

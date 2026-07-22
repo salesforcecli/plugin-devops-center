@@ -12,13 +12,21 @@ If no undeployed work items are found for the stage, the command exits successfu
 
 ID of the out-of-sync pipeline stage to deploy to.
 
+# flags.work-item-id.summary
+
+ID of a specific work item to deploy. Omit to deploy all undeployed work items for the stage. Use this for the first stage of a pipeline where no source stage exists.
+
 # examples
 
-- Deploy undeployed work items to a pipeline stage.
+- Complete a promotion for an out-of-sync pipeline stage.
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --target-stage-id 1QV000000000001
 
-- Deploy with full deploy and a specific test level.
+- Complete a promotion for a specific work item (e.g. first stage of a pipeline).
+
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --target-stage-id 1QV000000000001 --work-item-id 1fk000000000001
+
+- Complete a promotion with full deploy and a specific test level.
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --target-stage-id 1QV000000000001 --deploy-all --test-level RunLocalTests
 

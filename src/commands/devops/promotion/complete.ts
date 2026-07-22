@@ -16,18 +16,23 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { getUndeployedWorkItems, validateDeploy, executeDeploy, DeployStageResult } from '../../utils/deployStage.js';
-import { deployAll, testLevel, specificTestsNoChar } from '../../common/flags/promote/promoteFlags.js';
+import {
+  getUndeployedWorkItems,
+  validateDeploy,
+  executeDeploy,
+  DeployStageResult,
+} from '../../../utils/deployStage.js';
+import { deployAll, testLevel, specificTestsNoChar } from '../../../common/flags/promote/promoteFlags.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.deploy');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.promotion.complete');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export type DeployCommandResult = DeployStageResult & {
+export type PromotionCompleteResult = DeployStageResult & {
   undeployedWorkitemIds: string[];
 };
 
-export default class DevopsDeploy extends SfCommand<DeployCommandResult> {
+export default class DevopsPromotionComplete extends SfCommand<PromotionCompleteResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -41,17 +46,24 @@ export default class DevopsDeploy extends SfCommand<DeployCommandResult> {
       required: true,
       startsWith: '1QV',
     }),
+    'work-item-id': Flags.salesforceId({
+      char: 'i',
+      summary: messages.getMessage('flags.work-item-id.summary'),
+      required: false,
+      multiple: true,
+      startsWith: '1fk',
+    }),
     'deploy-all': deployAll,
     'test-level': testLevel(),
     tests: specificTestsNoChar,
   };
 
-  public async run(): Promise<DeployCommandResult> {
-    const { flags } = await this.parse(DevopsDeploy);
+  public async run(): Promise<PromotionCompleteResult> {
+    const { flags } = await this.parse(DevopsPromotionComplete);
     const connection = flags['target-org'].getConnection(flags['api-version']);
     const targetStageId = flags['target-stage-id'];
+    const workItemIds = flags['work-item-id'];
 
-    // Resolve pipelineId from the target stage
     let pipelineId: string;
     try {
       const stageResult = await connection.query<{ DevopsPipelineId: string }>(
@@ -70,28 +82,33 @@ export default class DevopsDeploy extends SfCommand<DeployCommandResult> {
       throw error;
     }
 
-    // Step 1: discover pending deploys
-    const { undeployedWorkitemIds } = await getUndeployedWorkItems(connection, pipelineId, targetStageId);
-    if (undeployedWorkitemIds.length === 0) {
-      this.log(messages.getMessage('info.NothingToDeploy'));
-      return {
-        requestId: '',
-        status: 'NoOp',
-        message: 'No undeployed work items found for this stage.',
-        promotedWorkitemIds: [],
-        undeployedWorkitemIds: [],
-      };
+    // When --work-item-id is provided, skip discovery and target those IDs directly.
+    // When omitted, discover all undeployed work items for the stage.
+    let resolvedWorkItemIds: string[];
+    if (workItemIds?.length) {
+      resolvedWorkItemIds = workItemIds;
+    } else {
+      const { undeployedWorkitemIds } = await getUndeployedWorkItems(connection, pipelineId, targetStageId);
+      if (undeployedWorkitemIds.length === 0) {
+        this.log(messages.getMessage('info.NothingToDeploy'));
+        return {
+          requestId: '',
+          status: 'NoOp',
+          message: 'No undeployed work items found for this stage.',
+          promotedWorkitemIds: [],
+          undeployedWorkitemIds: [],
+        };
+      }
+      resolvedWorkItemIds = undeployedWorkitemIds;
     }
 
-    // Step 2: pre-flight validate
-    const validation = await validateDeploy(connection, pipelineId, undeployedWorkitemIds, targetStageId);
+    const validation = await validateDeploy(connection, pipelineId, resolvedWorkItemIds, targetStageId);
     if (!validation.success) {
       this.error(
         messages.getMessage('error.ValidationFailed', [validation.errorType ?? '', validation.errorDetails ?? ''])
       );
     }
 
-    // Step 3: execute just-deploy via promote
     let result: DeployStageResult;
     try {
       result = await executeDeploy(
@@ -100,7 +117,8 @@ export default class DevopsDeploy extends SfCommand<DeployCommandResult> {
         targetStageId,
         flags['deploy-all'],
         flags['test-level'],
-        flags.tests
+        flags.tests,
+        workItemIds?.length ? resolvedWorkItemIds : undefined
       );
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
@@ -115,6 +133,6 @@ export default class DevopsDeploy extends SfCommand<DeployCommandResult> {
     this.log(`Message:    ${result.message}`);
     this.log(`Request ID: ${result.requestId}`);
 
-    return { ...result, undeployedWorkitemIds };
+    return { ...result, undeployedWorkitemIds: resolvedWorkItemIds };
   }
 }

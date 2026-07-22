@@ -195,15 +195,18 @@ describe('devops promote', () => {
       .it('promotes all work items from the source stage', async (ctx) => {
         queryMock = sinon
           .stub()
+          // source stage → pipelineId
           .onFirstCall()
           .resolves({ records: [{ DevopsPipelineId: '1QVxx0000000001' }] })
+          // source stage → NextStageId validation
           .onSecondCall()
-          .resolves({ records: [{ Id: '1QVxx0000000002' }] })
+          .resolves({ records: [{ NextStageId: '1QVxx0000000003' }] })
+          // work items in source stage
           .onThirdCall()
           .resolves({ records: [{ Id: '1fkxx0000000001' }, { Id: '1fkxx0000000002' }] });
         promoteStageStub.resolves(mockPromoteResult);
 
-        await PromoteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000003']);
+        await PromoteCommand.run(['-o', 'testOrg', '-s', '1QVxx0000000002', '-t', '1QVxx0000000003']);
 
         expect(ctx.stdout).to.contain('SUBMITTED');
         expect(ctx.stdout).to.contain('mock-request-id');
@@ -222,7 +225,7 @@ describe('devops promote', () => {
           .onFirstCall()
           .resolves({ records: [{ DevopsPipelineId: '1QVxx0000000001' }] })
           .onSecondCall()
-          .resolves({ records: [{ Id: '1QVxx0000000002' }] })
+          .resolves({ records: [{ NextStageId: '1QVxx0000000003' }] })
           .onThirdCall()
           .resolves({ records: [{ Id: '1fkxx0000000001' }] });
         promoteStageStub.resolves(mockPromoteResult);
@@ -230,6 +233,8 @@ describe('devops promote', () => {
         await PromoteCommand.run([
           '-o',
           'testOrg',
+          '-s',
+          '1QVxx0000000002',
           '-t',
           '1QVxx0000000003',
           '--deploy-all',
@@ -250,14 +255,33 @@ describe('devops promote', () => {
     test
       .stdout()
       .stderr()
-      .it('errors when target stage is not found', async () => {
+      .it('errors when source stage is not found', async () => {
         queryMock = sinon.stub().resolves({ records: [] });
 
         try {
-          await PromoteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000099']);
+          await PromoteCommand.run(['-o', 'testOrg', '-s', '1QVxx0000000099', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
         } catch (e: unknown) {
           expect((e as Error).message).to.contain('1QVxx0000000099');
+        }
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('errors when source stage does not feed into target stage', async () => {
+        queryMock = sinon
+          .stub()
+          .onFirstCall()
+          .resolves({ records: [{ DevopsPipelineId: '1QVxx0000000001' }] })
+          .onSecondCall()
+          .resolves({ records: [{ NextStageId: '1QVxx0000000999' }] }); // different target
+
+        try {
+          await PromoteCommand.run(['-o', 'testOrg', '-s', '1QVxx0000000002', '-t', '1QVxx0000000003']);
+          expect.fail('should have thrown');
+        } catch (e: unknown) {
+          expect((e as Error).message).to.contain('does not feed into');
         }
       });
 
@@ -270,12 +294,12 @@ describe('devops promote', () => {
           .onFirstCall()
           .resolves({ records: [{ DevopsPipelineId: '1QVxx0000000001' }] })
           .onSecondCall()
-          .resolves({ records: [{ Id: '1QVxx0000000002' }] })
+          .resolves({ records: [{ NextStageId: '1QVxx0000000003' }] })
           .onThirdCall()
           .resolves({ records: [] });
 
         try {
-          await PromoteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000003']);
+          await PromoteCommand.run(['-o', 'testOrg', '-s', '1QVxx0000000002', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
         } catch (e: unknown) {
           expect((e as Error).message).to.contain('No work items found');
@@ -283,9 +307,50 @@ describe('devops promote', () => {
       });
   });
 
+  // ── Mutual exclusion / missing flags ─────────────────────────────────────
+
+  describe('flag validation', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('errors when neither --work-item-id nor --stage-id is provided', async (ctx) => {
+        try {
+          await PromoteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000003']);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('--work-item-id');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('errors when both --work-item-id and --stage-id are provided', async (ctx) => {
+        try {
+          await PromoteCommand.run([
+            '-o',
+            'testOrg',
+            '-i',
+            '1fkxx0000000001',
+            '-s',
+            '1QVxx0000000002',
+            '-t',
+            '1QVxx0000000003',
+          ]);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('exclusive');
+      });
+  });
+
   // ── Shared error cases ────────────────────────────────────────────────────
 
-  describe('API error', () => {
+  describe('API errors', () => {
     test
       .stdout()
       .stderr()
