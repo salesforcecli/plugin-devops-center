@@ -4,7 +4,14 @@
   "definitions": {
     "DeployCommandResult": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
+        "undeployedWorkitemIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "requestId": {
           "type": "string"
         },
@@ -16,15 +23,12 @@
         },
         "promotedWorkitemIds": {
           "type": "array",
-          "items": { "type": "string" }
-        },
-        "undeployedWorkitemIds": {
-          "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         }
       },
-      "required": ["requestId", "status", "message", "promotedWorkitemIds", "undeployedWorkitemIds"],
-      "additionalProperties": false
+      "required": ["message", "promotedWorkitemIds", "requestId", "status", "undeployedWorkitemIds"]
     }
   }
 }
