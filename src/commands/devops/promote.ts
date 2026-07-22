@@ -20,6 +20,7 @@ import { promoteStage, PromoteStageResult } from '../../utils/promoteStage.js';
 import { resolveProjectIdFromWorkItem } from '../../utils/prepareWorkItem.js';
 import { getPipelineIdForProject } from '../../utils/pipelineUtils.js';
 import { deployAll, testLevel as testLevelFlag, specificTestsNoChar } from '../../common/flags/promote/promoteFlags.js';
+import { validateSalesforceId } from '../../utils/soqlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.promote');
@@ -73,9 +74,10 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
     sourceStageId: string,
     targetStageId: string
   ): Promise<string[]> {
-    if (!/^[a-zA-Z0-9]{15,18}$/.test(pipelineId)) {
-      throw new Error('Invalid pipeline ID format.');
-    }
+    // Validate all IDs before using in SOQL
+    validateSalesforceId(pipelineId, 'pipeline');
+    validateSalesforceId(sourceStageId, 'source stage');
+    validateSalesforceId(targetStageId, 'target stage');
 
     // Verify the source stage feeds into the target stage
     const stageResult = await connection.query<{ NextStageId: string }>(
@@ -122,6 +124,7 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
     } else {
       // Stage path: resolve pipelineId from the source stage
       const sid = sourceStageId!;
+      validateSalesforceId(sid, 'source stage');
       const stageQueryResult = await connection.query<{ DevopsPipelineId: string }>(
         `SELECT DevopsPipelineId FROM DevopsPipelineStage WHERE Id = '${sid}' LIMIT 1`
       );

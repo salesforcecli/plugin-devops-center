@@ -16,6 +16,7 @@
 
 import { Connection } from '@salesforce/core';
 import { QueryResult } from '@jsforce/jsforce-node';
+import { escapeSOQL, validateSalesforceId } from '../../utils/soqlUtils.js';
 import { PipelineStage } from '../types.js';
 import { runSafeQuery } from './selectorUtils.js';
 
@@ -25,8 +26,8 @@ import { runSafeQuery } from './selectorUtils.js';
  */
 export async function selectPipelineStagesByProject(con: Connection, projectName: string): Promise<PipelineStage[]> {
   const queryStr = `SELECT Id, sf_devops__Pipeline__r.sf_devops__Project__c, sf_devops__Branch__r.sf_devops__Name__c, (SELECT Id FROM sf_devops__Pipeline_Stages__r)
-                    FROM sf_devops__Pipeline_Stage__c  
-                    WHERE sf_devops__Pipeline__r.sf_devops__Project__r.Name = '${projectName}'`;
+                    FROM sf_devops__Pipeline_Stage__c
+                    WHERE sf_devops__Pipeline__r.sf_devops__Project__r.Name = '${escapeSOQL(projectName)}'`;
 
   const resp: QueryResult<PipelineStage> = await runSafeQuery(con, queryStr);
   return resp.records;
@@ -40,8 +41,9 @@ export async function selectOnePipelineStageByEnvironmentId(
   con: Connection,
   envId: string
 ): Promise<PipelineStage | null> {
+  validateSalesforceId(envId, 'environment');
   const queryStr = `SELECT Id, sf_devops__Pipeline__r.sf_devops__Project__c, sf_devops__Branch__r.sf_devops__Name__c, (SELECT Id FROM sf_devops__Pipeline_Stages__r)
-                    FROM sf_devops__Pipeline_Stage__c  
+                    FROM sf_devops__Pipeline_Stage__c
                     WHERE sf_devops__Environment__c = '${envId}'`;
 
   const resp: QueryResult<PipelineStage> = await runSafeQuery(con, queryStr);

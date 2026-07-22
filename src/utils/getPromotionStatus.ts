@@ -15,6 +15,7 @@
  */
 
 import { Connection } from '@salesforce/core';
+import { escapeSOQL } from './soqlUtils.js';
 
 export type PromotionStatusResult = {
   id: string;
@@ -36,7 +37,9 @@ type DevopsRequestInfoRecord = {
 
 export async function getPromotionStatus(connection: Connection, requestToken: string): Promise<PromotionStatusResult> {
   const result = await connection.query<DevopsRequestInfoRecord>(
-    `SELECT Id, Status, Message, ErrorDetails, RequestToken, RequestCompletionDate FROM DevopsRequestInfo WHERE RequestToken = '${requestToken}' LIMIT 1`
+    `SELECT Id, Status, Message, ErrorDetails, RequestToken, RequestCompletionDate FROM DevopsRequestInfo WHERE RequestToken = '${escapeSOQL(
+      requestToken
+    )}' LIMIT 1`
   );
 
   const record = (result.records ?? [])[0];

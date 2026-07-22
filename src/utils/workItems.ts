@@ -24,6 +24,7 @@ import {
   resolveTargetStageId,
 } from './pipelineUtils.js';
 import { WorkItem, ProjectStagesContext, VcsType, WorkItemQueryRecord } from './types.js';
+import { validateSalesforceId } from './soqlUtils.js';
 
 function normalizeProvider(provider: unknown): string | undefined {
   if (!provider) return undefined;
@@ -187,6 +188,7 @@ function mapRawItemToWorkItem(
 }
 
 export async function fetchWorkItems(connection: Connection, projectId: string): Promise<WorkItem[]> {
+  validateSalesforceId(projectId, 'project');
   const query = `
     SELECT
       Id, Name, Subject, Description, Status, AssignedToId,

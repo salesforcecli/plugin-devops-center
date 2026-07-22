@@ -16,6 +16,7 @@
 
 import { Connection } from '@salesforce/core';
 import { QueryResult } from '@jsforce/jsforce-node';
+import { validateSalesforceId } from '../../utils/soqlUtils.js';
 import { AsyncOperationResult } from '../types.js';
 import { runSafeQuery } from './selectorUtils.js';
 
@@ -24,8 +25,9 @@ import { runSafeQuery } from './selectorUtils.js';
  * Returns an Async Operation Result record filtering by project name.
  */
 export async function selectAsyncOperationResultById(con: Connection, aorId: string): Promise<AsyncOperationResult> {
+  validateSalesforceId(aorId, 'async operation result');
   const queryStr = `SELECT sf_devops__Status__c, sf_devops__Message__c, sf_devops__Error_Details__c
-                    FROM sf_devops__Async_Operation_Result__c  
+                    FROM sf_devops__Async_Operation_Result__c
                     WHERE Id = '${aorId}'`;
 
   const resp: QueryResult<AsyncOperationResult> = await runSafeQuery(con, queryStr);

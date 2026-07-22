@@ -19,6 +19,7 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { activatePipeline, updatePipelineRecord, PipelineUpdateResult } from '../../../utils/activatePipeline.js';
 import { fetchPipelineStages } from '../../../utils/pipelineUtils.js';
 import { PipelineStageRecord } from '../../../utils/types.js';
+import { validateSalesforceId } from '../../../utils/soqlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.pipeline.update');
@@ -53,6 +54,7 @@ export default class DevopsPipelineUpdate extends SfCommand<PipelineUpdateResult
     connection: Connection,
     pipelineId: string
   ): Promise<{ IsActive: boolean; Name: string }> {
+    validateSalesforceId(pipelineId, 'pipeline');
     const result = await connection.query<{ IsActive: boolean; Name: string }>(
       `SELECT IsActive, Name FROM DevopsPipeline WHERE Id = '${pipelineId}' LIMIT 1`
     );

@@ -16,6 +16,7 @@
 
 import { QueryResult } from '@jsforce/jsforce-node';
 import { Connection } from '@salesforce/core';
+import { escapeSOQL } from '../../utils/soqlUtils.js';
 import { NamedCredential } from '../types.js';
 import { runSafeQuery } from './selectorUtils.js';
 
@@ -26,7 +27,7 @@ export async function selectNamedCredentialByName(con: Connection, name: string)
   const queryStr = `
     SELECT Endpoint
     FROM NamedCredential
-    WHERE DeveloperName = '${name}'
+    WHERE DeveloperName = '${escapeSOQL(name)}'
     AND NamespacePrefix = 'sf_devops'
     LIMIT 1`;
 

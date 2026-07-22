@@ -15,6 +15,7 @@
  */
 
 import { Connection } from '@salesforce/core';
+import { escapeSOQL, validateSalesforceId } from './soqlUtils.js';
 
 export type WorkItemContext = {
   workItemId: string;
@@ -58,7 +59,7 @@ export function toApiStatus(status: string): string {
 
 export async function resolveWorkItemByName(connection: Connection, workItemName: string): Promise<WorkItemContext> {
   const result = await connection.query<{ Id: string; DevopsProjectId: string }>(
-    `SELECT Id, DevopsProjectId FROM WorkItem WHERE Name = '${workItemName}' LIMIT 1`
+    `SELECT Id, DevopsProjectId FROM WorkItem WHERE Name = '${escapeSOQL(workItemName)}' LIMIT 1`
   );
   const record = (result.records ?? [])[0];
   if (!record) {
@@ -68,6 +69,7 @@ export async function resolveWorkItemByName(connection: Connection, workItemName
 }
 
 export async function resolveProjectIdForWorkItem(connection: Connection, workItemId: string): Promise<string> {
+  validateSalesforceId(workItemId, 'work item');
   const result = await connection.query<{ DevopsProjectId: string }>(
     `SELECT DevopsProjectId FROM WorkItem WHERE Id = '${workItemId}' LIMIT 1`
   );

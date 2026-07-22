@@ -20,6 +20,7 @@ import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { addStageEnvironment, AddStageEnvironmentResult, OrgType } from '../../../../utils/addStageEnvironment.js';
 import { fetchPipelineStages } from '../../../../utils/pipelineUtils.js';
 import { PipelineStageRecord } from '../../../../utils/types.js';
+import { validateSalesforceId } from '../../../../utils/soqlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.stage.environment.add');
@@ -94,6 +95,7 @@ export default class DevopsStageEnvironmentAdd extends SfCommand<AddStageEnviron
       this.error(messages.getMessage('error.StageNotFound', [stageId, pipelineId]));
     }
 
+    validateSalesforceId(pipelineId, 'pipeline');
     const pipelineQueryResult = await connection.query(
       `SELECT IsActive FROM DevopsPipeline WHERE Id = '${pipelineId}' LIMIT 1`
     );

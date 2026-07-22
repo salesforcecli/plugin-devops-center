@@ -23,6 +23,7 @@ import {
   DeployStageResult,
 } from '../../../utils/deployStage.js';
 import { deployAll, testLevel, specificTestsNoChar } from '../../../common/flags/promote/promoteFlags.js';
+import { validateSalesforceId } from '../../../utils/soqlUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.promotion.complete');
@@ -66,6 +67,7 @@ export default class DevopsPromotionComplete extends SfCommand<PromotionComplete
 
     let pipelineId: string;
     try {
+      validateSalesforceId(targetStageId, 'target stage');
       const stageResult = await connection.query<{ DevopsPipelineId: string }>(
         `SELECT DevopsPipelineId FROM DevopsPipelineStage WHERE Id = '${targetStageId}' LIMIT 1`
       );
