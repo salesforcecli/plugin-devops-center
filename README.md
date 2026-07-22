@@ -56,7 +56,7 @@ sf plugins
 
 <!-- commands -->
 
-- [`sf devops pipeline activate`](#sf-devops-pipeline-activate)
+- [`sf devops pipeline update`](#sf-devops-pipeline-update)
 - [`sf devops pipeline create`](#sf-devops-pipeline-create)
 - [`sf devops pipeline project add`](#sf-devops-pipeline-project-add)
 - [`sf devops pipeline stage add`](#sf-devops-pipeline-stage-add)
@@ -74,18 +74,19 @@ sf plugins
 - [`sf project deploy pipeline start`](#sf-project-deploy-pipeline-start)
 - [`sf project deploy pipeline validate`](#sf-project-deploy-pipeline-validate)
 
-## `sf devops pipeline activate`
+## `sf devops pipeline update`
 
-Activate a DevOps Center pipeline for deployments.
+Activate or deactivate a DevOps Center pipeline.
 
 ```
 USAGE
-  $ sf devops pipeline activate -o <value> --pipeline-id <value> [--json] [--flags-dir <value>] [--api-version <value>]
+  $ sf devops pipeline update -o <value> --pipeline-id <value> [--active | --no-active] [--json] [--flags-dir <value>] [--api-version <value>]
 
 FLAGS
   -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
                              configuration variable is already set.
       --api-version=<value>  Override the api version used for api requests made by this command
+      --[no-]active          Activate the pipeline. Use --no-active to deactivate.
       --pipeline-id=<value>  (required) ID of the pipeline.
 
 GLOBAL FLAGS
@@ -93,18 +94,24 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  Activate a DevOps Center pipeline for deployments.
+  Activate or deactivate a DevOps Center pipeline.
 
-  A pipeline must have at least one stage before you activate it. You can't modify the pipeline stages after you
+  Use --active to activate a pipeline and make it available for deployments. Use --no-active to deactivate it.
+
+  A pipeline must have at least one stage before you can activate it. You can't modify the pipeline stages after you
   activate and promote changes through it.
 
 EXAMPLES
-  Activate a pipeline using the pipeline ID.
+  Activate a pipeline.
 
-    $ sf devops pipeline activate --target-org my-devops-org --pipeline-id 0XB000000000001
+    $ sf devops pipeline update --target-org my-devops-org --pipeline-id 0XB000000000001 --active
+
+  Deactivate a pipeline.
+
+    $ sf devops pipeline update --target-org my-devops-org --pipeline-id 0XB000000000001 --no-active
 ```
 
-_See code: [src/commands/devops/pipeline/activate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/pipeline/activate.ts)_
+_See code: [src/commands/devops/pipeline/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/pipeline/update.ts)_
 
 ## `sf devops pipeline create`
 

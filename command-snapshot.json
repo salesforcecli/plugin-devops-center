@@ -9,10 +9,10 @@
   },
   {
     "alias": [],
-    "command": "devops:pipeline:activate",
+    "command": "devops:pipeline:update",
     "flagAliases": [],
-    "flagChars": ["o"],
-    "flags": ["api-version", "flags-dir", "json", "pipeline-id", "target-org"],
+    "flagChars": ["n", "o"],
+    "flags": ["active", "api-version", "flags-dir", "json", "name", "pipeline-id", "target-org"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
