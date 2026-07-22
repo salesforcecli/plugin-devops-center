@@ -25,9 +25,7 @@ export async function selectDeployComponentsByAsyncOpId(
   asyncOpId: string
 ): Promise<DeployComponent[]> {
   validateSalesforceId(asyncOpId, 'async operation');
-  const queryStr = `SELECT sf_devops__Source_Component__c, sf_devops__Operation__c, sf_devops__File_Path__c
-                    FROM sf_devops__Deploy_Component__c
-                    WHERE sf_devops__Deployment_Result__r.sf_devops__Status__c = '${asyncOpId}'`;
+  const queryStr = `SELECT sf_devops__Source_Component__c, sf_devops__Operation__c, sf_devops__File_Path__c FROM sf_devops__Deploy_Component__c WHERE sf_devops__Deployment_Result__r.sf_devops__Status__c = '${asyncOpId}'`;
 
   const resp: QueryResult<DeployComponent> = await runSafeQuery(con, queryStr);
   return resp.records;
@@ -38,9 +36,7 @@ export async function selectDeployComponentsForCheckDeployByAsynchOpId(
   asyncOpId: string
 ): Promise<DeployComponent[]> {
   validateSalesforceId(asyncOpId, 'async operation');
-  const queryStr = `SELECT sf_devops__Source_Component__c, sf_devops__Operation__c, sf_devops__File_Path__c
-                    FROM sf_devops__Deploy_Component__c
-                    WHERE sf_devops__Deployment_Result__r.sf_devops__Check_Deploy_Status__c = '${asyncOpId}'`;
+  const queryStr = `SELECT sf_devops__Source_Component__c, sf_devops__Operation__c, sf_devops__File_Path__c FROM sf_devops__Deploy_Component__c WHERE sf_devops__Deployment_Result__r.sf_devops__Check_Deploy_Status__c = '${asyncOpId}'`;
 
   const resp: QueryResult<DeployComponent> = await runSafeQuery(con, queryStr);
   return resp.records;

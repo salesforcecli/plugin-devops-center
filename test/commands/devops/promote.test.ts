@@ -344,7 +344,7 @@ describe('devops promote', () => {
           // expected
         }
 
-        expect(ctx.stderr).to.contain('exclusive');
+        expect(ctx.stderr).to.contain('cannot also be provided');
       });
   });
 
