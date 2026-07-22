@@ -56,13 +56,13 @@ sf plugins
 
 <!-- commands -->
 
-- [`sf devops pipeline activate`](#sf-devops-pipeline-activate)
+- [`sf devops pipeline update`](#sf-devops-pipeline-update)
 - [`sf devops pipeline create`](#sf-devops-pipeline-create)
 - [`sf devops pipeline project add`](#sf-devops-pipeline-project-add)
 - [`sf devops pipeline stage add`](#sf-devops-pipeline-stage-add)
 - [`sf devops project create`](#sf-devops-project-create)
 - [`sf devops project list`](#sf-devops-project-list)
-- [`sf devops pull-request create`](#sf-devops-pull-request-create)
+- [`sf devops review create`](#sf-devops-review-create)
 - [`sf devops stage branch add`](#sf-devops-stage-branch-add)
 - [`sf devops stage environment add`](#sf-devops-stage-environment-add)
 - [`sf devops work-item create`](#sf-devops-work-item-create)
@@ -74,18 +74,19 @@ sf plugins
 - [`sf project deploy pipeline start`](#sf-project-deploy-pipeline-start)
 - [`sf project deploy pipeline validate`](#sf-project-deploy-pipeline-validate)
 
-## `sf devops pipeline activate`
+## `sf devops pipeline update`
 
-Activate a DevOps Center pipeline for deployments.
+Activate or deactivate a DevOps Center pipeline.
 
 ```
 USAGE
-  $ sf devops pipeline activate -o <value> --pipeline-id <value> [--json] [--flags-dir <value>] [--api-version <value>]
+  $ sf devops pipeline update -o <value> --pipeline-id <value> [--active | --no-active] [--json] [--flags-dir <value>] [--api-version <value>]
 
 FLAGS
   -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
                              configuration variable is already set.
       --api-version=<value>  Override the api version used for api requests made by this command
+      --[no-]active          Activate the pipeline. Use --no-active to deactivate.
       --pipeline-id=<value>  (required) ID of the pipeline.
 
 GLOBAL FLAGS
@@ -93,18 +94,24 @@ GLOBAL FLAGS
   --json               Format output as json.
 
 DESCRIPTION
-  Activate a DevOps Center pipeline for deployments.
+  Activate or deactivate a DevOps Center pipeline.
 
-  A pipeline must have at least one stage before you activate it. You can't modify the pipeline stages after you
+  Use --active to activate a pipeline and make it available for deployments. Use --no-active to deactivate it.
+
+  A pipeline must have at least one stage before you can activate it. You can't modify the pipeline stages after you
   activate and promote changes through it.
 
 EXAMPLES
-  Activate a pipeline using the pipeline ID.
+  Activate a pipeline.
 
-    $ sf devops pipeline activate --target-org my-devops-org --pipeline-id 0XB000000000001
+    $ sf devops pipeline update --target-org my-devops-org --pipeline-id 0XB000000000001 --active
+
+  Deactivate a pipeline.
+
+    $ sf devops pipeline update --target-org my-devops-org --pipeline-id 0XB000000000001 --no-active
 ```
 
-_See code: [src/commands/devops/pipeline/activate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/pipeline/activate.ts)_
+_See code: [src/commands/devops/pipeline/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/pipeline/update.ts)_
 
 ## `sf devops pipeline create`
 
@@ -315,13 +322,13 @@ EXAMPLES
 
 _See code: [src/commands/devops/project/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/project/list.ts)_
 
-## `sf devops pull-request create`
+## `sf devops review create`
 
 Create a pull request for a work item branch.
 
 ```
 USAGE
-  $ sf devops pull-request create -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>] [-w
+  $ sf devops review create -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>] [-w
   <value>]
 
 FLAGS
@@ -344,14 +351,14 @@ DESCRIPTION
 EXAMPLES
   Create a pull request for a work item.
 
-    $ sf devops pull-request create --target-org my-devops-org --work-item-name WI-000001
+    $ sf devops review create --target-org my-devops-org --work-item-name WI-000001
 
   Create a pull request using the work item ID.
 
-    $ sf devops pull-request create --target-org my-devops-org --work-item-id 0Wx000000000001
+    $ sf devops review create --target-org my-devops-org --work-item-id 0Wx000000000001
 ```
 
-_See code: [src/commands/devops/pull-request/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/pull-request/create.ts)_
+_See code: [src/commands/devops/review/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/review/create.ts)_
 
 ## `sf devops stage branch add`
 

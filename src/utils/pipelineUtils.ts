@@ -16,14 +16,17 @@
 
 import { Connection } from '@salesforce/core';
 import { DevopsProjectPipelineQueryRecord, PipelineStageRecord } from './types.js';
+import { validateSalesforceId } from './soqlUtils.js';
 
 export async function getPipelineIdForProject(connection: Connection, projectId: string): Promise<string | undefined> {
+  validateSalesforceId(projectId, 'project');
   const query = `SELECT DevopsPipelineId FROM DevopsProjectPipeline WHERE DevopsProjectId = '${projectId}' LIMIT 1`;
   const result = await connection.query<DevopsProjectPipelineQueryRecord>(query);
   return (result.records ?? [])[0]?.DevopsPipelineId;
 }
 
 export async function fetchPipelineStages(connection: Connection, pipelineId: string): Promise<PipelineStageRecord[]> {
+  validateSalesforceId(pipelineId, 'pipeline');
   const stageQuery = `SELECT Id, Name, NextStageId, SourceCodeRepositoryBranch.Name FROM DevopsPipelineStage WHERE DevopsPipelineId = '${pipelineId}'`;
   const stageResult = await connection.query<PipelineStageRecord>(stageQuery);
   return stageResult.records ?? [];

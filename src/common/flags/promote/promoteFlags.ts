@@ -48,6 +48,12 @@ export const specificTests: OptionFlag<string[] | undefined> = Flags.string({
   summary: messages.getMessage('promote.tests.summary'),
 });
 
+export const specificTestsNoChar: OptionFlag<string[] | undefined> = Flags.string({
+  multiple: true,
+  description: messages.getMessage('promote.tests.description'),
+  summary: messages.getMessage('promote.tests.summary'),
+});
+
 export const deployAll: BooleanFlag<boolean> = Flags.boolean({
   char: 'a',
   description: messages.getMessage('promote.deploy-all.description'),

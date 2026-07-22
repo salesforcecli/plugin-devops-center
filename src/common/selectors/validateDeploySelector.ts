@@ -16,6 +16,7 @@
 
 import { QueryResult } from '@jsforce/jsforce-node';
 import { Connection } from '@salesforce/core';
+import { validateSalesforceId } from '../../utils/soqlUtils.js';
 import { ChangeBundleInstall } from '../types.js';
 import { runSafeQuery } from './selectorUtils.js';
 
@@ -26,8 +27,9 @@ export async function selectValidateDeployAORSummaryDataById(
   con: Connection,
   aorId: string
 ): Promise<ChangeBundleInstall[]> {
+  validateSalesforceId(aorId, 'async operation result');
   const queryStr = `SELECT sf_devops__Change_Bundle__r.Id, sf_devops__Change_Bundle__r.sf_devops__Version_Name__c, sf_devops__Environment__r.Id
-                    FROM sf_devops__Change_Bundle_Install__c 
+                    FROM sf_devops__Change_Bundle_Install__c
                     WHERE sf_devops__Deployment_Result__r.sf_devops__Check_Deploy_Status__c = '${aorId}'`;
 
   const resp: QueryResult<ChangeBundleInstall> = await runSafeQuery(con, queryStr);

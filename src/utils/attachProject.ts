@@ -15,6 +15,7 @@
  */
 
 import { Connection } from '@salesforce/core';
+import { validateSalesforceId } from './soqlUtils.js';
 
 export type AttachProjectParams = {
   connection: Connection;
@@ -34,6 +35,7 @@ export type AttachProjectResult = {
  * Returns the existing pipeline ID if found, undefined otherwise.
  */
 export async function findExistingAttachment(connection: Connection, projectId: string): Promise<string | undefined> {
+  validateSalesforceId(projectId, 'project');
   const result = await connection.query<{ DevopsPipelineId: string }>(
     `SELECT DevopsPipelineId FROM DevopsProjectPipeline WHERE DevopsProjectId = '${projectId}' LIMIT 1`
   );

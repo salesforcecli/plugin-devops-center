@@ -25,6 +25,7 @@ import {
   resolveTargetStageId,
 } from './pipelineUtils.js';
 import { WorkItemQueryRecord } from './types.js';
+import { escapeSOQL, validateSalesforceId } from './soqlUtils.js';
 
 export type WorkItemDetail = {
   workItemId: string;
@@ -68,7 +69,8 @@ export async function fetchWorkItemDetail(
   connection: Connection,
   filter: { name: string } | { id: string }
 ): Promise<WorkItemDetail> {
-  const whereClause = 'name' in filter ? `Name = '${filter.name}'` : `Id = '${filter.id}'`;
+  const whereClause =
+    'name' in filter ? `Name = '${escapeSOQL(filter.name)}'` : `Id = '${validateSalesforceId(filter.id, 'work item')}'`;
   const identifier = 'name' in filter ? filter.name : filter.id;
 
   const result = await connection.query<WorkItemQueryRecord>(

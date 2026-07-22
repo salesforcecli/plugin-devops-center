@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/PrepareWorkItemResult",
+  "definitions": {
+    "PrepareWorkItemResult": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "requestToken": {
+          "type": ["string", "null"]
+        },
+        "errorCode": {
+          "type": ["string", "null"]
+        },
+        "errorMessage": {
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["success", "requestToken", "errorCode", "errorMessage"],
+      "additionalProperties": false
+    }
+  }
+}

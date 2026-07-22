@@ -16,6 +16,7 @@
 
 import { QueryResult } from '@jsforce/jsforce-node';
 import { Connection } from '@salesforce/core';
+import { validateSalesforceId } from '../../utils/soqlUtils.js';
 import { PipelineStage } from '../types.js';
 import { runSafeQuery } from './selectorUtils.js';
 
@@ -29,9 +30,10 @@ export type EnvQueryResult = {
  * Returns the named credential and pipeline stage name associated with the envId sent
  */
 export async function selectPipelineStageByEnvironment(con: Connection, envId: string): Promise<EnvQueryResult> {
-  const queryStr = `SELECT Name, 
+  validateSalesforceId(envId, 'environment');
+  const queryStr = `SELECT Name,
                     (SELECT Name FROM sf_devops__Pipeline_Stages__r)
-                    FROM sf_devops__Environment__c 
+                    FROM sf_devops__Environment__c
                     WHERE Id = '${envId}'`;
 
   const resp: QueryResult<EnvQueryResult> = await runSafeQuery(con, queryStr);

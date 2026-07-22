@@ -19,7 +19,7 @@ import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
 
-describe('devops pull-request create', () => {
+describe('devops review create', () => {
   let sandbox: sinon.SinonSandbox;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let CreateCommand: any;
@@ -29,7 +29,7 @@ describe('devops pull-request create', () => {
   const createPrStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/pull-request/create.js', {
+    const mod = await esmock('../../../../src/commands/devops/review/create.js', {
       '../../../../src/utils/createPullRequest.js': {
         fetchWorkItemDetail: fetchDetailStub,
         createPullRequest: createPrStub,

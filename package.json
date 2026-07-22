@@ -11,8 +11,7 @@
     "@salesforce/core": "^8.2.7",
     "@salesforce/kit": "^3.2.3",
     "@salesforce/sf-plugins-core": "^12",
-    "@salesforce/ts-types": "^2.0.11",
-    "chalk": "^5"
+    "@salesforce/ts-types": "^2.0.11"
   },
   "devDependencies": {
     "@oclif/plugin-command-snapshot": "^5.2.3",
@@ -28,7 +27,7 @@
     "typescript": "^5.7.2"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "files": [
     "/bin/dev.js",
@@ -51,7 +50,6 @@
     "sf"
   ],
   "license": "Apache-2.0",
-  "main": "lib/index.js",
   "oclif": {
     "commands": "./lib/commands",
     "bin": "sf",
@@ -90,8 +88,19 @@
               }
             }
           },
-          "pull-request": {
+          "review": {
             "description": "Commands for managing DevOps Center pull requests."
+          },
+          "conflict": {
+            "description": "Commands for detecting and managing merge conflicts."
+          },
+          "stage": {
+            "description": "Commands for promoting bundles between pipeline stages.",
+            "subtopics": {
+              "deploy": {
+                "description": "Commands for deploying changes to a pipeline stage org."
+              }
+            }
           },
           "pipeline": {
             "description": "Commands for managing DevOps Center pipelines.",
@@ -100,6 +109,9 @@
                 "description": "Commands for managing pipeline stages."
               }
             }
+          },
+          "request": {
+            "description": "Commands for querying DevOps Center request status."
           }
         }
       }

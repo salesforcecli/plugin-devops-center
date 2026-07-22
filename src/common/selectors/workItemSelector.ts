@@ -16,6 +16,7 @@
 
 import { QueryResult } from '@jsforce/jsforce-node';
 import { Connection } from '@salesforce/core';
+import { validateSalesforceIds } from '../../utils/soqlUtils.js';
 import { WorkItem } from '../types.js';
 import { runSafeQuery } from './selectorUtils.js';
 
@@ -32,10 +33,12 @@ export async function selectWorkItemsByChangeBundles(
   con: Connection,
   changeBundles: string[]
 ): Promise<WorkItemsQueryResult[]> {
+  // Validate all IDs before constructing the IN clause
+  const validatedIds = validateSalesforceIds(changeBundles, 'change bundles');
   const queryStr = `SELECT Id,
                     (SELECT Name FROM sf_devops__Work_Items__r)
                     FROM sf_devops__Change_Bundle__c
-                    WHERE Id IN (${changeBundles.map((id) => "'" + id + "'").join(', ')})`;
+                    WHERE Id IN (${validatedIds.map((id) => "'" + id + "'").join(', ')})`;
 
   const resp: QueryResult<WorkItemsQueryResult> = await runSafeQuery(con, queryStr);
   return resp.records;

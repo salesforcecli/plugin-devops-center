@@ -1,0 +1,104 @@
+/*
+ * Copyright 2026, Salesforce, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { expect } from '@oclif/test';
+import sinon from 'sinon';
+import { Connection } from '@salesforce/core';
+import { combineWorkItemsPrepare } from '../../src/utils/combineWorkItems.js';
+
+describe('combineWorkItems utilities', () => {
+  let connectionStub: sinon.SinonStubbedInstance<Connection>;
+
+  beforeEach(() => {
+    connectionStub = sinon.createStubInstance(Connection);
+    (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  it('calls POST endpoint with correct body', async () => {
+    (connectionStub.request as sinon.SinonStub).resolves({
+      success: true,
+      requestToken: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    });
+
+    const result = await combineWorkItemsPrepare({
+      connection: connectionStub as unknown as Connection,
+      pipelineId: '0Xo000000000001',
+      parentWorkItemId: '0Wx000000000001',
+      childWorkItemIds: ['0Wx000000000002', '0Wx000000000003'],
+      sourceStageId: '05S000000000001',
+      targetStageId: '05S000000000002',
+    });
+
+    expect(result.success).to.be.true;
+    expect(result.requestToken).to.equal('a1b2c3d4-e5f6-7890-abcd-ef1234567890');
+    expect(result.errorCode).to.be.null;
+    expect(result.errorMessage).to.be.null;
+
+    const callArgs = (connectionStub.request as sinon.SinonStub).firstCall.args[0];
+    expect(callArgs.url).to.contain('/connect/devops/pipelines/0Xo000000000001/promote/combine/prepare');
+    expect(callArgs.method).to.equal('POST');
+
+    const body = JSON.parse(callArgs.body as string);
+    expect(body.parentWorkitemId).to.equal('0Wx000000000001');
+    expect(body.childWorkitemsId).to.deep.equal(['0Wx000000000002', '0Wx000000000003']);
+    expect(body.sourceStageId).to.equal('05S000000000001');
+    expect(body.targetStageId).to.equal('05S000000000002');
+  });
+
+  it('returns failure result with error code and message', async () => {
+    (connectionStub.request as sinon.SinonStub).resolves({
+      success: false,
+      errorCode: 'ALM_ERR_002',
+      errorMessage: 'One or more work items have conflicting components.',
+    });
+
+    const result = await combineWorkItemsPrepare({
+      connection: connectionStub as unknown as Connection,
+      pipelineId: '0Xo000000000001',
+      parentWorkItemId: '0Wx000000000001',
+      childWorkItemIds: ['0Wx000000000002'],
+      sourceStageId: '05S000000000001',
+      targetStageId: '05S000000000002',
+    });
+
+    expect(result.success).to.be.false;
+    expect(result.requestToken).to.be.null;
+    expect(result.errorCode).to.equal('ALM_ERR_002');
+    expect(result.errorMessage).to.contain('conflicting components');
+  });
+
+  it('propagates connection errors', async () => {
+    (connectionStub.request as sinon.SinonStub).rejects(new Error('Network timeout'));
+
+    try {
+      await combineWorkItemsPrepare({
+        connection: connectionStub as unknown as Connection,
+        pipelineId: '0Xo000000000001',
+        parentWorkItemId: '0Wx000000000001',
+        childWorkItemIds: ['0Wx000000000002'],
+        sourceStageId: '05S000000000001',
+        targetStageId: '05S000000000002',
+      });
+      expect.fail('should have thrown');
+    } catch (e: unknown) {
+      expect((e as Error).message).to.contain('Network timeout');
+    }
+  });
+});

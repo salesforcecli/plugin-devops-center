@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 import { StandardColors } from '@salesforce/sf-plugins-core';
-import chalk from 'chalk';
 import { AsyncOperationStatus } from '../types.js';
 
 export function tableHeader(message: string): string {
-  return chalk.blue(chalk.bold(message));
+  return StandardColors.info(message);
 }
 export function colorStatus(status: AsyncOperationStatus): string {
   if (status === AsyncOperationStatus.Completed) return StandardColors.success(status);

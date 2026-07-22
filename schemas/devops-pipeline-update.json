@@ -1,14 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/ActivatePipelineResult",
+  "$ref": "#/definitions/PipelineUpdateResult",
   "definitions": {
-    "ActivatePipelineResult": {
+    "PipelineUpdateResult": {
       "type": "object",
       "properties": {
         "success": {
           "type": "boolean"
         },
         "pipelineId": {
+          "type": "string"
+        },
+        "name": {
           "type": "string"
         },
         "status": {

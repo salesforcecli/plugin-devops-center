@@ -16,6 +16,7 @@
 
 import { Connection } from '@salesforce/core';
 import { QueryResult } from '@jsforce/jsforce-node';
+import { validateSalesforceId } from '../../utils/soqlUtils.js';
 import { AsyncOperationResult, ChangeBundleInstall, DeploymentResult } from '../types.js';
 import { runSafeQuery } from './selectorUtils.js';
 
@@ -36,11 +37,12 @@ export async function selectOneDeploymentResultByAsyncJobId(
   con: Connection,
   asyncJobId: string
 ): Promise<DeploymentResult | null> {
+  validateSalesforceId(asyncJobId, 'async job');
   const queryStr = `SELECT sf_devops__Full_Deploy__c, sf_devops__Check_Deploy__c, sf_devops__Test_Level__c, sf_devops__Run_Tests__c, sf_devops__Completion_Date__c,
                       sf_devops__Status__r.Id, sf_devops__Status__r.CreatedDate, sf_devops__Status__r.CreatedById,
-                      sf_devops__Status__r.CreatedBy.Name, sf_devops__Status__r.sf_devops__Message__c, 
-                      sf_devops__Status__r.sf_devops__Status__c, sf_devops__Status__r.sf_devops__Error_Details__c                      
-                    FROM sf_devops__Deployment_Result__c  
+                      sf_devops__Status__r.CreatedBy.Name, sf_devops__Status__r.sf_devops__Message__c,
+                      sf_devops__Status__r.sf_devops__Status__c, sf_devops__Status__r.sf_devops__Error_Details__c
+                    FROM sf_devops__Deployment_Result__c
                     WHERE sf_devops__Status__r.Id = '${asyncJobId}'`;
 
   const resp: QueryResult<DeploymentResult> = await runSafeQuery(con, queryStr, true);
@@ -52,9 +54,10 @@ export async function selectOneDeploymentResultByAsyncJobId(
  * Returns if a deployment result is from a Check-Deploy by async job id.
  */
 export async function isCheckDeploy(con: Connection, asyncJobId: string): Promise<boolean> {
+  validateSalesforceId(asyncJobId, 'async job');
   const queryStr = `SELECT sf_devops__Check_Deploy__c,
-                      sf_devops__Status__r.Id, sf_devops__Check_Deploy_Status__r.Id     
-                    FROM sf_devops__Deployment_Result__c  
+                      sf_devops__Status__r.Id, sf_devops__Check_Deploy_Status__r.Id
+                    FROM sf_devops__Deployment_Result__c
                     WHERE sf_devops__Status__r.Id = '${asyncJobId}'
                     OR sf_devops__Check_Deploy_Status__r.Id = '${asyncJobId}'`;
 
@@ -70,9 +73,10 @@ export async function selectOneDeploymentResultWithChangeBundleInstallsByAsyncJo
   con: Connection,
   asyncJobId: string
 ): Promise<CheckDeploymentResultWithChangeBundleInstalls | null> {
+  validateSalesforceId(asyncJobId, 'async job');
   const queryStr = `SELECT sf_devops__Check_Deploy__c, sf_devops__Deployment_Id__c, sf_devops__Check_Deploy_Status__r.sf_devops__Status__c,
                       (SELECT sf_devops__Environment__c FROM sf_devops__Change_Bundle_Installs__r)
-                    FROM sf_devops__Deployment_Result__c  
+                    FROM sf_devops__Deployment_Result__c
                     WHERE sf_devops__Check_Deploy_Status__c = '${asyncJobId}'
                       AND sf_devops__Check_Deploy__c = TRUE
                       AND Id IN (SELECT sf_devops__Deployment_Result__c FROM sf_devops__Change_Bundle_Install__c)`;

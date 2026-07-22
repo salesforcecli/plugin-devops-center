@@ -16,40 +16,48 @@
 
 import { Connection } from '@salesforce/core';
 
-export type ActivatePipelineParams = {
+export type PipelineUpdateParams = {
   connection: Connection;
   pipelineId: string;
 };
 
-export type ActivatePipelineResult = {
+export type PipelineUpdateResult = {
   success: boolean;
   pipelineId: string;
+  name?: string;
   status?: string;
   stageCount?: number;
   error?: string;
 };
 
+// Keep legacy alias so existing imports don't break during transition
+export type ActivatePipelineParams = PipelineUpdateParams;
+export type ActivatePipelineResult = PipelineUpdateResult;
+
 type ActivateResponse = { status?: string; id: string };
 
 /**
- * Activates a DevOps Center pipeline via the Connect API.
  * POST /services/data/v{version}/connect/devops/pipelines/{pipelineId}/activate
  */
-export async function activatePipeline(params: ActivatePipelineParams): Promise<ActivatePipelineResult> {
+export async function activatePipeline(params: PipelineUpdateParams): Promise<PipelineUpdateResult> {
   const { connection, pipelineId } = params;
-
   const path = `/services/data/v${connection.getApiVersion()}/connect/devops/pipelines/${pipelineId}/activate`;
-
   const data = await connection.request<ActivateResponse>({
     method: 'POST',
     url: path,
     body: '{}',
     headers: { 'Content-Type': 'application/json' },
   });
+  return { success: true, pipelineId, status: data.status ?? 'Active' };
+}
 
-  return {
-    success: true,
-    pipelineId,
-    status: data.status ?? 'Active',
-  };
+/**
+ * Record API update — covers deactivate and/or rename since no Connect API exists for those.
+ */
+export async function updatePipelineRecord(
+  connection: Connection,
+  pipelineId: string,
+  fields: { IsActive?: boolean; Name?: string }
+): Promise<void> {
+  await connection.sobject('DevopsPipeline').update({ Id: pipelineId, ...fields });
 }

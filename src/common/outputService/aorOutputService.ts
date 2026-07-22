@@ -17,7 +17,7 @@
 /* eslint-disable no-console, class-methods-use-this */
 
 import { Messages } from '@salesforce/core';
-import chalk from 'chalk';
+import { StandardColors } from '@salesforce/sf-plugins-core';
 import { AsyncOperationResult, AsyncOperationStatus } from '../types.js';
 import { AbstractOutputService, OutputFlags, OutputService } from './outputService.js';
 
@@ -74,16 +74,16 @@ export abstract class AbstractAorOutputService<T extends AorOutputFlags>
 
   public printAorStatus(aor: AsyncOperationResult): void {
     if (aor.sf_devops__Status__c === AsyncOperationStatus.Completed) {
-      console.log(chalk.green(aor.sf_devops__Message__c));
+      console.log(StandardColors.success(aor.sf_devops__Message__c));
     } else if (aor.sf_devops__Status__c === AsyncOperationStatus.Error) {
       if (aor.sf_devops__Error_Details__c) {
         console.log(
-          chalk.red(
+          StandardColors.error(
             output.getMessage('output.aor-error-status', [aor.sf_devops__Message__c, aor.sf_devops__Error_Details__c])
           )
         );
       } else {
-        console.log(chalk.red(aor.sf_devops__Message__c));
+        console.log(StandardColors.error(aor.sf_devops__Message__c));
       }
     } else if (aor.sf_devops__Message__c) {
       console.log(aor.sf_devops__Message__c);
