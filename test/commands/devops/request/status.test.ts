@@ -23,14 +23,14 @@ describe('devops request status', () => {
   let sandbox: sinon.SinonSandbox;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let StatusCommand: any;
-  const getPromotionStatusStub = sinon.stub();
+  const getRequestStatusStub = sinon.stub();
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
 
   before(async () => {
     const mod = await esmock('../../../../src/commands/devops/request/status.js', {
-      '../../../../src/utils/getPromotionStatus.js': {
-        getPromotionStatus: getPromotionStatusStub,
+      '../../../../src/utils/getRequestStatus.js': {
+        getRequestStatus: getRequestStatusStub,
       },
     });
     StatusCommand = mod.default;
@@ -38,7 +38,7 @@ describe('devops request status', () => {
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
-    getPromotionStatusStub.reset();
+    getRequestStatusStub.reset();
   });
 
   afterEach(() => {
@@ -52,7 +52,7 @@ describe('devops request status', () => {
       .it('displays all fields', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        getPromotionStatusStub.resolves({
+        getRequestStatusStub.resolves({
           id: '0Bf000000000001',
           status: 'Completed',
           message: 'Promotion completed successfully',
@@ -77,7 +77,7 @@ describe('devops request status', () => {
       .it('displays error details', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        getPromotionStatusStub.resolves({
+        getRequestStatusStub.resolves({
           id: '0Bf000000000002',
           status: 'Error',
           message: 'Deployment failed',
@@ -100,7 +100,7 @@ describe('devops request status', () => {
       .it('shows request not found error', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        getPromotionStatusStub.rejects(new Error('RequestNotFound:a0B000000000099'));
+        getRequestStatusStub.rejects(new Error('RequestNotFound:a0B000000000099'));
 
         try {
           await StatusCommand.run(['--target-org', 'testOrg', '--request-token', 'a0B000000000099']);
@@ -119,7 +119,7 @@ describe('devops request status', () => {
       .it('shows DevOps Center not enabled error', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        getPromotionStatusStub.rejects(new Error("sObject type 'DevopsRequestInfo' is not supported"));
+        getRequestStatusStub.rejects(new Error("sObject type 'DevopsRequestInfo' is not supported"));
 
         try {
           await StatusCommand.run(['--target-org', 'testOrg', '--request-token', 'a0B000000000001']);
@@ -138,7 +138,7 @@ describe('devops request status', () => {
       .it('rethrows non-DevOps errors', async () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        getPromotionStatusStub.rejects(new Error('Network error'));
+        getRequestStatusStub.rejects(new Error('Network error'));
 
         try {
           await StatusCommand.run(['--target-org', 'testOrg', '--request-token', 'a0B000000000001']);

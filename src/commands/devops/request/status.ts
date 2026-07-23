@@ -16,7 +16,7 @@
 
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { getPromotionStatus, PromotionStatusResult } from '../../../utils/getPromotionStatus.js';
+import { getRequestStatus, RequestStatusResult } from '../../../utils/getRequestStatus.js';
 import { colorStatus } from '../../../common/outputService/outputUtils.js';
 import { AsyncOperationStatus } from '../../../common/types.js';
 
@@ -24,7 +24,7 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.request.status');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export default class DevopsRequestStatus extends SfCommand<PromotionStatusResult> {
+export default class DevopsRequestStatus extends SfCommand<RequestStatusResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -39,15 +39,15 @@ export default class DevopsRequestStatus extends SfCommand<PromotionStatusResult
     }),
   };
 
-  public async run(): Promise<PromotionStatusResult> {
+  public async run(): Promise<RequestStatusResult> {
     const { flags } = await this.parse(DevopsRequestStatus);
     const org: Org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
     const requestToken = flags['request-token'];
 
-    let result: PromotionStatusResult;
+    let result: RequestStatusResult;
     try {
-      result = await getPromotionStatus(connection, requestToken);
+      result = await getRequestStatus(connection, requestToken);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
