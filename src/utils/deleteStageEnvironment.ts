@@ -15,6 +15,7 @@
  */
 
 import { Connection } from '@salesforce/core';
+import { validateSalesforceId } from './soqlUtils.js';
 
 export type DeleteStageEnvironmentResult = {
   success: boolean;
@@ -27,6 +28,7 @@ export async function deleteStageEnvironment(
   connection: Connection,
   environmentId: string
 ): Promise<DeleteStageEnvironmentResult> {
+  validateSalesforceId(environmentId, 'environment');
   const stageResult = await connection.query<{ Id: string }>(
     `SELECT Id FROM DevopsPipelineStage WHERE DevOpsEnvironmentId = '${environmentId}'`
   );

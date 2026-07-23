@@ -49,6 +49,7 @@ export default class DevopsStageEnvironmentDelete extends SfCommand<DeleteStageE
     const pipelineId = flags['pipeline-id'];
     const environmentId = flags['environment-id'];
 
+    // pipeline-id and environment-id are already validated by Flags.salesforceId()
     const pipelineQueryResult = await connection.query(
       `SELECT IsActive FROM DevopsPipeline WHERE Id = '${pipelineId}' LIMIT 1`
     );

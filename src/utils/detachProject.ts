@@ -15,6 +15,7 @@
  */
 
 import { Connection } from '@salesforce/core';
+import { validateSalesforceId } from './soqlUtils.js';
 
 export type DetachProjectResult = {
   success: boolean;
@@ -28,6 +29,8 @@ export async function detachProject(
   projectId: string,
   pipelineId: string
 ): Promise<DetachProjectResult> {
+  validateSalesforceId(projectId, 'project');
+  validateSalesforceId(pipelineId, 'pipeline');
   const queryResult = await connection.query<{ Id: string }>(
     `SELECT Id FROM DevopsProjectPipeline WHERE DevopsProjectId = '${projectId}' AND DevopsPipelineId = '${pipelineId}' LIMIT 1`
   );

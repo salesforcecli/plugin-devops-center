@@ -15,6 +15,7 @@
  */
 
 import { Connection } from '@salesforce/core';
+import { validateSalesforceId } from './soqlUtils.js';
 
 type DevopsPipelineRecord = {
   Id: string;
@@ -91,6 +92,7 @@ function orderStages(stages: PipelineStageDetail[]): PipelineStageDetail[] {
 }
 
 export async function getPipeline(connection: Connection, pipelineId: string): Promise<PipelineGetResult> {
+  validateSalesforceId(pipelineId, 'pipeline');
   const pipelineResult = await connection.query<DevopsPipelineRecord>(
     `SELECT Id, Name, Description, IsActive FROM DevopsPipeline WHERE Id = '${pipelineId}' LIMIT 1`
   );
