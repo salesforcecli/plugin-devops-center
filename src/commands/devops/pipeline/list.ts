@@ -16,15 +16,13 @@
 
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { getRequestStatus, RequestStatusResult } from '../../../utils/getRequestStatus.js';
-import { colorStatus } from '../../../common/outputService/outputUtils.js';
-import { AsyncOperationStatus } from '../../../common/types.js';
+import { listPipelines, PipelineListResult } from '../../../utils/listPipelines.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.request.status');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.pipeline.list');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export default class DevopsRequestStatus extends SfCommand<RequestStatusResult> {
+export default class DevopsPipelineList extends SfCommand<PipelineListResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -32,43 +30,33 @@ export default class DevopsRequestStatus extends SfCommand<RequestStatusResult> 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    'request-token': Flags.string({
-      summary: messages.getMessage('flags.request-token.summary'),
-      required: true,
-      char: 'i',
-    }),
   };
 
-  public async run(): Promise<RequestStatusResult> {
-    const { flags } = await this.parse(DevopsRequestStatus);
+  public async run(): Promise<PipelineListResult> {
+    const { flags } = await this.parse(DevopsPipelineList);
     const org: Org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
-    const requestToken = flags['request-token'];
 
-    let result: RequestStatusResult;
+    let result: PipelineListResult;
     try {
-      result = await getRequestStatus(connection, requestToken);
+      result = await listPipelines(connection);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
         this.error(commonErrorMessages.getMessage('error.DevopsCenterNotEnabled'));
       }
-      if (errMsg.startsWith('RequestNotFound:') || errMsg.includes('entity is deleted')) {
-        this.error(messages.getMessage('error.RequestNotFound', [requestToken]));
-      }
       throw error;
     }
 
-    const statusStr = Object.values(AsyncOperationStatus).includes(result.status as AsyncOperationStatus)
-      ? colorStatus(result.status as AsyncOperationStatus)
-      : result.status;
-
-    this.log(`  Request Token:      ${result.requestToken}`);
-    this.log(`  ID:                 ${result.id}`);
-    this.log(`  Status:             ${statusStr}`);
-    if (result.message) this.log(`  Message:            ${result.message}`);
-    if (result.errorDetails) this.log(`  Error Details:      ${result.errorDetails}`);
-    if (result.requestCompletionDate) this.log(`  Completion Date:    ${result.requestCompletionDate}`);
+    if (result.pipelines.length === 0) {
+      this.log('No DevOps Center pipelines found in this org.');
+    } else {
+      this.styledHeader('DevOps Center Pipelines');
+      this.table({
+        data: result.pipelines,
+        columns: ['Id', 'Name', 'Description', 'IsActive'],
+      });
+    }
 
     return result;
   }

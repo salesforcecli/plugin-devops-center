@@ -19,96 +19,111 @@ import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
 
-describe('devops request status', () => {
+describe('devops pipeline stage delete', () => {
   let sandbox: sinon.SinonSandbox;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let StatusCommand: any;
-  const getRequestStatusStub = sinon.stub();
+  let DeleteCommand: any;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
+  const deletePipelineStageStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/request/status.js', {
-      '../../../../src/utils/getRequestStatus.js': {
-        getRequestStatus: getRequestStatusStub,
+    const mod = await esmock('../../../../../src/commands/devops/pipeline/stage/delete.js', {
+      '../../../../../src/utils/deletePipelineStage.js': {
+        deletePipelineStage: deletePipelineStageStub,
       },
     });
-    StatusCommand = mod.default;
+    DeleteCommand = mod.default;
   });
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
-    getRequestStatusStub.reset();
+    deletePipelineStageStub.reset();
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  describe('completed request', () => {
+  describe('successful deletion', () => {
     test
       .stdout()
       .stderr()
-      .it('displays all fields', async (ctx) => {
+      .it('logs success', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        getRequestStatusStub.resolves({
-          id: '0Bf000000000001',
-          status: 'Completed',
-          message: 'Promotion completed successfully',
-          errorDetails: null,
-          requestToken: 'a0B000000000001',
-          requestCompletionDate: '2026-07-17T10:00:00.000Z',
+        deletePipelineStageStub.resolves({
+          success: true,
+          stageId: '0Xc000000000002',
+          pipelineId: '0XB000000000001',
         });
 
-        await StatusCommand.run(['--target-org', 'testOrg', '--request-token', 'a0B000000000001']);
+        await DeleteCommand.run([
+          '--target-org',
+          'testOrg',
+          '--pipeline-id',
+          '0XB000000000001',
+          '--stage-id',
+          '0Xc000000000002',
+        ]);
 
-        expect(ctx.stdout).to.contain('a0B000000000001');
-        expect(ctx.stdout).to.contain('0Bf000000000001');
-        expect(ctx.stdout).to.contain('Promotion completed successfully');
-        expect(ctx.stdout).to.contain('2026-07-17T10:00:00.000Z');
+        expect(ctx.stdout).to.contain('Successfully deleted stage 0Xc000000000002');
+        expect(ctx.stdout).to.contain('0XB000000000001');
       });
   });
 
-  describe('failed request', () => {
+  describe('stage not found', () => {
     test
       .stdout()
       .stderr()
-      .it('displays error details', async (ctx) => {
+      .it('shows stage not found error', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        getRequestStatusStub.resolves({
-          id: '0Bf000000000002',
-          status: 'Error',
-          message: 'Deployment failed',
-          errorDetails: 'ApexClass MyClass has compile errors',
-          requestToken: 'a0B000000000002',
-          requestCompletionDate: null,
-        });
-
-        await StatusCommand.run(['--target-org', 'testOrg', '--request-token', 'a0B000000000002']);
-
-        expect(ctx.stdout).to.contain('Error');
-        expect(ctx.stdout).to.contain('ApexClass MyClass has compile errors');
-      });
-  });
-
-  describe('request not found', () => {
-    test
-      .stdout()
-      .stderr()
-      .it('shows request not found error', async (ctx) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        getRequestStatusStub.rejects(new Error('RequestNotFound:a0B000000000099'));
+        deletePipelineStageStub.rejects(new Error('Stage not found: 0Xc000000000099'));
 
         try {
-          await StatusCommand.run(['--target-org', 'testOrg', '--request-token', 'a0B000000000099']);
+          await DeleteCommand.run([
+            '--target-org',
+            'testOrg',
+            '--pipeline-id',
+            '0XB000000000001',
+            '--stage-id',
+            '0Xc000000000099',
+          ]);
         } catch (e) {
           // expected
         }
 
-        expect(ctx.stderr).to.contain('not found');
+        expect(ctx.stderr).to.contain('not found in pipeline');
+      });
+  });
+
+  describe('deletion failure', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('shows failure error', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        deletePipelineStageStub.resolves({
+          success: false,
+          error: 'ENTITY_IS_LOCKED',
+        });
+
+        try {
+          await DeleteCommand.run([
+            '--target-org',
+            'testOrg',
+            '--pipeline-id',
+            '0XB000000000001',
+            '--stage-id',
+            '0Xc000000000002',
+          ]);
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('Failed to delete stage');
       });
   });
 
@@ -119,10 +134,17 @@ describe('devops request status', () => {
       .it('shows DevOps Center not enabled error', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        getRequestStatusStub.rejects(new Error("sObject type 'DevopsRequestInfo' is not supported"));
+        deletePipelineStageStub.rejects(new Error("sObject type 'DevopsPipelineStage' is not supported"));
 
         try {
-          await StatusCommand.run(['--target-org', 'testOrg', '--request-token', 'a0B000000000001']);
+          await DeleteCommand.run([
+            '--target-org',
+            'testOrg',
+            '--pipeline-id',
+            '0XB000000000001',
+            '--stage-id',
+            '0Xc000000000002',
+          ]);
         } catch (e) {
           // expected
         }
@@ -138,10 +160,17 @@ describe('devops request status', () => {
       .it('rethrows non-DevOps errors', async () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
-        getRequestStatusStub.rejects(new Error('Network error'));
+        deletePipelineStageStub.rejects(new Error('Network error'));
 
         try {
-          await StatusCommand.run(['--target-org', 'testOrg', '--request-token', 'a0B000000000001']);
+          await DeleteCommand.run([
+            '--target-org',
+            'testOrg',
+            '--pipeline-id',
+            '0XB000000000001',
+            '--stage-id',
+            '0Xc000000000002',
+          ]);
           expect.fail('should have thrown');
         } catch (e: unknown) {
           expect((e as Error).message).to.contain('Network error');

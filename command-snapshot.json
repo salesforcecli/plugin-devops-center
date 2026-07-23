@@ -22,7 +22,31 @@
   },
   {
     "alias": [],
+    "command": "devops:pipeline:get",
+    "flagAliases": [],
+    "flagChars": ["i", "o"],
+    "flags": ["api-version", "flags-dir", "json", "pipeline-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:pipeline:list",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:pipeline:project:add",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "pipeline-id", "project-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:pipeline:project:delete",
     "flagAliases": [],
     "flagChars": ["o"],
     "flags": ["api-version", "flags-dir", "json", "pipeline-id", "project-id", "target-org"],
@@ -34,6 +58,14 @@
     "flagAliases": [],
     "flagChars": ["n", "o"],
     "flags": ["api-version", "flags-dir", "json", "name", "next-stage-id", "pipeline-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:pipeline:stage:delete",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "pipeline-id", "stage-id", "target-org"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -58,6 +90,14 @@
     "flagAliases": [],
     "flagChars": ["o"],
     "flags": ["api-version", "flags-dir", "json", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:project:update",
+    "flagAliases": [],
+    "flagChars": ["d", "i", "n", "o"],
+    "flags": ["api-version", "description", "flags-dir", "is-active", "json", "name", "project-id", "target-org"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -146,6 +186,14 @@
       "stage-id",
       "target-org"
     ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:stage:environment:delete",
+    "flagAliases": [],
+    "flagChars": ["e", "o"],
+    "flags": ["api-version", "environment-id", "flags-dir", "json", "pipeline-id", "target-org"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {

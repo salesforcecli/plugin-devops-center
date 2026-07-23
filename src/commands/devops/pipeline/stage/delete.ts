@@ -16,15 +16,13 @@
 
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { getRequestStatus, RequestStatusResult } from '../../../utils/getRequestStatus.js';
-import { colorStatus } from '../../../common/outputService/outputUtils.js';
-import { AsyncOperationStatus } from '../../../common/types.js';
+import { deletePipelineStage, DeletePipelineStageResult } from '../../../../utils/deletePipelineStage.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.request.status');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.pipeline.stage.delete');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export default class DevopsRequestStatus extends SfCommand<RequestStatusResult> {
+export default class DevopsPipelineStageDelete extends SfCommand<DeletePipelineStageResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -32,43 +30,44 @@ export default class DevopsRequestStatus extends SfCommand<RequestStatusResult> 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    'request-token': Flags.string({
-      summary: messages.getMessage('flags.request-token.summary'),
+    'pipeline-id': Flags.salesforceId({
+      summary: messages.getMessage('flags.pipeline-id.summary'),
       required: true,
-      char: 'i',
+      char: undefined,
+    }),
+    'stage-id': Flags.salesforceId({
+      summary: messages.getMessage('flags.stage-id.summary'),
+      required: true,
+      char: undefined,
     }),
   };
 
-  public async run(): Promise<RequestStatusResult> {
-    const { flags } = await this.parse(DevopsRequestStatus);
+  public async run(): Promise<DeletePipelineStageResult> {
+    const { flags } = await this.parse(DevopsPipelineStageDelete);
     const org: Org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
-    const requestToken = flags['request-token'];
+    const pipelineId = flags['pipeline-id'];
+    const stageId = flags['stage-id'];
 
-    let result: RequestStatusResult;
+    let result: DeletePipelineStageResult;
     try {
-      result = await getRequestStatus(connection, requestToken);
+      result = await deletePipelineStage(connection, pipelineId, stageId);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
         this.error(commonErrorMessages.getMessage('error.DevopsCenterNotEnabled'));
       }
-      if (errMsg.startsWith('RequestNotFound:') || errMsg.includes('entity is deleted')) {
-        this.error(messages.getMessage('error.RequestNotFound', [requestToken]));
+      if (errMsg.startsWith('Stage not found:') || errMsg.includes('entity is deleted')) {
+        this.error(messages.getMessage('error.StageNotFound', [stageId, pipelineId]));
       }
       throw error;
     }
 
-    const statusStr = Object.values(AsyncOperationStatus).includes(result.status as AsyncOperationStatus)
-      ? colorStatus(result.status as AsyncOperationStatus)
-      : result.status;
-
-    this.log(`  Request Token:      ${result.requestToken}`);
-    this.log(`  ID:                 ${result.id}`);
-    this.log(`  Status:             ${statusStr}`);
-    if (result.message) this.log(`  Message:            ${result.message}`);
-    if (result.errorDetails) this.log(`  Error Details:      ${result.errorDetails}`);
-    if (result.requestCompletionDate) this.log(`  Completion Date:    ${result.requestCompletionDate}`);
+    if (result.success) {
+      this.log(`Successfully deleted stage ${stageId} from pipeline ${pipelineId}.`);
+    } else {
+      this.error(`Failed to delete stage: ${result.error ?? ''}`);
+    }
 
     return result;
   }

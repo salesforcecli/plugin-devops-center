@@ -16,15 +16,13 @@
 
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { getRequestStatus, RequestStatusResult } from '../../../utils/getRequestStatus.js';
-import { colorStatus } from '../../../common/outputService/outputUtils.js';
-import { AsyncOperationStatus } from '../../../common/types.js';
+import { detachProject, DetachProjectResult } from '../../../../utils/detachProject.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.request.status');
+const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.pipeline.project.delete');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
-export default class DevopsRequestStatus extends SfCommand<RequestStatusResult> {
+export default class DevopsPipelineProjectDelete extends SfCommand<DetachProjectResult> {
   public static readonly summary = messages.getMessage('summary');
   public static readonly description = messages.getMessage('description');
   public static readonly examples = messages.getMessages('examples');
@@ -32,43 +30,46 @@ export default class DevopsRequestStatus extends SfCommand<RequestStatusResult> 
   public static readonly flags = {
     'target-org': Flags.requiredOrg(),
     'api-version': Flags.orgApiVersion(),
-    'request-token': Flags.string({
-      summary: messages.getMessage('flags.request-token.summary'),
+    'pipeline-id': Flags.salesforceId({
+      summary: messages.getMessage('flags.pipeline-id.summary'),
       required: true,
-      char: 'i',
+      char: undefined,
+    }),
+    'project-id': Flags.salesforceId({
+      summary: messages.getMessage('flags.project-id.summary'),
+      required: true,
+      char: undefined,
     }),
   };
 
-  public async run(): Promise<RequestStatusResult> {
-    const { flags } = await this.parse(DevopsRequestStatus);
+  public async run(): Promise<DetachProjectResult> {
+    const { flags } = await this.parse(DevopsPipelineProjectDelete);
     const org: Org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
-    const requestToken = flags['request-token'];
+    const projectId = flags['project-id'];
+    const pipelineId = flags['pipeline-id'];
 
-    let result: RequestStatusResult;
+    let result: DetachProjectResult;
     try {
-      result = await getRequestStatus(connection, requestToken);
+      result = await detachProject(connection, projectId, pipelineId);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
         this.error(commonErrorMessages.getMessage('error.DevopsCenterNotEnabled'));
       }
-      if (errMsg.startsWith('RequestNotFound:') || errMsg.includes('entity is deleted')) {
-        this.error(messages.getMessage('error.RequestNotFound', [requestToken]));
+      if (errMsg.startsWith('ProjectNotAttached:') || errMsg.includes('entity is deleted')) {
+        this.error(messages.getMessage('error.ProjectNotAttached', [projectId, pipelineId]));
       }
       throw error;
     }
 
-    const statusStr = Object.values(AsyncOperationStatus).includes(result.status as AsyncOperationStatus)
-      ? colorStatus(result.status as AsyncOperationStatus)
-      : result.status;
-
-    this.log(`  Request Token:      ${result.requestToken}`);
-    this.log(`  ID:                 ${result.id}`);
-    this.log(`  Status:             ${statusStr}`);
-    if (result.message) this.log(`  Message:            ${result.message}`);
-    if (result.errorDetails) this.log(`  Error Details:      ${result.errorDetails}`);
-    if (result.requestCompletionDate) this.log(`  Completion Date:    ${result.requestCompletionDate}`);
+    if (result.success) {
+      this.log('Successfully removed project from pipeline.');
+      this.log(`  Project ID:  ${projectId}`);
+      this.log(`  Pipeline ID: ${pipelineId}`);
+    } else {
+      this.error(`Failed to remove project from pipeline: ${result.error ?? ''}`);
+    }
 
     return result;
   }
