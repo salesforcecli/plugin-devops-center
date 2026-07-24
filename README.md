@@ -56,62 +56,34 @@ sf plugins
 
 <!-- commands -->
 
-- [`sf devops pipeline update`](#sf-devops-pipeline-update)
 - [`sf devops pipeline create`](#sf-devops-pipeline-create)
+- [`sf devops pipeline get`](#sf-devops-pipeline-get)
+- [`sf devops pipeline list`](#sf-devops-pipeline-list)
 - [`sf devops pipeline project add`](#sf-devops-pipeline-project-add)
+- [`sf devops pipeline project delete`](#sf-devops-pipeline-project-delete)
 - [`sf devops pipeline stage add`](#sf-devops-pipeline-stage-add)
+- [`sf devops pipeline stage delete`](#sf-devops-pipeline-stage-delete)
+- [`sf devops pipeline update`](#sf-devops-pipeline-update)
 - [`sf devops project create`](#sf-devops-project-create)
 - [`sf devops project list`](#sf-devops-project-list)
+- [`sf devops project update`](#sf-devops-project-update)
+- [`sf devops promote`](#sf-devops-promote)
+- [`sf devops promotion complete`](#sf-devops-promotion-complete)
+- [`sf devops request status`](#sf-devops-request-status)
 - [`sf devops review create`](#sf-devops-review-create)
 - [`sf devops stage branch add`](#sf-devops-stage-branch-add)
 - [`sf devops stage environment add`](#sf-devops-stage-environment-add)
+- [`sf devops stage environment delete`](#sf-devops-stage-environment-delete)
+- [`sf devops work-item combine`](#sf-devops-work-item-combine)
 - [`sf devops work-item create`](#sf-devops-work-item-create)
 - [`sf devops work-item list`](#sf-devops-work-item-list)
+- [`sf devops work-item prepare`](#sf-devops-work-item-prepare)
 - [`sf devops work-item update`](#sf-devops-work-item-update)
 - [`sf project deploy pipeline quick`](#sf-project-deploy-pipeline-quick)
 - [`sf project deploy pipeline report`](#sf-project-deploy-pipeline-report)
 - [`sf project deploy pipeline resume`](#sf-project-deploy-pipeline-resume)
 - [`sf project deploy pipeline start`](#sf-project-deploy-pipeline-start)
 - [`sf project deploy pipeline validate`](#sf-project-deploy-pipeline-validate)
-
-## `sf devops pipeline update`
-
-Activate or deactivate a DevOps Center pipeline.
-
-```
-USAGE
-  $ sf devops pipeline update -o <value> --pipeline-id <value> [--active | --no-active] [--json] [--flags-dir <value>] [--api-version <value>]
-
-FLAGS
-  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
-                             configuration variable is already set.
-      --api-version=<value>  Override the api version used for api requests made by this command
-      --[no-]active          Activate the pipeline. Use --no-active to deactivate.
-      --pipeline-id=<value>  (required) ID of the pipeline.
-
-GLOBAL FLAGS
-  --flags-dir=<value>  Import flag values from a directory.
-  --json               Format output as json.
-
-DESCRIPTION
-  Activate or deactivate a DevOps Center pipeline.
-
-  Use --active to activate a pipeline and make it available for deployments. Use --no-active to deactivate it.
-
-  A pipeline must have at least one stage before you can activate it. You can't modify the pipeline stages after you
-  activate and promote changes through it.
-
-EXAMPLES
-  Activate a pipeline.
-
-    $ sf devops pipeline update --target-org my-devops-org --pipeline-id 0XB000000000001 --active
-
-  Deactivate a pipeline.
-
-    $ sf devops pipeline update --target-org my-devops-org --pipeline-id 0XB000000000001 --no-active
-```
-
-_See code: [src/commands/devops/pipeline/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/pipeline/update.ts)_
 
 ## `sf devops pipeline create`
 
@@ -173,7 +145,70 @@ EXAMPLES
       https://bitbucket.org/myworkspace/myrepo --description "Main CI/CD pipeline for production releases"
 ```
 
-_See code: [src/commands/devops/pipeline/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/pipeline/create.ts)_
+_See code: [src/commands/devops/pipeline/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/pipeline/create.ts)_
+
+## `sf devops pipeline get`
+
+Get details of a DevOps Center pipeline including its stages, repositories, and connected projects.
+
+```
+USAGE
+  $ sf devops pipeline get -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>]
+
+FLAGS
+  -i, --pipeline-id=<value>  (required) ID of the DevOps Center pipeline.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Get details of a DevOps Center pipeline including its stages, repositories, and connected projects.
+
+  Returns full details for a single DevOps Center pipeline: its stages in order, the source code repository and branch
+  associated with each stage, and any connected projects.
+
+EXAMPLES
+  Get details for a specific pipeline:
+
+    $ sf devops pipeline get --target-org my-devops-org --pipeline-id 0Do000000000001
+```
+
+_See code: [src/commands/devops/pipeline/get.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/pipeline/get.ts)_
+
+## `sf devops pipeline list`
+
+List DevOps Center pipelines with their stages, repositories, and connected projects.
+
+```
+USAGE
+  $ sf devops pipeline list -o <value> [--json] [--flags-dir <value>] [--api-version <value>]
+
+FLAGS
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  List DevOps Center pipelines with their stages, repositories, and connected projects.
+
+  Returns all DevOps Center pipelines in the org, including each pipeline's stages (in order), source code repository
+  information per stage, and any connected projects.
+
+EXAMPLES
+  List all pipelines in the org:
+
+    $ sf devops pipeline list --target-org my-devops-org
+```
+
+_See code: [src/commands/devops/pipeline/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/pipeline/list.ts)_
 
 ## `sf devops pipeline project add`
 
@@ -207,7 +242,41 @@ EXAMPLES
       0Hn000000000001
 ```
 
-_See code: [src/commands/devops/pipeline/project/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/pipeline/project/add.ts)_
+_See code: [src/commands/devops/pipeline/project/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/pipeline/project/add.ts)_
+
+## `sf devops pipeline project delete`
+
+Remove a DevOps Center project's connection to a pipeline.
+
+```
+USAGE
+  $ sf devops pipeline project delete -o <value> --pipeline-id <value> --project-id <value> [--json] [--flags-dir <value>]
+    [--api-version <value>]
+
+FLAGS
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --pipeline-id=<value>  (required) ID of the pipeline.
+      --project-id=<value>   (required) ID of the DevOps Center project.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Remove a DevOps Center project's connection to a pipeline.
+
+  Deletes the junction record that connects the project to the pipeline. The project itself is not deleted.
+
+EXAMPLES
+  Remove a project from a pipeline using the project ID and pipeline ID.
+
+    $ sf devops pipeline project delete --target-org my-devops-org --pipeline-id 0XB000000000001 --project-id \
+      0Hn000000000001
+```
+
+_See code: [src/commands/devops/pipeline/project/delete.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/pipeline/project/delete.ts)_
 
 ## `sf devops pipeline stage add`
 
@@ -248,7 +317,85 @@ EXAMPLES
       --next-stage-id 0Xc000000000003
 ```
 
-_See code: [src/commands/devops/pipeline/stage/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/pipeline/stage/add.ts)_
+_See code: [src/commands/devops/pipeline/stage/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/pipeline/stage/add.ts)_
+
+## `sf devops pipeline stage delete`
+
+Delete a stage from a DevOps Center pipeline.
+
+```
+USAGE
+  $ sf devops pipeline stage delete -o <value> --pipeline-id <value> --stage-id <value> [--json] [--flags-dir <value>]
+    [--api-version <value>]
+
+FLAGS
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --pipeline-id=<value>  (required) ID of the pipeline that contains the stage.
+      --stage-id=<value>     (required) ID of the stage to delete.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Delete a stage from a DevOps Center pipeline.
+
+  Deletes the specified stage from the pipeline. If the stage sits between two other stages, the predecessor stage is
+  automatically re-linked to the successor so the pipeline chain stays intact.
+
+EXAMPLES
+  Delete a stage from a pipeline:
+
+    $ sf devops pipeline stage delete --target-org my-devops-org --pipeline-id 0XB000000000001 --stage-id \
+      0Xc000000000002
+```
+
+_See code: [src/commands/devops/pipeline/stage/delete.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/pipeline/stage/delete.ts)_
+
+## `sf devops pipeline update`
+
+Update a DevOps Center pipeline.
+
+```
+USAGE
+  $ sf devops pipeline update -o <value> --pipeline-id <value> [--json] [--flags-dir <value>] [--api-version <value>]
+    [--active] [-n <value>]
+
+FLAGS
+  -n, --name=<value>         New name for the pipeline.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --[no-]active          Activate the pipeline. Use --no-active to deactivate.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --pipeline-id=<value>  (required) ID of the pipeline.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Update a DevOps Center pipeline.
+
+  Activate, deactivate, or rename a DevOps Center pipeline. Use --active to activate, --no-active to deactivate, and
+  --name to rename. You can combine --no-active and --name in one command.
+
+  A pipeline must have at least one stage before you can activate it. You can't modify the pipeline stages after you
+  activate and promote changes through it.
+
+EXAMPLES
+  Activate a pipeline:
+
+    $ sf devops pipeline update --target-org my-devops-org --pipeline-id 0XB000000000001 --active
+
+  Deactivate and rename in one step.
+
+    $ sf devops pipeline update --target-org my-devops-org --pipeline-id 0XB000000000001 --no-active --name "My \
+      Pipeline"
+```
+
+_See code: [src/commands/devops/pipeline/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/pipeline/update.ts)_
 
 ## `sf devops project create`
 
@@ -285,7 +432,7 @@ EXAMPLES
       update"
 ```
 
-_See code: [src/commands/devops/project/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/project/create.ts)_
+_See code: [src/commands/devops/project/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/project/create.ts)_
 
 ## `sf devops project list`
 
@@ -320,7 +467,267 @@ EXAMPLES
     $ sf devops project list --target-org devops-center@example.com
 ```
 
-_See code: [src/commands/devops/project/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/project/list.ts)_
+_See code: [src/commands/devops/project/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/project/list.ts)_
+
+## `sf devops project update`
+
+Update a DevOps Center project.
+
+```
+USAGE
+  $ sf devops project update -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>] [-d
+    <value>] [--is-active]
+
+FLAGS
+  -d, --description=<value>  New description for the project.
+  -i, --project-id=<value>   (required) ID of the DevOps Center project to update.
+  -n, --name=<value>         New name for the project.
+  -o, --target-org=<value>   (required) Username or alias of the target org. Not required if the `target-org`
+                             configuration variable is already set.
+      --api-version=<value>  Override the api version used for api requests made by this command
+      --[no-]is-active       Set the project active status. Use --is-active to activate or --no-is-active to deactivate.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Update a DevOps Center project.
+
+  Update the name, description, or active status of a DevOps Center project. At least one of --name, --description, or
+  --is-active must be provided.
+
+EXAMPLES
+  Rename a project:
+
+    $ sf devops project update --target-org my-devops-org --project-id 1Qg000000000001 --name "MyApp Release v2"
+
+  Update the description of a project:
+
+    $ sf devops project update --target-org my-devops-org --project-id 1Qg000000000001 --description "Updated \
+      release description"
+
+  Deactivate a project:
+
+    $ sf devops project update --target-org my-devops-org --project-id 1Qg000000000001 --no-is-active
+
+  Update all fields at once:
+
+    $ sf devops project update --target-org my-devops-org --project-id 1Qg000000000001 --name "Archived App" \
+      --description "Archived" --no-is-active
+```
+
+_See code: [src/commands/devops/project/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/project/update.ts)_
+
+## `sf devops promote`
+
+Promote work items or a pipeline stage to a target pipeline stage.
+
+```
+USAGE
+  $ sf devops promote -o <value> -t <value> [--json] [--flags-dir <value>] [--api-version <value>] [-i <value>... |
+    -s <value>] [-a] [-l NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg] [--tests <value>...]
+
+FLAGS
+  -a, --deploy-all               Deploy all metadata in the branch to the stage's org.
+  -i, --work-item-id=<value>...  ID of the work item to promote. Mutually exclusive with --stage-id.
+  -l, --test-level=<option>      Deployment Apex testing level.
+                                 <options: NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg>
+  -o, --target-org=<value>       (required) Username or alias of the target org. Not required if the `target-org`
+                                 configuration variable is already set.
+  -s, --stage-id=<value>         ID of the source pipeline stage whose approved work items will be promoted. Mutually
+                                 exclusive with --work-item-id.
+  -t, --target-stage-id=<value>  (required) ID of the pipeline stage to promote to.
+      --api-version=<value>      Override the api version used for api requests made by this command
+      --tests=<value>...         Apex tests to run when --test-level is RunSpecifiedTests.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Promote work items or a pipeline stage to a target pipeline stage.
+
+  Promote specific work items or all approved work items from a source stage to the target pipeline stage.
+
+  Pass --work-item-id to promote one or more specific work items to the target stage.
+
+  Pass --stage-id to promote all approved work items from that source stage to the target stage.
+
+  Exactly one of --work-item-id or --stage-id must be provided.
+
+  Use --deploy-all to deploy all metadata in the branch rather than only changes not yet in the target stage.
+
+EXAMPLES
+  Promote all approved work items from a source stage to a target stage:
+
+    $ sf devops promote --target-org my-devops-org --stage-id 1QVxx0000000001 --target-stage-id 1QVxx0000000002
+
+  Promote a specific work item to a stage:
+
+    $ sf devops promote --target-org my-devops-org --work-item-id 1fkxx0000000001 --target-stage-id 1QVxx0000000001
+
+  Promote multiple work items:
+
+    $ sf devops promote --target-org my-devops-org --work-item-id 1fkxx0000000001 --work-item-id 1fkxx0000000002 \
+      --target-stage-id 1QVxx0000000001
+
+  Promote a stage with full deploy:
+
+    $ sf devops promote --target-org my-devops-org --stage-id 1QVxx0000000001 --target-stage-id 1QVxx0000000002 \
+      --deploy-all
+
+FLAG DESCRIPTIONS
+  -a, --deploy-all  Deploy all metadata in the branch to the stage's org.
+
+    If you don’t specify this flag, only changes in the stage’s branch are deployed.
+
+  -i, --work-item-id=<value>...  ID of the work item to promote. Mutually exclusive with --stage-id.
+
+    Specify this flag multiple times to promote multiple work items in a single operation.
+
+  -l, --test-level=NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg  Deployment Apex testing level.
+
+    Valid values are:
+
+    - NoTestRun — No tests are run. This test level applies only to deployments to development environments, such as
+    sandbox, Developer Edition, or trial orgs. This test level is the default for development environments.
+
+    - RunSpecifiedTests — Runs only the tests that you specify with the --tests flag. Code coverage requirements differ
+    from the default coverage requirements when using this test level. Executed tests must comprise a minimum of 75%
+    code coverage for each class and trigger in the deployment package. This coverage is computed for each class and
+    trigger individually and is different than the overall coverage percentage.
+
+    - RunLocalTests — All tests in your org are run, except the ones that originate from installed managed and unlocked
+    packages. This test level is the default for production deployments that include Apex classes or triggers.
+
+    - RunAllTestsInOrg — All tests in your org are run, including tests of managed packages.
+
+    If you don’t specify a test level, the default behavior depends on the contents of your deployment package. For more
+    information, see the section "Running Tests in a Deployment" in the "Metadata API Developer Guide".
+    (https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_deploy_running_tests.htm)
+
+  --tests=<value>...  Apex tests to run when --test-level is RunSpecifiedTests.
+
+    Separate multiple test names with commas. Enclose the entire flag value in double quotes if a test name contains
+    spaces.
+```
+
+_See code: [src/commands/devops/promote.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/promote.ts)_
+
+## `sf devops promotion complete`
+
+Deploy undeployed work items to a pipeline stage org.
+
+```
+USAGE
+  $ sf devops promotion complete -o <value> -t <value> [--json] [--flags-dir <value>] [--api-version <value>] [-i <value>...]
+    [-a] [-l NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg] [--tests <value>...]
+
+FLAGS
+  -a, --deploy-all               Deploy all metadata in the branch to the stage's org.
+  -i, --work-item-id=<value>...  ID of a specific work item to deploy. Omit to deploy all undeployed work items for the
+                                 stage. Use this for the first stage of a pipeline where no source stage exists.
+  -l, --test-level=<option>      Deployment Apex testing level.
+                                 <options: NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg>
+  -o, --target-org=<value>       (required) Username or alias of the target org. Not required if the `target-org`
+                                 configuration variable is already set.
+  -t, --target-stage-id=<value>  (required) ID of the out-of-sync pipeline stage to deploy to.
+      --api-version=<value>      Override the api version used for api requests made by this command
+      --tests=<value>...         Apex tests to run when --test-level is RunSpecifiedTests.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Deploy undeployed work items to a pipeline stage org.
+
+  Deploys work items that were merged into the pipeline branch outside of DevOps Center (externally merged) into the
+  target stage org and updates DevOps Center records. Equivalent to the "Complete Promotion" action in the DevOps Center
+  UI when a stage is out of sync.
+
+  If no undeployed work items are found for the stage, the command exits successfully with no action taken.
+
+EXAMPLES
+  Complete a promotion for an out-of-sync pipeline stage.
+
+    $ sf devops promotion complete --target-org my-devops-org --target-stage-id 1QV000000000001
+
+  Complete a promotion for a specific work item (e.g. first stage of a pipeline).
+
+    $ sf devops promotion complete --target-org my-devops-org --target-stage-id 1QV000000000001 --work-item-id \
+      1fk000000000001
+
+  Complete a promotion with full deploy and a specific test level.
+
+    $ sf devops promotion complete --target-org my-devops-org --target-stage-id 1QV000000000001 --deploy-all \
+      --test-level RunLocalTests
+
+FLAG DESCRIPTIONS
+  -a, --deploy-all  Deploy all metadata in the branch to the stage's org.
+
+    If you don’t specify this flag, only changes in the stage’s branch are deployed.
+
+  -l, --test-level=NoTestRun|RunSpecifiedTests|RunLocalTests|RunAllTestsInOrg  Deployment Apex testing level.
+
+    Valid values are:
+
+    - NoTestRun — No tests are run. This test level applies only to deployments to development environments, such as
+    sandbox, Developer Edition, or trial orgs. This test level is the default for development environments.
+
+    - RunSpecifiedTests — Runs only the tests that you specify with the --tests flag. Code coverage requirements differ
+    from the default coverage requirements when using this test level. Executed tests must comprise a minimum of 75%
+    code coverage for each class and trigger in the deployment package. This coverage is computed for each class and
+    trigger individually and is different than the overall coverage percentage.
+
+    - RunLocalTests — All tests in your org are run, except the ones that originate from installed managed and unlocked
+    packages. This test level is the default for production deployments that include Apex classes or triggers.
+
+    - RunAllTestsInOrg — All tests in your org are run, including tests of managed packages.
+
+    If you don’t specify a test level, the default behavior depends on the contents of your deployment package. For more
+    information, see the section "Running Tests in a Deployment" in the "Metadata API Developer Guide".
+    (https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_deploy_running_tests.htm)
+
+  --tests=<value>...  Apex tests to run when --test-level is RunSpecifiedTests.
+
+    Separate multiple test names with commas. Enclose the entire flag value in double quotes if a test name contains
+    spaces.
+```
+
+_See code: [src/commands/devops/promotion/complete.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/promotion/complete.ts)_
+
+## `sf devops request status`
+
+Get the status of a request.
+
+```
+USAGE
+  $ sf devops request status -o <value> -i <value> [--json] [--flags-dir <value>] [--api-version <value>]
+
+FLAGS
+  -i, --request-token=<value>  (required) Request token from the promote response.
+  -o, --target-org=<value>     (required) Username or alias of the target org. Not required if the `target-org`
+                               configuration variable is already set.
+      --api-version=<value>    Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Get the status of a request.
+
+  Returns the current status of a request identified by its request token.
+
+EXAMPLES
+  Get the status of a request:
+
+    $ sf devops request status --target-org my-devops-org --request-token a0B000000000001
+```
+
+_See code: [src/commands/devops/request/status.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/request/status.ts)_
 
 ## `sf devops review create`
 
@@ -328,8 +735,7 @@ Create a pull request for a work item branch.
 
 ```
 USAGE
-  $ sf devops review create -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>] [-w
-  <value>]
+  $ sf devops review create -o <value> [--json] [--flags-dir <value>] [--api-version <value>] [-n <value>] [-w <value>]
 
 FLAGS
   -n, --work-item-name=<value>  Name of the work item, such as WI-000001.
@@ -358,7 +764,7 @@ EXAMPLES
     $ sf devops review create --target-org my-devops-org --work-item-id 0Wx000000000001
 ```
 
-_See code: [src/commands/devops/review/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/review/create.ts)_
+_See code: [src/commands/devops/review/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/review/create.ts)_
 
 ## `sf devops stage branch add`
 
@@ -401,7 +807,7 @@ EXAMPLES
       --branch-name integration --create-vcs-branch
 ```
 
-_See code: [src/commands/devops/stage/branch/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/stage/branch/add.ts)_
+_See code: [src/commands/devops/stage/branch/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/stage/branch/add.ts)_
 
 ## `sf devops stage environment add`
 
@@ -441,7 +847,90 @@ EXAMPLES
       Production_Org --org-type Production
 ```
 
-_See code: [src/commands/devops/stage/environment/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/stage/environment/add.ts)_
+_See code: [src/commands/devops/stage/environment/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/stage/environment/add.ts)_
+
+## `sf devops stage environment delete`
+
+Delete an environment from a DevOps Center pipeline stage.
+
+```
+USAGE
+  $ sf devops stage environment delete -o <value> --pipeline-id <value> -e <value> [--json] [--flags-dir <value>] [--api-version
+    <value>]
+
+FLAGS
+  -e, --environment-id=<value>  (required) ID of the environment to delete.
+  -o, --target-org=<value>      (required) Username or alias of the target org. Not required if the `target-org`
+                                configuration variable is already set.
+      --api-version=<value>     Override the api version used for api requests made by this command
+      --pipeline-id=<value>     (required) ID of the pipeline. Used to verify the pipeline is inactive before deleting.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Delete an environment from a DevOps Center pipeline stage.
+
+  Removes the specified environment from the pipeline stage. The environment must belong to an inactive pipeline.
+
+EXAMPLES
+  Delete an environment:
+
+    $ sf devops stage environment delete --target-org my-devops-org --pipeline-id 0XB000000000001 --environment-id \
+      0Xe000000000001
+```
+
+_See code: [src/commands/devops/stage/environment/delete.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/stage/environment/delete.ts)_
+
+## `sf devops work-item combine`
+
+Prepare work items to be combined for custom promotion.
+
+```
+USAGE
+  $ sf devops work-item combine -o <value> --parent-work-item-id <value> --child-work-item-id <value>... -t <value> [--json]
+    [--flags-dir <value>] [--api-version <value>]
+
+FLAGS
+  -o, --target-org=<value>             (required) Username or alias of the target org. Not required if the `target-org`
+                                       configuration variable is already set.
+  -t, --target-stage-id=<value>        (required) ID of the pipeline stage to promote the combined work item to.
+      --api-version=<value>            Override the api version used for api requests made by this command
+      --child-work-item-id=<value>...  (required) ID of a work item to combine.
+      --parent-work-item-id=<value>    (required) ID of the parent work item.
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Prepare work items to be combined for custom promotion.
+
+  Use this command when work items in the same stage share metadata or have dependencies. DevOps Center combines the
+  selected work items so they can be promoted together during custom promotion.
+
+  After running this command, use "sf devops work-item promote" with the parent work item ID to complete the promotion.
+  The combined work items are promoted as a single unit.
+
+EXAMPLES
+  Prepare three work items to be combined to prevent conflicts during promotion:
+
+    $ sf devops work-item combine --target-org my-devops-org --parent-work-item-id 0Wx000000000001 \
+      --child-work-item-id 0Wx000000000002 --child-work-item-id 0Wx000000000003 --target-stage-id 05S000000000002
+
+FLAG DESCRIPTIONS
+  --child-work-item-id=<value>...  ID of a work item to combine.
+
+    Specify this flag multiple times to combine multiple work items with the parent.
+
+  --parent-work-item-id=<value>  ID of the parent work item.
+
+    The parent work item is the primary work item that continues through the pipeline. Changes from all child work items
+    are merged into the parent's branch during promotion.
+```
+
+_See code: [src/commands/devops/work-item/combine.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/work-item/combine.ts)_
 
 ## `sf devops work-item create`
 
@@ -482,7 +971,7 @@ EXAMPLES
       --description "Implement dark mode toggle in settings page"
 ```
 
-_See code: [src/commands/devops/work-item/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/work-item/create.ts)_
+_See code: [src/commands/devops/work-item/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/work-item/create.ts)_
 
 ## `sf devops work-item list`
 
@@ -518,7 +1007,48 @@ EXAMPLES
     $ sf devops work-item list --target-org my-devops-org --project-id 1Qg000000000001 --json
 ```
 
-_See code: [src/commands/devops/work-item/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/work-item/list.ts)_
+_See code: [src/commands/devops/work-item/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/work-item/list.ts)_
+
+## `sf devops work-item prepare`
+
+Prepare a work item for one-off promotion between pipeline stages.
+
+```
+USAGE
+  $ sf devops work-item prepare -o <value> -i <value> -t <value> [--json] [--flags-dir <value>] [--api-version <value>]
+
+FLAGS
+  -i, --work-item-id=<value>     (required) ID of the work item to prepare for one-off promotion.
+  -o, --target-org=<value>       (required) Username or alias of the target org. Not required if the `target-org`
+                                 configuration variable is already set.
+  -t, --target-stage-id=<value>  (required) ID of the pipeline stage to promote the work item to.
+      --api-version=<value>      Override the api version used for api requests made by this command
+
+GLOBAL FLAGS
+  --flags-dir=<value>  Import flag values from a directory.
+  --json               Format output as json.
+
+DESCRIPTION
+  Prepare a work item for one-off promotion between pipeline stages.
+
+  Prepares a work item for one-off promotion by creating the necessary branches and pull requests in the source control
+  repository. Run this command before running "sf devops work-item promote" for a one-off promotion.
+
+  Use "sf devops work-item list" to find the work item ID and target stage ID for a project.
+
+EXAMPLES
+  Prepare a work item for one-off promotion to the UAT stage:
+
+    $ sf devops work-item prepare --target-org my-devops-org --work-item-id 0Wx000000000001 --target-stage-id \
+      05S000000000002
+
+  Prepare a work item using a DevOps Center org username:
+
+    $ sf devops work-item prepare --target-org devops-center@example.com --work-item-id 0Wx000000000001 \
+      --target-stage-id 05S000000000002
+```
+
+_See code: [src/commands/devops/work-item/prepare.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/work-item/prepare.ts)_
 
 ## `sf devops work-item update`
 
@@ -565,7 +1095,7 @@ EXAMPLES
       --description "Users can't log in on mobile" --status "In Progress"
 ```
 
-_See code: [src/commands/devops/work-item/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/devops/work-item/update.ts)_
+_See code: [src/commands/devops/work-item/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/devops/work-item/update.ts)_
 
 ## `sf project deploy pipeline quick`
 
@@ -639,7 +1169,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/quick.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/project/deploy/pipeline/quick.ts)_
+_See code: [src/commands/project/deploy/pipeline/quick.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/project/deploy/pipeline/quick.ts)_
 
 ## `sf project deploy pipeline report`
 
@@ -687,7 +1217,7 @@ FLAG DESCRIPTIONS
     your most recent operation was longer than 3 days ago, this flag won't find the job ID.
 ```
 
-_See code: [src/commands/project/deploy/pipeline/report.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/project/deploy/pipeline/report.ts)_
+_See code: [src/commands/project/deploy/pipeline/report.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/project/deploy/pipeline/report.ts)_
 
 ## `sf project deploy pipeline resume`
 
@@ -754,7 +1284,7 @@ FLAG DESCRIPTIONS
     returns the job ID. To check the status of the operation, run "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/resume.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/project/deploy/pipeline/resume.ts)_
+_See code: [src/commands/project/deploy/pipeline/resume.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/project/deploy/pipeline/resume.ts)_
 
 ## `sf project deploy pipeline start`
 
@@ -854,7 +1384,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/start.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/project/deploy/pipeline/start.ts)_
+_See code: [src/commands/project/deploy/pipeline/start.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/project/deploy/pipeline/start.ts)_
 
 ## `sf project deploy pipeline validate`
 
@@ -954,7 +1484,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/validate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.0/src/commands/project/deploy/pipeline/validate.ts)_
+_See code: [src/commands/project/deploy/pipeline/validate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/1.4.1/src/commands/project/deploy/pipeline/validate.ts)_
 
 <!-- commandsstop -->
 

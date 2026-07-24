@@ -1,3 +1,5 @@
+## [1.4.1](https://github.com/salesforcecli/plugin-devops-center/compare/1.4.0...1.4.1) (2026-07-24)
+
 # [1.4.0](https://github.com/salesforcecli/plugin-devops-center/compare/1.3.0...1.4.0) (2026-07-07)
 
 ### Bug Fixes
