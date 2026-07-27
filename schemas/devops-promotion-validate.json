@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/PromotionValidateResult",
+  "definitions": {
+    "PromotionValidateResult": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "errorType": {
+          "type": ["string", "null"]
+        },
+        "errorDetails": {
+          "type": ["string", "null"]
+        },
+        "combineDetails": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CombineDetails"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": ["success", "errorType", "errorDetails", "combineDetails"],
+      "additionalProperties": false
+    },
+    "CombineDetails": {
+      "type": "object",
+      "additionalProperties": {}
+    }
+  }
+}

@@ -43,6 +43,22 @@ type ValidateDeployResponse = {
   errorDetails?: string;
 };
 
+export type CombineDetails = Record<string, unknown>;
+
+export type ValidatePromotionResult = {
+  success: boolean;
+  errorType: string | null;
+  errorDetails: string | null;
+  combineDetails: CombineDetails | null;
+};
+
+type ValidatePromotionResponse = {
+  success?: boolean;
+  errorType?: string;
+  errorDetails?: string;
+  combineDetails?: CombineDetails;
+};
+
 type DeployStageResponse = {
   requestId?: string;
   status?: string;
@@ -83,6 +99,32 @@ export async function validateDeploy(
     success: response.success ?? true,
     errorType: response.errorType ?? null,
     errorDetails: response.errorDetails ?? null,
+  };
+}
+
+/**
+ * POST /services/data/vXX.X/connect/devops/pipelines/{pipelineId}/validatePromote
+ * Full variant that accepts checkCombineDetails and returns combineDetails.
+ */
+export async function validatePromotion(
+  connection: Connection,
+  pipelineId: string,
+  workItemIds: string[],
+  targetStageId: string,
+  checkCombineDetails = false
+): Promise<ValidatePromotionResult> {
+  const path = `/services/data/v${connection.getApiVersion()}/connect/devops/pipelines/${pipelineId}/validatePromote`;
+  const response = await connection.request<ValidatePromotionResponse>({
+    method: 'POST',
+    url: path,
+    body: JSON.stringify({ selectedWorkItemIds: workItemIds, targetStageId, checkCombineDetails }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return {
+    success: response.success ?? true,
+    errorType: response.errorType ?? null,
+    errorDetails: response.errorDetails ?? null,
+    combineDetails: response.combineDetails ?? null,
   };
 }
 

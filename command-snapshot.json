@@ -139,6 +139,22 @@
   },
   {
     "alias": [],
+    "command": "devops:promotion:validate",
+    "flagAliases": [],
+    "flagChars": ["i", "o", "t"],
+    "flags": [
+      "api-version",
+      "check-combine-details",
+      "flags-dir",
+      "json",
+      "target-org",
+      "target-stage-id",
+      "work-item-id"
+    ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:request:status",
     "flagAliases": [],
     "flagChars": ["i", "o"],
