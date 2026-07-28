@@ -70,6 +70,14 @@
   },
   {
     "alias": [],
+    "command": "devops:pipeline:stage:update",
+    "flagAliases": [],
+    "flagChars": ["n", "o", "s"],
+    "flags": ["api-version", "flags-dir", "json", "name", "stage-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:pipeline:update",
     "flagAliases": [],
     "flagChars": ["n", "o"],

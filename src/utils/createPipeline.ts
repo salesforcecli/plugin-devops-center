@@ -71,11 +71,19 @@ export function detectRepoType(repoUrl: string): string | undefined {
  * don't block the command when the check itself is unavailable.
  */
 export async function validateGitHubOwner(owner: string, token?: string, fetchFn: typeof fetch = fetch): Promise<void> {
+  const encoded = encodeURIComponent(owner);
   try {
-    execSync(`gh api users/${encodeURIComponent(owner)}`, {
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
+    // Try user first, then org — owner may be either a personal account or an organization
+    try {
+      execSync(`gh api users/${encoded}`, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
+      return;
+    } catch (e: unknown) {
+      const stderr = String((e as { stderr?: string }).stderr ?? '');
+      const stdout = String((e as { stdout?: string }).stdout ?? '');
+      if (!stderr.includes('404') && !stdout.includes('"Not Found"')) throw e;
+      // 404 on users/ — try orgs/
+    }
+    execSync(`gh api orgs/${encoded}`, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
     return;
   } catch (e: unknown) {
     const stderr = String((e as { stderr?: string }).stderr ?? '');
@@ -87,14 +95,15 @@ export async function validateGitHubOwner(owner: string, token?: string, fetchFn
   }
 
   if (!token) return;
-  const response = await fetchFn(`https://api.github.com/users/${encodeURIComponent(owner)}`, {
-    headers: {
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (response.status === 404) throw new GitHubOwnerNotFoundError(owner);
+  const headers = {
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    Authorization: `Bearer ${token}`,
+  };
+  const userRes = await fetchFn(`https://api.github.com/users/${encoded}`, { headers });
+  if (userRes.status !== 404) return;
+  const orgRes = await fetchFn(`https://api.github.com/orgs/${encoded}`, { headers });
+  if (orgRes.status === 404) throw new GitHubOwnerNotFoundError(owner);
   // 403 or other non-404: skip validation
 }
 
