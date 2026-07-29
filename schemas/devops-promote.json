@@ -19,10 +19,24 @@
           "items": {
             "type": "string"
           }
+        },
+        "combineDetails": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/CombineDetails"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": ["requestId", "status", "message", "promotedWorkitemIds"],
       "additionalProperties": false
+    },
+    "CombineDetails": {
+      "type": "object",
+      "additionalProperties": {}
     }
   }
 }

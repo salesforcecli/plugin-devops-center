@@ -118,6 +118,7 @@
       "deploy-all",
       "flags-dir",
       "json",
+      "skip-validation",
       "stage-id",
       "target-org",
       "target-stage-id",

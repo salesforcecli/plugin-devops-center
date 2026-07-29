@@ -21,7 +21,7 @@ export type PrepareWorkItemParams = {
   connection: Connection;
   pipelineId: string;
   workItemId: string;
-  sourceStageId: string;
+  sourceStageId?: string;
   targetStageId: string;
 };
 
@@ -48,11 +48,9 @@ export async function prepareWorkItem(params: PrepareWorkItemParams): Promise<Pr
   const { connection, pipelineId, workItemId, sourceStageId, targetStageId } = params;
 
   const path = `/services/data/v${connection.getApiVersion()}/connect/devops/pipelines/${pipelineId}/promote/oneoff/prepare`;
-  const body = JSON.stringify({
-    selectedWorkItemId: workItemId,
-    sourceStageId,
-    targetStageId,
-  });
+  const payload: Record<string, string> = { selectedWorkItemId: workItemId, targetStageId };
+  if (sourceStageId) payload.sourceStageId = sourceStageId;
+  const body = JSON.stringify(payload);
 
   const data = await connection.request<PrepareOneOffPromotionResponse>({
     method: 'POST',

@@ -34,7 +34,7 @@ No pipeline found for work item "%s". Ensure the project has an associated pipel
 
 # error.ValidationFailed
 
-Validation failed. Error type: %s. Details: %s
+Validation failed (%s): %s
 
 # error.ValidationRequestFailed
 

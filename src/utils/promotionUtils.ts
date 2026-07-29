@@ -15,6 +15,7 @@
  */
 
 import { Connection } from '@salesforce/core';
+import { normalizeSalesforceId } from './soqlUtils.js';
 
 export type UndeployedWorkItemsResult = {
   undeployedWorkitemIds: string[];
@@ -102,6 +103,35 @@ export async function validateDeploy(
   };
 }
 
+const VALIDATION_REASON_LABELS: Record<string, string> = {
+  PR_DOES_NOT_EXIST: 'no pull request exists',
+  PR_NOT_MERGED: 'pull request has not been merged',
+  BRANCH_NOT_FOUND: 'source branch not found',
+};
+
+export function formatValidationDetails(raw: string | null): string {
+  if (!raw) return '';
+  const decoded = raw
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+  try {
+    const parsed = JSON.parse(decoded) as Array<{ reason?: string; workItem?: string }>;
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed
+        .map((entry) => {
+          const label = entry.reason ? VALIDATION_REASON_LABELS[entry.reason] ?? entry.reason : '';
+          return entry.workItem ? `${entry.workItem}: ${label}` : label;
+        })
+        .join(', ');
+    }
+  } catch {
+    // not JSON — fall through
+  }
+  return decoded;
+}
+
 /**
  * POST /services/data/vXX.X/connect/devops/pipelines/{pipelineId}/validatePromote
  * Full variant that accepts checkCombineDetails and returns combineDetails.
@@ -111,13 +141,20 @@ export async function validatePromotion(
   pipelineId: string,
   workItemIds: string[],
   targetStageId: string,
-  checkCombineDetails = false
+  checkCombineDetails = false,
+  allWorkItemsInStage = false
 ): Promise<ValidatePromotionResult> {
   const path = `/services/data/v${connection.getApiVersion()}/connect/devops/pipelines/${pipelineId}/validatePromote`;
+  const payload: Record<string, unknown> = {
+    selectedWorkItemIds: workItemIds.map(normalizeSalesforceId),
+    targetStageId: normalizeSalesforceId(targetStageId),
+    allWorkItemsInStage,
+  };
+  if (checkCombineDetails) payload.checkCombineDetails = true;
   const response = await connection.request<ValidatePromotionResponse>({
     method: 'POST',
     url: path,
-    body: JSON.stringify({ selectedWorkItemIds: workItemIds, targetStageId, checkCombineDetails }),
+    body: JSON.stringify(payload),
     headers: { 'Content-Type': 'application/json' },
   });
   return {

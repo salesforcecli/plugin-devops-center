@@ -44,6 +44,7 @@ describe('devops promote', () => {
   const promoteStageStub = sinon.stub();
   const resolveProjectIdFromWorkItemStub = sinon.stub();
   const getPipelineIdForProjectStub = sinon.stub();
+  const validatePromotionStub = sinon.stub();
 
   before(async () => {
     const mod = await esmock('../../../src/commands/devops/promote.js', {
@@ -56,6 +57,9 @@ describe('devops promote', () => {
       '../../../src/utils/pipelineUtils.js': {
         getPipelineIdForProject: getPipelineIdForProjectStub,
       },
+      '../../../src/utils/promotionUtils.js': {
+        validatePromotion: validatePromotionStub,
+      },
     });
     PromoteCommand = mod.default;
   });
@@ -65,6 +69,15 @@ describe('devops promote', () => {
     promoteStageStub.reset();
     resolveProjectIdFromWorkItemStub.reset();
     getPipelineIdForProjectStub.reset();
+    validatePromotionStub.reset();
+    validatePromotionStub.resolves({ success: true, errorType: null, errorDetails: null, combineDetails: null });
+    // Default: all queried work items are promotable
+    queryMock = sinon.stub().resolves({
+      records: [
+        { Id: '1fkxx0000000001', Status: 'READY_TO_PROMOTE' },
+        { Id: '1fkxx0000000002', Status: 'READY_TO_PROMOTE' },
+      ],
+    });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sandbox.stub(Org, 'create' as any).returns(mockOrg);
   });
@@ -82,6 +95,7 @@ describe('devops promote', () => {
       .it('promotes a single work item', async (ctx) => {
         resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
         getPipelineIdForProjectStub.resolves('PIPE001');
+        queryMock = sinon.stub().resolves({ records: [{ Id: '1fkxx0000000001', Status: 'READY_TO_PROMOTE' }] });
         promoteStageStub.resolves(mockPromoteResult);
 
         await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
@@ -93,6 +107,22 @@ describe('devops promote', () => {
         expect(args.pipelineId).to.equal('PIPE001');
         expect(args.workItemIds).to.deep.equal(['1fkxx0000000001']);
         expect(args.targetStageId).to.equal('1QVxx0000000003');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('uses canonical 18-char IDs from SOQL for both validation and promotion', async () => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        // SOQL returns the full 18-char canonical ID even when user supplied 15-char
+        queryMock = sinon.stub().resolves({ records: [{ Id: '1fkWt000000hGr7IAE', Status: 'READY_TO_PROMOTE' }] });
+        promoteStageStub.resolves(mockPromoteResult);
+
+        await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkWt000000hGr7', '-t', '1QVxx0000000003']);
+
+        expect(validatePromotionStub.firstCall.args[2]).to.deep.equal(['1fkWt000000hGr7IAE']);
+        expect(promoteStageStub.firstCall.args[0].workItemIds).to.deep.equal(['1fkWt000000hGr7IAE']);
       });
 
     test
@@ -183,6 +213,128 @@ describe('devops promote', () => {
         }
 
         expect(ctx.stderr).to.contain('No pipeline found');
+      });
+  });
+
+  // ── Work-item status eligibility ─────────────────────────────────────────
+
+  describe('work-item path: status eligibility', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('promotes work items with status "Ready to Promote"', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        queryMock = sinon.stub().resolves({ records: [{ Id: '1fkxx0000000001', Status: 'READY_TO_PROMOTE' }] });
+        promoteStageStub.resolves(mockPromoteResult);
+
+        await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+
+        expect(ctx.stdout).to.contain('SUBMITTED');
+        expect(promoteStageStub.calledOnce).to.be.true;
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('promotes work items with status "Promoted"', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        queryMock = sinon.stub().resolves({ records: [{ Id: '1fkxx0000000001', Status: 'PROMOTED' }] });
+        promoteStageStub.resolves(mockPromoteResult);
+
+        await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+
+        expect(ctx.stdout).to.contain('SUBMITTED');
+        expect(promoteStageStub.calledOnce).to.be.true;
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('errors when a work item is not in an eligible status', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        queryMock = sinon.stub().resolves({ records: [{ Id: '1fkxx0000000001', Status: 'In Progress' }] });
+
+        try {
+          await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(promoteStageStub.called).to.be.false;
+        expect(ctx.stderr).to.contain('not eligible for promotion');
+        expect(ctx.stderr).to.contain('1fkxx0000000001');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('errors listing all ineligible IDs when multiple work items fail the status check', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        queryMock = sinon.stub().resolves({
+          records: [
+            { Id: '1fkxx0000000001', Status: 'Open' },
+            { Id: '1fkxx0000000002', Status: 'In Progress' },
+          ],
+        });
+
+        try {
+          await PromoteCommand.run([
+            '-o',
+            'testOrg',
+            '-i',
+            '1fkxx0000000001',
+            '-i',
+            '1fkxx0000000002',
+            '-t',
+            '1QVxx0000000003',
+          ]);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(promoteStageStub.called).to.be.false;
+        expect(ctx.stderr).to.contain('1fkxx0000000001');
+        expect(ctx.stderr).to.contain('1fkxx0000000002');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('errors only for ineligible items when some pass and some fail the status check', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        queryMock = sinon.stub().resolves({
+          records: [
+            { Id: '1fkxx0000000001', Status: 'READY_TO_PROMOTE' },
+            { Id: '1fkxx0000000002', Status: 'IN_PROGRESS' },
+          ],
+        });
+
+        try {
+          await PromoteCommand.run([
+            '-o',
+            'testOrg',
+            '-i',
+            '1fkxx0000000001',
+            '-i',
+            '1fkxx0000000002',
+            '-t',
+            '1QVxx0000000003',
+          ]);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(promoteStageStub.called).to.be.false;
+        expect(ctx.stderr).to.not.contain('1fkxx0000000001');
+        expect(ctx.stderr).to.contain('1fkxx0000000002');
       });
   });
 
@@ -348,6 +500,212 @@ describe('devops promote', () => {
       });
   });
 
+  // ── Validation gate ───────────────────────────────────────────────────────
+
+  describe('validation gate', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('runs validation before promoting and proceeds when validation passes', async () => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        queryMock = sinon.stub().resolves({ records: [{ Id: '1fkxx0000000001', Status: 'READY_TO_PROMOTE' }] });
+        promoteStageStub.resolves(mockPromoteResult);
+
+        await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+
+        expect(validatePromotionStub.calledOnce).to.be.true;
+        const validateArgs = validatePromotionStub.firstCall.args;
+        expect(validateArgs[1]).to.equal('PIPE001');
+        expect(validateArgs[2]).to.deep.equal(['1fkxx0000000001']);
+        expect(validateArgs[3]).to.equal('1QVxx0000000003');
+        expect(validateArgs[4]).to.be.false; // checkCombineDetails always false in pre-promote gate
+        expect(validateArgs[5]).to.be.false; // allWorkItemsInStage false for work-item path
+        expect(promoteStageStub.calledOnce).to.be.true;
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('blocks promotion and errors when validation fails without combine details', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        validatePromotionStub.resolves({
+          success: false,
+          errorType: 'MISSING_PR',
+          errorDetails: 'No PR associated with work item',
+          combineDetails: null,
+        });
+
+        try {
+          await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(promoteStageStub.called).to.be.false;
+        expect(ctx.stderr).to.contain('MISSING_PR');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('formats HTML-encoded JSON error details into human-readable lines', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        validatePromotionStub.resolves({
+          success: false,
+          errorType: 'CHANGE_REQUEST_VALIDATION',
+          errorDetails:
+            '[{&quot;reason&quot;:&quot;PR_DOES_NOT_EXIST&quot;,&quot;workItem&quot;:&quot;WI-000132&quot;}]',
+          combineDetails: null,
+        });
+
+        try {
+          await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('WI-000132');
+        expect(ctx.stderr).to.contain('no pull request exists');
+        expect(ctx.stderr).to.not.contain('&quot;');
+        expect(ctx.stderr).to.not.contain('PR_DOES_NOT_EXIST');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('formats multiple work item errors into a comma-separated list', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        validatePromotionStub.resolves({
+          success: false,
+          errorType: 'CHANGE_REQUEST_VALIDATION',
+          errorDetails:
+            '[{&quot;reason&quot;:&quot;PR_DOES_NOT_EXIST&quot;,&quot;workItem&quot;:&quot;WI-000132&quot;},{&quot;reason&quot;:&quot;PR_NOT_MERGED&quot;,&quot;workItem&quot;:&quot;WI-000133&quot;}]',
+          combineDetails: null,
+        });
+
+        try {
+          await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('WI-000132: no pull request exists');
+        expect(ctx.stderr).to.contain('WI-000133: pull request has not been merged');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('prints combine details and errors when validation fails with combine required', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        validatePromotionStub.resolves({
+          success: false,
+          errorType: 'COMBINE_REQUIRED',
+          errorDetails: 'Work items must be combined',
+          combineDetails: { workItemIds: ['1fkxx0000000001', '1fkxx0000000002'] },
+        });
+
+        try {
+          await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(promoteStageStub.called).to.be.false;
+        expect(ctx.stdout).to.contain('1fkxx0000000001');
+        expect(ctx.stdout).to.contain('1fkxx0000000002');
+        expect(ctx.stderr).to.contain('COMBINE_REQUIRED');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('skips validation and promotes directly when --skip-validation is passed', async () => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        promoteStageStub.resolves(mockPromoteResult);
+
+        await PromoteCommand.run([
+          '-o',
+          'testOrg',
+          '-i',
+          '1fkxx0000000001',
+          '-t',
+          '1QVxx0000000003',
+          '--skip-validation',
+        ]);
+
+        expect(validatePromotionStub.called).to.be.false;
+        expect(promoteStageStub.calledOnce).to.be.true;
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('surfaces DevOps Center not enabled error from validation', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        validatePromotionStub.rejects(new Error("sObject type 'DevopsPromotionRequest' is not supported"));
+
+        try {
+          await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+        } catch (e) {
+          // expected
+        }
+
+        expect(promoteStageStub.called).to.be.false;
+        expect(ctx.stderr).to.contain("DevOps Center isn't enabled");
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('surfaces generic validation request failure', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        validatePromotionStub.rejects(new Error('Network timeout'));
+
+        try {
+          await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+        } catch (e) {
+          // expected
+        }
+
+        expect(promoteStageStub.called).to.be.false;
+        expect(ctx.stderr).to.contain('pre-promote validation');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('runs validation using resolved work item IDs when --stage-id is used', async () => {
+        queryMock = sinon
+          .stub()
+          .onFirstCall()
+          .resolves({ records: [{ DevopsPipelineId: '1QVxx0000000001' }] })
+          .onSecondCall()
+          .resolves({ records: [{ NextStageId: '1QVxx0000000003' }] })
+          .onThirdCall()
+          .resolves({ records: [{ Id: '1fkxx0000000001' }, { Id: '1fkxx0000000002' }] });
+        promoteStageStub.resolves(mockPromoteResult);
+
+        await PromoteCommand.run(['-o', 'testOrg', '-s', '1QVxx0000000002', '-t', '1QVxx0000000003']);
+
+        expect(validatePromotionStub.calledOnce).to.be.true;
+        expect(validatePromotionStub.firstCall.args[2]).to.deep.equal(['1fkxx0000000001', '1fkxx0000000002']);
+        expect(validatePromotionStub.firstCall.args[5]).to.be.true; // allWorkItemsInStage true for stage path
+      });
+  });
+
   // ── Shared error cases ────────────────────────────────────────────────────
 
   describe('API errors', () => {
@@ -383,6 +741,28 @@ describe('devops promote', () => {
         }
 
         expect(ctx.stderr).to.contain('Failed to promote');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('strips API error code prefix from promote error message', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        promoteStageStub.rejects(
+          new Error(
+            'PROMOTION_SOURCE_CODE_REPOSITORY_BRANCH_NOT_FOUND:No source code repository branch found for work item: 1fkxx0000000001'
+          )
+        );
+
+        try {
+          await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('No source code repository branch found');
+        expect(ctx.stderr).to.not.contain('PROMOTION_SOURCE_CODE_REPOSITORY_BRANCH_NOT_FOUND:');
       });
   });
 });

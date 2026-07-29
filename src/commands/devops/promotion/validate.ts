@@ -16,7 +16,12 @@
 
 import { Messages } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { validatePromotion, CombineDetails, ValidatePromotionResult } from '../../../utils/promotionUtils.js';
+import {
+  validatePromotion,
+  CombineDetails,
+  ValidatePromotionResult,
+  formatValidationDetails,
+} from '../../../utils/promotionUtils.js';
 import { validateSalesforceId } from '../../../utils/soqlUtils.js';
 import { resolveProjectIdFromWorkItem } from '../../../utils/prepareWorkItem.js';
 import { getPipelineIdForProject } from '../../../utils/pipelineUtils.js';
@@ -100,7 +105,12 @@ export default class DevopsPromotionValidate extends SfCommand<PromotionValidate
     }
 
     if (!result.success) {
-      this.error(messages.getMessage('error.ValidationFailed', [result.errorType ?? '', result.errorDetails ?? '']));
+      this.error(
+        messages.getMessage('error.ValidationFailed', [
+          result.errorType ?? '',
+          formatValidationDetails(result.errorDetails),
+        ])
+      );
     }
 
     this.log(`Success:      ${result.success}`);

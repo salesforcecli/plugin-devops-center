@@ -50,6 +50,14 @@ export function validateSalesforceId(id: string, context?: string): string {
 }
 
 /**
+ * Trims an 18-character Salesforce ID to its 15-character form.
+ * 15-char IDs are returned unchanged. Accepts IDs that have already passed validateSalesforceId.
+ */
+export function normalizeSalesforceId(id: string): string {
+  return id.length === 18 ? id.slice(0, 15) : id;
+}
+
+/**
  * Validates that a string starts with the expected Salesforce object prefix.
  * Throws an error if validation fails.
  */
