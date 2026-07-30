@@ -1,3 +1,11 @@
+# [2.0.0](https://github.com/salesforcecli/plugin-devops-center/compare/1.4.1...2.0.0) (2026-07-30)
+
+- feat!: require Node >=22, drop EOL Node versions @W-23480655@ ([da3bd9a](https://github.com/salesforcecli/plugin-devops-center/commit/da3bd9a29a7a076650bc4d01fa8d9b8bb849b215))
+
+### BREAKING CHANGES
+
+- Drop support for Node 18 and Node 20. Node >=22.0.0 is now required.
+
 ## [1.4.1](https://github.com/salesforcecli/plugin-devops-center/compare/1.4.0...1.4.1) (2026-07-24)
 
 # [1.4.0](https://github.com/salesforcecli/plugin-devops-center/compare/1.3.0...1.4.0) (2026-07-07)
