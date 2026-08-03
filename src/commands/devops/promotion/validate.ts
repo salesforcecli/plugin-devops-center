@@ -58,10 +58,6 @@ export default class DevopsPromotionValidate extends SfCommand<PromotionValidate
       multiple: true,
       startsWith: '1fk',
     }),
-    'check-combine-details': Flags.boolean({
-      summary: messages.getMessage('flags.check-combine-details.summary'),
-      default: false,
-    }),
   };
 
   public async run(): Promise<PromotionValidateResult> {
@@ -69,7 +65,6 @@ export default class DevopsPromotionValidate extends SfCommand<PromotionValidate
     const connection = flags['target-org'].getConnection(flags['api-version']);
     const targetStageId = flags['target-stage-id'];
     const workItemIds = flags['work-item-id'];
-    const checkCombineDetails = flags['check-combine-details'];
 
     validateSalesforceId(targetStageId, 'target stage');
     for (const id of workItemIds) {
@@ -94,7 +89,7 @@ export default class DevopsPromotionValidate extends SfCommand<PromotionValidate
 
     let result: ValidatePromotionResult;
     try {
-      result = await validatePromotion(connection, pipelineId, workItemIds, targetStageId, checkCombineDetails);
+      result = await validatePromotion(connection, pipelineId, workItemIds, targetStageId);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {

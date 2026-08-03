@@ -24,6 +24,7 @@ import {
   resolveTargetStageId,
   findStageById,
   getBranchNameFromStage,
+  computeUpstreamStageIds,
 } from '../../src/utils/pipelineUtils.js';
 import { PipelineStageRecord } from '../../src/utils/types.js';
 
@@ -147,6 +148,42 @@ describe('pipelineUtils', () => {
     it('returns undefined when branch is null', () => {
       const stage: PipelineStageRecord = { Id: 'S1', SourceCodeRepositoryBranch: null };
       expect(getBranchNameFromStage(stage)).to.be.undefined;
+    });
+  });
+
+  describe('computeUpstreamStageIds', () => {
+    // Dev -> Int -> Prod
+    const LINEAR: PipelineStageRecord[] = [
+      { Id: 'DEV', NextStageId: 'INT' },
+      { Id: 'INT', NextStageId: 'PROD' },
+      { Id: 'PROD', NextStageId: null },
+    ];
+
+    it('returns all upstream stages for a middle stage', () => {
+      expect(computeUpstreamStageIds(LINEAR, 'INT')).to.deep.equal(['DEV']);
+    });
+
+    it('returns the whole chain upstream of the last stage, nearest first', () => {
+      expect(computeUpstreamStageIds(LINEAR, 'PROD')).to.deep.equal(['INT', 'DEV']);
+    });
+
+    it('returns empty array for the first stage', () => {
+      expect(computeUpstreamStageIds(LINEAR, 'DEV')).to.deep.equal([]);
+    });
+
+    it('handles branching pipelines where two stages feed one', () => {
+      // A -> C, B -> C
+      const branching: PipelineStageRecord[] = [
+        { Id: 'A', NextStageId: 'C' },
+        { Id: 'B', NextStageId: 'C' },
+        { Id: 'C', NextStageId: null },
+      ];
+      expect(computeUpstreamStageIds(branching, 'C')).to.have.members(['A', 'B']);
+      expect(computeUpstreamStageIds(branching, 'A')).to.deep.equal([]);
+    });
+
+    it('returns empty array when stage is not found', () => {
+      expect(computeUpstreamStageIds(LINEAR, 'MISSING')).to.deep.equal([]);
     });
   });
 });

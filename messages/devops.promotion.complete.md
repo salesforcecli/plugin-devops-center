@@ -18,15 +18,15 @@ ID of a specific work item to deploy. Omit to deploy all undeployed work items f
 
 # examples
 
-- Complete a promotion for an out-of-sync pipeline stage.
+- Complete a promotion for an out-of-sync pipeline stage:
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --target-stage-id 1QV000000000001
 
-- Complete a promotion for a specific work item (e.g. first stage of a pipeline).
+- Complete a promotion for a specific work item (e.g. first stage of a pipeline):
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --target-stage-id 1QV000000000001 --work-item-id 1fk000000000001
 
-- Complete a promotion with full deploy and a specific test level.
+- Complete a promotion with full deploy and a specific test level:
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --target-stage-id 1QV000000000001 --deploy-all --test-level RunLocalTests
 

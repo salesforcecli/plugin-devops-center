@@ -108,27 +108,6 @@ describe('devops promotion validate', () => {
     test
       .stdout()
       .stderr()
-      .it('passes checkCombineDetails=true when flag is set', async () => {
-        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
-        getPipelineIdForProjectStub.resolves('PIPE001');
-        validatePromotionStub.resolves({ success: true, errorType: null, errorDetails: null, combineDetails: null });
-
-        await ValidateCommand.run([
-          '-o',
-          'testOrg',
-          '-i',
-          '1fkxx0000000001',
-          '-t',
-          '1QVxx0000000003',
-          '--check-combine-details',
-        ]);
-
-        expect(validatePromotionStub.firstCall.args[4]).to.be.true;
-      });
-
-    test
-      .stdout()
-      .stderr()
       .it('prints combine details when present', async (ctx) => {
         resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
         getPipelineIdForProjectStub.resolves('PIPE001');
@@ -139,15 +118,7 @@ describe('devops promotion validate', () => {
           combineDetails: { sharedComponents: ['ComponentA'] },
         });
 
-        const result = await ValidateCommand.run([
-          '-o',
-          'testOrg',
-          '-i',
-          '1fkxx0000000001',
-          '-t',
-          '1QVxx0000000003',
-          '--check-combine-details',
-        ]);
+        const result = await ValidateCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
 
         expect(ctx.stdout).to.contain('Combine Details');
         expect(ctx.stdout).to.contain('ComponentA');
