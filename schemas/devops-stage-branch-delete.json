@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/DeleteStageBranchResult",
+  "definitions": {
+    "DeleteStageBranchResult": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "stageId": {
+          "type": "string"
+        },
+        "branchName": {
+          "type": "string"
+        },
+        "clearedStages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ClearedStage"
+          }
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": ["success", "stageId"],
+      "additionalProperties": false
+    },
+    "ClearedStage": {
+      "type": "object",
+      "properties": {
+        "stageId": {
+          "type": "string"
+        },
+        "stageName": {
+          "type": "string"
+        },
+        "branchName": {
+          "type": "string"
+        }
+      },
+      "required": ["stageId"],
+      "additionalProperties": false
+    }
+  }
+}

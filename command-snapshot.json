@@ -151,15 +151,7 @@
     "command": "devops:promotion:validate",
     "flagAliases": [],
     "flagChars": ["i", "o", "t"],
-    "flags": [
-      "api-version",
-      "check-combine-details",
-      "flags-dir",
-      "json",
-      "target-org",
-      "target-stage-id",
-      "work-item-id"
-    ],
+    "flags": ["api-version", "flags-dir", "json", "target-org", "target-stage-id", "work-item-id"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -193,6 +185,14 @@
       "stage-id",
       "target-org"
     ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:stage:branch:delete",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "pipeline-id", "stage-id", "target-org"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
