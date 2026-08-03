@@ -21,6 +21,7 @@ import {
   CombineDetails,
   ValidatePromotionResult,
   formatValidationDetails,
+  hasSharedComponents,
 } from '../../../utils/promotionUtils.js';
 import { validateSalesforceId } from '../../../utils/soqlUtils.js';
 import { resolveProjectIdFromWorkItem } from '../../../utils/prepareWorkItem.js';
@@ -35,6 +36,7 @@ export type PromotionValidateResult = {
   errorType: string | null;
   errorDetails: string | null;
   combineDetails: CombineDetails | null;
+  suggestions: string[];
 };
 
 export default class DevopsPromotionValidate extends SfCommand<PromotionValidateResult> {
@@ -89,7 +91,7 @@ export default class DevopsPromotionValidate extends SfCommand<PromotionValidate
 
     let result: ValidatePromotionResult;
     try {
-      result = await validatePromotion(connection, pipelineId, workItemIds, targetStageId);
+      result = await validatePromotion(connection, pipelineId, workItemIds, targetStageId, true);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
@@ -114,11 +116,54 @@ export default class DevopsPromotionValidate extends SfCommand<PromotionValidate
       this.log(JSON.stringify(result.combineDetails, null, 2));
     }
 
+    // Validation succeeded, which means a pull request already exists for each work item, so they
+    // can be promoted directly. When the work items also share components, the user has two choices:
+    //   1. combine them and promote the combined parent as a single unit, or
+    //   2. promote them as they are, without combining.
+    const suggestions: string[] = [];
+    if (hasSharedComponents(result.combineDetails)) {
+      suggestions.push(messages.getMessage('suggestion.SharedComponents'));
+
+      // Option 1 — combine + promote. combineDetails carries the parent/child IDs to combine.
+      const parentId = result.combineDetails?.parentWorkitemId;
+      const childIds = result.combineDetails?.childWorkitemsId ?? [];
+      if (parentId && childIds.length > 0) {
+        const combineArgs = [
+          `--parent-work-item-id ${parentId}`,
+          ...childIds.map((id) => `--child-work-item-id ${id}`),
+          `--target-stage-id ${targetStageId}`,
+        ].join(' ');
+        suggestions.push(messages.getMessage('suggestion.CombineOption'));
+        suggestions.push(
+          messages.getMessage('suggestion.CombineStepPrepare', [`sf devops work-item combine ${combineArgs}`])
+        );
+        // Combine merges the children into the parent, so only the parent is promoted.
+        suggestions.push(
+          messages.getMessage('suggestion.CombineStepPromote', [
+            `sf devops promote --work-item-id ${parentId} --target-stage-id ${targetStageId}`,
+          ])
+        );
+      }
+
+      // Option 2 — promote the work items as-is. Their PRs already exist (validation passed).
+      const promoteArgs = [
+        ...workItemIds.map((id) => `--work-item-id ${id}`),
+        `--target-stage-id ${targetStageId}`,
+      ].join(' ');
+      suggestions.push(messages.getMessage('suggestion.PromoteOption'));
+      suggestions.push(messages.getMessage('suggestion.PromoteStep', [`sf devops promote ${promoteArgs}`]));
+
+      this.log('');
+      this.log('Suggestions:');
+      suggestions.forEach((s) => this.log(`  ${s}`));
+    }
+
     return {
       success: result.success,
       errorType: result.errorType,
       errorDetails: result.errorDetails,
       combineDetails: result.combineDetails,
+      suggestions,
     };
   }
 }

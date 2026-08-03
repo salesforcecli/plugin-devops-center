@@ -44,7 +44,23 @@ type ValidateDeployResponse = {
   errorDetails?: string;
 };
 
-export type CombineDetails = Record<string, unknown>;
+/** Maps a comma-separated list of work item names to the components they share. */
+export type SharedComponentsList = Record<string, string[]>;
+
+export type CombineDetails = {
+  childWorkitemsId?: string[];
+  parentWorkitemId?: string;
+  sharedComponentsList?: SharedComponentsList;
+} & Record<string, unknown>;
+
+/**
+ * Returns true when the combine details describe work items that share one or more components.
+ * Shared components mean the work items can optionally be combined before promotion.
+ */
+export function hasSharedComponents(combineDetails: CombineDetails | null): boolean {
+  const shared = combineDetails?.sharedComponentsList;
+  return Boolean(shared && Object.keys(shared).length > 0);
+}
 
 export type ValidatePromotionResult = {
   success: boolean;

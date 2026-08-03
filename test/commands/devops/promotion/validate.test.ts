@@ -79,6 +79,21 @@ describe('devops promotion validate', () => {
         expect(result.success).to.be.true;
         expect(result.errorType).to.be.null;
         expect(result.combineDetails).to.be.null;
+        expect(result.suggestions).to.deep.equal([]);
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('requests combine details from the API', async () => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        validatePromotionStub.resolves({ success: true, errorType: null, errorDetails: null, combineDetails: null });
+
+        await ValidateCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+
+        // checkCombineDetails (5th arg) must be true so the API returns shared-component info.
+        expect(validatePromotionStub.firstCall.args[4]).to.be.true;
       });
 
     test
@@ -123,6 +138,107 @@ describe('devops promotion validate', () => {
         expect(ctx.stdout).to.contain('Combine Details');
         expect(ctx.stdout).to.contain('ComponentA');
         expect(result.combineDetails).to.deep.equal({ sharedComponents: ['ComponentA'] });
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('suggests combine or promote when work items share components', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        validatePromotionStub.resolves({
+          success: true,
+          errorType: null,
+          errorDetails: null,
+          combineDetails: {
+            childWorkitemsId: ['1fkWt000000gzwjIAA'],
+            parentWorkitemId: '1fkWt000000hIjFIAU',
+            sharedComponentsList: {
+              'WI-000122,WI-000136': ['HelloMCP2:ApexClass'],
+            },
+          },
+        });
+
+        const result = await ValidateCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+
+        expect(ctx.stdout).to.contain('Success:      true');
+        expect(ctx.stdout).to.contain('Suggestions:');
+        expect(ctx.stdout).to.contain('share one or more components');
+        expect(ctx.stdout).to.contain('Option 1');
+        expect(ctx.stdout).to.contain('Option 2');
+        // Option 1: combine command populated with the real parent/child IDs from combineDetails
+        expect(ctx.stdout).to.contain(
+          'sf devops work-item combine --parent-work-item-id 1fkWt000000hIjFIAU --child-work-item-id 1fkWt000000gzwjIAA --target-stage-id 1QVxx0000000003'
+        );
+        // Option 1 promote: only the combined parent is promoted
+        expect(ctx.stdout).to.contain(
+          'sf devops promote --work-item-id 1fkWt000000hIjFIAU --target-stage-id 1QVxx0000000003'
+        );
+        // Option 2: promote the validated work items as-is (PR already exists, no prepare needed)
+        expect(ctx.stdout).to.contain(
+          'sf devops promote --work-item-id 1fkxx0000000001 --target-stage-id 1QVxx0000000003'
+        );
+        expect(ctx.stdout).to.not.contain('work-item prepare');
+        expect(result.success).to.be.true;
+        expect(result.suggestions.length).to.be.greaterThan(0);
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('lists all validated work items in the option 2 promote suggestion', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        validatePromotionStub.resolves({
+          success: true,
+          errorType: null,
+          errorDetails: null,
+          combineDetails: {
+            childWorkitemsId: ['1fkWt000000gzwjIAA', '1fkWt000000gzwkIAA'],
+            parentWorkitemId: '1fkWt000000hIjFIAU',
+            sharedComponentsList: { 'WI-000122,WI-000136': ['HelloMCP2:ApexClass'] },
+          },
+        });
+
+        await ValidateCommand.run([
+          '-o',
+          'testOrg',
+          '-i',
+          '1fkxx0000000001',
+          '-i',
+          '1fkxx0000000002',
+          '-t',
+          '1QVxx0000000003',
+        ]);
+
+        // Option 1 combine lists all children
+        expect(ctx.stdout).to.contain(
+          '--child-work-item-id 1fkWt000000gzwjIAA --child-work-item-id 1fkWt000000gzwkIAA'
+        );
+        // Option 2 promote lists all validated work items together (no prepare step needed)
+        expect(ctx.stdout).to.contain(
+          'sf devops promote --work-item-id 1fkxx0000000001 --work-item-id 1fkxx0000000002 --target-stage-id 1QVxx0000000003'
+        );
+        expect(ctx.stdout).to.not.contain('work-item prepare');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('does not suggest combining when there are no shared components', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        validatePromotionStub.resolves({
+          success: true,
+          errorType: null,
+          errorDetails: null,
+          combineDetails: { sharedComponentsList: {} },
+        });
+
+        const result = await ValidateCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+
+        expect(ctx.stdout).to.not.contain('Suggestions:');
+        expect(result.suggestions).to.deep.equal([]);
       });
   });
 

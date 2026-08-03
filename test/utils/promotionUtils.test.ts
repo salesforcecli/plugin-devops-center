@@ -17,7 +17,7 @@
 import { expect } from '@oclif/test';
 import sinon from 'sinon';
 import { Connection } from '@salesforce/core';
-import { validatePromotion } from '../../src/utils/promotionUtils.js';
+import { validatePromotion, hasSharedComponents } from '../../src/utils/promotionUtils.js';
 import { normalizeSalesforceId } from '../../src/utils/soqlUtils.js';
 
 describe('normalizeSalesforceId', () => {
@@ -27,6 +27,25 @@ describe('normalizeSalesforceId', () => {
 
   it('trims an 18-char ID to 15 chars', () => {
     expect(normalizeSalesforceId('1fkWt000000hGr7IAE')).to.equal('1fkWt000000hGr7');
+  });
+});
+
+describe('hasSharedComponents', () => {
+  it('returns false when combineDetails is null', () => {
+    expect(hasSharedComponents(null)).to.be.false;
+  });
+
+  it('returns false when sharedComponentsList is missing', () => {
+    expect(hasSharedComponents({ parentWorkitemId: '1fk000000000001' })).to.be.false;
+  });
+
+  it('returns false when sharedComponentsList is empty', () => {
+    expect(hasSharedComponents({ sharedComponentsList: {} })).to.be.false;
+  });
+
+  it('returns true when sharedComponentsList has entries', () => {
+    expect(hasSharedComponents({ sharedComponentsList: { 'WI-000122,WI-000136': ['HelloMCP2:ApexClass'] } })).to.be
+      .true;
   });
 });
 

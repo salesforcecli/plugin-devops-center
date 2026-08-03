@@ -36,7 +36,31 @@
     },
     "CombineDetails": {
       "type": "object",
-      "additionalProperties": {}
+      "additionalProperties": {},
+      "properties": {
+        "childWorkitemsId": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "parentWorkitemId": {
+          "type": "string"
+        },
+        "sharedComponentsList": {
+          "$ref": "#/definitions/SharedComponentsList"
+        }
+      }
+    },
+    "SharedComponentsList": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "description": "Maps a comma-separated list of work item names to the components they share."
     }
   }
 }

@@ -35,3 +35,30 @@ Validation failed (%s): %s
 # error.ValidationRequestFailed
 
 Validation request failed: %s
+
+# suggestion.SharedComponents
+
+The selected work items share one or more components. Choose one of these approaches:
+
+# suggestion.CombineOption
+
+Option 1 - Combine the work items and promote them as a single unit:
+
+# suggestion.PromoteOption
+
+Option 2 - Promote the work items as they are, without combining:
+
+# suggestion.CombineStepPrepare
+
+1. Combine the work items:
+   %s
+
+# suggestion.CombineStepPromote
+
+2. Promote the combined work item:
+   %s
+
+# suggestion.PromoteStep
+
+Run:
+%s
