@@ -54,6 +54,7 @@ describe('addPipelineStage utilities', () => {
     expect(createArg.Name).to.equal('Development');
     expect(createArg.DevopsPipelineId).to.equal('0XB000000000001');
     expect(createArg.NextStageId).to.equal('0Xc000000000002');
+    expect(createArg.IsBundled).to.be.true;
   });
 
   it('returns error when sObject create fails', async () => {

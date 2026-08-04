@@ -1,24 +1,18 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$ref": "#/definitions/PromoteResult",
+  "$ref": "#/definitions/PromotionValidateResult",
   "definitions": {
-    "PromoteResult": {
+    "PromotionValidateResult": {
       "type": "object",
       "properties": {
-        "requestId": {
-          "type": "string"
+        "success": {
+          "type": "boolean"
         },
-        "status": {
-          "type": "string"
+        "errorType": {
+          "type": ["string", "null"]
         },
-        "message": {
-          "type": "string"
-        },
-        "promotedWorkitemIds": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+        "errorDetails": {
+          "type": ["string", "null"]
         },
         "combineDetails": {
           "anyOf": [
@@ -29,9 +23,15 @@
               "type": "null"
             }
           ]
+        },
+        "suggestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
-      "required": ["requestId", "status", "message", "promotedWorkitemIds"],
+      "required": ["success", "errorType", "errorDetails", "combineDetails", "suggestions"],
       "additionalProperties": false
     },
     "CombineDetails": {

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/PipelineStageUpdateResult",
+  "definitions": {
+    "PipelineStageUpdateResult": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "stageId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": ["success", "stageId", "name"],
+      "additionalProperties": false
+    }
+  }
+}

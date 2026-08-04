@@ -92,6 +92,30 @@ describe('promoteStage utilities', () => {
     expect(body.deployOptions).to.deep.equal({ testLevel: 'RunLocalTests', isFullDeploy: true, runTests: ['MyTest'] });
   });
 
+  it('passes 18-char IDs through unchanged in the request body', async () => {
+    (connectionStub.request as sinon.SinonStub).resolves({
+      requestId: 'r',
+      status: 'SUBMITTED',
+      message: '',
+      promotedWorkitemIds: [],
+    });
+    (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
+
+    await promoteStage({
+      connection: connectionStub as unknown as Connection,
+      pipelineId: '0XB000000000001',
+      workItemIds: ['1fkWt000000hGr7IAE'],
+      targetStageId: '1QVWt000000G3huOAC',
+    });
+
+    const body = JSON.parse((connectionStub.request as sinon.SinonStub).firstCall.args[0].body as string) as Record<
+      string,
+      unknown
+    >;
+    expect(body.workitemIds).to.deep.equal(['1fkWt000000hGr7IAE']);
+    expect(body.targetStageId).to.equal('1QVWt000000G3huOAC');
+  });
+
   it('propagates API errors', async () => {
     (connectionStub.request as sinon.SinonStub).rejects(new Error('Bad Request'));
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');

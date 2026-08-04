@@ -21,6 +21,12 @@ import { resolveProjectIdFromWorkItem } from '../../utils/prepareWorkItem.js';
 import { getPipelineIdForProject } from '../../utils/pipelineUtils.js';
 import { deployAll, testLevel as testLevelFlag, specificTestsNoChar } from '../../common/flags/promote/promoteFlags.js';
 import { validateSalesforceId } from '../../utils/soqlUtils.js';
+import {
+  validatePromotion,
+  CombineDetails,
+  ValidatePromotionResult,
+  formatValidationDetails,
+} from '../../utils/promotionUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.promote');
@@ -31,7 +37,11 @@ export type PromoteResult = {
   status: string;
   message: string;
   promotedWorkitemIds: string[];
+  combineDetails?: CombineDetails | null;
 };
+
+const PROMOTABLE_STATUSES = ['READY_TO_PROMOTE', 'PROMOTED'] as const;
+const PROMOTABLE_STATUS_LIST = PROMOTABLE_STATUSES.join("', '");
 
 export default class DevopsPromote extends SfCommand<PromoteResult> {
   public static readonly summary = messages.getMessage('summary');
@@ -66,7 +76,26 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
     'deploy-all': deployAll,
     'test-level': testLevelFlag(),
     tests: specificTestsNoChar,
+    'skip-validation': Flags.boolean({
+      summary: messages.getMessage('flags.skip-validation.summary'),
+      default: false,
+    }),
   };
+
+  private static async assertWorkItemsPromotable(connection: Connection, workItemIds: string[]): Promise<string[]> {
+    const idList = workItemIds.map((id) => `'${id}'`).join(', ');
+    const result = await connection.query<{ Id: string; Status: string }>(
+      `SELECT Id, Status FROM WorkItem WHERE Id IN (${idList})`
+    );
+    const ineligible = result.records.filter((r) => !(PROMOTABLE_STATUSES as readonly string[]).includes(r.Status));
+    if (ineligible.length > 0) {
+      const details = ineligible.map((r) => `${r.Id} (${r.Status})`).join(', ');
+      throw new Error(
+        `The following work items are not eligible for promotion: ${details}. Only work items with status READY_TO_PROMOTE or PROMOTED can be promoted.`
+      );
+    }
+    return result.records.map((r) => r.Id);
+  }
 
   private static async fetchStageWorkItems(
     connection: Connection,
@@ -92,7 +121,7 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
     }
 
     const workItemResult = await connection.query<{ Id: string }>(
-      `SELECT Id FROM WorkItem WHERE DevopsPipelineStageId = '${sourceStageId}' LIMIT 200`
+      `SELECT Id FROM WorkItem WHERE DevopsPipelineStageId = '${sourceStageId}' AND Status IN ('${PROMOTABLE_STATUS_LIST}') LIMIT 200`
     );
     return workItemResult.records.map((r) => r.Id);
   }
@@ -120,7 +149,7 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
         );
       }
       pipelineId = pid;
-      resolvedWorkItemIds = workItemIds;
+      resolvedWorkItemIds = await DevopsPromote.assertWorkItemsPromotable(connection, workItemIds);
     } else {
       // Stage path: resolve pipelineId from the source stage
       const sid = sourceStageId!;
@@ -139,6 +168,10 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
       }
     }
 
+    if (!flags['skip-validation']) {
+      await this.runValidation(connection, pipelineId, resolvedWorkItemIds, targetStageId, !workItemIds?.length);
+    }
+
     let apiResult: PromoteStageResult;
     try {
       apiResult = await promoteStage({
@@ -155,7 +188,8 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
         this.error(commonErrorMessages.getMessage('error.DevopsCenterNotEnabled'));
       }
-      const cleanMsg = errMsg.split('<')[0].trim();
+      const htmlStripped = errMsg.split('<')[0].trim();
+      const cleanMsg = htmlStripped.replace(/^[A-Z][A-Z0-9_]+:/, '').trim();
       this.error(messages.getMessage('error.PromoteFailed', [cleanMsg]));
     }
 
@@ -175,5 +209,39 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
       message: apiResult.message,
       promotedWorkitemIds: apiResult.promotedWorkitemIds,
     };
+  }
+
+  private async runValidation(
+    connection: Connection,
+    pipelineId: string,
+    workItemIds: string[],
+    targetStageId: string,
+    allWorkItemsInStage = false
+  ): Promise<void> {
+    let result: ValidatePromotionResult;
+    try {
+      result = await validatePromotion(connection, pipelineId, workItemIds, targetStageId, false, allWorkItemsInStage);
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
+        this.error(commonErrorMessages.getMessage('error.DevopsCenterNotEnabled'));
+      }
+      const htmlStripped = errMsg.split('<')[0].trim();
+      const cleanMsg = htmlStripped.replace(/^[A-Z][A-Z0-9_]+:/, '').trim();
+      this.error(messages.getMessage('error.ValidationRequestFailed', [cleanMsg]));
+    }
+
+    if (!result.success) {
+      if (result.combineDetails) {
+        this.log(messages.getMessage('error.ValidationFailedCombineRequired'));
+        this.log(JSON.stringify(result.combineDetails, null, 2));
+      }
+      this.error(
+        messages.getMessage('error.ValidationFailed', [
+          result.errorType ?? '',
+          formatValidationDetails(result.errorDetails),
+        ])
+      );
+    }
   }
 }

@@ -69,10 +69,6 @@ export default class DevopsWorkItemPrepare extends SfCommand<PrepareWorkItemResu
       throw error;
     }
 
-    if (!sourceStageId) {
-      this.error(`Work item '${workItemId}' is not currently assigned to a pipeline stage.`);
-    }
-
     const pipelineId = await getPipelineIdForProject(connection, projectId);
     if (!pipelineId) {
       this.error(`No pipeline found for work item ${workItemId}. Ensure the project has an associated pipeline.`);

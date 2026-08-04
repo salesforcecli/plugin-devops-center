@@ -48,6 +48,10 @@ ID of the source pipeline stage whose approved work items will be promoted. Mutu
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --stage-id 1QVxx0000000001 --target-stage-id 1QVxx0000000002 --deploy-all
 
+# flags.skip-validation.summary
+
+Skip pre-promote validation. By default, promotion is validated before proceeding to prevent promoting work items without an associated PR. Use this flag to bypass validation.
+
 # error.NoModeFlag
 
 Provide either --work-item-id to promote specific work items or --stage-id to promote all approved work items from a stage.
@@ -55,6 +59,18 @@ Provide either --work-item-id to promote specific work items or --stage-id to pr
 # error.NoWorkItems
 
 No work items found to promote from the source stage. Make sure there are approved work items before promoting.
+
+# error.ValidationRequestFailed
+
+Failed to run pre-promote validation: %s
+
+# error.ValidationFailedCombineRequired
+
+Promotion blocked: work items must be combined before promoting. Run the combine command with the following details:
+
+# error.ValidationFailed
+
+Pre-promote validation failed (%s): %s
 
 # error.PromoteFailed
 

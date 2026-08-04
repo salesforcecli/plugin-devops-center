@@ -34,7 +34,7 @@ describe('devops promotion complete', () => {
 
   before(async () => {
     const mod = await esmock('../../../../src/commands/devops/promotion/complete.js', {
-      '../../../../src/utils/deployStage.js': {
+      '../../../../src/utils/promotionUtils.js': {
         getUndeployedWorkItems: getUndeployedWorkItemsStub,
         validateDeploy: validateDeployStub,
         executeDeploy: executeDeployStub,

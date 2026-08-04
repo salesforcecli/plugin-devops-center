@@ -49,6 +49,7 @@ export async function addPipelineStage(params: AddPipelineStageParams): Promise<
     Name: name,
     DevopsPipelineId: pipelineId,
     NextStageId: nextStageId,
+    IsBundled: true,
   });
 
   const createResult = result as unknown as SObjectCreateResult;

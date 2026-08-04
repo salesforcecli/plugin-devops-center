@@ -21,7 +21,7 @@ import {
   validateDeploy,
   executeDeploy,
   DeployStageResult,
-} from '../../../utils/deployStage.js';
+} from '../../../utils/promotionUtils.js';
 import { deployAll, testLevel, specificTestsNoChar } from '../../../common/flags/promote/promoteFlags.js';
 import { validateSalesforceId } from '../../../utils/soqlUtils.js';
 

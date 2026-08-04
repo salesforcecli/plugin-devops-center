@@ -59,6 +59,23 @@ describe('prepareWorkItem', () => {
     expect(body.targetStageId).to.equal('05S000000000002');
   });
 
+  it('omits sourceStageId from request body when not provided', async () => {
+    (connectionStub.request as sinon.SinonStub).resolves({ success: true, requestToken: 'tok' });
+    (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
+
+    await prepareWorkItem({
+      connection: connectionStub as unknown as Connection,
+      pipelineId: '0XB000000000001',
+      workItemId: '0Wx000000000001',
+      targetStageId: '05S000000000002',
+    });
+
+    const body = JSON.parse((connectionStub.request as sinon.SinonStub).firstCall.args[0].body as string);
+    expect(body).to.not.have.property('sourceStageId');
+    expect(body.selectedWorkItemId).to.equal('0Wx000000000001');
+    expect(body.targetStageId).to.equal('05S000000000002');
+  });
+
   it('returns failure with error code and message', async () => {
     (connectionStub.request as sinon.SinonStub).resolves({
       success: false,

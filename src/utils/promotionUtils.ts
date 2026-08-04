@@ -15,6 +15,7 @@
  */
 
 import { Connection } from '@salesforce/core';
+import { normalizeSalesforceId } from './soqlUtils.js';
 
 export type UndeployedWorkItemsResult = {
   undeployedWorkitemIds: string[];
@@ -41,6 +42,38 @@ type ValidateDeployResponse = {
   success?: boolean;
   errorType?: string;
   errorDetails?: string;
+};
+
+/** Maps a comma-separated list of work item names to the components they share. */
+export type SharedComponentsList = Record<string, string[]>;
+
+export type CombineDetails = {
+  childWorkitemsId?: string[];
+  parentWorkitemId?: string;
+  sharedComponentsList?: SharedComponentsList;
+} & Record<string, unknown>;
+
+/**
+ * Returns true when the combine details describe work items that share one or more components.
+ * Shared components mean the work items can optionally be combined before promotion.
+ */
+export function hasSharedComponents(combineDetails: CombineDetails | null): boolean {
+  const shared = combineDetails?.sharedComponentsList;
+  return Boolean(shared && Object.keys(shared).length > 0);
+}
+
+export type ValidatePromotionResult = {
+  success: boolean;
+  errorType: string | null;
+  errorDetails: string | null;
+  combineDetails: CombineDetails | null;
+};
+
+type ValidatePromotionResponse = {
+  success?: boolean;
+  errorType?: string;
+  errorDetails?: string;
+  combineDetails?: CombineDetails;
 };
 
 type DeployStageResponse = {
@@ -83,6 +116,68 @@ export async function validateDeploy(
     success: response.success ?? true,
     errorType: response.errorType ?? null,
     errorDetails: response.errorDetails ?? null,
+  };
+}
+
+const VALIDATION_REASON_LABELS: Record<string, string> = {
+  PR_DOES_NOT_EXIST: 'no pull request exists',
+  PR_NOT_MERGED: 'pull request has not been merged',
+  BRANCH_NOT_FOUND: 'source branch not found',
+};
+
+export function formatValidationDetails(raw: string | null): string {
+  if (!raw) return '';
+  const decoded = raw
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+  try {
+    const parsed = JSON.parse(decoded) as Array<{ reason?: string; workItem?: string }>;
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed
+        .map((entry) => {
+          const label = entry.reason ? VALIDATION_REASON_LABELS[entry.reason] ?? entry.reason : '';
+          return entry.workItem ? `${entry.workItem}: ${label}` : label;
+        })
+        .join(', ');
+    }
+  } catch {
+    // not JSON — fall through
+  }
+  return decoded;
+}
+
+/**
+ * POST /services/data/vXX.X/connect/devops/pipelines/{pipelineId}/validatePromote
+ * Full variant that accepts checkCombineDetails and returns combineDetails.
+ */
+export async function validatePromotion(
+  connection: Connection,
+  pipelineId: string,
+  workItemIds: string[],
+  targetStageId: string,
+  checkCombineDetails = false,
+  allWorkItemsInStage = false
+): Promise<ValidatePromotionResult> {
+  const path = `/services/data/v${connection.getApiVersion()}/connect/devops/pipelines/${pipelineId}/validatePromote`;
+  const payload: Record<string, unknown> = {
+    selectedWorkItemIds: workItemIds.map(normalizeSalesforceId),
+    targetStageId: normalizeSalesforceId(targetStageId),
+    allWorkItemsInStage,
+  };
+  if (checkCombineDetails) payload.checkCombineDetails = true;
+  const response = await connection.request<ValidatePromotionResponse>({
+    method: 'POST',
+    url: path,
+    body: JSON.stringify(payload),
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return {
+    success: response.success ?? true,
+    errorType: response.errorType ?? null,
+    errorDetails: response.errorDetails ?? null,
+    combineDetails: response.combineDetails ?? null,
   };
 }
 

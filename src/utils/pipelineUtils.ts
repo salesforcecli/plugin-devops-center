@@ -63,3 +63,37 @@ export function findStageById(
 export function getBranchNameFromStage(stage: PipelineStageRecord | undefined): string | undefined {
   return stage?.SourceCodeRepositoryBranch?.Name ?? undefined;
 }
+
+/**
+ * Returns the IDs of all stages upstream (to the left) of the given stage, i.e. every stage
+ * whose promotion path eventually reaches it by following NextStageId. The target stage itself
+ * is not included. Order is nearest-to-farthest from the target.
+ *
+ * Branches are configured right-to-left (a stage can only have a branch once the stage to its
+ * right does), so removing a branch must cascade to every upstream stage to keep the pipeline valid.
+ */
+export function computeUpstreamStageIds(stages: PipelineStageRecord[], stageId: string): string[] {
+  const predecessorsByStageId = new Map<string, string[]>();
+  for (const stage of stages) {
+    if (stage.NextStageId) {
+      const predecessors = predecessorsByStageId.get(stage.NextStageId) ?? [];
+      predecessors.push(stage.Id);
+      predecessorsByStageId.set(stage.NextStageId, predecessors);
+    }
+  }
+
+  const upstream: string[] = [];
+  const seen = new Set<string>([stageId]);
+  const queue: string[] = [stageId];
+  while (queue.length > 0) {
+    const current = queue.shift() as string;
+    for (const predecessorId of predecessorsByStageId.get(current) ?? []) {
+      if (!seen.has(predecessorId)) {
+        seen.add(predecessorId);
+        upstream.push(predecessorId);
+        queue.push(predecessorId);
+      }
+    }
+  }
+  return upstream;
+}

@@ -70,6 +70,14 @@
   },
   {
     "alias": [],
+    "command": "devops:pipeline:stage:update",
+    "flagAliases": [],
+    "flagChars": ["n", "o", "s"],
+    "flags": ["api-version", "flags-dir", "json", "name", "stage-id", "target-org"],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
     "command": "devops:pipeline:update",
     "flagAliases": [],
     "flagChars": ["n", "o"],
@@ -110,6 +118,7 @@
       "deploy-all",
       "flags-dir",
       "json",
+      "skip-validation",
       "stage-id",
       "target-org",
       "target-stage-id",
@@ -135,6 +144,14 @@
       "tests",
       "work-item-id"
     ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:promotion:validate",
+    "flagAliases": [],
+    "flagChars": ["i", "o", "t"],
+    "flags": ["api-version", "flags-dir", "json", "target-org", "target-stage-id", "work-item-id"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {
@@ -168,6 +185,14 @@
       "stage-id",
       "target-org"
     ],
+    "plugin": "@salesforce/plugin-devops-center"
+  },
+  {
+    "alias": [],
+    "command": "devops:stage:branch:delete",
+    "flagAliases": [],
+    "flagChars": ["o"],
+    "flags": ["api-version", "flags-dir", "json", "pipeline-id", "stage-id", "target-org"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {

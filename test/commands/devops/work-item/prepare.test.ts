@@ -100,6 +100,28 @@ describe('devops work-item prepare', () => {
       });
   });
 
+  describe('work item not assigned to a pipeline stage', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('proceeds without sourceStageId when work item has no pipeline stage assignment', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        prepareWorkItemStub.resolves({
+          success: true,
+          requestToken: 'tok-dev',
+          errorCode: null,
+          errorMessage: null,
+        });
+
+        await PrepareCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000002']);
+
+        expect(ctx.stdout).to.contain('prepared for one-off promotion');
+        expect(prepareWorkItemStub.calledOnce).to.be.true;
+      });
+  });
+
   describe('failure response', () => {
     test
       .stdout()
