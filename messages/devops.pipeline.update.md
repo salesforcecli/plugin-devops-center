@@ -4,7 +4,7 @@ Update a DevOps Center pipeline.
 
 # description
 
-Activate, deactivate, or rename a DevOps Center pipeline. Use --active to activate, --no-active to deactivate, and --name to rename. You can combine --no-active and --name in one command.
+Activate, deactivate, or rename a DevOps Center pipeline. Use --activate to activate, --deactivate to deactivate, and --name to rename. You can combine --deactivate and --name in one command.
 
 A pipeline must have at least one stage before you can activate it. You can't modify the pipeline stages after you activate and promote changes through it.
 
@@ -12,9 +12,13 @@ A pipeline must have at least one stage before you can activate it. You can't mo
 
 ID of the pipeline.
 
-# flags.active.summary
+# flags.activate.summary
 
-Activate the pipeline. Use --no-active to deactivate.
+Activate the pipeline. Can't be used with --deactivate.
+
+# flags.deactivate.summary
+
+Deactivate the pipeline. Can't be used with --activate.
 
 # flags.name.summary
 
@@ -24,15 +28,15 @@ New name for the pipeline.
 
 - Activate a pipeline:
 
-      <%= config.bin %> <%= command.id %> --target-org my-devops-org --pipeline-id 0XB000000000001 --active
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --pipeline-id 0XB000000000001 --activate
 
 - Deactivate and rename in one step.
 
-      <%= config.bin %> <%= command.id %> --target-org my-devops-org --pipeline-id 0XB000000000001 --no-active --name "My Pipeline"
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --pipeline-id 0XB000000000001 --deactivate --name "My Pipeline"
 
 # error.NoFlags
 
-Provide at least one of --active/--no-active or --name.
+Provide at least one of --activate, --deactivate, or --name.
 
 # error.NoStages
 

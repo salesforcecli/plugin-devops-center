@@ -26,20 +26,19 @@ export type RepoInfo = {
 export type CreatePipelineParams = {
   connection: Connection;
   name: string;
-  description?: string;
   repo: string;
   repoType: string;
   createRepo?: boolean;
   repoOwner?: string;
   bitbucketWorkspace?: string;
   bitbucketProjectKey?: string;
+  stages?: string[];
 };
 
 export type CreatePipelineResult = {
   success: boolean;
   pipelineId?: string;
   name?: string;
-  description?: string;
   status?: string;
   repository?: RepoInfo;
   error?: string;
@@ -51,7 +50,7 @@ type ConnectPipelineResponse = {
   status: string;
 };
 
-const DEFAULT_STAGES = [{ name: 'Integration' }, { name: 'UAT' }, { name: 'Staging' }, { name: 'Production' }];
+const DEFAULT_STAGE_NAMES = ['Integration', 'UAT', 'Staging', 'Production'];
 
 /**
  * Detects repo type from a URL. Returns 'github' or 'bitbucket', or undefined.
@@ -120,24 +119,17 @@ export class GitHubOwnerNotFoundError extends Error {
  * POST /services/data/v{version}/connect/devops/pipelines
  */
 export async function createPipeline(params: CreatePipelineParams): Promise<CreatePipelineResult> {
-  const {
-    connection,
-    name,
-    description,
-    repo,
-    repoType,
-    createRepo,
-    repoOwner,
-    bitbucketWorkspace,
-    bitbucketProjectKey,
-  } = params;
+  const { connection, name, repo, repoType, createRepo, repoOwner, bitbucketWorkspace, bitbucketProjectKey, stages } =
+    params;
 
   const path = `/services/data/v${connection.getApiVersion()}/connect/devops/pipelines`;
+
+  const stageNames = stages && stages.length > 0 ? stages : DEFAULT_STAGE_NAMES;
 
   const payload: Record<string, unknown> = {
     name,
     vcsType: repoType,
-    stages: DEFAULT_STAGES,
+    stages: stageNames.map((stageName) => ({ name: stageName })),
   };
 
   if (createRepo) {
@@ -157,10 +149,6 @@ export async function createPipeline(params: CreatePipelineParams): Promise<Crea
     payload.vcsRepoUrl = repo;
   }
 
-  if (description) {
-    payload.description = description;
-  }
-
   const data = await connection.request<ConnectPipelineResponse>({
     method: 'POST',
     url: path,
@@ -172,7 +160,6 @@ export async function createPipeline(params: CreatePipelineParams): Promise<Crea
     success: true,
     pipelineId: data.id,
     name,
-    description,
     status: data.status ?? 'Inactive',
     repository: {
       repoUrl: repo,

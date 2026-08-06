@@ -38,10 +38,15 @@ export default class DevopsPipelineUpdate extends SfCommand<PipelineUpdateResult
       required: true,
       char: undefined,
     }),
-    active: Flags.boolean({
-      summary: messages.getMessage('flags.active.summary'),
+    activate: Flags.boolean({
+      summary: messages.getMessage('flags.activate.summary'),
       required: false,
-      allowNo: true,
+      exclusive: ['deactivate'],
+    }),
+    deactivate: Flags.boolean({
+      summary: messages.getMessage('flags.deactivate.summary'),
+      required: false,
+      exclusive: ['activate'],
     }),
     name: Flags.string({
       summary: messages.getMessage('flags.name.summary'),
@@ -70,7 +75,8 @@ export default class DevopsPipelineUpdate extends SfCommand<PipelineUpdateResult
     const org: Org = flags['target-org'];
     const connection = org.getConnection(flags['api-version']);
     const pipelineId = flags['pipeline-id'];
-    const activateFlag = flags.active;
+    // Derive tri-state: true = activate, false = deactivate, undefined = neither requested.
+    const activateFlag = flags.activate ? true : flags.deactivate ? false : undefined;
     const newName = flags.name;
 
     if (activateFlag === undefined && newName === undefined) {

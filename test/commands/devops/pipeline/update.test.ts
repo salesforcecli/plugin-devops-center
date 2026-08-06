@@ -78,7 +78,7 @@ describe('devops pipeline update', () => {
         ]);
         activatePipelineStub.resolves({ success: true, pipelineId: '0XB000000000001', status: 'Active' });
 
-        await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--active']);
+        await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--activate']);
 
         expect(ctx.stdout).to.contain('Successfully activated the pipeline.');
         expect(ctx.stdout).to.contain('0XB000000000001');
@@ -97,7 +97,7 @@ describe('devops pipeline update', () => {
         fetchPipelineStagesStub.resolves([{ Id: '1', Name: 'Integration' }]);
         queryStub.resolves({ records: [{ IsActive: true, Name: 'My Pipeline' }] });
 
-        await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--no-active']);
+        await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--deactivate']);
 
         expect(ctx.stdout).to.contain('Successfully deactivated the pipeline.');
         expect(ctx.stdout).to.contain('0XB000000000001');
@@ -140,7 +140,7 @@ describe('devops pipeline update', () => {
           'testOrg',
           '--pipeline-id',
           '0XB000000000001',
-          '--no-active',
+          '--deactivate',
           '--name',
           'Archived Pipeline',
         ]);
@@ -159,7 +159,7 @@ describe('devops pipeline update', () => {
     test
       .stdout()
       .stderr()
-      .it('errors when neither --active nor --name is provided', async (ctx) => {
+      .it('errors when neither --activate, --deactivate, nor --name is provided', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         fetchPipelineStagesStub.resolves([{ Id: '1', Name: 'Integration' }]);
@@ -175,6 +175,33 @@ describe('devops pipeline update', () => {
       });
   });
 
+  describe('mutually exclusive activate/deactivate', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('errors when both --activate and --deactivate are provided', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        fetchPipelineStagesStub.resolves([{ Id: '1', Name: 'Integration' }]);
+
+        try {
+          await UpdateCommand.run([
+            '--target-org',
+            'testOrg',
+            '--pipeline-id',
+            '0XB000000000001',
+            '--activate',
+            '--deactivate',
+          ]);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('cannot also be provided');
+      });
+  });
+
   describe('no stages error on activate', () => {
     test
       .stdout()
@@ -185,7 +212,7 @@ describe('devops pipeline update', () => {
         fetchPipelineStagesStub.resolves([]);
 
         try {
-          await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--active']);
+          await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--activate']);
           expect.fail('should have thrown');
         } catch (e) {
           // expected
@@ -206,7 +233,7 @@ describe('devops pipeline update', () => {
         queryStub.resolves({ records: [{ IsActive: true, Name: 'My Pipeline' }] });
 
         try {
-          await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--active']);
+          await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--activate']);
           expect.fail('should have thrown');
         } catch (e) {
           // expected
@@ -227,7 +254,7 @@ describe('devops pipeline update', () => {
         queryStub.resolves({ records: [{ IsActive: false, Name: 'My Pipeline' }] });
 
         try {
-          await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--no-active']);
+          await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--deactivate']);
           expect.fail('should have thrown');
         } catch (e) {
           // expected
@@ -247,7 +274,7 @@ describe('devops pipeline update', () => {
         fetchPipelineStagesStub.rejects(new Error("sObject type 'DevopsPipelineStage' is not supported"));
 
         try {
-          await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--active']);
+          await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--activate']);
         } catch (e) {
           // expected
         }
@@ -267,7 +294,7 @@ describe('devops pipeline update', () => {
         activatePipelineStub.rejects(new Error('Network error'));
 
         try {
-          await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--active']);
+          await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--activate']);
           expect.fail('should have thrown');
         } catch (e: unknown) {
           expect((e as Error).message).to.contain('Network error');
