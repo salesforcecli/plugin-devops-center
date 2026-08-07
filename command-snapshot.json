@@ -3,19 +3,19 @@
     "alias": [],
     "command": "devops:pipeline:create",
     "flagAliases": [],
-    "flagChars": ["d", "n", "o", "r"],
+    "flagChars": ["n", "o", "r", "s"],
     "flags": [
       "api-version",
       "bitbucket-project-key",
       "bitbucket-workspace",
       "create-repo",
-      "description",
       "flags-dir",
       "json",
       "name",
       "repo",
       "repo-owner",
       "repo-type",
+      "stage",
       "target-org"
     ],
     "plugin": "@salesforce/plugin-devops-center"
@@ -81,7 +81,7 @@
     "command": "devops:pipeline:update",
     "flagAliases": [],
     "flagChars": ["n", "o"],
-    "flags": ["active", "api-version", "flags-dir", "json", "name", "pipeline-id", "target-org"],
+    "flags": ["activate", "api-version", "deactivate", "flags-dir", "json", "name", "pipeline-id", "target-org"],
     "plugin": "@salesforce/plugin-devops-center"
   },
   {

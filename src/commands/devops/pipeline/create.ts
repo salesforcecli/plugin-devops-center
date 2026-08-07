@@ -64,9 +64,10 @@ export default class DevopsPipelineCreate extends SfCommand<CreatePipelineResult
     'bitbucket-project-key': Flags.string({
       summary: messages.getMessage('flags.bitbucket-project-key.summary'),
     }),
-    description: Flags.string({
-      summary: messages.getMessage('flags.description.summary'),
-      char: 'd',
+    stage: Flags.string({
+      summary: messages.getMessage('flags.stage.summary'),
+      char: 's',
+      multiple: true,
     }),
   };
 
@@ -102,13 +103,13 @@ export default class DevopsPipelineCreate extends SfCommand<CreatePipelineResult
       result = await createPipeline({
         connection,
         name: flags['name'],
-        description: flags['description'],
         repo: flags['repo'],
         repoType,
         createRepo: flags['create-repo'],
         repoOwner: flags['repo-owner'],
         bitbucketWorkspace: flags['bitbucket-workspace'],
         bitbucketProjectKey: flags['bitbucket-project-key'],
+        stages: flags['stage'],
       });
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);

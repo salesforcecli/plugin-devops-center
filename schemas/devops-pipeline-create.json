@@ -14,9 +14,6 @@
         "name": {
           "type": "string"
         },
-        "description": {
-          "type": "string"
-        },
         "status": {
           "type": "string"
         },

@@ -38,27 +38,31 @@ Bitbucket workspace that will own the repository. Required when creating a Bitbu
 
 Bitbucket project key to associate with the repository. Optional when creating a Bitbucket repository using '--create-repo'.
 
-# flags.description.summary
+# flags.stage.summary
 
-Description of the pipeline.
+Name of a pipeline stage, in promotion order. Repeat the flag for each stage. Defaults to Integration, UAT, Staging, and Production.
 
 # examples
 
-- Create a pipeline and associate it with an existing GitHub repository.
+- Create a pipeline and associate it with an existing GitHub repository:
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --name "Release Pipeline" --repo https://github.com/myorg/myrepo
 
-- Create a pipeline and associate it with a new GitHub repository.
+- Create a pipeline and associate it with a new GitHub repository:
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --name "Release Pipeline" --repo my-new-repo --repo-type github --repo-owner myorg --create-repo
 
-- Create a pipeline and create a new Bitbucket repository.
+- Create a pipeline and create a new Bitbucket repository:
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --name "Release Pipeline" --repo my-new-repo --repo-type bitbucket --bitbucket-workspace myworkspace --bitbucket-project-key PROJ --create-repo
 
-- Create a pipeline with a description and associate it with an existing Bitbucket repository.
+- Create a pipeline and associate it with an existing Bitbucket repository:
 
-      <%= config.bin %> <%= command.id %> --target-org my-devops-org --name "Release Pipeline" --repo https://bitbucket.org/myworkspace/myrepo --description "Main CI/CD pipeline for production releases"
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --name "Release Pipeline" --repo https://bitbucket.org/myworkspace/myrepo
+
+- Create a pipeline with custom stage names instead of the default stages:
+
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --name "Release Pipeline" --repo https://github.com/myorg/myrepo --stage Dev --stage QA --stage Prod
 
 # error.RepoTypeRequired
 

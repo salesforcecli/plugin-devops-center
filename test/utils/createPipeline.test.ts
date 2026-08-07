@@ -231,28 +231,51 @@ describe('createPipeline utilities', () => {
       expect(providerInfo.bitbucketProjectKey).to.equal('PROJ');
     });
 
-    it('includes description when provided', async () => {
+    it('uses custom stage names when stages are provided', async () => {
       (connectionStub.request as sinon.SinonStub).resolves({
-        id: '0XB000000000003',
+        id: '0XB000000000005',
         message: 'Created',
         status: 'Inactive',
       });
       (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
-      const result = await createPipeline({
+      await createPipeline({
         connection: connectionStub as unknown as Connection,
-        name: 'Described Pipeline',
-        description: 'My description',
+        name: 'Custom Stages Pipeline',
         repo: 'https://github.com/myorg/myrepo',
         repoType: 'github',
+        stages: ['Dev', 'QA', 'Prod'],
       });
-
-      expect(result.success).to.be.true;
-      expect(result.description).to.equal('My description');
 
       const callArgs = (connectionStub.request as sinon.SinonStub).firstCall.args[0];
       const body = JSON.parse(callArgs.body as string) as Record<string, unknown>;
-      expect(body.description).to.equal('My description');
+      expect(body.stages).to.deep.equal([{ name: 'Dev' }, { name: 'QA' }, { name: 'Prod' }]);
+    });
+
+    it('falls back to default stages when stages is an empty array', async () => {
+      (connectionStub.request as sinon.SinonStub).resolves({
+        id: '0XB000000000006',
+        message: 'Created',
+        status: 'Inactive',
+      });
+      (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
+
+      await createPipeline({
+        connection: connectionStub as unknown as Connection,
+        name: 'Default Stages Pipeline',
+        repo: 'https://github.com/myorg/myrepo',
+        repoType: 'github',
+        stages: [],
+      });
+
+      const callArgs = (connectionStub.request as sinon.SinonStub).firstCall.args[0];
+      const body = JSON.parse(callArgs.body as string) as Record<string, unknown>;
+      expect(body.stages).to.deep.equal([
+        { name: 'Integration' },
+        { name: 'UAT' },
+        { name: 'Staging' },
+        { name: 'Production' },
+      ]);
     });
 
     it('propagates API errors', async () => {
