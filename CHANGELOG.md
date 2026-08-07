@@ -1,3 +1,9 @@
+# [2.1.0](https://github.com/salesforcecli/plugin-devops-center/compare/2.0.1...2.1.0) (2026-08-07)
+
+### Features
+
+- customize pipeline create/update flags ([55e3316](https://github.com/salesforcecli/plugin-devops-center/commit/55e3316f7237a1c0ba127916d901138b61d486ec))
+
 ## [2.0.1](https://github.com/salesforcecli/plugin-devops-center/compare/2.0.0...2.0.1) (2026-08-06)
 
 # [2.0.0](https://github.com/salesforcecli/plugin-devops-center/compare/1.4.1...2.0.0) (2026-07-30)
