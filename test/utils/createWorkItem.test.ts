@@ -34,7 +34,7 @@ describe('createWorkItem', () => {
     (connectionStub.request as sinon.SinonStub).resolves({ id: 'WI001', name: 'WI-001', subject: 'Fix bug' });
 
     const result = await createWorkItem({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       projectId: 'PROJ001',
       subject: 'Fix bug',
       description: 'Details',
@@ -50,7 +50,7 @@ describe('createWorkItem', () => {
     (connectionStub.request as sinon.SinonStub).resolves({ Id: 'WI002', Name: 'WI-002', Subject: 'My subject' });
 
     const result = await createWorkItem({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       projectId: 'PROJ001',
       subject: 'My subject',
       description: '',
@@ -66,7 +66,7 @@ describe('createWorkItem', () => {
     (connectionStub.request as sinon.SinonStub).rejects(err);
 
     const result = await createWorkItem({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       projectId: 'PROJ001',
       subject: 'Fix bug',
       description: '',
@@ -83,7 +83,7 @@ describe('createWorkItem', () => {
     (connectionStub.request as sinon.SinonStub).rejects(err);
 
     const result = await createWorkItem({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       projectId: 'PROJ001',
       subject: 'Fix',
       description: '',
@@ -100,7 +100,7 @@ describe('createWorkItem', () => {
     (connectionStub.request as sinon.SinonStub).rejects(err);
 
     const result = await createWorkItem({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       projectId: 'PROJ001',
       subject: 'Fix',
       description: '',

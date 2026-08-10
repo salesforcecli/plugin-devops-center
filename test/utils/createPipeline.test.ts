@@ -141,7 +141,7 @@ describe('createPipeline utilities', () => {
       (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
       const result = await createPipeline({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         name: 'Release Pipeline',
         repo: 'https://github.com/myorg/myrepo',
         repoType: 'github',
@@ -179,7 +179,7 @@ describe('createPipeline utilities', () => {
       (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
       const result = await createPipeline({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         name: 'New Pipeline',
         repo: 'my-new-repo',
         repoType: 'github',
@@ -208,7 +208,7 @@ describe('createPipeline utilities', () => {
       (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
       const result = await createPipeline({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         name: 'BB Pipeline',
         repo: 'my-bb-repo',
         repoType: 'bitbucket',
@@ -240,7 +240,7 @@ describe('createPipeline utilities', () => {
       (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
       await createPipeline({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         name: 'Custom Stages Pipeline',
         repo: 'https://github.com/myorg/myrepo',
         repoType: 'github',
@@ -261,7 +261,7 @@ describe('createPipeline utilities', () => {
       (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
       await createPipeline({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         name: 'Default Stages Pipeline',
         repo: 'https://github.com/myorg/myrepo',
         repoType: 'github',
@@ -284,7 +284,7 @@ describe('createPipeline utilities', () => {
 
       try {
         await createPipeline({
-          connection: connectionStub as unknown as Connection,
+          connection: connectionStub,
           name: 'Fail',
           repo: 'https://github.com/myorg/myrepo',
           repoType: 'github',

@@ -136,7 +136,7 @@ function sleep(ms: number): Promise<void> {
  * Falls back to GET polling as a secondary check.
  * Throws on timeout.
  */
-// eslint-disable-next-line no-await-in-loop -- polling requires sequential awaits by design
+ 
 export async function pollForAuthentication(
   connection: Connection,
   environmentId: string,
