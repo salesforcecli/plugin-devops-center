@@ -12,6 +12,7 @@
       "flags-dir",
       "json",
       "name",
+      "project-id",
       "repo",
       "repo-owner",
       "repo-type",
