@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Messages } from '@salesforce/core';
+import { Messages, Connection } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import {
   validatePromotion,
@@ -23,13 +23,31 @@ import {
   formatValidationDetails,
   hasSharedComponents,
 } from '../../../utils/promotionUtils.js';
-import { validateSalesforceId } from '../../../utils/soqlUtils.js';
+import { validateSalesforceId, normalizeSalesforceId } from '../../../utils/soqlUtils.js';
 import { resolveProjectIdFromWorkItem } from '../../../utils/prepareWorkItem.js';
-import { getPipelineIdForProject } from '../../../utils/pipelineUtils.js';
+import { getPipelineIdForProject, fetchPipelineStages, computeFirstStageId } from '../../../utils/pipelineUtils.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.promotion.validate');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
+
+/**
+ * Combine details describe how work items that share components could be merged before promotion.
+ * We request them regardless of work-item count, except when promoting to the pipeline's first
+ * stage: those work items come straight from dev branches and have no source stage, so Core's
+ * combine-details path NPEs on a null source stage.
+ */
+async function shouldCheckCombineDetails(
+  connection: Connection,
+  pipelineId: string,
+  targetStageId: string
+): Promise<boolean> {
+  const stages = await fetchPipelineStages(connection, pipelineId);
+  const firstStageId = computeFirstStageId(stages);
+  const promotingToFirstStage =
+    Boolean(firstStageId) && normalizeSalesforceId(targetStageId) === normalizeSalesforceId(firstStageId!);
+  return !promotingToFirstStage;
+}
 
 export type PromotionValidateResult = {
   success: boolean;
@@ -89,9 +107,11 @@ export default class DevopsPromotionValidate extends SfCommand<PromotionValidate
       throw error;
     }
 
+    const checkCombineDetails = await shouldCheckCombineDetails(connection, pipelineId, targetStageId);
+
     let result: ValidatePromotionResult;
     try {
-      result = await validatePromotion(connection, pipelineId, workItemIds, targetStageId, true);
+      result = await validatePromotion(connection, pipelineId, workItemIds, targetStageId, checkCombineDetails);
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
       if (errMsg.includes('sObject type') && errMsg.includes('is not supported')) {
