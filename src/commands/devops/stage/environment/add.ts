@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { exec } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import { Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { addStageEnvironment, AddStageEnvironmentResult, OrgType } from '../../../../utils/addStageEnvironment.js';
@@ -26,10 +26,40 @@ Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.stage.environment.add');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
 
+/**
+ * Validates that a server-provided redirect URL is a well-formed http(s) URL, and
+ * returns its normalized form. Rejects anything else so a malicious endpoint can't
+ * smuggle shell metacharacters or non-web schemes (javascript:, file:, etc.) into
+ * the browser-open step. Throws on invalid input.
+ */
+function sanitizeRedirectUrl(url: string): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error(messages.getMessage('error.InvalidRedirectUrl', [url]));
+  }
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+    throw new Error(messages.getMessage('error.InvalidRedirectUrl', [url]));
+  }
+  // Return the normalized href: quotes, spaces, and other unsafe characters are
+  // percent-encoded, so no shell metacharacters survive.
+  return parsed.href;
+}
+
 function openUrl(url: string): void {
   const platform = process.platform;
-  const cmd = platform === 'darwin' ? 'open' : platform === 'win32' ? 'start' : 'xdg-open';
-  exec(`${cmd} "${url}"`);
+  // Pass the URL as a separate argument (never interpolated into a shell string),
+  // so it can't be interpreted as a command even if it contained metacharacters.
+  // On Windows, `start` is a cmd builtin; its first quoted argument is the window
+  // title, so pass an empty title before the URL.
+  if (platform === 'darwin') {
+    execFile('open', [url]);
+  } else if (platform === 'win32') {
+    execFile('cmd', ['/c', 'start', '', url]);
+  } else {
+    execFile('xdg-open', [url]);
+  }
 }
 
 function decodeRedirectUrl(url: string): string {
@@ -113,7 +143,7 @@ export default class DevopsStageEnvironmentAdd extends SfCommand<AddStageEnviron
         environmentName,
         orgType,
         onCreated: (data) => {
-          const url = decodeRedirectUrl(data.redirectUrl);
+          const url = sanitizeRedirectUrl(decodeRedirectUrl(data.redirectUrl));
           if (!noBrowser) {
             openUrl(url);
             this.log(messages.getMessage('info.BrowserOpened'));

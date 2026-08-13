@@ -63,3 +63,7 @@ Failed to create environment for stage: %s
 # error.AuthTimeout
 
 Authentication timed out. The environment was created but not yet authenticated. Re-run the command or authenticate manually via the org's DevOps Center setup.
+
+# error.InvalidRedirectUrl
+
+The server returned an invalid authentication redirect URL: %s. Expected an http or https URL.
