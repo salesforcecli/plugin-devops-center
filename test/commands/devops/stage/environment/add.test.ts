@@ -28,7 +28,7 @@ describe('devops stage environment add', () => {
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const addStageEnvironmentStub = sinon.stub();
   const fetchPipelineStagesStub = sinon.stub();
-  const execStub = sinon.stub();
+  const execFileStub = sinon.stub();
 
   before(async () => {
     const mod = await esmock('../../../../../src/commands/devops/stage/environment/add.js', {
@@ -39,7 +39,7 @@ describe('devops stage environment add', () => {
         fetchPipelineStages: fetchPipelineStagesStub,
       },
       'node:child_process': {
-        exec: execStub,
+        execFile: execFileStub,
       },
     });
     AddEnvironmentCommand = mod.default;
@@ -49,7 +49,7 @@ describe('devops stage environment add', () => {
     sandbox = sinon.createSandbox();
     addStageEnvironmentStub.reset();
     fetchPipelineStagesStub.reset();
-    execStub.reset();
+    execFileStub.reset();
     queryStub.reset();
     queryStub.resolves({ records: [{ IsActive: false }] });
   });
@@ -330,6 +330,132 @@ describe('devops stage environment add', () => {
         } catch (e: unknown) {
           expect((e as Error).message).to.contain('already exists');
         }
+      });
+  });
+
+  describe('redirect URL is opened safely (RCE regression)', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('passes the URL as a separate argument, never a shell string', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        fetchPipelineStagesStub.resolves([{ Id: '0Xp000000000001', Name: 'Production' }]);
+        addStageEnvironmentStub.callsFake(
+          async (params: { onCreated?: (data: { environmentId: string; redirectUrl: string }) => void }) => {
+            params.onCreated?.({
+              environmentId: '0Hi000000000001',
+              redirectUrl: 'https://login.salesforce.com/services/oauth2/authorize?client_id=abc',
+            });
+            return {
+              success: true,
+              stageId: '0Xp000000000001',
+              environmentId: '0Hi000000000001',
+              environmentName: 'Production_Org',
+              orgType: 'Production',
+              pipelineId: '0Xo000000000001',
+              redirectUrl: 'https://login.salesforce.com/services/oauth2/authorize?client_id=abc',
+              namedCredential: 'Production_Org_NC',
+              organizationId: '00D000000000001',
+            };
+          }
+        );
+
+        await AddEnvironmentCommand.run([
+          '--target-org',
+          'testOrg',
+          '--pipeline-id',
+          '0Xo000000000001',
+          '--stage-id',
+          '0Xp000000000001',
+          '--environment-name',
+          'Production_Org',
+          '--org-type',
+          'Production',
+        ]);
+
+        expect(execFileStub.calledOnce).to.equal(true);
+        const [, args] = execFileStub.firstCall.args as [string, string[]];
+        // The URL must be an element of the args array, not concatenated into a command string.
+        expect(args).to.include('https://login.salesforce.com/services/oauth2/authorize?client_id=abc');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('rejects a malicious redirectUrl that is not an http(s) URL', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        fetchPipelineStagesStub.resolves([{ Id: '0Xp000000000001', Name: 'Production' }]);
+        addStageEnvironmentStub.callsFake(
+          async (params: { onCreated?: (data: { environmentId: string; redirectUrl: string }) => void }) => {
+            // Payload from the vulnerability report: breaks out of the quoted URL on Windows.
+            params.onCreated?.({
+              environmentId: '0Hi000000000001',
+              redirectUrl: 'safe" & calc.exe & rem "',
+            });
+            return { success: true };
+          }
+        );
+
+        try {
+          await AddEnvironmentCommand.run([
+            '--target-org',
+            'testOrg',
+            '--pipeline-id',
+            '0Xo000000000001',
+            '--stage-id',
+            '0Xp000000000001',
+            '--environment-name',
+            'Production_Org',
+            '--org-type',
+            'Production',
+          ]);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        // The browser-open must never run for a non-URL payload.
+        expect(execFileStub.called).to.equal(false);
+        expect(ctx.stderr).to.contain('invalid authentication redirect URL');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('normalizes a crafted http URL so shell metacharacters are percent-encoded', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        fetchPipelineStagesStub.resolves([{ Id: '0Xp000000000001', Name: 'Production' }]);
+        addStageEnvironmentStub.callsFake(
+          async (params: { onCreated?: (data: { environmentId: string; redirectUrl: string }) => void }) => {
+            params.onCreated?.({
+              environmentId: '0Hi000000000001',
+              redirectUrl: 'https://login.salesforce.com/x" & calc.exe & rem "',
+            });
+            return { success: true, environmentId: '0Hi000000000001' };
+          }
+        );
+
+        await AddEnvironmentCommand.run([
+          '--target-org',
+          'testOrg',
+          '--pipeline-id',
+          '0Xo000000000001',
+          '--stage-id',
+          '0Xp000000000001',
+          '--environment-name',
+          'Production_Org',
+          '--org-type',
+          'Production',
+        ]);
+
+        expect(execFileStub.calledOnce).to.equal(true);
+        const [, args] = execFileStub.firstCall.args as [string, string[]];
+        const opened = args[args.length - 1];
+        // No literal double-quote or space survives normalization.
+        expect(opened).to.not.match(/["\s]/);
       });
   });
 });
