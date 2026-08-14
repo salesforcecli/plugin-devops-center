@@ -1,3 +1,9 @@
+## [2.1.1](https://github.com/salesforcecli/plugin-devops-center/compare/2.1.0...2.1.1) (2026-08-14)
+
+### Bug Fixes
+
+- prevent command injection via server-provided redirectUrl ([c5d690d](https://github.com/salesforcecli/plugin-devops-center/commit/c5d690d4b3e2c795109977c88991d1bae3042dd4))
+
 # [2.1.0](https://github.com/salesforcecli/plugin-devops-center/compare/2.0.1...2.1.0) (2026-08-07)
 
 ### Features
