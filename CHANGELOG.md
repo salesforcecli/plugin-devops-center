@@ -1,3 +1,13 @@
+# [2.2.0](https://github.com/salesforcecli/plugin-devops-center/compare/2.1.1...2.2.0) (2026-08-18)
+
+### Bug Fixes
+
+- skip combine-details check when promoting to first stage ([c0c2354](https://github.com/salesforcecli/plugin-devops-center/commit/c0c2354d96abe2872fa50a71b02b1152ec04d518))
+
+### Features
+
+- support attaching projects in pipeline create ([2eb0031](https://github.com/salesforcecli/plugin-devops-center/commit/2eb0031a410d8da4b679219107f0ad37f6463a6a))
+
 ## [2.1.1](https://github.com/salesforcecli/plugin-devops-center/compare/2.1.0...2.1.1) (2026-08-14)
 
 ### Bug Fixes
