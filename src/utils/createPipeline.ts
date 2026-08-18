@@ -33,6 +33,7 @@ export type CreatePipelineParams = {
   bitbucketWorkspace?: string;
   bitbucketProjectKey?: string;
   stages?: string[];
+  projectIds?: string[];
 };
 
 export type CreatePipelineResult = {
@@ -119,8 +120,18 @@ export class GitHubOwnerNotFoundError extends Error {
  * POST /services/data/v{version}/connect/devops/pipelines
  */
 export async function createPipeline(params: CreatePipelineParams): Promise<CreatePipelineResult> {
-  const { connection, name, repo, repoType, createRepo, repoOwner, bitbucketWorkspace, bitbucketProjectKey, stages } =
-    params;
+  const {
+    connection,
+    name,
+    repo,
+    repoType,
+    createRepo,
+    repoOwner,
+    bitbucketWorkspace,
+    bitbucketProjectKey,
+    stages,
+    projectIds,
+  } = params;
 
   const path = `/services/data/v${connection.getApiVersion()}/connect/devops/pipelines`;
 
@@ -131,6 +142,10 @@ export async function createPipeline(params: CreatePipelineParams): Promise<Crea
     vcsType: repoType,
     stages: stageNames.map((stageName) => ({ name: stageName })),
   };
+
+  if (projectIds && projectIds.length > 0) {
+    payload.projectIds = projectIds;
+  }
 
   if (createRepo) {
     payload.createVcsRepo = true;

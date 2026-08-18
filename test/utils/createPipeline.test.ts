@@ -278,6 +278,47 @@ describe('createPipeline utilities', () => {
       ]);
     });
 
+    it('includes projectIds when projects are provided', async () => {
+      (connectionStub.request as sinon.SinonStub).resolves({
+        id: '0XB000000000007',
+        message: 'Created',
+        status: 'Inactive',
+      });
+      (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
+
+      await createPipeline({
+        connection: connectionStub as unknown as Connection,
+        name: 'Pipeline With Projects',
+        repo: 'https://github.com/myorg/myrepo',
+        repoType: 'github',
+        projectIds: ['0Hn000000000001', '0Hn000000000002'],
+      });
+
+      const callArgs = (connectionStub.request as sinon.SinonStub).firstCall.args[0];
+      const body = JSON.parse(callArgs.body as string) as Record<string, unknown>;
+      expect(body.projectIds).to.deep.equal(['0Hn000000000001', '0Hn000000000002']);
+    });
+
+    it('omits projectIds when none are provided', async () => {
+      (connectionStub.request as sinon.SinonStub).resolves({
+        id: '0XB000000000008',
+        message: 'Created',
+        status: 'Inactive',
+      });
+      (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
+
+      await createPipeline({
+        connection: connectionStub as unknown as Connection,
+        name: 'Pipeline No Projects',
+        repo: 'https://github.com/myorg/myrepo',
+        repoType: 'github',
+      });
+
+      const callArgs = (connectionStub.request as sinon.SinonStub).firstCall.args[0];
+      const body = JSON.parse(callArgs.body as string) as Record<string, unknown>;
+      expect(body).to.not.have.property('projectIds');
+    });
+
     it('propagates API errors', async () => {
       (connectionStub.request as sinon.SinonStub).rejects(new Error('Bad Request'));
       (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');

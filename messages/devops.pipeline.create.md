@@ -42,6 +42,10 @@ Bitbucket project key to associate with the repository. Optional when creating a
 
 Name of a pipeline stage, in promotion order. Repeat the flag for each stage. Defaults to Integration, UAT, Staging, and Production.
 
+# flags.project-id.summary
+
+ID of a project to associate with the pipeline. Repeat the flag to associate multiple projects.
+
 # examples
 
 - Create a pipeline and associate it with an existing GitHub repository:
@@ -63,6 +67,10 @@ Name of a pipeline stage, in promotion order. Repeat the flag for each stage. De
 - Create a pipeline with custom stage names instead of the default stages:
 
       <%= config.bin %> <%= command.id %> --target-org my-devops-org --name "Release Pipeline" --repo https://github.com/myorg/myrepo --stage Dev --stage QA --stage Prod
+
+- Create a pipeline and associate one or more projects with it:
+
+      <%= config.bin %> <%= command.id %> --target-org my-devops-org --name "Release Pipeline" --repo https://github.com/myorg/myrepo --project-id 0Hn000000000001 --project-id 0Hn000000000002
 
 # error.RepoTypeRequired
 

@@ -69,6 +69,11 @@ export default class DevopsPipelineCreate extends SfCommand<CreatePipelineResult
       char: 's',
       multiple: true,
     }),
+    'project-id': Flags.salesforceId({
+      summary: messages.getMessage('flags.project-id.summary'),
+      multiple: true,
+      char: undefined,
+    }),
   };
 
   public async run(): Promise<CreatePipelineResult> {
@@ -110,6 +115,7 @@ export default class DevopsPipelineCreate extends SfCommand<CreatePipelineResult
         bitbucketWorkspace: flags['bitbucket-workspace'],
         bitbucketProjectKey: flags['bitbucket-project-key'],
         stages: flags['stage'],
+        projectIds: flags['project-id'],
       });
     } catch (error: unknown) {
       const errMsg = error instanceof Error ? error.message : String(error);
@@ -121,7 +127,7 @@ export default class DevopsPipelineCreate extends SfCommand<CreatePipelineResult
     }
 
     if (result.success) {
-      this.printSuccessOutput(result, flags['repo'], org.getUsername());
+      this.printSuccessOutput(result, flags['repo'], org.getUsername(), flags['project-id']);
     } else {
       this.error(`Failed to create pipeline: ${result.error ?? ''}`);
     }
@@ -163,7 +169,12 @@ export default class DevopsPipelineCreate extends SfCommand<CreatePipelineResult
     }
   }
 
-  private printSuccessOutput(result: CreatePipelineResult, repoFlag: string, username: string | undefined): void {
+  private printSuccessOutput(
+    result: CreatePipelineResult,
+    repoFlag: string,
+    username: string | undefined,
+    projectIds: string[] | undefined
+  ): void {
     if (result.repository?.created) {
       this.log(`Created repository: ${repoFlag} (${result.repository.repoType})`);
     }
@@ -171,14 +182,19 @@ export default class DevopsPipelineCreate extends SfCommand<CreatePipelineResult
     this.log(`  Pipeline ID: ${result.pipelineId ?? ''}`);
     this.log(`  Repository:  ${result.repository?.repoUrl ?? ''} (${result.repository?.repoType ?? ''})`);
     this.log(`  Status:      ${result.status ?? 'Inactive'}`);
+    if (projectIds && projectIds.length > 0) {
+      this.log(`  Projects:    ${projectIds.join(', ')}`);
+    }
     this.log('  Next steps:');
     const orgLabel = username ?? '<org>';
     const pipelineIdLabel = result.pipelineId ?? '<ID>';
     this.log(
       `    Add pipeline stages: sf devops pipeline stage add --target-org ${orgLabel} --pipeline-id ${pipelineIdLabel}`
     );
-    this.log(
-      `    Attach a project: sf devops pipeline project add --target-org ${orgLabel} --pipeline-id ${pipelineIdLabel} --project-id <ID>`
-    );
+    if (!projectIds || projectIds.length === 0) {
+      this.log(
+        `    Attach a project: sf devops pipeline project add --target-org ${orgLabel} --pipeline-id ${pipelineIdLabel} --project-id <ID>`
+      );
+    }
   }
 }

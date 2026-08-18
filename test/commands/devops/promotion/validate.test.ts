@@ -26,6 +26,8 @@ describe('devops promotion validate', () => {
   const validatePromotionStub = sinon.stub();
   const resolveProjectIdFromWorkItemStub = sinon.stub();
   const getPipelineIdForProjectStub = sinon.stub();
+  const fetchPipelineStagesStub = sinon.stub();
+  const computeFirstStageIdStub = sinon.stub();
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
 
@@ -39,6 +41,8 @@ describe('devops promotion validate', () => {
       },
       '../../../../src/utils/pipelineUtils.js': {
         getPipelineIdForProject: getPipelineIdForProjectStub,
+        fetchPipelineStages: fetchPipelineStagesStub,
+        computeFirstStageId: computeFirstStageIdStub,
       },
     });
     ValidateCommand = mod.default;
@@ -49,6 +53,11 @@ describe('devops promotion validate', () => {
     validatePromotionStub.reset();
     resolveProjectIdFromWorkItemStub.reset();
     getPipelineIdForProjectStub.reset();
+    fetchPipelineStagesStub.reset();
+    computeFirstStageIdStub.reset();
+    // Default: target stage is not the pipeline's first stage, so combine details are requested.
+    fetchPipelineStagesStub.resolves([]);
+    computeFirstStageIdStub.returns(undefined);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sandbox.stub(Org, 'create' as any).returns(mockOrg);
   });
@@ -85,15 +94,66 @@ describe('devops promotion validate', () => {
     test
       .stdout()
       .stderr()
-      .it('requests combine details from the API', async () => {
+      .it('requests combine details from the API for multiple work items', async () => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        validatePromotionStub.resolves({ success: true, errorType: null, errorDetails: null, combineDetails: null });
+
+        await ValidateCommand.run([
+          '-o',
+          'testOrg',
+          '-i',
+          '1fkxx0000000001',
+          '-i',
+          '1fkxx0000000002',
+          '-t',
+          '1QVxx0000000003',
+        ]);
+
+        // checkCombineDetails (5th arg) must be true so the API returns shared-component info.
+        expect(validatePromotionStub.firstCall.args[4]).to.be.true;
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('requests combine details for a single work item promoted to a non-first stage', async () => {
         resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
         getPipelineIdForProjectStub.resolves('PIPE001');
         validatePromotionStub.resolves({ success: true, errorType: null, errorDetails: null, combineDetails: null });
 
         await ValidateCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
 
-        // checkCombineDetails (5th arg) must be true so the API returns shared-component info.
+        // Combine details are requested regardless of work-item count, as long as the target is
+        // not the pipeline's first stage.
         expect(validatePromotionStub.firstCall.args[4]).to.be.true;
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('does not request combine details when promoting to the first stage', async () => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        // The target stage is the pipeline's first stage, so work items have no source stage.
+        fetchPipelineStagesStub.resolves([{ Id: '1QVxx0000000003', Name: 'Integration', NextStageId: null }]);
+        computeFirstStageIdStub.returns('1QVxx0000000003');
+        validatePromotionStub.resolves({ success: true, errorType: null, errorDetails: null, combineDetails: null });
+
+        await ValidateCommand.run([
+          '-o',
+          'testOrg',
+          '-i',
+          '1fkxx0000000001',
+          '-i',
+          '1fkxx0000000002',
+          '-t',
+          '1QVxx0000000003',
+        ]);
+
+        // Combine details for the first stage NPE server-side (null source stage), so skip them
+        // regardless of work-item count.
+        expect(validatePromotionStub.firstCall.args[4]).to.be.false;
       });
 
     test
