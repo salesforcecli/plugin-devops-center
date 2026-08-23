@@ -37,7 +37,7 @@ describe('addPipelineStage utilities', () => {
     createStub.resolves({ id: '0Xc000000000005', success: true });
 
     const result = await addPipelineStage({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0XB000000000001',
       name: 'Development',
       nextStageId: '0Xc000000000002',
@@ -61,7 +61,7 @@ describe('addPipelineStage utilities', () => {
     createStub.resolves({ success: false, errors: [{ message: 'Invalid pipeline ID' }] });
 
     const result = await addPipelineStage({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0XB000000000001',
       name: 'Fail',
       nextStageId: '0Xc000000000002',
@@ -76,7 +76,7 @@ describe('addPipelineStage utilities', () => {
 
     try {
       await addPipelineStage({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         pipelineId: '0XB000000000001',
         name: 'Fail',
         nextStageId: '0Xc000000000002',

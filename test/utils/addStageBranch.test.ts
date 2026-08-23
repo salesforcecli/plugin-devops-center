@@ -40,7 +40,7 @@ describe('addStageBranch utilities', () => {
     });
 
     const result = await addStageBranch({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0Xo000000000001',
       stageId: '0Xp000000000001',
       branchName: 'main',
@@ -72,7 +72,7 @@ describe('addStageBranch utilities', () => {
     });
 
     const result = await addStageBranch({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0Xo000000000001',
       stageId: '0Xp000000000002',
       branchName: 'integration',
@@ -97,7 +97,7 @@ describe('addStageBranch utilities', () => {
     });
 
     const result = await addStageBranch({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0Xo000000000001',
       stageId: '0Xp000000000001',
       branchName: 'nonexistent',
@@ -114,7 +114,7 @@ describe('addStageBranch utilities', () => {
 
     try {
       await addStageBranch({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         pipelineId: '0Xo000000000001',
         stageId: '0Xp000000000001',
         branchName: 'main',

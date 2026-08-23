@@ -71,7 +71,7 @@ describe('validatePromotion', () => {
   it('omits checkCombineDetails from request body when false (default)', async () => {
     (connectionStub.request as sinon.SinonStub).resolves(successResponse);
 
-    await validatePromotion(connectionStub as unknown as Connection, 'PIPE001', ['1fkxx0000000001'], '1QVxx0000000003');
+    await validatePromotion(connectionStub, 'PIPE001', ['1fkxx0000000001'], '1QVxx0000000003');
 
     const body = JSON.parse((connectionStub.request as sinon.SinonStub).firstCall.args[0].body as string);
     expect(body).to.not.have.property('checkCombineDetails');
@@ -81,7 +81,7 @@ describe('validatePromotion', () => {
     (connectionStub.request as sinon.SinonStub).resolves(successResponse);
 
     await validatePromotion(
-      connectionStub as unknown as Connection,
+      connectionStub,
       'PIPE001',
       ['1fkxx0000000001'],
       '1QVxx0000000003',
@@ -96,7 +96,7 @@ describe('validatePromotion', () => {
     (connectionStub.request as sinon.SinonStub).resolves(successResponse);
 
     await validatePromotion(
-      connectionStub as unknown as Connection,
+      connectionStub,
       'PIPE001',
       ['1fkxx0000000001'],
       '1QVxx0000000003',
@@ -111,7 +111,7 @@ describe('validatePromotion', () => {
     (connectionStub.request as sinon.SinonStub).resolves(successResponse);
 
     await validatePromotion(
-      connectionStub as unknown as Connection,
+      connectionStub,
       'PIPE001',
       ['1fkxx0000000001', '1fkxx0000000002'],
       '1QVxx0000000003'
@@ -130,7 +130,7 @@ describe('validatePromotion', () => {
     (connectionStub.request as sinon.SinonStub).resolves(successResponse);
 
     await validatePromotion(
-      connectionStub as unknown as Connection,
+      connectionStub,
       'PIPE001',
       ['1fkxx0000000001'],
       '1QVxx0000000003',
@@ -146,7 +146,7 @@ describe('validatePromotion', () => {
     (connectionStub.request as sinon.SinonStub).resolves(successResponse);
 
     await validatePromotion(
-      connectionStub as unknown as Connection,
+      connectionStub,
       'PIPE001',
       ['1fkWt000000hGr7IAE'],
       '1QVWt000000G3huOAC'
@@ -166,7 +166,7 @@ describe('validatePromotion', () => {
     });
 
     const result = await validatePromotion(
-      connectionStub as unknown as Connection,
+      connectionStub,
       'PIPE001',
       ['1fkxx0000000001'],
       '1QVxx0000000003',
