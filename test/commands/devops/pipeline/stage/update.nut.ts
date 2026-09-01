@@ -16,18 +16,14 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../../nutHelpers.js';
 import type { PipelineStageUpdateResult } from '../../../../../src/commands/devops/pipeline/stage/update.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops pipeline stage update NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   let pipelineId: string;
   let stageId: string;
@@ -36,7 +32,9 @@ describe('devops pipeline stage update NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       const name = genUniqueString('NUT-stage-upd-%s');
       const pipeline = execCmd<{ pipelineId: string }>(
         `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
@@ -77,7 +75,9 @@ describe('devops pipeline stage update NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('updates a stage name and returns structured JSON', () => {
+  it('updates a stage name and returns structured JSON', function () {
+    if (!dcEnabled) this.skip();
+
     const newName = genUniqueString('NUT-stage-%s');
     const result = execCmd<PipelineStageUpdateResult>(
       `devops pipeline stage update --stage-id ${stageId} --name "${newName}" --json ${orgFlag}`,
@@ -89,7 +89,9 @@ describe('devops pipeline stage update NUTs', () => {
     expect(result.jsonOutput?.result.name).to.equal(newName);
   });
 
-  (REAL_ORG ? it : it.skip)('errors when the stage does not exist', () => {
+  it('errors when the stage does not exist', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd(`devops pipeline stage update --stage-id 1QV000000000001AAA --name Whatever ${orgFlag}`, {
       ensureExitCode: 1,
     });

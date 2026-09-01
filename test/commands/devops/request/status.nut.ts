@@ -16,21 +16,19 @@
 
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../nutHelpers.js';
 import type { RequestStatusResult } from '../../../../src/utils/getRequestStatus.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 describe('devops request status NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
 
   before(async () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
+
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
   });
 
   after(async () => {
@@ -51,7 +49,9 @@ describe('devops request status NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('errors when the request token does not exist', () => {
+  it('errors when the request token does not exist', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<RequestStatusResult>(
       `devops request status --request-token NUT-nonexistent-token --json ${orgFlag}`,
       { ensureExitCode: 1 }

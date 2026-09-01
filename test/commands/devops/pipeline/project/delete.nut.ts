@@ -16,18 +16,14 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../../nutHelpers.js';
 import type { DetachProjectResult } from '../../../../../src/utils/detachProject.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops pipeline project delete NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   let pipelineId: string;
   let projectId: string;
@@ -36,7 +32,9 @@ describe('devops pipeline project delete NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       const pipelineName = genUniqueString('NUT-projdel-%s');
       const pipeline = execCmd<{ pipelineId: string }>(
         `devops pipeline create --name "${pipelineName}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
@@ -85,7 +83,9 @@ describe('devops pipeline project delete NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('removes an attached project and returns structured JSON', () => {
+  it('removes an attached project and returns structured JSON', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<DetachProjectResult>(
       `devops pipeline project delete --pipeline-id ${pipelineId} --project-id ${projectId} --json ${orgFlag}`,
       { ensureExitCode: 0 }
@@ -94,7 +94,9 @@ describe('devops pipeline project delete NUTs', () => {
     expect(result.jsonOutput?.result.success).to.be.true;
   });
 
-  (REAL_ORG ? it : it.skip)('errors when the project is not attached to the pipeline', () => {
+  it('errors when the project is not attached to the pipeline', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd(
       `devops pipeline project delete --pipeline-id ${pipelineId} --project-id ${projectId} ${orgFlag}`,
       { ensureExitCode: 1 }

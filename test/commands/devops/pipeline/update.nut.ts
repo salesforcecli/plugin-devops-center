@@ -16,18 +16,14 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../nutHelpers.js';
 import type { PipelineUpdateResult } from '../../../../src/utils/activatePipeline.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops pipeline update NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   // Pipeline created (with default stages) so activate/deactivate/rename can succeed
   let pipelineId: string;
@@ -36,7 +32,9 @@ describe('devops pipeline update NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       const name = genUniqueString('NUT-update-%s');
       const pipeline = execCmd<{ pipelineId: string }>(
         `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
@@ -69,7 +67,9 @@ describe('devops pipeline update NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('activates a pipeline and returns structured JSON', () => {
+  it('activates a pipeline and returns structured JSON', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<PipelineUpdateResult>(
       `devops pipeline update --pipeline-id ${pipelineId} --activate --json ${orgFlag}`,
       { ensureExitCode: 0 }
@@ -81,14 +81,18 @@ describe('devops pipeline update NUTs', () => {
     expect(output?.result.status).to.equal('Active');
   });
 
-  (REAL_ORG ? it : it.skip)('errors when activating an already-active pipeline', () => {
+  it('errors when activating an already-active pipeline', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd(`devops pipeline update --pipeline-id ${pipelineId} --activate ${orgFlag}`, {
       ensureExitCode: 1,
     });
     expect(result.shellOutput.stderr).to.include('already active');
   });
 
-  (REAL_ORG ? it : it.skip)('deactivates the pipeline', () => {
+  it('deactivates the pipeline', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<PipelineUpdateResult>(
       `devops pipeline update --pipeline-id ${pipelineId} --deactivate --json ${orgFlag}`,
       { ensureExitCode: 0 }
@@ -97,7 +101,9 @@ describe('devops pipeline update NUTs', () => {
     expect(result.jsonOutput?.result.status).to.equal('Inactive');
   });
 
-  (REAL_ORG ? it : it.skip)('renames the pipeline', () => {
+  it('renames the pipeline', function () {
+    if (!dcEnabled) this.skip();
+
     const newName = genUniqueString('NUT-renamed-%s');
     const result = execCmd<PipelineUpdateResult>(
       `devops pipeline update --pipeline-id ${pipelineId} --name "${newName}" --json ${orgFlag}`,

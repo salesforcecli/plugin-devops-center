@@ -16,19 +16,15 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../../nutHelpers.js';
 import type { AddStageBranchResult } from '../../../../../src/utils/addStageBranch.js';
 import type { CreatePipelineResult } from '../../../../../src/utils/createPipeline.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops stage branch add NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   // The last stage of the pipeline (no NextStageId) — branch setup must start right-to-left
   let lastStageId: string;
@@ -38,7 +34,9 @@ describe('devops stage branch add NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       const name = genUniqueString('NUT-add-branch-%s');
       const pipeline = execCmd<CreatePipelineResult>(
         `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
@@ -81,7 +79,9 @@ describe('devops stage branch add NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('adds a branch to the last stage and returns structured JSON', () => {
+  it('adds a branch to the last stage and returns structured JSON', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<AddStageBranchResult>(
       `devops stage branch add --pipeline-id ${pipelineId} --stage-id ${lastStageId} --branch-name main --json ${orgFlag}`,
       { ensureExitCode: 0 }
@@ -93,7 +93,9 @@ describe('devops stage branch add NUTs', () => {
     expect(output?.result.repoBranchId).to.match(/^[a-zA-Z0-9]{15,18}$/);
   });
 
-  (REAL_ORG ? it : it.skip)('errors when --stage-id does not belong to the pipeline', () => {
+  it('errors when --stage-id does not belong to the pipeline', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd(
       `devops stage branch add --pipeline-id ${pipelineId} --stage-id 0XC000000000001AAA --branch-name main ${orgFlag}`,
       { ensureExitCode: 1 }

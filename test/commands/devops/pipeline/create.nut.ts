@@ -16,24 +16,22 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../nutHelpers.js';
 import type { CreatePipelineResult } from '../../../../src/utils/createPipeline.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 // Use a real GitHub repo URL that DevOps Center can validate without creating anything
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops pipeline create NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
 
   before(async () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
+
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
   });
 
   after(async () => {
@@ -61,7 +59,9 @@ describe('devops pipeline create NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('creates a pipeline and returns structured JSON', () => {
+  it('creates a pipeline and returns structured JSON', function () {
+    if (!dcEnabled) this.skip();
+
     const name = genUniqueString('NUT-pipeline-%s');
     const result = execCmd<CreatePipelineResult>(
       `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
@@ -75,7 +75,9 @@ describe('devops pipeline create NUTs', () => {
     expect(output?.result.repository?.repoType).to.equal('github');
   });
 
-  (REAL_ORG ? it : it.skip)('new pipeline starts in Inactive status', () => {
+  it('new pipeline starts in Inactive status', function () {
+    if (!dcEnabled) this.skip();
+
     const name = genUniqueString('NUT-pipeline-inactive-%s');
     const result = execCmd<CreatePipelineResult>(
       `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,

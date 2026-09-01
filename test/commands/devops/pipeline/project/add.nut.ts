@@ -16,18 +16,14 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../../nutHelpers.js';
 import type { AttachProjectResult } from '../../../../../src/utils/attachProject.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops pipeline project add NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   let pipelineId: string;
   let projectId: string;
@@ -38,7 +34,9 @@ describe('devops pipeline project add NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       const pipelineName = genUniqueString('NUT-projadd-%s');
       const pipeline = execCmd<{ pipelineId: string }>(
         `devops pipeline create --name "${pipelineName}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
@@ -90,7 +88,9 @@ describe('devops pipeline project add NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('attaches a project to a pipeline and returns structured JSON', () => {
+  it('attaches a project to a pipeline and returns structured JSON', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<AttachProjectResult>(
       `devops pipeline project add --pipeline-id ${pipelineId} --project-id ${projectId} --json ${orgFlag}`,
       { ensureExitCode: 0 }
@@ -99,7 +99,9 @@ describe('devops pipeline project add NUTs', () => {
     expect(result.jsonOutput?.result.success).to.be.true;
   });
 
-  (REAL_ORG ? it : it.skip)('errors when attaching the same project a second time', () => {
+  it('errors when attaching the same project a second time', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd(
       `devops pipeline project add --pipeline-id ${pipelineId} --project-id ${projectId} ${orgFlag}`,
       { ensureExitCode: 1 }
@@ -107,7 +109,9 @@ describe('devops pipeline project add NUTs', () => {
     expect(result.shellOutput.stderr.toLowerCase()).to.include('already');
   });
 
-  (REAL_ORG ? it : it.skip)('attaches a second project to the same pipeline', () => {
+  it('attaches a second project to the same pipeline', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<AttachProjectResult>(
       `devops pipeline project add --pipeline-id ${pipelineId} --project-id ${secondProjectId} --json ${orgFlag}`,
       { ensureExitCode: 0 }

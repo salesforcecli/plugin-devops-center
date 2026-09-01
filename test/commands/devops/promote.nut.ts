@@ -16,20 +16,18 @@
 
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
+import { isDevopsCenterEnabled } from './nutHelpers.js';
 
 describe('devops promote NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
 
   before(async () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
+
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
   });
 
   after(async () => {
@@ -67,7 +65,9 @@ describe('devops promote NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('errors when neither --work-item-id nor --stage-id is provided', () => {
+  it('errors when neither --work-item-id nor --stage-id is provided', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd(`devops promote --target-stage-id 1QV000000000001AAA ${orgFlag}`, { ensureExitCode: 1 });
     expect(result.shellOutput.stderr).to.include('--work-item-id');
   });

@@ -16,16 +16,12 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../nutHelpers.js';
 import type { DevopsWorkItemListResult } from '../../../../src/commands/devops/work-item/list.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 describe('devops work-item list NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   let projectId: string;
   let createdWorkItemId: string;
@@ -34,7 +30,9 @@ describe('devops work-item list NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       // Create a project and seed one work item so the list is non-empty
       const projName = genUniqueString('NUT-wi-list-%s');
       const proj = execCmd<{ projectId: string }>(`devops project create --name "${projName}" --json ${orgFlag}`, {
@@ -69,7 +67,9 @@ describe('devops work-item list NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('returns JSON with a workItems array', () => {
+  it('returns JSON with a workItems array', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<DevopsWorkItemListResult>(
       `devops work-item list --project-id ${projectId} --json ${orgFlag}`,
       { ensureExitCode: 0 }
@@ -79,7 +79,9 @@ describe('devops work-item list NUTs', () => {
     expect(output?.result.workItems).to.be.an('array');
   });
 
-  (REAL_ORG ? it : it.skip)('lists the seeded work item', () => {
+  it('lists the seeded work item', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<DevopsWorkItemListResult>(
       `devops work-item list --project-id ${projectId} --json ${orgFlag}`,
       { ensureExitCode: 0 }
@@ -88,7 +90,9 @@ describe('devops work-item list NUTs', () => {
     expect(ids).to.include(createdWorkItemId);
   });
 
-  (REAL_ORG ? it : it.skip)('each work item has required fields', () => {
+  it('each work item has required fields', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<DevopsWorkItemListResult>(
       `devops work-item list --project-id ${projectId} --json ${orgFlag}`,
       { ensureExitCode: 0 }

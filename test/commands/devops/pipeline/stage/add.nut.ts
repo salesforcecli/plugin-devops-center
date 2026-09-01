@@ -16,19 +16,15 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../../nutHelpers.js';
 import type { AddPipelineStageResult } from '../../../../../src/utils/addPipelineStage.js';
 import type { CreatePipelineResult } from '../../../../../src/utils/createPipeline.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops pipeline stage add NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   let pipelineId: string;
   // One of the default stage IDs seeded by pipeline create, used as the `--next-stage-id`
@@ -38,7 +34,9 @@ describe('devops pipeline stage add NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       const name = genUniqueString('NUT-stage-add-%s');
       const pipeline = execCmd<CreatePipelineResult>(
         `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
@@ -73,7 +71,9 @@ describe('devops pipeline stage add NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('adds a stage before an existing stage and returns structured JSON', () => {
+  it('adds a stage before an existing stage and returns structured JSON', function () {
+    if (!dcEnabled) this.skip();
+
     const stageName = genUniqueString('NUT-stage-%s');
     const result = execCmd<AddPipelineStageResult>(
       `devops pipeline stage add --pipeline-id ${pipelineId} --name "${stageName}" --next-stage-id ${existingStageId} --json ${orgFlag}`,
@@ -87,7 +87,9 @@ describe('devops pipeline stage add NUTs', () => {
     expect(output?.result.nextStageId).to.equal(existingStageId);
   });
 
-  (REAL_ORG ? it : it.skip)('errors when --next-stage-id does not belong to the pipeline', () => {
+  it('errors when --next-stage-id does not belong to the pipeline', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd(
       `devops pipeline stage add --pipeline-id ${pipelineId} --name NewStage --next-stage-id 0XC000000000001AAA ${orgFlag}`,
       { ensureExitCode: 1 }

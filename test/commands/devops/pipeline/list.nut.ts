@@ -16,18 +16,14 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../nutHelpers.js';
 import type { PipelineListResult } from '../../../../src/utils/listPipelines.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops pipeline list NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   let pipelineId: string;
 
@@ -35,7 +31,9 @@ describe('devops pipeline list NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       const name = genUniqueString('NUT-list-%s');
       const pipeline = execCmd<{ pipelineId: string }>(
         `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
@@ -63,14 +61,18 @@ describe('devops pipeline list NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('returns JSON with a pipelines array', () => {
+  it('returns JSON with a pipelines array', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<PipelineListResult>(`devops pipeline list --json ${orgFlag}`, { ensureExitCode: 0 });
     const output = result.jsonOutput;
     expect(output?.status).to.equal(0);
     expect(output?.result.pipelines).to.be.an('array');
   });
 
-  (REAL_ORG ? it : it.skip)('includes the seeded pipeline', () => {
+  it('includes the seeded pipeline', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<PipelineListResult>(`devops pipeline list --json ${orgFlag}`, { ensureExitCode: 0 });
     const ids = (result.jsonOutput?.result.pipelines ?? []).map((p) => p.Id);
     expect(ids).to.include(pipelineId);

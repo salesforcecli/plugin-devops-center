@@ -16,16 +16,12 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../nutHelpers.js';
 import type { DevopsProjectListResult } from '../../../../src/commands/devops/project/list.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 describe('devops project list NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   let createdProjectId: string;
 
@@ -33,7 +29,9 @@ describe('devops project list NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       // Seed a project so the list is guaranteed non-empty
       const name = genUniqueString('NUT-list-seed-%s');
       const create = execCmd<{ projectId: string }>(`devops project create --name "${name}" --json ${orgFlag}`, {
@@ -61,7 +59,9 @@ describe('devops project list NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('returns JSON with a projects array', () => {
+  it('returns JSON with a projects array', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<DevopsProjectListResult>(`devops project list --json ${orgFlag}`, {
       ensureExitCode: 0,
     });
@@ -70,7 +70,9 @@ describe('devops project list NUTs', () => {
     expect(output?.result.projects).to.be.an('array');
   });
 
-  (REAL_ORG ? it : it.skip)('lists the seeded project', () => {
+  it('lists the seeded project', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<DevopsProjectListResult>(`devops project list --json ${orgFlag}`, {
       ensureExitCode: 0,
     });
@@ -78,7 +80,9 @@ describe('devops project list NUTs', () => {
     expect(ids).to.include(createdProjectId);
   });
 
-  (REAL_ORG ? it : it.skip)('each project record has Id and Name fields', () => {
+  it('each project record has Id and Name fields', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<DevopsProjectListResult>(`devops project list --json ${orgFlag}`, {
       ensureExitCode: 0,
     });

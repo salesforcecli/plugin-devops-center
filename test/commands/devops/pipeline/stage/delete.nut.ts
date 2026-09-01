@@ -16,18 +16,14 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../../nutHelpers.js';
 import type { DeletePipelineStageResult } from '../../../../../src/utils/deletePipelineStage.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops pipeline stage delete NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   let pipelineId: string;
   let lastStageId: string;
@@ -36,7 +32,9 @@ describe('devops pipeline stage delete NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       const name = genUniqueString('NUT-stage-del-%s');
       const pipeline = execCmd<{ pipelineId: string }>(
         `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
@@ -83,7 +81,9 @@ describe('devops pipeline stage delete NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('deletes a stage and returns structured JSON', () => {
+  it('deletes a stage and returns structured JSON', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<DeletePipelineStageResult>(
       `devops pipeline stage delete --pipeline-id ${pipelineId} --stage-id ${lastStageId} --json ${orgFlag}`,
       { ensureExitCode: 0 }
@@ -92,7 +92,9 @@ describe('devops pipeline stage delete NUTs', () => {
     expect(result.jsonOutput?.result.success).to.be.true;
   });
 
-  (REAL_ORG ? it : it.skip)('errors when deleting a stage that does not belong to the pipeline', () => {
+  it('errors when deleting a stage that does not belong to the pipeline', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd(
       `devops pipeline stage delete --pipeline-id ${pipelineId} --stage-id 1QV000000000001AAA ${orgFlag}`,
       { ensureExitCode: 1 }

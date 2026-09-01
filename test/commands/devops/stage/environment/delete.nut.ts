@@ -16,17 +16,13 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
+import { isDevopsCenterEnabled } from '../../nutHelpers.js';
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops stage environment delete NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   let pipelineId: string;
 
@@ -34,7 +30,9 @@ describe('devops stage environment delete NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       const name = genUniqueString('NUT-env-del-%s');
       const pipeline = execCmd<{ pipelineId: string }>(
         `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
@@ -75,7 +73,9 @@ describe('devops stage environment delete NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('errors when the environment does not exist', () => {
+  it('errors when the environment does not exist', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd(
       `devops stage environment delete --pipeline-id ${pipelineId} --environment-id 0Xk000000000001AAA ${orgFlag}`,
       { ensureExitCode: 1 }

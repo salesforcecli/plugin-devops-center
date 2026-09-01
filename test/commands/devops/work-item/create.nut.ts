@@ -16,16 +16,12 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../nutHelpers.js';
 import type { CreateWorkItemResult } from '../../../../src/utils/createWorkItem.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 describe('devops work-item create NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   // Project created in before() to host work items
   let projectId: string;
@@ -34,7 +30,9 @@ describe('devops work-item create NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       const name = genUniqueString('NUT-wi-create-%s');
       const create = execCmd<{ projectId: string }>(`devops project create --name "${name}" --json ${orgFlag}`, {
         ensureExitCode: 0,
@@ -69,7 +67,9 @@ describe('devops work-item create NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('creates a work item and returns structured JSON', () => {
+  it('creates a work item and returns structured JSON', function () {
+    if (!dcEnabled) this.skip();
+
     const subject = genUniqueString('NUT work item %s');
     const result = execCmd<CreateWorkItemResult>(
       `devops work-item create --project-id ${projectId} --subject "${subject}" --json ${orgFlag}`,
@@ -82,7 +82,9 @@ describe('devops work-item create NUTs', () => {
     expect(output?.result.subject).to.equal(subject);
   });
 
-  (REAL_ORG ? it : it.skip)('creates a work item with a description', () => {
+  it('creates a work item with a description', function () {
+    if (!dcEnabled) this.skip();
+
     const subject = genUniqueString('NUT wi desc %s');
     const description = 'NUT description text';
     const result = execCmd<CreateWorkItemResult>(

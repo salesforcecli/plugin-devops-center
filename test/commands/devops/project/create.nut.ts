@@ -16,23 +16,21 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../nutHelpers.js';
 import type { CreateProjectResult } from '../../../../src/utils/createProject.js';
 
 // These tests require a real org. Set TESTKIT_HUB_USERNAME (and TESTKIT_AUTH_URL or JWT vars)
 // before running. CI sets these via secrets; locally use `sf org login web` and export the username.
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
-
 describe('devops project create NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
 
   before(async () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
+
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
   });
 
   after(async () => {
@@ -53,7 +51,9 @@ describe('devops project create NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('creates a project and returns structured JSON', () => {
+  it('creates a project and returns structured JSON', function () {
+    if (!dcEnabled) this.skip();
+
     const name = genUniqueString('NUT-project-%s');
     const result = execCmd<CreateProjectResult>(`devops project create --name "${name}" --json ${orgFlag}`, {
       ensureExitCode: 0,
@@ -65,7 +65,9 @@ describe('devops project create NUTs', () => {
     expect(output?.result.name).to.equal(name);
   });
 
-  (REAL_ORG ? it : it.skip)('creates a project with a description', () => {
+  it('creates a project with a description', function () {
+    if (!dcEnabled) this.skip();
+
     const name = genUniqueString('NUT-desc-%s');
     const desc = 'Created by NUT';
     const result = execCmd<CreateProjectResult>(

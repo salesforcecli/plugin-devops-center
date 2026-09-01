@@ -16,18 +16,14 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../nutHelpers.js';
 import type { PipelineGetResult } from '../../../../src/utils/getPipeline.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops pipeline get NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   let pipelineId: string;
 
@@ -35,7 +31,9 @@ describe('devops pipeline get NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       const name = genUniqueString('NUT-get-%s');
       const pipeline = execCmd<{ pipelineId: string }>(
         `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
@@ -68,7 +66,9 @@ describe('devops pipeline get NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('returns structured JSON for an existing pipeline', () => {
+  it('returns structured JSON for an existing pipeline', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<PipelineGetResult>(`devops pipeline get --pipeline-id ${pipelineId} --json ${orgFlag}`, {
       ensureExitCode: 0,
     });
@@ -81,7 +81,9 @@ describe('devops pipeline get NUTs', () => {
     expect(output?.result.connectedProjects).to.be.an('array');
   });
 
-  (REAL_ORG ? it : it.skip)('errors when the pipeline does not exist', () => {
+  it('errors when the pipeline does not exist', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd(`devops pipeline get --pipeline-id 0XB000000000001AAA ${orgFlag}`, { ensureExitCode: 1 });
     expect(result.shellOutput.stderr).to.include('not found');
   });

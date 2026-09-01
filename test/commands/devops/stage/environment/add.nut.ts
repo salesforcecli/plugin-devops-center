@@ -16,18 +16,14 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../../nutHelpers.js';
 import type { CreatePipelineResult } from '../../../../../src/utils/createPipeline.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops stage environment add NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   let pipelineId: string;
   let validStageId: string;
@@ -36,7 +32,9 @@ describe('devops stage environment add NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       const name = genUniqueString('NUT-add-env-%s');
       const pipeline = execCmd<CreatePipelineResult>(
         `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
@@ -81,7 +79,9 @@ describe('devops stage environment add NUTs', () => {
   // The full happy path requires interactive OAuth (browser open + org auth callback),
   // which cannot run headlessly. We verify the command reaches the API layer by
   // checking the error when a non-existent stage ID is supplied.
-  (REAL_ORG ? it : it.skip)('errors when --stage-id does not belong to the pipeline', () => {
+  it('errors when --stage-id does not belong to the pipeline', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd(
       `devops stage environment add --pipeline-id ${pipelineId} --stage-id 0XC000000000001AAA --environment-name myEnv --org-type Sandbox --no-browser ${orgFlag}`,
       { ensureExitCode: 1 }
@@ -89,7 +89,9 @@ describe('devops stage environment add NUTs', () => {
     expect(result.shellOutput.stderr).to.include('0XC000000000001AAA');
   });
 
-  (REAL_ORG ? it : it.skip)('errors with valid stage when no org auth is completed (timeout)', () => {
+  it('errors with valid stage when no org auth is completed (timeout)', function () {
+    if (!dcEnabled) this.skip();
+
     // With --no-browser the command waits for auth but no callback arrives → auth timeout error.
     // This confirms the command reaches DevOps Center and attempts the environment-creation flow.
     const result = execCmd(

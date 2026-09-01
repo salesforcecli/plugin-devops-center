@@ -16,16 +16,12 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../nutHelpers.js';
 import type { UpdateWorkItemResult } from '../../../../src/utils/updateWorkItem.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 describe('devops work-item update NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   let workItemName: string;
   let workItemId: string;
@@ -34,7 +30,9 @@ describe('devops work-item update NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       // Create a project and a work item to update
       const projName = genUniqueString('NUT-wi-update-%s');
       const proj = execCmd<{ projectId: string }>(`devops project create --name "${projName}" --json ${orgFlag}`, {
@@ -79,7 +77,9 @@ describe('devops work-item update NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('updates a work item status by ID and returns structured JSON', () => {
+  it('updates a work item status by ID and returns structured JSON', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<UpdateWorkItemResult>(
       `devops work-item update --work-item-id ${workItemId} --status "In Progress" --json ${orgFlag}`,
       { ensureExitCode: 0 }
@@ -91,7 +91,9 @@ describe('devops work-item update NUTs', () => {
     expect(output?.result.status).to.equal('In Progress');
   });
 
-  (REAL_ORG ? it : it.skip)('updates a work item status by name', () => {
+  it('updates a work item status by name', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<UpdateWorkItemResult>(
       `devops work-item update --work-item-name ${workItemName} --status "Ready to Promote" --json ${orgFlag}`,
       { ensureExitCode: 0 }
@@ -100,7 +102,9 @@ describe('devops work-item update NUTs', () => {
     expect(result.jsonOutput?.result.status).to.equal('Ready to Promote');
   });
 
-  (REAL_ORG ? it : it.skip)('updates the subject and description', () => {
+  it('updates the subject and description', function () {
+    if (!dcEnabled) this.skip();
+
     const newSubject = genUniqueString('NUT subject %s');
     const result = execCmd<UpdateWorkItemResult>(
       `devops work-item update --work-item-id ${workItemId} --subject "${newSubject}" --description "NUT description" --json ${orgFlag}`,

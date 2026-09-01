@@ -16,16 +16,12 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../nutHelpers.js';
 import type { UpdateProjectResult } from '../../../../src/utils/updateProject.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 describe('devops project update NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   let projectId: string;
 
@@ -33,7 +29,9 @@ describe('devops project update NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       const projName = genUniqueString('NUT-proj-upd-%s');
       const proj = execCmd<{ projectId: string }>(`devops project create --name "${projName}" --json ${orgFlag}`, {
         ensureExitCode: 0,
@@ -67,12 +65,16 @@ describe('devops project update NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('errors when no fields to update are provided', () => {
+  it('errors when no fields to update are provided', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd(`devops project update --project-id ${projectId} ${orgFlag}`, { ensureExitCode: 1 });
     expect(result.shellOutput.stderr.toLowerCase()).to.include('field');
   });
 
-  (REAL_ORG ? it : it.skip)('updates the project name and returns structured JSON', () => {
+  it('updates the project name and returns structured JSON', function () {
+    if (!dcEnabled) this.skip();
+
     const newName = genUniqueString('NUT-proj-renamed-%s');
     const result = execCmd<UpdateProjectResult>(
       `devops project update --project-id ${projectId} --name "${newName}" --json ${orgFlag}`,
@@ -83,7 +85,9 @@ describe('devops project update NUTs', () => {
     expect(result.jsonOutput?.result.name).to.equal(newName);
   });
 
-  (REAL_ORG ? it : it.skip)('updates the project description and active flag', () => {
+  it('updates the project description and active flag', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<UpdateProjectResult>(
       `devops project update --project-id ${projectId} --description "NUT description" --no-is-active --json ${orgFlag}`,
       { ensureExitCode: 0 }

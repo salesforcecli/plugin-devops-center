@@ -16,20 +16,18 @@
 
 import { execCmd, TestSession } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
+import { isDevopsCenterEnabled } from '../nutHelpers.js';
 
 describe('devops work-item prepare NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
 
   before(async () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
+
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
   });
 
   after(async () => {
@@ -62,7 +60,9 @@ describe('devops work-item prepare NUTs', () => {
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('errors when the work item does not exist', () => {
+  it('errors when the work item does not exist', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd(
       `devops work-item prepare --work-item-id 1fk000000000001AAA --target-stage-id 1QV000000000001AAA ${orgFlag}`,
       { ensureExitCode: 1 }

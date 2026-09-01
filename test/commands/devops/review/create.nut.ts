@@ -16,16 +16,12 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
+import { isDevopsCenterEnabled } from '../nutHelpers.js';
 import type { CreatePullRequestResult } from '../../../../src/utils/createPullRequest.js';
-
-const REAL_ORG = [
-  process.env.TESTKIT_HUB_USERNAME,
-  process.env.TESTKIT_ORG_USERNAME,
-  process.env.TESTKIT_AUTH_URL,
-].some(Boolean);
 
 describe('devops review create NUTs', () => {
   let session: TestSession;
+  let dcEnabled = false;
   let orgFlag: string;
   // A work item that exists in the org but has no branch yet (freshly created)
   let noBranchWorkItemName: string;
@@ -34,7 +30,9 @@ describe('devops review create NUTs', () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
-    if (REAL_ORG) {
+    dcEnabled = isDevopsCenterEnabled(orgFlag);
+
+    if (dcEnabled) {
       // Create a project and a bare work item (no VCS branch assigned yet)
       const projName = genUniqueString('NUT-review-%s');
       const proj = execCmd<{ projectId: string }>(`devops project create --name "${projName}" --json ${orgFlag}`, {
@@ -75,7 +73,9 @@ describe('devops review create NUTs', () => {
   // ── real-org tests ────────────────────────────────────────────────────────
 
   // A work item without a DevOps Center branch assigned → command should error with NoBranch message
-  (REAL_ORG ? it : it.skip)('errors with a NoBranch message for a work item with no branch', () => {
+  it('errors with a NoBranch message for a work item with no branch', function () {
+    if (!dcEnabled) this.skip();
+
     const result = execCmd<CreatePullRequestResult>(
       `devops review create --work-item-name ${noBranchWorkItemName} ${orgFlag}`,
       { ensureExitCode: 1 }
