@@ -18,9 +18,11 @@ import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-t
 import { expect } from 'chai';
 import type { CreateWorkItemResult } from '../../../../src/utils/createWorkItem.js';
 
-const REAL_ORG = Boolean(
-  process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME ?? process.env.TESTKIT_AUTH_URL
-);
+const REAL_ORG = [
+  process.env.TESTKIT_HUB_USERNAME,
+  process.env.TESTKIT_ORG_USERNAME,
+  process.env.TESTKIT_AUTH_URL,
+].some(Boolean);
 
 describe('devops work-item create NUTs', () => {
   let session: TestSession;

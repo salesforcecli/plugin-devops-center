@@ -18,9 +18,11 @@ import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-t
 import { expect } from 'chai';
 import type { DevopsProjectListResult } from '../../../../src/commands/devops/project/list.js';
 
-const REAL_ORG = Boolean(
-  process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME ?? process.env.TESTKIT_AUTH_URL
-);
+const REAL_ORG = [
+  process.env.TESTKIT_HUB_USERNAME,
+  process.env.TESTKIT_ORG_USERNAME,
+  process.env.TESTKIT_AUTH_URL,
+].some(Boolean);
 
 describe('devops project list NUTs', () => {
   let session: TestSession;

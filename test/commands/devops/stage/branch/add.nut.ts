@@ -19,9 +19,11 @@ import { expect } from 'chai';
 import type { AddStageBranchResult } from '../../../../../src/utils/addStageBranch.js';
 import type { CreatePipelineResult } from '../../../../../src/utils/createPipeline.js';
 
-const REAL_ORG = Boolean(
-  process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME ?? process.env.TESTKIT_AUTH_URL
-);
+const REAL_ORG = [
+  process.env.TESTKIT_HUB_USERNAME,
+  process.env.TESTKIT_ORG_USERNAME,
+  process.env.TESTKIT_AUTH_URL,
+].some(Boolean);
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 

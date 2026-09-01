@@ -16,8 +16,7 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import type { AddPipelineStageResult } from '../../../../../src/utils/addPipelineStage.js';
-import type { CreatePipelineResult } from '../../../../../src/utils/createPipeline.js';
+import type { DeletePipelineStageResult } from '../../../../../src/utils/deletePipelineStage.js';
 
 const REAL_ORG = [
   process.env.TESTKIT_HUB_USERNAME,
@@ -27,31 +26,30 @@ const REAL_ORG = [
 
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
-describe('devops pipeline stage add NUTs', () => {
+describe('devops pipeline stage delete NUTs', () => {
   let session: TestSession;
   let orgFlag: string;
   let pipelineId: string;
-  // One of the default stage IDs seeded by pipeline create, used as the `--next-stage-id`
-  let existingStageId: string;
+  let lastStageId: string;
 
   before(async () => {
     session = await TestSession.create({ devhubAuthStrategy: 'AUTO' });
     orgFlag = `--target-org ${session.hubOrg?.username ?? ''}`;
 
     if (REAL_ORG) {
-      const name = genUniqueString('NUT-stage-add-%s');
-      const pipeline = execCmd<CreatePipelineResult>(
+      const name = genUniqueString('NUT-stage-del-%s');
+      const pipeline = execCmd<{ pipelineId: string }>(
         `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
         { ensureExitCode: 0 }
       );
       pipelineId = pipeline.jsonOutput!.result.pipelineId!;
 
-      // Retrieve the first stage ID from the newly created pipeline via sf data query
+      // The last stage (no NextStageId) is safe to remove
       const stagesResult = execCmd<{ records: Array<{ Id: string }> }>(
-        `data query --query "SELECT Id FROM DevopsPipelineStage WHERE DevopsPipelineId='${pipelineId}' ORDER BY CreatedDate ASC LIMIT 1" --json ${orgFlag}`,
+        `data query --query "SELECT Id FROM DevopsPipelineStage WHERE DevopsPipelineId='${pipelineId}' AND NextStageId=null LIMIT 1" --json ${orgFlag}`,
         { ensureExitCode: 0, cli: 'sf' }
       );
-      existingStageId = stagesResult.jsonOutput!.result.records[0].Id;
+      lastStageId = stagesResult.jsonOutput!.result.records[0].Id;
     }
   });
 
@@ -62,36 +60,43 @@ describe('devops pipeline stage add NUTs', () => {
   // ── flag-validation tests ─────────────────────────────────────────────────
 
   it('displays help text', () => {
-    const result = execCmd('devops pipeline stage add --help', { ensureExitCode: 0 });
-    expect(result.shellOutput.stdout).to.include('Add a stage to a DevOps Center pipeline');
+    const result = execCmd('devops pipeline stage delete --help', { ensureExitCode: 0 });
+    expect(result.shellOutput.stdout).to.include('Delete a stage from a DevOps Center pipeline');
   });
 
-  it('errors when --target-org is missing', () => {
-    const result = execCmd('devops pipeline stage add', { ensureExitCode: 1 });
+  it('errors when --pipeline-id is an invalid Salesforce ID format', () => {
+    const result = execCmd('devops pipeline stage delete --pipeline-id not-an-id --stage-id 1QV000000000001AAA', {
+      ensureExitCode: 1,
+    });
+    expect(result.shellOutput.stderr).to.include('15 or 18 characters');
+  });
+
+  it('errors when --target-org is missing (valid flags supplied)', () => {
+    const result = execCmd(
+      'devops pipeline stage delete --pipeline-id 0XB000000000001AAA --stage-id 1QV000000000001AAA',
+      {
+        ensureExitCode: 1,
+      }
+    );
     expect(result.shellOutput.stderr).to.include('target-org');
   });
 
   // ── real-org tests ────────────────────────────────────────────────────────
 
-  (REAL_ORG ? it : it.skip)('adds a stage before an existing stage and returns structured JSON', () => {
-    const stageName = genUniqueString('NUT-stage-%s');
-    const result = execCmd<AddPipelineStageResult>(
-      `devops pipeline stage add --pipeline-id ${pipelineId} --name "${stageName}" --next-stage-id ${existingStageId} --json ${orgFlag}`,
+  (REAL_ORG ? it : it.skip)('deletes a stage and returns structured JSON', () => {
+    const result = execCmd<DeletePipelineStageResult>(
+      `devops pipeline stage delete --pipeline-id ${pipelineId} --stage-id ${lastStageId} --json ${orgFlag}`,
       { ensureExitCode: 0 }
     );
-    const output = result.jsonOutput;
-    expect(output?.status).to.equal(0);
-    expect(output?.result.success).to.be.true;
-    expect(output?.result.stageId).to.match(/^[a-zA-Z0-9]{15,18}$/);
-    expect(output?.result.name).to.equal(stageName);
-    expect(output?.result.nextStageId).to.equal(existingStageId);
+    expect(result.jsonOutput?.status).to.equal(0);
+    expect(result.jsonOutput?.result.success).to.be.true;
   });
 
-  (REAL_ORG ? it : it.skip)('errors when --next-stage-id does not belong to the pipeline', () => {
+  (REAL_ORG ? it : it.skip)('errors when deleting a stage that does not belong to the pipeline', () => {
     const result = execCmd(
-      `devops pipeline stage add --pipeline-id ${pipelineId} --name NewStage --next-stage-id 0XC000000000001AAA ${orgFlag}`,
+      `devops pipeline stage delete --pipeline-id ${pipelineId} --stage-id 1QV000000000001AAA ${orgFlag}`,
       { ensureExitCode: 1 }
     );
-    expect(result.shellOutput.stderr).to.include('0XC000000000001AAA');
+    expect(result.shellOutput.stderr.toLowerCase()).to.include('stage');
   });
 });

@@ -18,9 +18,11 @@ import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-t
 import { expect } from 'chai';
 import type { CreatePipelineResult } from '../../../../src/utils/createPipeline.js';
 
-const REAL_ORG = Boolean(
-  process.env.TESTKIT_HUB_USERNAME ?? process.env.TESTKIT_ORG_USERNAME ?? process.env.TESTKIT_AUTH_URL
-);
+const REAL_ORG = [
+  process.env.TESTKIT_HUB_USERNAME,
+  process.env.TESTKIT_ORG_USERNAME,
+  process.env.TESTKIT_AUTH_URL,
+].some(Boolean);
 
 // Use a real GitHub repo URL that DevOps Center can validate without creating anything
 const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
