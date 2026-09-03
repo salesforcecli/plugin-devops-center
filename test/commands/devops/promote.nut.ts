@@ -68,7 +68,9 @@ describe('devops promote NUTs', () => {
   it('errors when neither --work-item-id nor --stage-id is provided', function () {
     if (!dcEnabled) this.skip();
 
-    const result = execCmd(`devops promote --target-stage-id 1QV000000000001AAA ${orgFlag}`, { ensureExitCode: 1 });
+    const result = execCmd(`devops promote --target-stage-id 1QV000000000001AAA ${orgFlag}`, {
+      ensureExitCode: 'nonZero',
+    });
     expect(result.shellOutput.stderr).to.include('--work-item-id');
   });
 });

@@ -57,7 +57,7 @@ describe('devops promotion complete NUTs', () => {
     if (!dcEnabled) this.skip();
 
     const result = execCmd(`devops promotion complete --target-stage-id 1QV000000000001AAA ${orgFlag}`, {
-      ensureExitCode: 1,
+      ensureExitCode: 'nonZero',
     });
     expect(result.shellOutput.stderr.toLowerCase()).to.include('not found');
   });

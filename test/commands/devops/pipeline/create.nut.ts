@@ -16,11 +16,8 @@
 
 import { execCmd, TestSession, genUniqueString } from '@salesforce/cli-plugins-testkit';
 import { expect } from 'chai';
-import { isDevopsCenterEnabled } from '../nutHelpers.js';
+import { GITHUB_REPO, isDevopsCenterEnabled } from '../nutHelpers.js';
 import type { CreatePipelineResult } from '../../../../src/utils/createPipeline.js';
-
-// Use a real GitHub repo URL that DevOps Center can validate without creating anything
-const GITHUB_REPO = 'https://github.com/salesforcecli/plugin-devops-center';
 
 describe('devops pipeline create NUTs', () => {
   let session: TestSession;
@@ -83,6 +80,12 @@ describe('devops pipeline create NUTs', () => {
       `devops pipeline create --name "${name}" --repo ${GITHUB_REPO} --repo-type github --json ${orgFlag}`,
       { ensureExitCode: 0 }
     );
-    expect(result.jsonOutput?.result.status).to.equal('Inactive');
+    const pipelineId = result.jsonOutput!.result.pipelineId!;
+    // The create response `status` is the operation result ('SUCCESS'); a new pipeline's
+    // inactive state is exposed via `pipeline get` → isActive: false.
+    const get = execCmd<{ isActive: boolean }>(`devops pipeline get --pipeline-id ${pipelineId} --json ${orgFlag}`, {
+      ensureExitCode: 0,
+    });
+    expect(get.jsonOutput?.result.isActive).to.equal(false);
   });
 });

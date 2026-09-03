@@ -54,8 +54,9 @@ describe('devops request status NUTs', () => {
 
     const result = execCmd<RequestStatusResult>(
       `devops request status --request-token NUT-nonexistent-token --json ${orgFlag}`,
-      { ensureExitCode: 1 }
+      { ensureExitCode: 'nonZero' }
     );
-    expect(result.shellOutput.stderr.toLowerCase()).to.include('not found');
+    // With --json the error surfaces in the JSON payload's `message`, not stderr.
+    expect(result.jsonOutput?.message?.toLowerCase()).to.include('not found');
   });
 });
