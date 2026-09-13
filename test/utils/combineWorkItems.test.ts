@@ -38,7 +38,7 @@ describe('combineWorkItems utilities', () => {
     });
 
     const result = await combineWorkItemsPrepare({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0Xo000000000001',
       parentWorkItemId: '0Wx000000000001',
       childWorkItemIds: ['0Wx000000000002', '0Wx000000000003'],
@@ -70,7 +70,7 @@ describe('combineWorkItems utilities', () => {
     });
 
     const result = await combineWorkItemsPrepare({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0Xo000000000001',
       parentWorkItemId: '0Wx000000000001',
       childWorkItemIds: ['0Wx000000000002'],
@@ -89,7 +89,7 @@ describe('combineWorkItems utilities', () => {
 
     try {
       await combineWorkItemsPrepare({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         pipelineId: '0Xo000000000001',
         parentWorkItemId: '0Wx000000000001',
         childWorkItemIds: ['0Wx000000000002'],

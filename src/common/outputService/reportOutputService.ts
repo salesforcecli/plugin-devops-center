@@ -26,7 +26,7 @@ import {
 } from './deploymentResultOutputService.js';
 import { OutputFlags } from './outputService.js';
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
+ 
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'project.deploy.pipeline.report');
