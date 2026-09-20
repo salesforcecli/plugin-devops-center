@@ -35,7 +35,7 @@ describe('activatePipeline utilities', () => {
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
     const result = await activatePipeline({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0XB000000000001',
     });
 
@@ -54,7 +54,7 @@ describe('activatePipeline utilities', () => {
 
     try {
       await activatePipeline({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         pipelineId: '0XB000000000001',
       });
       expect.fail('should have thrown');

@@ -21,7 +21,7 @@ import { DeployComponent } from '../types.js';
 import { getFormattedDeployComponentsByAyncOpId } from '../utils.js';
 import { AorOutputService, AorOutputFlags, AbstractAorOutputService } from './aorOutputService.js';
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
+ 
 
 /**
  * Interface for output methods for resume operations
