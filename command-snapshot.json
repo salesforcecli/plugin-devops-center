@@ -118,6 +118,7 @@
       "api-version",
       "deploy-all",
       "flags-dir",
+      "force",
       "json",
       "skip-validation",
       "stage-id",
