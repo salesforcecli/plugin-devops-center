@@ -27,6 +27,8 @@ describe('devops stage environment add', () => {
   const mockConnection = { getApiVersion: () => '65.0', query: queryStub };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const addStageEnvironmentStub = sinon.stub();
+  const getStageEnvironmentStub = sinon.stub();
+  const deleteStageEnvironmentStub = sinon.stub();
   const fetchPipelineStagesStub = sinon.stub();
   const execFileStub = sinon.stub();
 
@@ -34,6 +36,10 @@ describe('devops stage environment add', () => {
     const mod = await esmock('../../../../../src/commands/devops/stage/environment/add.js', {
       '../../../../../src/utils/addStageEnvironment.js': {
         addStageEnvironment: addStageEnvironmentStub,
+        getStageEnvironment: getStageEnvironmentStub,
+      },
+      '../../../../../src/utils/deleteStageEnvironment.js': {
+        deleteStageEnvironment: deleteStageEnvironmentStub,
       },
       '../../../../../src/utils/pipelineUtils.js': {
         fetchPipelineStages: fetchPipelineStagesStub,
@@ -48,6 +54,10 @@ describe('devops stage environment add', () => {
   beforeEach(() => {
     sandbox = sinon.createSandbox();
     addStageEnvironmentStub.reset();
+    getStageEnvironmentStub.reset();
+    getStageEnvironmentStub.resolves(undefined);
+    deleteStageEnvironmentStub.reset();
+    deleteStageEnvironmentStub.resolves({ success: true });
     fetchPipelineStagesStub.reset();
     execFileStub.reset();
     queryStub.reset();
@@ -456,6 +466,118 @@ describe('devops stage environment add', () => {
         const opened = args[args.length - 1];
         // No literal double-quote or space survives normalization.
         expect(opened).to.not.match(/["\s]/);
+      });
+  });
+
+  describe('existing environment guard', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('blocks when the stage already has an environment and --force is not set', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        fetchPipelineStagesStub.resolves([{ Id: '0Xp000000000001', Name: 'Production' }]);
+        getStageEnvironmentStub.resolves({ environmentId: '0Hi000000000001', environmentName: 'Existing_Org' });
+
+        try {
+          await AddEnvironmentCommand.run([
+            '--target-org',
+            'testOrg',
+            '--pipeline-id',
+            '0Xo000000000001',
+            '--stage-id',
+            '0Xp000000000001',
+            '--environment-name',
+            'Production_Org',
+            '--org-type',
+            'Production',
+          ]);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('already has an environment');
+        expect(ctx.stderr).to.contain('Existing_Org');
+        // The new environment must not be created while one already exists.
+        expect(addStageEnvironmentStub.called).to.equal(false);
+        expect(deleteStageEnvironmentStub.called).to.equal(false);
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('with --force, removes the existing environment then adds the new one', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        fetchPipelineStagesStub.resolves([{ Id: '0Xp000000000001', Name: 'Production' }]);
+        getStageEnvironmentStub.resolves({ environmentId: '0Hi000000000001', environmentName: 'Existing_Org' });
+        deleteStageEnvironmentStub.resolves({ success: true, environmentId: '0Hi000000000001' });
+        addStageEnvironmentStub.resolves({
+          success: true,
+          stageId: '0Xp000000000001',
+          environmentId: '0Hi000000000002',
+          environmentName: 'Production_Org',
+          orgType: 'Production',
+          pipelineId: '0Xo000000000001',
+          organizationId: '00D000000000002',
+        });
+
+        await AddEnvironmentCommand.run([
+          '--target-org',
+          'testOrg',
+          '--pipeline-id',
+          '0Xo000000000001',
+          '--stage-id',
+          '0Xp000000000001',
+          '--environment-name',
+          'Production_Org',
+          '--org-type',
+          'Production',
+          '--force',
+        ]);
+
+        // The existing environment is deleted before the new one is created.
+        expect(deleteStageEnvironmentStub.calledOnce).to.equal(true);
+        expect(deleteStageEnvironmentStub.firstCall.args[1]).to.equal('0Hi000000000001');
+        expect(addStageEnvironmentStub.calledOnce).to.equal(true);
+        expect(deleteStageEnvironmentStub.calledBefore(addStageEnvironmentStub)).to.equal(true);
+        expect(ctx.stdout).to.contain('Successfully added environment to the stage.');
+        expect(ctx.stdout).to.contain('0Hi000000000002');
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('with --force, aborts when removing the existing environment fails', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        fetchPipelineStagesStub.resolves([{ Id: '0Xp000000000001', Name: 'Production' }]);
+        getStageEnvironmentStub.resolves({ environmentId: '0Hi000000000001', environmentName: 'Existing_Org' });
+        deleteStageEnvironmentStub.resolves({ success: false, error: 'delete failed' });
+
+        try {
+          await AddEnvironmentCommand.run([
+            '--target-org',
+            'testOrg',
+            '--pipeline-id',
+            '0Xo000000000001',
+            '--stage-id',
+            '0Xp000000000001',
+            '--environment-name',
+            'Production_Org',
+            '--org-type',
+            'Production',
+            '--force',
+          ]);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('Failed to remove the existing environment');
+        // The new environment must not be created if the old one couldn't be removed.
+        expect(addStageEnvironmentStub.called).to.equal(false);
       });
   });
 });

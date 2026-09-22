@@ -15,9 +15,15 @@
  */
 
 import { execFile } from 'node:child_process';
-import { Messages, Org } from '@salesforce/core';
+import { Connection, Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { addStageEnvironment, AddStageEnvironmentResult, OrgType } from '../../../../utils/addStageEnvironment.js';
+import {
+  addStageEnvironment,
+  AddStageEnvironmentResult,
+  OrgType,
+  getStageEnvironment,
+} from '../../../../utils/addStageEnvironment.js';
+import { deleteStageEnvironment } from '../../../../utils/deleteStageEnvironment.js';
 import { fetchPipelineStages } from '../../../../utils/pipelineUtils.js';
 import { PipelineStageRecord } from '../../../../utils/types.js';
 import { validateSalesforceId } from '../../../../utils/soqlUtils.js';
@@ -98,6 +104,10 @@ export default class DevopsStageEnvironmentAdd extends SfCommand<AddStageEnviron
       summary: messages.getMessage('flags.no-browser.summary'),
       default: false,
     }),
+    force: Flags.boolean({
+      summary: messages.getMessage('flags.force.summary'),
+      default: false,
+    }),
   };
 
   public async run(): Promise<AddStageEnvironmentResult> {
@@ -134,6 +144,8 @@ export default class DevopsStageEnvironmentAdd extends SfCommand<AddStageEnviron
       this.error(messages.getMessage('error.PipelineAlreadyActive', [pipelineId]));
     }
 
+    await this.guardExistingEnvironment(connection, stageId, flags.force);
+
     let result: AddStageEnvironmentResult;
     try {
       result = await addStageEnvironment({
@@ -166,6 +178,41 @@ export default class DevopsStageEnvironmentAdd extends SfCommand<AddStageEnviron
       this.spinner.stop();
     }
 
+    return this.logResult(result, stageId, orgType, pipelineId);
+  }
+
+  /**
+   * A stage holds only one environment (DevopsPipelineStage.DevOpsEnvironmentId). Adding a new one
+   * re-points the lookup and orphans the old DevopsEnvironment record, so block by default and
+   * require --force to replace it (removing the existing environment first).
+   */
+  private async guardExistingEnvironment(connection: Connection, stageId: string, force: boolean): Promise<void> {
+    const existingEnvironment = await getStageEnvironment(connection, stageId);
+    if (!existingEnvironment) {
+      return;
+    }
+    if (!force) {
+      this.error(
+        messages.getMessage('error.EnvironmentAlreadyExists', [
+          stageId,
+          existingEnvironment.environmentName ?? existingEnvironment.environmentId,
+          existingEnvironment.environmentId,
+          this.config.bin,
+        ])
+      );
+    }
+    const deleteResult = await deleteStageEnvironment(connection, existingEnvironment.environmentId);
+    if (!deleteResult.success) {
+      this.error(messages.getMessage('error.ReplaceEnvironmentFailed', [deleteResult.error ?? '']));
+    }
+  }
+
+  private logResult(
+    result: AddStageEnvironmentResult,
+    stageId: string,
+    orgType: OrgType,
+    pipelineId: string
+  ): AddStageEnvironmentResult {
     if (result.success) {
       this.log(messages.getMessage('info.Success'));
       this.log(`  Stage ID:         ${stageId}`);

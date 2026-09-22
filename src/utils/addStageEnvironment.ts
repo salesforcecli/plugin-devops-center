@@ -15,8 +15,37 @@
  */
 
 import { Connection } from '@salesforce/core';
+import { validateSalesforceId } from './soqlUtils.js';
 
 export type OrgType = 'Production' | 'Sandbox';
+
+export type ExistingStageEnvironment = {
+  environmentId: string;
+  environmentName?: string;
+};
+
+/**
+ * Returns the environment currently associated with a pipeline stage, if any.
+ *
+ * A stage references its environment via DevopsPipelineStage.DevOpsEnvironmentId. Adding a new
+ * environment re-points that lookup, so callers must check for an existing environment first to
+ * avoid orphaning the old DevopsEnvironment record.
+ */
+export async function getStageEnvironment(
+  connection: Connection,
+  stageId: string
+): Promise<ExistingStageEnvironment | undefined> {
+  validateSalesforceId(stageId, 'stage');
+  const result = await connection.query<{
+    DevOpsEnvironmentId: string | null;
+    DevOpsEnvironment: { Name: string } | null;
+  }>(`SELECT DevOpsEnvironmentId, DevOpsEnvironment.Name FROM DevopsPipelineStage WHERE Id = '${stageId}' LIMIT 1`);
+  const record = (result.records ?? [])[0];
+  if (!record?.DevOpsEnvironmentId) {
+    return undefined;
+  }
+  return { environmentId: record.DevOpsEnvironmentId, environmentName: record.DevOpsEnvironment?.Name };
+}
 
 const ORG_TYPE_API_MAP: Record<OrgType, string> = {
   Production: 'PRODUCTION',
