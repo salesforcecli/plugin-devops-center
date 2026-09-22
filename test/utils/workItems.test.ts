@@ -176,4 +176,52 @@ describe('fetchWorkItems', () => {
     expect(result[0].TargetStageId).to.equal('S2');
     expect(result[0].TargetBranch).to.equal('branch-2');
   });
+
+  it('leaves the target branch blank for a work item on the final stage', async () => {
+    // Work item currently sits on S2, the last stage (NextStageId is null), so it has no next
+    // stage to promote into — the target branch must not fall back to the first stage.
+    (connectionStub.query as sinon.SinonStub).resolves({
+      records: [{ ...MOCK_RECORD, DevopsPipelineStageId: 'S2' }],
+    });
+    (connectionStub.request as sinon.SinonStub).rejects(new Error('no vcs'));
+
+    const { fetchWorkItems } = await esmock('../../src/utils/workItems.js', {
+      '../../src/utils/pipelineUtils.js': {
+        getPipelineIdForProject: sinon.stub().resolves('PIPE001'),
+        fetchPipelineStages: sinon.stub().resolves([
+          { Id: 'S1', NextStageId: 'S2', SourceCodeRepositoryBranch: { Name: 'branch-1' } },
+          { Id: 'S2', NextStageId: null, SourceCodeRepositoryBranch: { Name: 'branch-2' } },
+        ]),
+      },
+    });
+
+    const result = await fetchWorkItems(connectionStub as unknown as Connection, 'PROJ001');
+
+    expect(result[0].TargetStageId).to.be.undefined;
+    expect(result[0].TargetBranch).to.be.undefined;
+  });
+
+  it('targets the first stage for a work item that has not entered the pipeline', async () => {
+    // No current stage (DevopsPipelineStageId null) — the work item first promotes into the first
+    // stage (S1, the stage nothing points to), so the target branch is that stage's branch.
+    (connectionStub.query as sinon.SinonStub).resolves({
+      records: [{ ...MOCK_RECORD, DevopsPipelineStageId: null }],
+    });
+    (connectionStub.request as sinon.SinonStub).rejects(new Error('no vcs'));
+
+    const { fetchWorkItems } = await esmock('../../src/utils/workItems.js', {
+      '../../src/utils/pipelineUtils.js': {
+        getPipelineIdForProject: sinon.stub().resolves('PIPE001'),
+        fetchPipelineStages: sinon.stub().resolves([
+          { Id: 'S1', NextStageId: 'S2', SourceCodeRepositoryBranch: { Name: 'branch-1' } },
+          { Id: 'S2', NextStageId: null, SourceCodeRepositoryBranch: { Name: 'branch-2' } },
+        ]),
+      },
+    });
+
+    const result = await fetchWorkItems(connectionStub as unknown as Connection, 'PROJ001');
+
+    expect(result[0].TargetStageId).to.equal('S1');
+    expect(result[0].TargetBranch).to.equal('branch-1');
+  });
 });
