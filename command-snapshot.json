@@ -206,6 +206,7 @@
       "api-version",
       "environment-name",
       "flags-dir",
+      "force",
       "json",
       "no-browser",
       "org-type",
