@@ -57,6 +57,46 @@ export function toApiStatus(status: string): string {
   return apiStatus;
 }
 
+/**
+ * Allowed current statuses for each target status a user can set. A work item may only move
+ * to IN_PROGRESS while it is NEW, and to READY_TO_PROMOTE while it is IN_REVIEW. Target statuses
+ * absent from this map have no precondition.
+ */
+export const STATUS_TRANSITION_PRECONDITIONS: Record<string, readonly string[]> = {
+  IN_PROGRESS: ['NEW'],
+  READY_TO_PROMOTE: ['IN_REVIEW'],
+};
+
+/**
+ * Verifies that the work item's current status permits the requested transition. Throws with a
+ * descriptive error when it does not. Only runs a query when the target status has a precondition,
+ * so subject/description-only updates are unaffected.
+ */
+export async function assertStatusTransitionAllowed(
+  connection: Connection,
+  workItemId: string,
+  targetApiStatus: string
+): Promise<void> {
+  const allowedFrom = STATUS_TRANSITION_PRECONDITIONS[targetApiStatus];
+  if (!allowedFrom) {
+    return;
+  }
+  validateSalesforceId(workItemId, 'work item');
+  const result = await connection.query<{ Status: string }>(
+    `SELECT Status FROM WorkItem WHERE Id = '${workItemId}' LIMIT 1`
+  );
+  const current = result.records?.[0]?.Status;
+  if (!current) {
+    throw new Error(`Work item with ID '${workItemId}' not found.`);
+  }
+  if (!allowedFrom.includes(current)) {
+    const allowed = allowedFrom.join(', ');
+    throw new Error(
+      `Cannot change status to ${targetApiStatus}: the work item is currently ${current}, but this transition is only allowed from ${allowed}.`
+    );
+  }
+}
+
 export async function resolveWorkItemByName(connection: Connection, workItemName: string): Promise<WorkItemContext> {
   const result = await connection.query<{ Id: string; DevopsProjectId: string }>(
     `SELECT Id, DevopsProjectId FROM WorkItem WHERE Name = '${escapeSOQL(workItemName)}' LIMIT 1`
@@ -81,32 +121,48 @@ export async function resolveProjectIdForWorkItem(connection: Connection, workIt
 }
 
 /**
- * Updates fields on a DevOps Center work item via the Connect API.
- * PATCH /services/data/v{version}/connect/devops/projects/{projectId}/workitem/{workItemId}
+ * Updates a DevOps Center work item.
+ *
+ * Subject and description are plain WorkItem sObject fields — the DevOps Center connect work item
+ * endpoint does not accept them — so they are written via the sObject API. Status changes go
+ * through the connect endpoint (PATCH /connect/devops/projects/{projectId}/workitem/{workItemId}),
+ * which is the only field that endpoint accepts, so platform-side status handling runs.
  */
 export async function updateWorkItem(params: UpdateWorkItemParams): Promise<UpdateWorkItemResult> {
   const { connection, workItemId, projectId, status, subject, description } = params;
 
-  const path = `/services/data/v${connection.getApiVersion()}/connect/devops/projects/${projectId}/workitem/${workItemId}`;
-  const payload: Record<string, string> = {};
-  if (status !== undefined) payload.status = toApiStatus(status);
-  if (subject !== undefined) payload.subject = subject;
-  if (description !== undefined) payload.description = description;
+  if (subject !== undefined || description !== undefined) {
+    const fields: { Id: string; Subject?: string; Description?: string } = { Id: workItemId };
+    if (subject !== undefined) fields.Subject = subject;
+    if (description !== undefined) fields.Description = description;
+    const saveResult = await connection.sobject('WorkItem').update(fields);
+    if (!saveResult.success) {
+      const errorMsg = saveResult.errors
+        .map((e) => (typeof e === 'string' ? e : e.message))
+        .filter(Boolean)
+        .join('; ');
+      return { success: false, workItemId, error: errorMsg || 'Failed to update work item fields.' };
+    }
+  }
 
-  const response = await connection.request({
-    method: 'PATCH',
-    url: path,
-    body: JSON.stringify(payload),
-    headers: { 'Content-Type': 'application/json' },
-  });
+  let apiStatus: string | undefined;
+  if (status !== undefined) {
+    apiStatus = toApiStatus(status);
+    await assertStatusTransitionAllowed(connection, workItemId, apiStatus);
+    const path = `/services/data/v${connection.getApiVersion()}/connect/devops/projects/${projectId}/workitem/${workItemId}`;
+    await connection.request({
+      method: 'PATCH',
+      url: path,
+      body: JSON.stringify({ status: apiStatus }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 
-  const data = (response as Record<string, unknown>) ?? {};
   return {
     success: true,
     workItemId,
-    status: status !== undefined ? ((data.status ?? data.Status ?? status) as string) : undefined,
-    subject: subject !== undefined ? ((data.subject ?? data.Subject ?? subject) as string) : undefined,
-    description:
-      description !== undefined ? ((data.description ?? data.Description ?? description) as string) : undefined,
+    status: apiStatus,
+    subject,
+    description,
   };
 }
