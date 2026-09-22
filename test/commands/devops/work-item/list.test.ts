@@ -69,6 +69,8 @@ describe('devops work-item list', () => {
         await ListCommand.run(['--target-org', 'testOrg', '--project-id', '1Qg000000000001']);
 
         expect(ctx.stdout).to.contain('WI-001');
+        // The work item ID must be shown alongside the name.
+        expect(ctx.stdout).to.contain('WI001');
       });
   });
 
