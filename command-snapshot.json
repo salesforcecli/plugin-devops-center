@@ -182,6 +182,7 @@
       "branch-name",
       "create-vcs-branch",
       "flags-dir",
+      "force",
       "json",
       "pipeline-id",
       "stage-id",

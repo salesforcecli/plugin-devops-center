@@ -26,12 +26,16 @@ describe('devops stage branch add', () => {
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const addStageBranchStub = sinon.stub();
+  const getStageBranchStub = sinon.stub();
+  const deleteOrphanedBranchStub = sinon.stub();
   const fetchPipelineStagesStub = sinon.stub();
 
   before(async () => {
     const mod = await esmock('../../../../../src/commands/devops/stage/branch/add.js', {
       '../../../../../src/utils/addStageBranch.js': {
         addStageBranch: addStageBranchStub,
+        getStageBranch: getStageBranchStub,
+        deleteOrphanedBranch: deleteOrphanedBranchStub,
       },
       '../../../../../src/utils/pipelineUtils.js': {
         fetchPipelineStages: fetchPipelineStagesStub,
@@ -43,6 +47,10 @@ describe('devops stage branch add', () => {
   beforeEach(() => {
     sandbox = sinon.createSandbox();
     addStageBranchStub.reset();
+    getStageBranchStub.reset();
+    getStageBranchStub.resolves(undefined);
+    deleteOrphanedBranchStub.reset();
+    deleteOrphanedBranchStub.resolves(true);
     fetchPipelineStagesStub.reset();
   });
 
@@ -343,6 +351,118 @@ describe('devops stage branch add', () => {
         }
 
         expect(ctx.stderr).to.contain("DevOps Center isn't enabled");
+      });
+  });
+
+  describe('existing branch guard', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('blocks when the stage already has a branch and --force is not set', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        fetchPipelineStagesStub.resolves([{ Id: '0Xp000000000001', Name: 'Production' }]);
+        getStageBranchStub.resolves({ branchId: '0Xq000000000001', branchName: '$$UAT' });
+
+        try {
+          await AddBranchCommand.run([
+            '--target-org',
+            'testOrg',
+            '--pipeline-id',
+            '0Xo000000000001',
+            '--stage-id',
+            '0Xp000000000001',
+            '--branch-name',
+            'UAT123',
+          ]);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('already has a branch');
+        // The "$$" marker prefix is stripped for display.
+        expect(ctx.stderr).to.contain('UAT');
+        expect(ctx.stderr).to.not.contain('$$');
+        // No new branch is associated while one already exists.
+        expect(addStageBranchStub.called).to.equal(false);
+        expect(deleteOrphanedBranchStub.called).to.equal(false);
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('with --force, associates the new branch then removes the orphaned one', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        fetchPipelineStagesStub.resolves([{ Id: '0Xp000000000001', Name: 'Production' }]);
+        getStageBranchStub.resolves({ branchId: '0Xq000000000001', branchName: '$$UAT' });
+        deleteOrphanedBranchStub.resolves(true);
+        addStageBranchStub.resolves({
+          success: true,
+          stageId: '0Xp000000000001',
+          branchName: 'UAT123',
+          branchCreated: true,
+          repoBranchId: '0Xq000000000002',
+          pipelineId: '0Xo000000000001',
+        });
+
+        await AddBranchCommand.run([
+          '--target-org',
+          'testOrg',
+          '--pipeline-id',
+          '0Xo000000000001',
+          '--stage-id',
+          '0Xp000000000001',
+          '--branch-name',
+          'UAT123',
+          '--create-vcs-branch',
+          '--force',
+        ]);
+
+        // The new branch is associated first, then the previous branch record is removed.
+        expect(addStageBranchStub.calledOnce).to.equal(true);
+        expect(deleteOrphanedBranchStub.calledOnce).to.equal(true);
+        expect(deleteOrphanedBranchStub.firstCall.args[1]).to.equal('0Xq000000000001');
+        expect(addStageBranchStub.calledBefore(deleteOrphanedBranchStub)).to.equal(true);
+        expect(ctx.stdout).to.contain('Created branch and associated it with the stage.');
+        expect(ctx.stdout).to.contain("Removed the stage's previous branch");
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('with --force, warns but succeeds when the orphaned branch cleanup fails', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        fetchPipelineStagesStub.resolves([{ Id: '0Xp000000000001', Name: 'Production' }]);
+        getStageBranchStub.resolves({ branchId: '0Xq000000000001', branchName: '$$UAT' });
+        deleteOrphanedBranchStub.rejects(new Error('delete not allowed'));
+        addStageBranchStub.resolves({
+          success: true,
+          stageId: '0Xp000000000001',
+          branchName: 'UAT123',
+          branchCreated: true,
+          repoBranchId: '0Xq000000000002',
+          pipelineId: '0Xo000000000001',
+        });
+
+        await AddBranchCommand.run([
+          '--target-org',
+          'testOrg',
+          '--pipeline-id',
+          '0Xo000000000001',
+          '--stage-id',
+          '0Xp000000000001',
+          '--branch-name',
+          'UAT123',
+          '--create-vcs-branch',
+          '--force',
+        ]);
+
+        // The command still reports success even though cleanup failed.
+        expect(ctx.stdout).to.contain('Created branch and associated it with the stage.');
+        expect(ctx.stderr).to.contain("couldn't remove the previous branch record");
       });
   });
 
