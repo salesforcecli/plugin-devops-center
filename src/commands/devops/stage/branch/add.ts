@@ -14,15 +14,26 @@
  * limitations under the License.
  */
 
-import { Messages, Org } from '@salesforce/core';
+import { Connection, Messages, Org } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { addStageBranch, AddStageBranchResult } from '../../../../utils/addStageBranch.js';
+import {
+  addStageBranch,
+  AddStageBranchResult,
+  ExistingStageBranch,
+  getStageBranch,
+  deleteOrphanedBranch,
+} from '../../../../utils/addStageBranch.js';
 import { fetchPipelineStages } from '../../../../utils/pipelineUtils.js';
 import { PipelineStageRecord } from '../../../../utils/types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'devops.stage.branch.add');
 const commonErrorMessages = Messages.loadMessages('@salesforce/plugin-devops-center', 'commonErrors');
+
+// The platform stores created branch names with a "$$" marker prefix; strip it for display.
+function displayBranchName(existingBranch: ExistingStageBranch): string {
+  return (existingBranch.branchName ?? existingBranch.branchId).replace(/^\$\$/, '');
+}
 
 export default class DevopsStageBranchAdd extends SfCommand<AddStageBranchResult> {
   public static readonly summary = messages.getMessage('summary');
@@ -49,6 +60,10 @@ export default class DevopsStageBranchAdd extends SfCommand<AddStageBranchResult
     }),
     'create-vcs-branch': Flags.boolean({
       summary: messages.getMessage('flags.create-vcs-branch.summary'),
+      default: false,
+    }),
+    force: Flags.boolean({
+      summary: messages.getMessage('flags.force.summary'),
       default: false,
     }),
   };
@@ -85,6 +100,8 @@ export default class DevopsStageBranchAdd extends SfCommand<AddStageBranchResult
       }
     }
 
+    const existingBranch = await this.guardExistingBranch(connection, stageId, flags.force);
+
     let result: AddStageBranchResult;
     try {
       result = await addStageBranch({
@@ -102,6 +119,53 @@ export default class DevopsStageBranchAdd extends SfCommand<AddStageBranchResult
       throw error;
     }
 
+    if (existingBranch && result.success) {
+      await this.cleanupReplacedBranch(connection, existingBranch);
+    }
+
+    return this.logResult(result, stageId, pipelineId);
+  }
+
+  /**
+   * A stage holds only one branch (DevopsPipelineStage.SourceCodeRepositoryBranchId). Adding a new
+   * one re-points the lookup and orphans the old SourceCodeRepositoryBranch record, so block by
+   * default and require --force to replace it. Returns the existing branch (when present) so the
+   * caller can remove the orphaned record after the new branch is associated.
+   */
+  private async guardExistingBranch(
+    connection: Connection,
+    stageId: string,
+    force: boolean
+  ): Promise<ExistingStageBranch | undefined> {
+    const existingBranch = await getStageBranch(connection, stageId);
+    if (!existingBranch) {
+      return undefined;
+    }
+    if (!force) {
+      this.error(
+        messages.getMessage('error.BranchAlreadyExists', [stageId, displayBranchName(existingBranch), this.config.bin])
+      );
+    }
+    return existingBranch;
+  }
+
+  /**
+   * Removes the branch record the stage was re-pointed away from, unless another stage still
+   * references it. Best-effort: a cleanup failure is surfaced as a warning and does not fail the
+   * command, since the new branch has already been associated successfully.
+   */
+  private async cleanupReplacedBranch(connection: Connection, existingBranch: ExistingStageBranch): Promise<void> {
+    try {
+      const deleted = await deleteOrphanedBranch(connection, existingBranch.branchId);
+      if (deleted) {
+        this.log(messages.getMessage('info.ReplacedBranchRemoved', [displayBranchName(existingBranch)]));
+      }
+    } catch {
+      this.warn(messages.getMessage('warn.ReplacedBranchCleanupFailed', [existingBranch.branchId]));
+    }
+  }
+
+  private logResult(result: AddStageBranchResult, stageId: string, pipelineId: string): AddStageBranchResult {
     if (result.success) {
       const action = result.branchCreated ? 'Created branch and associated it' : 'Successfully associated branch';
       this.log(`${action} with the stage.`);

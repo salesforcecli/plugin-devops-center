@@ -175,10 +175,13 @@ function mapRawItemToWorkItem(
   };
 
   if (ctx) {
-    let targetStageId = resolveTargetStageId(mapped.PipelineStageId, ctx.stages);
-    if (!targetStageId) {
-      targetStageId = ctx.firstStageId;
-    }
+    // A work item's changes are promoted into the branch of its *next* pipeline stage. Only fall
+    // back to the first stage when the work item hasn't entered the pipeline yet (no current stage);
+    // a work item already on the final stage has no next stage, so it has no target branch (e.g. a
+    // closed work item that reached the last stage), and the branch is left blank.
+    const targetStageId = mapped.PipelineStageId
+      ? resolveTargetStageId(mapped.PipelineStageId, ctx.stages)
+      : ctx.firstStageId;
     const targetStage = findStageById(ctx.stages, targetStageId);
     mapped.TargetBranch = getBranchNameFromStage(targetStage);
     mapped.TargetStageId = targetStageId;

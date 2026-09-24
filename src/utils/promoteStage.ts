@@ -15,6 +15,7 @@
  */
 
 import { Connection } from '@salesforce/core';
+import { validateSalesforceId } from './soqlUtils.js';
 
 export type PromoteStageParams = {
   connection: Connection;
@@ -80,4 +81,48 @@ export async function promoteStage(params: PromoteStageParams): Promise<PromoteS
     message: response.message ?? '',
     promotedWorkitemIds: response.promotedWorkitemIds ?? [],
   };
+}
+
+/**
+ * DevopsPipelnStgProm.Status values that indicate a promotion has been submitted
+ * but has not yet finished (i.e. is still in flight).
+ */
+export const IN_FLIGHT_PROMOTION_STATUSES = ['NEW', 'IN_PROGRESS', 'FINALIZING'] as const;
+
+export type InFlightPromotion = {
+  id: string;
+  requestToken: string;
+  status: string;
+};
+
+type PipelineStagePromotionRecord = {
+  Id: string;
+  Status: string;
+  RequestInfoId: string | null;
+  RequestInfo: { RequestToken: string | null } | null;
+};
+
+/**
+ * Returns any in-flight promotions targeting the given pipeline stage.
+ *
+ * DevopsPipelnStgProm (Pipeline Stage Promotion) records the target stage of a promotion
+ * (PipelineStageId) and links to its DevopsRequestInfo, so the check is scoped to the
+ * specific target stage — and therefore its pipeline — rather than the whole org. Used to
+ * block a duplicate promotion to the same stage while one is already running, without
+ * affecting promotions in other stages or pipelines.
+ */
+export async function findInFlightPromotions(
+  connection: Connection,
+  targetStageId: string
+): Promise<InFlightPromotion[]> {
+  validateSalesforceId(targetStageId, 'target stage');
+  const statusList = IN_FLIGHT_PROMOTION_STATUSES.join("', '");
+  const result = await connection.query<PipelineStagePromotionRecord>(
+    `SELECT Id, Status, RequestInfoId, RequestInfo.RequestToken FROM DevopsPipelnStgProm WHERE PipelineStageId = '${targetStageId}' AND Status IN ('${statusList}') LIMIT 10`
+  );
+  return (result.records ?? []).map((r) => ({
+    id: r.Id,
+    requestToken: r.RequestInfo?.RequestToken ?? r.RequestInfoId ?? '',
+    status: r.Status,
+  }));
 }

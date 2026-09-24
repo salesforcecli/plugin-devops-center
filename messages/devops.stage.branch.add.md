@@ -5,7 +5,7 @@ Add a source code repository branch to a pipeline stage.
 # description
 
 By default, the branch must exist in the repository. Use --create-vcs-branch to create a branch if it doesn't exist.
-Each pipeline stage supports only one branch. Adding a branch replaces any existing branch linked to the pipeline stage.
+Each pipeline stage supports only one branch. If the stage already has a branch, the command blocks so the existing branch isn't orphaned; pass --force to replace it.
 
 # flags.pipeline-id.summary
 
@@ -22,6 +22,10 @@ Name of the repository branch to assign to the stage.
 # flags.create-vcs-branch.summary
 
 Create the branch in the remote repository if it doesn't already exist.
+
+# flags.force.summary
+
+Replace the stage's existing branch. By default, the command blocks if the stage already has a branch to avoid orphaning it. With this flag, the new branch is associated and the previous branch record is removed if no other stage references it.
 
 # examples
 
@@ -44,3 +48,15 @@ You must set up a branch on stage "%s" before configuring stage "%s". Branches m
 # error.BranchAttachFailed
 
 Failed to associate branch with stage: %s
+
+# error.BranchAlreadyExists
+
+Stage "%s" already has a branch ("%s"). Adding another would leave the existing one orphaned. Remove it first with "%s devops stage branch delete", or pass --force to replace it.
+
+# info.ReplacedBranchRemoved
+
+Removed the stage's previous branch "%s".
+
+# warn.ReplacedBranchCleanupFailed
+
+Associated the new branch, but couldn't remove the previous branch record (%s). Remove it manually if it's no longer needed.

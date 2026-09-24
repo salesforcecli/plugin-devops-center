@@ -16,7 +16,12 @@
 
 import { Connection, Messages } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
-import { promoteStage, PromoteStageResult } from '../../utils/promoteStage.js';
+import {
+  promoteStage,
+  PromoteStageResult,
+  findInFlightPromotions,
+  InFlightPromotion,
+} from '../../utils/promoteStage.js';
 import { resolveProjectIdFromWorkItem } from '../../utils/prepareWorkItem.js';
 import { getPipelineIdForProject } from '../../utils/pipelineUtils.js';
 import { deployAll, testLevel as testLevelFlag, specificTestsNoChar } from '../../common/flags/promote/promoteFlags.js';
@@ -78,6 +83,10 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
     tests: specificTestsNoChar,
     'skip-validation': Flags.boolean({
       summary: messages.getMessage('flags.skip-validation.summary'),
+      default: false,
+    }),
+    force: Flags.boolean({
+      summary: messages.getMessage('flags.force.summary'),
       default: false,
     }),
   };
@@ -168,6 +177,10 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
       }
     }
 
+    if (!flags.force) {
+      await this.assertNoInFlightPromotion(connection, targetStageId);
+    }
+
     if (!flags['skip-validation']) {
       await this.runValidation(connection, pipelineId, resolvedWorkItemIds, targetStageId, !workItemIds?.length);
     }
@@ -209,6 +222,29 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
       message: apiResult.message,
       promotedWorkitemIds: apiResult.promotedWorkitemIds,
     };
+  }
+
+  /**
+   * Blocks promotion if another promotion to the same target stage is already in flight, to
+   * avoid creating a duplicate. Scoped to the target stage (and therefore its pipeline), so
+   * promotions in other stages or pipelines are unaffected. Best-effort: if the check can't
+   * run, the promotion proceeds as before.
+   */
+  private async assertNoInFlightPromotion(connection: Connection, targetStageId: string): Promise<void> {
+    let inFlight: InFlightPromotion[];
+    try {
+      inFlight = await findInFlightPromotions(connection, targetStageId);
+    } catch (err) {
+      // Guard failure must not break the existing promote flow, but surface it so operators can see
+      // the duplicate-promotion check was skipped rather than silently passing.
+      this.warn(messages.getMessage('warn.InFlightCheckSkipped', [err instanceof Error ? err.message : String(err)]));
+      return;
+    }
+    if (inFlight.length > 0) {
+      const tokens = inFlight.map((p) => p.requestToken).filter(Boolean);
+      const plural = tokens.length > 1 ? 's' : '';
+      this.error(messages.getMessage('error.PromotionInFlight', [plural, tokens.join(', '), this.config.bin]));
+    }
   }
 
   private async runValidation(

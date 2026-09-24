@@ -26,6 +26,10 @@ Type of the Salesforce org. Valid values: Production, Sandbox.
 
 Don't auto-open the browser for OAuth authentication. The redirect URL is printed for manual use.
 
+# flags.force.summary
+
+Replace the stage's existing environment. By default, the command blocks if the stage already has an environment to avoid orphaning it. With this flag, the existing environment is removed before the new one is added.
+
 # examples
 
 - Add a production environment to a stage using its ID:
@@ -59,6 +63,14 @@ Pipeline stage "%s" doesn't exist in pipeline "%s". Check the stage ID and try a
 # error.EnvironmentAttachFailed
 
 Failed to create environment for stage: %s
+
+# error.EnvironmentAlreadyExists
+
+Stage "%s" already has an environment ("%s", %s). Adding another would leave the existing one orphaned. Remove it first with "%s devops stage environment delete", or pass --force to replace it.
+
+# error.ReplaceEnvironmentFailed
+
+Failed to remove the existing environment before adding the new one: %s
 
 # error.AuthTimeout
 

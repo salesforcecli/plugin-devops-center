@@ -52,6 +52,18 @@ ID of the source pipeline stage whose approved work items will be promoted. Mutu
 
 Skip pre-promote validation. By default, promotion is validated before proceeding to prevent promoting work items without an associated PR. Use this flag to bypass validation.
 
+# flags.force.summary
+
+Submit the promotion even if another promotion to the same target stage is already in progress. By default, the command blocks to avoid creating duplicate promotions.
+
+# error.PromotionInFlight
+
+A promotion to this stage is already in progress (request token%s: %s). Submitting now can create a duplicate promotion. Wait for it to finish (check with "%s devops request status --request-token <token>"), or pass --force to promote anyway.
+
+# warn.InFlightCheckSkipped
+
+Couldn't check for in-flight promotions to this stage, so a duplicate promotion may not be blocked: %s
+
 # error.NoModeFlag
 
 Provide either --work-item-id to promote specific work items or --stage-id to promote all approved work items from a stage.
