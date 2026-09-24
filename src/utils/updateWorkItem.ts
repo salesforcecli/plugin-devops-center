@@ -131,6 +131,15 @@ export async function resolveProjectIdForWorkItem(connection: Connection, workIt
 export async function updateWorkItem(params: UpdateWorkItemParams): Promise<UpdateWorkItemResult> {
   const { connection, workItemId, projectId, status, subject, description } = params;
 
+  // Validate the status transition before writing any field. This guard is read-only, so running it
+  // first avoids persisting subject/description when the status change would be rejected — otherwise
+  // a combined --subject/--status call could silently keep the subject change after throwing.
+  let apiStatus: string | undefined;
+  if (status !== undefined) {
+    apiStatus = toApiStatus(status);
+    await assertStatusTransitionAllowed(connection, workItemId, apiStatus);
+  }
+
   if (subject !== undefined || description !== undefined) {
     const fields: { Id: string; Subject?: string; Description?: string } = { Id: workItemId };
     if (subject !== undefined) fields.Subject = subject;
@@ -145,10 +154,7 @@ export async function updateWorkItem(params: UpdateWorkItemParams): Promise<Upda
     }
   }
 
-  let apiStatus: string | undefined;
-  if (status !== undefined) {
-    apiStatus = toApiStatus(status);
-    await assertStatusTransitionAllowed(connection, workItemId, apiStatus);
+  if (apiStatus) {
     const path = `/services/data/v${connection.getApiVersion()}/connect/devops/projects/${projectId}/workitem/${workItemId}`;
     await connection.request({
       method: 'PATCH',

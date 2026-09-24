@@ -118,7 +118,7 @@ export async function findInFlightPromotions(
   validateSalesforceId(targetStageId, 'target stage');
   const statusList = IN_FLIGHT_PROMOTION_STATUSES.join("', '");
   const result = await connection.query<PipelineStagePromotionRecord>(
-    `SELECT Id, Status, RequestInfoId, RequestInfo.RequestToken FROM DevopsPipelnStgProm WHERE PipelineStageId = '${targetStageId}' AND Status IN ('${statusList}')`
+    `SELECT Id, Status, RequestInfoId, RequestInfo.RequestToken FROM DevopsPipelnStgProm WHERE PipelineStageId = '${targetStageId}' AND Status IN ('${statusList}') LIMIT 10`
   );
   return (result.records ?? []).map((r) => ({
     id: r.Id,

@@ -234,8 +234,10 @@ export default class DevopsPromote extends SfCommand<PromoteResult> {
     let inFlight: InFlightPromotion[];
     try {
       inFlight = await findInFlightPromotions(connection, targetStageId);
-    } catch {
-      // Guard failure must not break the existing promote flow.
+    } catch (err) {
+      // Guard failure must not break the existing promote flow, but surface it so operators can see
+      // the duplicate-promotion check was skipped rather than silently passing.
+      this.warn(messages.getMessage('warn.InFlightCheckSkipped', [err instanceof Error ? err.message : String(err)]));
       return;
     }
     if (inFlight.length > 0) {
