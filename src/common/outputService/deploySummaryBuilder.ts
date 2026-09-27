@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-console, @typescript-eslint/no-non-null-assertion */
+/* eslint-disable no-console */
 
 import { Connection, Messages } from '@salesforce/core';
 import { AsyncOperationType } from '../constants.js';

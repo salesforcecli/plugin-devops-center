@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-console, class-methods-use-this , no-case-declarations */
+ 
 
 import { Connection } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
@@ -31,10 +31,10 @@ export class DeployCommandOutputService extends AbstractPromoteOutputService {
   public constructor(flags: Partial<Flags<typeof SfCommand>>, con: Connection, branchName?: string) {
     super(
       {
-        async: flags['async'] as boolean | undefined,
+        async: flags['async'],
         branch: branchName ? branchName : (flags['branch-name'] as string),
-        concise: flags['concise'] as boolean | undefined,
-        verbose: flags['verbose'] as boolean | undefined,
+        concise: flags['concise'],
+        verbose: flags['verbose'],
       },
       new DeploySummaryBuilder(con),
       con

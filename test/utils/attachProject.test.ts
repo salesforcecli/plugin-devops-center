@@ -43,7 +43,7 @@ describe('attachProject utilities', () => {
         records: [{ DevopsPipelineId: '0XB000000000002' }],
       });
 
-      const result = await findExistingAttachment(connectionStub as unknown as Connection, '0Hn000000000001');
+      const result = await findExistingAttachment(connectionStub, '0Hn000000000001');
 
       expect(result).to.equal('0XB000000000002');
     });
@@ -52,7 +52,7 @@ describe('attachProject utilities', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (connectionStub.query as any).resolves({ records: [] });
 
-      const result = await findExistingAttachment(connectionStub as unknown as Connection, '0Hn000000000001');
+      const result = await findExistingAttachment(connectionStub, '0Hn000000000001');
 
       expect(result).to.be.undefined;
     });
@@ -63,7 +63,7 @@ describe('attachProject utilities', () => {
       createStub.resolves({ success: true, id: 'JCT001', errors: [] });
 
       const result = await attachProject({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         projectId: '0Hn000000000001',
         pipelineId: '0XB000000000001',
       });
@@ -78,7 +78,7 @@ describe('attachProject utilities', () => {
       createStub.resolves({ success: false, id: null, errors: ['DUPLICATE_VALUE'] });
 
       const result = await attachProject({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         projectId: '0Hn000000000001',
         pipelineId: '0XB000000000001',
       });
@@ -92,7 +92,7 @@ describe('attachProject utilities', () => {
 
       try {
         await attachProject({
-          connection: connectionStub as unknown as Connection,
+          connection: connectionStub,
           projectId: '0Hn000000000001',
           pipelineId: '0XB000000000001',
         });

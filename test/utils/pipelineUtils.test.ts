@@ -50,21 +50,21 @@ describe('pipelineUtils', () => {
         records: [{ DevopsPipelineId: 'PIPE001' }],
       });
 
-      const result = await getPipelineIdForProject(connectionStub as unknown as Connection, 'PROJ001');
+      const result = await getPipelineIdForProject(connectionStub, 'PROJ001');
       expect(result).to.equal('PIPE001');
     });
 
     it('returns undefined when no records', async () => {
       (connectionStub.query as sinon.SinonStub).resolves({ records: [] });
 
-      const result = await getPipelineIdForProject(connectionStub as unknown as Connection, 'PROJ001');
+      const result = await getPipelineIdForProject(connectionStub, 'PROJ001');
       expect(result).to.be.undefined;
     });
 
     it('returns undefined when records is null', async () => {
       (connectionStub.query as sinon.SinonStub).resolves({ records: null });
 
-      const result = await getPipelineIdForProject(connectionStub as unknown as Connection, 'PROJ001');
+      const result = await getPipelineIdForProject(connectionStub, 'PROJ001');
       expect(result).to.be.undefined;
     });
   });
@@ -73,14 +73,14 @@ describe('pipelineUtils', () => {
     it('returns stages when found', async () => {
       (connectionStub.query as sinon.SinonStub).resolves({ records: STAGES });
 
-      const result = await fetchPipelineStages(connectionStub as unknown as Connection, 'PIPE001');
+      const result = await fetchPipelineStages(connectionStub, 'PIPE001');
       expect(result).to.deep.equal(STAGES);
     });
 
     it('returns empty array when no records', async () => {
       (connectionStub.query as sinon.SinonStub).resolves({ records: null });
 
-      const result = await fetchPipelineStages(connectionStub as unknown as Connection, 'PIPE001');
+      const result = await fetchPipelineStages(connectionStub, 'PIPE001');
       expect(result).to.deep.equal([]);
     });
   });

@@ -26,11 +26,11 @@ describe('createPullRequest utilities', () => {
 
   beforeEach(() => {
     connectionStub = sinon.createStubInstance(Connection);
+     
     // eslint-disable-next-line @typescript-eslint/unbound-method
+    queryStub = connectionStub.query;
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    queryStub = connectionStub.query as unknown as sinon.SinonStub;
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    requestStub = connectionStub.request as unknown as sinon.SinonStub;
+    requestStub = connectionStub.request;
     (connectionStub.getApiVersion as unknown as sinon.SinonStub).returns('65.0');
   });
 
@@ -73,7 +73,7 @@ describe('createPullRequest utilities', () => {
         ],
       });
 
-      const result = await fetchWorkItemDetail(connectionStub as unknown as Connection, { name: 'WI-000001' });
+      const result = await fetchWorkItemDetail(connectionStub, { name: 'WI-000001' });
 
       expect(result.workItemId).to.equal('0Wx000000000001');
       expect(result.workItemName).to.equal('WI-000001');
@@ -97,7 +97,7 @@ describe('createPullRequest utilities', () => {
       });
       queryStub.onSecondCall().resolves({ records: [] });
 
-      const result = await fetchWorkItemDetail(connectionStub as unknown as Connection, { name: 'WI-000001' });
+      const result = await fetchWorkItemDetail(connectionStub, { name: 'WI-000001' });
 
       expect(result.branchName).to.be.undefined;
     });
@@ -106,7 +106,7 @@ describe('createPullRequest utilities', () => {
       queryStub.resolves({ records: [] });
 
       try {
-        await fetchWorkItemDetail(connectionStub as unknown as Connection, { name: 'WI-999999' });
+        await fetchWorkItemDetail(connectionStub, { name: 'WI-999999' });
         expect.fail('should have thrown');
       } catch (e: unknown) {
         expect((e as Error).message).to.contain('WI-999999');
@@ -118,7 +118,7 @@ describe('createPullRequest utilities', () => {
       queryStub.resolves({ records: [] });
 
       try {
-        await fetchWorkItemDetail(connectionStub as unknown as Connection, { id: '0Wx999999999999' });
+        await fetchWorkItemDetail(connectionStub, { id: '0Wx999999999999' });
         expect.fail('should have thrown');
       } catch (e: unknown) {
         expect((e as Error).message).to.contain('0Wx999999999999');
@@ -131,7 +131,7 @@ describe('createPullRequest utilities', () => {
     it('returns success with reviewUrl when API responds with reviewUrl', async () => {
       requestStub.resolves({ reviewUrl: 'https://bitbucket.org/myorg/myrepo/pull-requests/7' });
 
-      const result = await createPullRequest(connectionStub as unknown as Connection, '0Wx000000000001');
+      const result = await createPullRequest(connectionStub, '0Wx000000000001');
 
       expect(result.success).to.be.true;
       expect(result.url).to.equal('https://bitbucket.org/myorg/myrepo/pull-requests/7');
@@ -143,7 +143,7 @@ describe('createPullRequest utilities', () => {
     it('returns success with undefined url when reviewUrl is absent', async () => {
       requestStub.resolves({ status: 'Success' });
 
-      const result = await createPullRequest(connectionStub as unknown as Connection, '0Wx000000000001');
+      const result = await createPullRequest(connectionStub, '0Wx000000000001');
 
       expect(result.success).to.be.true;
       expect(result.url).to.be.undefined;
@@ -157,7 +157,7 @@ describe('createPullRequest utilities', () => {
       );
 
       try {
-        await createPullRequest(connectionStub as unknown as Connection, '0Wx000000000001');
+        await createPullRequest(connectionStub, '0Wx000000000001');
         expect.fail('should have thrown');
       } catch (e: unknown) {
         expect((e as Error).message).to.contain('Push your changes and try again');
@@ -172,7 +172,7 @@ describe('createPullRequest utilities', () => {
       );
 
       try {
-        await createPullRequest(connectionStub as unknown as Connection, '0Wx000000000001');
+        await createPullRequest(connectionStub, '0Wx000000000001');
         expect.fail('should have thrown');
       } catch (e: unknown) {
         expect((e as Error).message).to.equal('Repository not found');
@@ -183,7 +183,7 @@ describe('createPullRequest utilities', () => {
       requestStub.resolves({ status: 'Error', errorMessage: 'PR already exists' });
 
       try {
-        await createPullRequest(connectionStub as unknown as Connection, '0Wx000000000001');
+        await createPullRequest(connectionStub, '0Wx000000000001');
         expect.fail('should have thrown');
       } catch (e: unknown) {
         expect((e as Error).message).to.contain('PR already exists');

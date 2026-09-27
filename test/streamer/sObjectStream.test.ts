@@ -144,7 +144,7 @@ describe('AsyncOpStreaming', () => {
       } catch (error) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         expect(error.name.includes('UnexpectedValueTypeError')).to.equals(true);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+         
         expect(error.message).to.contains('Value is not a JsonMap');
       }
     });

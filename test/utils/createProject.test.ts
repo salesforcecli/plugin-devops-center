@@ -40,7 +40,7 @@ describe('createProject', () => {
     createStub.resolves({ success: true, id: '1Qg000000000001', errors: [] });
 
     const result = await createProject({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       name: 'MyApp Release',
       description: 'My description',
     });
@@ -57,7 +57,7 @@ describe('createProject', () => {
     createStub.resolves({ success: true, id: '1Qg000000000002', errors: [] });
 
     const result = await createProject({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       name: 'No Desc Project',
       description: '',
     });
@@ -70,7 +70,7 @@ describe('createProject', () => {
     createStub.resolves({ success: false, id: null, errors: ['DUPLICATE_VALUE: Name already exists'] });
 
     const result = await createProject({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       name: 'Duplicate',
       description: '',
     });
@@ -84,7 +84,7 @@ describe('createProject', () => {
 
     try {
       await createProject({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         name: 'Fail',
         description: '',
       });
