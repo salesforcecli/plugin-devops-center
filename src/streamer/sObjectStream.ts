@@ -35,7 +35,7 @@ export default abstract class SObjectStreaming extends DOCeStreaming {
    * @param matchProcessor This processor will be used in the matchingProcessor, it's provided by each implementation.
    */
   protected async watchForSObject(matchProcessor: (message: JsonMap) => StatusResult): Promise<void | AnyJson> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+     
     return this.startStream(this.channelName, (event: JsonMap) => this.matchingProcessor(event, matchProcessor));
   }
 

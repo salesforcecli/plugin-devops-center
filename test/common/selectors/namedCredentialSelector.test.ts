@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable camelcase */
+ 
 
 import { expect } from '@oclif/test';
 import { Connection } from '@salesforce/core';

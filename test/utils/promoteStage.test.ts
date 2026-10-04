@@ -41,7 +41,7 @@ describe('promoteStage utilities', () => {
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
     const result = await promoteStage({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0XB000000000001',
       workItemIds: ['0Wx000000000001', '0Wx000000000002'],
       targetStageId: '05S000000000002',
@@ -76,7 +76,7 @@ describe('promoteStage utilities', () => {
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
     await promoteStage({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0XB000000000001',
       workItemIds: ['0Wx000000000001'],
       targetStageId: '05S000000000002',
@@ -102,7 +102,7 @@ describe('promoteStage utilities', () => {
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
     await promoteStage({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0XB000000000001',
       workItemIds: ['1fkWt000000hGr7IAE'],
       targetStageId: '1QVWt000000G3huOAC',
@@ -122,7 +122,7 @@ describe('promoteStage utilities', () => {
 
     try {
       await promoteStage({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         pipelineId: '0XB000000000001',
         workItemIds: ['0Wx000000000001'],
         targetStageId: '05S000000000002',
@@ -138,7 +138,7 @@ describe('promoteStage utilities', () => {
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
     const result = await promoteStage({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0XB000000000001',
       workItemIds: ['0Wx000000000001'],
       targetStageId: '05S000000000002',

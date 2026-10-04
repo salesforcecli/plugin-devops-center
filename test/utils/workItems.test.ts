@@ -59,7 +59,7 @@ describe('fetchWorkItems', () => {
       },
     });
 
-    const result = await fetchWorkItems(connectionStub as unknown as Connection, 'PROJ001');
+    const result = await fetchWorkItems(connectionStub, 'PROJ001');
     expect(result).to.deep.equal([]);
   });
 
@@ -74,7 +74,7 @@ describe('fetchWorkItems', () => {
       },
     });
 
-    const result = await fetchWorkItems(connectionStub as unknown as Connection, 'PROJ001');
+    const result = await fetchWorkItems(connectionStub, 'PROJ001');
 
     expect(result).to.have.length(1);
     expect(result[0].id).to.equal('WI001');
@@ -96,7 +96,7 @@ describe('fetchWorkItems', () => {
       },
     });
 
-    const result = await fetchWorkItems(connectionStub as unknown as Connection, 'PROJ001');
+    const result = await fetchWorkItems(connectionStub, 'PROJ001');
 
     expect(result[0].SourceCodeRepository?.repoUrl).to.include('github.com');
     expect(result[0].SourceCodeRepository?.repoType).to.equal('github');
@@ -124,7 +124,7 @@ describe('fetchWorkItems', () => {
       },
     });
 
-    const result = await fetchWorkItems(connectionStub as unknown as Connection, 'PROJ001');
+    const result = await fetchWorkItems(connectionStub, 'PROJ001');
 
     expect(result[0].SourceCodeRepository?.repoUrl).to.include('bitbucket.org');
     expect(result[0].SourceCodeRepository?.repoType).to.equal('bitbucket');
@@ -151,7 +151,7 @@ describe('fetchWorkItems', () => {
       },
     });
 
-    const result = await fetchWorkItems(connectionStub as unknown as Connection, 'PROJ001');
+    const result = await fetchWorkItems(connectionStub, 'PROJ001');
 
     expect(result[0].SourceCodeRepository).to.be.undefined;
     expect(result[0].WorkItemBranch).to.be.undefined;
@@ -171,7 +171,7 @@ describe('fetchWorkItems', () => {
       },
     });
 
-    const result = await fetchWorkItems(connectionStub as unknown as Connection, 'PROJ001');
+    const result = await fetchWorkItems(connectionStub, 'PROJ001');
 
     expect(result[0].TargetStageId).to.equal('S2');
     expect(result[0].TargetBranch).to.equal('branch-2');

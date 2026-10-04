@@ -38,7 +38,7 @@ describe('prepareWorkItem', () => {
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
     const result = await prepareWorkItem({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0XB000000000001',
       workItemId: '0Wx000000000001',
       sourceStageId: '05S000000000001',
@@ -64,7 +64,7 @@ describe('prepareWorkItem', () => {
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
     await prepareWorkItem({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0XB000000000001',
       workItemId: '0Wx000000000001',
       targetStageId: '05S000000000002',
@@ -85,7 +85,7 @@ describe('prepareWorkItem', () => {
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
     const result = await prepareWorkItem({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0XB000000000001',
       workItemId: '0Wx000000000001',
       sourceStageId: '05S000000000001',
@@ -104,7 +104,7 @@ describe('prepareWorkItem', () => {
 
     try {
       await prepareWorkItem({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         pipelineId: '0XB000000000001',
         workItemId: '0Wx000000000001',
         sourceStageId: '05S000000000001',
@@ -133,7 +133,7 @@ describe('resolveProjectIdFromWorkItem', () => {
       records: [{ DevopsProjectId: 'PROJ001', DevopsPipelineStageId: '05S000000000001' }],
     });
 
-    const result = await resolveProjectIdFromWorkItem(connectionStub as unknown as Connection, '0Wx000000000001');
+    const result = await resolveProjectIdFromWorkItem(connectionStub, '0Wx000000000001');
     expect(result.projectId).to.equal('PROJ001');
     expect(result.pipelineStageId).to.equal('05S000000000001');
   });
@@ -144,7 +144,7 @@ describe('resolveProjectIdFromWorkItem', () => {
     });
 
     try {
-      await resolveProjectIdFromWorkItem(connectionStub as unknown as Connection, '0Wx999999999999');
+      await resolveProjectIdFromWorkItem(connectionStub, '0Wx999999999999');
       expect.fail('should have thrown');
     } catch (e: unknown) {
       expect((e as Error).message).to.contain('0Wx999999999999');
