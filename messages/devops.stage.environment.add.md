@@ -28,7 +28,7 @@ Don't auto-open the browser for OAuth authentication. The redirect URL is printe
 
 # flags.force.summary
 
-Replace the stage's existing environment. By default, the command blocks if the stage already has an environment to avoid orphaning it. With this flag, the existing environment is removed before the new one is added.
+Replace the stage's existing environment. By default, the command blocks if the stage already has an environment to avoid orphaning it. With this flag, the new environment is added first and the previous one is removed only after the new environment is associated successfully.
 
 # examples
 
@@ -68,9 +68,13 @@ Failed to create environment for stage: %s
 
 Stage "%s" already has an environment ("%s", %s). Adding another would leave the existing one orphaned. Remove it first with "%s devops stage environment delete", or pass --force to replace it.
 
-# error.ReplaceEnvironmentFailed
+# info.ReplacedEnvironmentRemoved
 
-Failed to remove the existing environment before adding the new one: %s
+Removed the stage's previous environment "%s".
+
+# warn.ReplacedEnvironmentCleanupFailed
+
+Associated the new environment, but couldn't remove the previous environment record (%s). Remove it manually if it's no longer needed.
 
 # error.AuthTimeout
 

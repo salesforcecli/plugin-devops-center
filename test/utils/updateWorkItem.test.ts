@@ -187,5 +187,32 @@ describe('updateWorkItem status transition guard', () => {
       expect(result.status).to.equal('IN_PROGRESS');
       expect(result.subject).to.equal('New subject');
     });
+
+    it('returns a partial-success result naming saved fields when the status PATCH fails', async () => {
+      const updateStub = sinon.stub().resolves({ id: workItemId, success: true, errors: [] });
+      (connectionStub.sobject as sinon.SinonStub).returns({ update: updateStub });
+      (connectionStub.query as sinon.SinonStub).resolves({ records: [{ Status: 'NEW' }] });
+      (connectionStub.request as sinon.SinonStub).rejects(new Error('network error'));
+
+      const result = await updateWorkItem({
+        connection: connectionStub as unknown as Connection,
+        workItemId,
+        projectId,
+        subject: 'New subject',
+        description: 'New description',
+        status: 'In Progress',
+      });
+
+      // The sObject write committed before the status PATCH failed.
+      expect(updateStub.calledOnce).to.be.true;
+      expect(result.success).to.be.false;
+      // Status was not applied, so it is not reported as changed.
+      expect(result.status).to.be.undefined;
+      // The subject/description that did persist are reported, and the error names them.
+      expect(result.subject).to.equal('New subject');
+      expect(result.description).to.equal('New description');
+      expect(result.error).to.contain('network error');
+      expect(result.error).to.contain('subject and description');
+    });
   });
 });

@@ -28,7 +28,7 @@ describe('devops stage environment add', () => {
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const addStageEnvironmentStub = sinon.stub();
   const getStageEnvironmentStub = sinon.stub();
-  const deleteStageEnvironmentStub = sinon.stub();
+  const deleteOrphanedEnvironmentStub = sinon.stub();
   const fetchPipelineStagesStub = sinon.stub();
   const execFileStub = sinon.stub();
 
@@ -37,9 +37,7 @@ describe('devops stage environment add', () => {
       '../../../../../src/utils/addStageEnvironment.js': {
         addStageEnvironment: addStageEnvironmentStub,
         getStageEnvironment: getStageEnvironmentStub,
-      },
-      '../../../../../src/utils/deleteStageEnvironment.js': {
-        deleteStageEnvironment: deleteStageEnvironmentStub,
+        deleteOrphanedEnvironment: deleteOrphanedEnvironmentStub,
       },
       '../../../../../src/utils/pipelineUtils.js': {
         fetchPipelineStages: fetchPipelineStagesStub,
@@ -56,8 +54,8 @@ describe('devops stage environment add', () => {
     addStageEnvironmentStub.reset();
     getStageEnvironmentStub.reset();
     getStageEnvironmentStub.resolves(undefined);
-    deleteStageEnvironmentStub.reset();
-    deleteStageEnvironmentStub.resolves({ success: true });
+    deleteOrphanedEnvironmentStub.reset();
+    deleteOrphanedEnvironmentStub.resolves(true);
     fetchPipelineStagesStub.reset();
     execFileStub.reset();
     queryStub.reset();
@@ -501,18 +499,18 @@ describe('devops stage environment add', () => {
         expect(ctx.stderr).to.contain('Existing_Org');
         // The new environment must not be created while one already exists.
         expect(addStageEnvironmentStub.called).to.equal(false);
-        expect(deleteStageEnvironmentStub.called).to.equal(false);
+        expect(deleteOrphanedEnvironmentStub.called).to.equal(false);
       });
 
     test
       .stdout()
       .stderr()
-      .it('with --force, removes the existing environment then adds the new one', async (ctx) => {
+      .it('with --force, adds the new environment first then removes the previous one', async (ctx) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         fetchPipelineStagesStub.resolves([{ Id: '0Xp000000000001', Name: 'Production' }]);
         getStageEnvironmentStub.resolves({ environmentId: '0Hi000000000001', environmentName: 'Existing_Org' });
-        deleteStageEnvironmentStub.resolves({ success: true, environmentId: '0Hi000000000001' });
+        deleteOrphanedEnvironmentStub.resolves(true);
         addStageEnvironmentStub.resolves({
           success: true,
           stageId: '0Xp000000000001',
@@ -537,24 +535,25 @@ describe('devops stage environment add', () => {
           '--force',
         ]);
 
-        // The existing environment is deleted before the new one is created.
-        expect(deleteStageEnvironmentStub.calledOnce).to.equal(true);
-        expect(deleteStageEnvironmentStub.firstCall.args[1]).to.equal('0Hi000000000001');
+        // The new environment is associated first; the old one is removed only afterward.
         expect(addStageEnvironmentStub.calledOnce).to.equal(true);
-        expect(deleteStageEnvironmentStub.calledBefore(addStageEnvironmentStub)).to.equal(true);
+        expect(deleteOrphanedEnvironmentStub.calledOnce).to.equal(true);
+        expect(deleteOrphanedEnvironmentStub.firstCall.args[1]).to.equal('0Hi000000000001');
+        expect(addStageEnvironmentStub.calledBefore(deleteOrphanedEnvironmentStub)).to.equal(true);
         expect(ctx.stdout).to.contain('Successfully added environment to the stage.');
         expect(ctx.stdout).to.contain('0Hi000000000002');
+        expect(ctx.stdout).to.contain("Removed the stage's previous environment");
       });
 
     test
       .stdout()
       .stderr()
-      .it('with --force, aborts when removing the existing environment fails', async (ctx) => {
+      .it('with --force, keeps the existing environment when the add fails', async () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         sandbox.stub(Org, 'create' as any).returns(mockOrg);
         fetchPipelineStagesStub.resolves([{ Id: '0Xp000000000001', Name: 'Production' }]);
         getStageEnvironmentStub.resolves({ environmentId: '0Hi000000000001', environmentName: 'Existing_Org' });
-        deleteStageEnvironmentStub.resolves({ success: false, error: 'delete failed' });
+        addStageEnvironmentStub.rejects(new Error('Authentication timed out'));
 
         try {
           await AddEnvironmentCommand.run([
@@ -575,9 +574,46 @@ describe('devops stage environment add', () => {
           // expected
         }
 
-        expect(ctx.stderr).to.contain('Failed to remove the existing environment');
-        // The new environment must not be created if the old one couldn't be removed.
-        expect(addStageEnvironmentStub.called).to.equal(false);
+        // The add failed, so the existing environment must be left intact — no delete runs.
+        expect(deleteOrphanedEnvironmentStub.called).to.equal(false);
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('with --force, warns but still succeeds when removing the previous environment fails', async (ctx) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sandbox.stub(Org, 'create' as any).returns(mockOrg);
+        fetchPipelineStagesStub.resolves([{ Id: '0Xp000000000001', Name: 'Production' }]);
+        getStageEnvironmentStub.resolves({ environmentId: '0Hi000000000001', environmentName: 'Existing_Org' });
+        deleteOrphanedEnvironmentStub.rejects(new Error('delete failed'));
+        addStageEnvironmentStub.resolves({
+          success: true,
+          stageId: '0Xp000000000001',
+          environmentId: '0Hi000000000002',
+          environmentName: 'Production_Org',
+          orgType: 'Production',
+          pipelineId: '0Xo000000000001',
+          organizationId: '00D000000000002',
+        });
+
+        await AddEnvironmentCommand.run([
+          '--target-org',
+          'testOrg',
+          '--pipeline-id',
+          '0Xo000000000001',
+          '--stage-id',
+          '0Xp000000000001',
+          '--environment-name',
+          'Production_Org',
+          '--org-type',
+          'Production',
+          '--force',
+        ]);
+
+        // Cleanup failure is a warning, not a command failure — the new environment is already set.
+        expect(ctx.stdout).to.contain('Successfully added environment to the stage.');
+        expect(ctx.stderr).to.contain("couldn't remove the previous environment record");
       });
   });
 });

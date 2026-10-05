@@ -47,6 +47,26 @@ export async function getStageEnvironment(
   return { environmentId: record.DevOpsEnvironmentId, environmentName: record.DevOpsEnvironment?.Name };
 }
 
+/**
+ * Deletes a DevopsEnvironment record only when no pipeline stage still references it.
+ * Returns true when the record was deleted, false when it is still referenced (left intact).
+ *
+ * Used to clean up the environment a stage was re-pointed away from during a --force replace, so the
+ * old record isn't orphaned in the org. The reference check keeps an environment shared by another
+ * stage safe.
+ */
+export async function deleteOrphanedEnvironment(connection: Connection, environmentId: string): Promise<boolean> {
+  validateSalesforceId(environmentId, 'environment');
+  const refs = await connection.query<{ Id: string }>(
+    `SELECT Id FROM DevopsPipelineStage WHERE DevOpsEnvironmentId = '${environmentId}' LIMIT 1`
+  );
+  if ((refs.records ?? []).length > 0) {
+    return false;
+  }
+  await connection.sobject('DevopsEnvironment').delete(environmentId);
+  return true;
+}
+
 const ORG_TYPE_API_MAP: Record<OrgType, string> = {
   Production: 'PRODUCTION',
   Sandbox: 'SANDBOX',

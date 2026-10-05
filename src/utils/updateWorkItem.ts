@@ -127,6 +127,10 @@ export async function resolveProjectIdForWorkItem(connection: Connection, workIt
  * endpoint does not accept them — so they are written via the sObject API. Status changes go
  * through the connect endpoint (PATCH /connect/devops/projects/{projectId}/workitem/{workItemId}),
  * which is the only field that endpoint accepts, so platform-side status handling runs.
+ *
+ * The two writes hit different APIs with no shared transaction. Subject/description are committed
+ * first; if the status call then fails, this returns `{ success: false }` with an error that names
+ * the fields that did persist, rather than throwing and leaving the committed changes unreported.
  */
 export async function updateWorkItem(params: UpdateWorkItemParams): Promise<UpdateWorkItemResult> {
   const { connection, workItemId, projectId, status, subject, description } = params;
@@ -156,12 +160,35 @@ export async function updateWorkItem(params: UpdateWorkItemParams): Promise<Upda
 
   if (apiStatus) {
     const path = `/services/data/v${connection.getApiVersion()}/connect/devops/projects/${projectId}/workitem/${workItemId}`;
-    await connection.request({
-      method: 'PATCH',
-      url: path,
-      body: JSON.stringify({ status: apiStatus }),
-      headers: { 'Content-Type': 'application/json' },
-    });
+    try {
+      await connection.request({
+        method: 'PATCH',
+        url: path,
+        body: JSON.stringify({ status: apiStatus }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch (error: unknown) {
+      // The subject/description sObject write above has already committed. The two writes go to
+      // different APIs with no shared transaction, so a status failure here can't roll them back.
+      // Report a partial success instead of throwing, so the caller can tell the user exactly which
+      // fields persisted rather than surfacing a bare error that hides the committed changes.
+      const statusError = error instanceof Error ? error.message : String(error);
+      const persisted = [
+        subject !== undefined ? 'subject' : undefined,
+        description !== undefined ? 'description' : undefined,
+      ].filter(Boolean);
+      const persistedNote =
+        persisted.length > 0
+          ? ` The ${persisted.join(' and ')} ${persisted.length > 1 ? 'changes were' : 'change was'} already saved.`
+          : '';
+      return {
+        success: false,
+        workItemId,
+        subject,
+        description,
+        error: `Failed to update work item status: ${statusError}.${persistedNote}`,
+      };
+    }
   }
 
   return {

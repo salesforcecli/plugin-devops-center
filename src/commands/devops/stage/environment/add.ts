@@ -22,8 +22,9 @@ import {
   AddStageEnvironmentResult,
   OrgType,
   getStageEnvironment,
+  deleteOrphanedEnvironment,
+  ExistingStageEnvironment,
 } from '../../../../utils/addStageEnvironment.js';
-import { deleteStageEnvironment } from '../../../../utils/deleteStageEnvironment.js';
 import { fetchPipelineStages } from '../../../../utils/pipelineUtils.js';
 import { PipelineStageRecord } from '../../../../utils/types.js';
 import { validateSalesforceId } from '../../../../utils/soqlUtils.js';
@@ -144,7 +145,7 @@ export default class DevopsStageEnvironmentAdd extends SfCommand<AddStageEnviron
       this.error(messages.getMessage('error.PipelineAlreadyActive', [pipelineId]));
     }
 
-    await this.guardExistingEnvironment(connection, stageId, flags.force);
+    const existingEnvironment = await this.guardExistingEnvironment(connection, stageId, flags.force);
 
     let result: AddStageEnvironmentResult;
     try {
@@ -178,18 +179,27 @@ export default class DevopsStageEnvironmentAdd extends SfCommand<AddStageEnviron
       this.spinner.stop();
     }
 
+    if (existingEnvironment && result.success) {
+      await this.cleanupReplacedEnvironment(connection, existingEnvironment);
+    }
+
     return this.logResult(result, stageId, orgType, pipelineId);
   }
 
   /**
    * A stage holds only one environment (DevopsPipelineStage.DevOpsEnvironmentId). Adding a new one
    * re-points the lookup and orphans the old DevopsEnvironment record, so block by default and
-   * require --force to replace it (removing the existing environment first).
+   * require --force to replace it. Returns the existing environment (when present) so the caller can
+   * remove the orphaned record after the new environment is associated.
    */
-  private async guardExistingEnvironment(connection: Connection, stageId: string, force: boolean): Promise<void> {
+  private async guardExistingEnvironment(
+    connection: Connection,
+    stageId: string,
+    force: boolean
+  ): Promise<ExistingStageEnvironment | undefined> {
     const existingEnvironment = await getStageEnvironment(connection, stageId);
     if (!existingEnvironment) {
-      return;
+      return undefined;
     }
     if (!force) {
       this.error(
@@ -201,9 +211,29 @@ export default class DevopsStageEnvironmentAdd extends SfCommand<AddStageEnviron
         ])
       );
     }
-    const deleteResult = await deleteStageEnvironment(connection, existingEnvironment.environmentId);
-    if (!deleteResult.success) {
-      this.error(messages.getMessage('error.ReplaceEnvironmentFailed', [deleteResult.error ?? '']));
+    return existingEnvironment;
+  }
+
+  /**
+   * Removes the environment record the stage was re-pointed away from, unless another stage still
+   * references it. Best-effort: a cleanup failure is surfaced as a warning and does not fail the
+   * command, since the new environment has already been associated successfully.
+   */
+  private async cleanupReplacedEnvironment(
+    connection: Connection,
+    existingEnvironment: ExistingStageEnvironment
+  ): Promise<void> {
+    try {
+      const deleted = await deleteOrphanedEnvironment(connection, existingEnvironment.environmentId);
+      if (deleted) {
+        this.log(
+          messages.getMessage('info.ReplacedEnvironmentRemoved', [
+            existingEnvironment.environmentName ?? existingEnvironment.environmentId,
+          ])
+        );
+      }
+    } catch {
+      this.warn(messages.getMessage('warn.ReplacedEnvironmentCleanupFailed', [existingEnvironment.environmentId]));
     }
   }
 
