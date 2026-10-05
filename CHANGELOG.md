@@ -1,3 +1,19 @@
+# [2.3.0](https://github.com/salesforcecli/plugin-devops-center/compare/2.2.0...2.3.0) (2026-10-05)
+
+### Bug Fixes
+
+- address PR review comments on promote and work-item update ([69db646](https://github.com/salesforcecli/plugin-devops-center/commit/69db646b78a0c6da0141f31d79da1ea38d6a3e56))
+- address PR review on force-replace and work-item partial update ([00cfbda](https://github.com/salesforcecli/plugin-devops-center/commit/00cfbda3e76199ed91567733a379789480789871))
+- block duplicate promotions ([e818394](https://github.com/salesforcecli/plugin-devops-center/commit/e818394abd4fbfa6a476890ba9f546430e177082))
+- block orphaning stage branch on re-add, add --force to replace ([04cf67f](https://github.com/salesforcecli/plugin-devops-center/commit/04cf67fa6b9c38ab634efd22e27673a5aade0c7d))
+- block orphaning stage environment on re-add, add --force to replace ([4e3d7dd](https://github.com/salesforcecli/plugin-devops-center/commit/4e3d7dd604bf87bdd0633f440de44c75b2ce18fa))
+- enforce work-item status transitions and route description via sObject ([da298e1](https://github.com/salesforcecli/plugin-devops-center/commit/da298e1639f60b6ea76f6117b08b2424b418e7b6))
+- leave work-item target branch blank on the final pipeline stage ([293ac78](https://github.com/salesforcecli/plugin-devops-center/commit/293ac78f68d37709b341b4eb9a03efdfd1ca1215))
+
+### Features
+
+- show work item ID in work-item list output ([59df297](https://github.com/salesforcecli/plugin-devops-center/commit/59df2979cd5f208c097a09db1095bde7e783c58f))
+
 # [2.2.0](https://github.com/salesforcecli/plugin-devops-center/compare/2.1.1...2.2.0) (2026-08-18)
 
 ### Bug Fixes
