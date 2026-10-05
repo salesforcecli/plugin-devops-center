@@ -20,6 +20,12 @@
         "repository": {
           "$ref": "#/definitions/RepoInfo"
         },
+        "stages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PipelineStageInfo"
+          }
+        },
         "error": {
           "type": "string"
         }
@@ -41,6 +47,19 @@
         }
       },
       "required": ["repoUrl", "repoType", "created"],
+      "additionalProperties": false
+    },
+    "PipelineStageInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": ["id"],
       "additionalProperties": false
     }
   }

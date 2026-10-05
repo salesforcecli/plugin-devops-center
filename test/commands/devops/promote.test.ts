@@ -42,6 +42,7 @@ describe('devops promote', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let PromoteCommand: any;
   const promoteStageStub = sinon.stub();
+  const findInFlightPromotionsStub = sinon.stub();
   const resolveProjectIdFromWorkItemStub = sinon.stub();
   const getPipelineIdForProjectStub = sinon.stub();
   const validatePromotionStub = sinon.stub();
@@ -50,6 +51,7 @@ describe('devops promote', () => {
     const mod = await esmock('../../../src/commands/devops/promote.js', {
       '../../../src/utils/promoteStage.js': {
         promoteStage: promoteStageStub,
+        findInFlightPromotions: findInFlightPromotionsStub,
       },
       '../../../src/utils/prepareWorkItem.js': {
         resolveProjectIdFromWorkItem: resolveProjectIdFromWorkItemStub,
@@ -67,6 +69,9 @@ describe('devops promote', () => {
   beforeEach(() => {
     sandbox = sinon.createSandbox();
     promoteStageStub.reset();
+    findInFlightPromotionsStub.reset();
+    // Default: no promotion in flight, so the guard is a no-op
+    findInFlightPromotionsStub.resolves([]);
     resolveProjectIdFromWorkItemStub.reset();
     getPipelineIdForProjectStub.reset();
     validatePromotionStub.reset();
@@ -501,6 +506,67 @@ describe('devops promote', () => {
   });
 
   // ── Validation gate ───────────────────────────────────────────────────────
+
+  describe('in-flight promotion guard', () => {
+    test
+      .stdout()
+      .stderr()
+      .it('blocks promotion when another promotion is already in flight', async (ctx) => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        queryMock = sinon.stub().resolves({ records: [{ Id: '1fkxx0000000001', Status: 'READY_TO_PROMOTE' }] });
+        findInFlightPromotionsStub.resolves([
+          { id: '0Rq000000000001', requestToken: 'TOKEN-123', status: 'IN_PROGRESS' },
+        ]);
+
+        try {
+          await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+          expect.fail('should have thrown');
+        } catch (e) {
+          // expected
+        }
+
+        expect(ctx.stderr).to.contain('already in progress');
+        expect(ctx.stderr).to.contain('TOKEN-123');
+        // Neither validation nor the promote submission should run when blocked
+        expect(validatePromotionStub.called).to.be.false;
+        expect(promoteStageStub.called).to.be.false;
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('promotes anyway when --force is passed despite an in-flight promotion', async () => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        queryMock = sinon.stub().resolves({ records: [{ Id: '1fkxx0000000001', Status: 'READY_TO_PROMOTE' }] });
+        findInFlightPromotionsStub.resolves([
+          { id: '0Rq000000000001', requestToken: 'TOKEN-123', status: 'IN_PROGRESS' },
+        ]);
+        promoteStageStub.resolves(mockPromoteResult);
+
+        await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003', '--force']);
+
+        // --force bypasses the guard entirely
+        expect(findInFlightPromotionsStub.called).to.be.false;
+        expect(promoteStageStub.calledOnce).to.be.true;
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .it('proceeds when the in-flight check itself fails (best-effort guard)', async () => {
+        resolveProjectIdFromWorkItemStub.resolves({ projectId: 'PROJ001', pipelineStageId: '' });
+        getPipelineIdForProjectStub.resolves('PIPE001');
+        queryMock = sinon.stub().resolves({ records: [{ Id: '1fkxx0000000001', Status: 'READY_TO_PROMOTE' }] });
+        findInFlightPromotionsStub.rejects(new Error('query failed'));
+        promoteStageStub.resolves(mockPromoteResult);
+
+        await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
+
+        expect(promoteStageStub.calledOnce).to.be.true;
+      });
+  });
 
   describe('validation gate', () => {
     test

@@ -64,6 +64,7 @@ export default class DevopsWorkItemList extends SfCommand<DevopsWorkItemListResu
       this.log('No work items found for this project.');
     } else {
       const tableData = workItems.map((wi) => ({
+        ID: wi.id,
         Name: wi.name,
         Subject: wi.subject ?? '',
         Status: wi.status,
@@ -74,7 +75,7 @@ export default class DevopsWorkItemList extends SfCommand<DevopsWorkItemListResu
       this.styledHeader('DevOps Center Work Items');
       this.table({
         data: tableData,
-        columns: ['Name', 'Subject', 'Status', 'Branch', 'Target Branch'],
+        columns: ['ID', 'Name', 'Subject', 'Status', 'Branch', 'Target Branch'],
       });
     }
 

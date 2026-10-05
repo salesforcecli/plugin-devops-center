@@ -17,7 +17,7 @@
 import { expect } from '@oclif/test';
 import sinon from 'sinon';
 import { Connection } from '@salesforce/core';
-import { promoteStage } from '../../src/utils/promoteStage.js';
+import { promoteStage, findInFlightPromotions } from '../../src/utils/promoteStage.js';
 
 describe('promoteStage utilities', () => {
   let connectionStub: sinon.SinonStubbedInstance<Connection>;
@@ -148,5 +148,50 @@ describe('promoteStage utilities', () => {
     expect(result.status).to.equal('');
     expect(result.message).to.equal('');
     expect(result.promotedWorkitemIds).to.deep.equal([]);
+  });
+
+  describe('findInFlightPromotions', () => {
+    it('queries stage-scoped in-flight promotions and maps the records', async () => {
+      (connectionStub.query as sinon.SinonStub).resolves({
+        records: [
+          {
+            Id: '0Pr000000000001',
+            Status: 'IN_PROGRESS',
+            RequestInfoId: '8Mw001',
+            RequestInfo: { RequestToken: 'TOKEN-1' },
+          },
+          { Id: '0Pr000000000002', Status: 'NEW', RequestInfoId: '8Mw002', RequestInfo: { RequestToken: 'TOKEN-2' } },
+        ],
+      });
+
+      const result = await findInFlightPromotions(connectionStub as unknown as Connection, '1QVxx0000000003');
+
+      const soql = (connectionStub.query as sinon.SinonStub).firstCall.args[0] as string;
+      expect(soql).to.contain('FROM DevopsPipelnStgProm');
+      expect(soql).to.contain("PipelineStageId = '1QVxx0000000003'");
+      expect(soql).to.contain("'NEW', 'IN_PROGRESS', 'FINALIZING'");
+      expect(result).to.deep.equal([
+        { id: '0Pr000000000001', requestToken: 'TOKEN-1', status: 'IN_PROGRESS' },
+        { id: '0Pr000000000002', requestToken: 'TOKEN-2', status: 'NEW' },
+      ]);
+    });
+
+    it('falls back to the request info id when the token is not populated', async () => {
+      (connectionStub.query as sinon.SinonStub).resolves({
+        records: [{ Id: '0Pr000000000003', Status: 'FINALIZING', RequestInfoId: '8Mw003', RequestInfo: null }],
+      });
+
+      const result = await findInFlightPromotions(connectionStub as unknown as Connection, '1QVxx0000000003');
+
+      expect(result).to.deep.equal([{ id: '0Pr000000000003', requestToken: '8Mw003', status: 'FINALIZING' }]);
+    });
+
+    it('returns an empty array when no promotions are in flight', async () => {
+      (connectionStub.query as sinon.SinonStub).resolves({ records: [] });
+
+      const result = await findInFlightPromotions(connectionStub as unknown as Connection, '1QVxx0000000003');
+
+      expect(result).to.deep.equal([]);
+    });
   });
 });

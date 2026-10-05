@@ -319,6 +319,58 @@ describe('createPipeline utilities', () => {
       expect(body).to.not.have.property('projectIds');
     });
 
+    it('fetches and returns stage ids ordered along the promotion path', async () => {
+      (connectionStub.request as sinon.SinonStub).resolves({
+        id: '1PJ000000000001',
+        message: '',
+        status: 'SUCCESS',
+      });
+      (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
+      // Returned out of order to verify NextStageId-based ordering
+      (connectionStub.query as sinon.SinonStub).resolves({
+        records: [
+          { Id: '0Sx000000000003', Name: 'Production', NextStageId: null },
+          { Id: '0Sx000000000001', Name: 'Integration', NextStageId: '0Sx000000000002' },
+          { Id: '0Sx000000000002', Name: 'UAT', NextStageId: '0Sx000000000003' },
+        ],
+      });
+
+      const result = await createPipeline({
+        connection: connectionStub as unknown as Connection,
+        name: 'Release Pipeline',
+        repo: 'https://github.com/myorg/myrepo',
+        repoType: 'github',
+      });
+
+      expect(result.pipelineId).to.equal('1PJ000000000001');
+      expect(result.stages).to.deep.equal([
+        { id: '0Sx000000000001', name: 'Integration' },
+        { id: '0Sx000000000002', name: 'UAT' },
+        { id: '0Sx000000000003', name: 'Production' },
+      ]);
+    });
+
+    it('succeeds without stages when the stage lookup fails', async () => {
+      (connectionStub.request as sinon.SinonStub).resolves({
+        id: '1PJ000000000009',
+        message: '',
+        status: 'SUCCESS',
+      });
+      (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
+      (connectionStub.query as sinon.SinonStub).rejects(new Error('QUERY failed'));
+
+      const result = await createPipeline({
+        connection: connectionStub as unknown as Connection,
+        name: 'Release Pipeline',
+        repo: 'https://github.com/myorg/myrepo',
+        repoType: 'github',
+      });
+
+      expect(result.success).to.be.true;
+      expect(result.pipelineId).to.equal('1PJ000000000009');
+      expect(result.stages).to.be.undefined;
+    });
+
     it('propagates API errors', async () => {
       (connectionStub.request as sinon.SinonStub).rejects(new Error('Bad Request'));
       (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');

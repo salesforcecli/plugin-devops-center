@@ -16,11 +16,18 @@
 
 import { execSync } from 'node:child_process';
 import { Connection } from '@salesforce/core';
+import { PipelineStageRecord } from './types.js';
+import { fetchPipelineStages, computeFirstStageId } from './pipelineUtils.js';
 
 export type RepoInfo = {
   repoUrl: string;
   repoType: string;
   created: boolean;
+};
+
+export type PipelineStageInfo = {
+  id: string;
+  name?: string;
 };
 
 export type CreatePipelineParams = {
@@ -42,6 +49,7 @@ export type CreatePipelineResult = {
   name?: string;
   status?: string;
   repository?: RepoInfo;
+  stages?: PipelineStageInfo[];
   error?: string;
 };
 
@@ -181,5 +189,43 @@ export async function createPipeline(params: CreatePipelineParams): Promise<Crea
       repoType,
       created: createRepo ?? false,
     },
+    stages: await fetchCreatedStages(connection, data.id),
   };
+}
+
+/**
+ * Fetches the stages of a newly created pipeline, ordered along the promotion path.
+ * Best-effort: the pipeline already exists, so a failed lookup returns undefined
+ * rather than failing the create.
+ */
+async function fetchCreatedStages(
+  connection: Connection,
+  pipelineId: string
+): Promise<PipelineStageInfo[] | undefined> {
+  try {
+    const stages = await fetchPipelineStages(connection, pipelineId);
+    return orderStages(stages).map((s) => ({ id: s.Id, name: s.Name }));
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Orders stages from the first stage following the NextStageId chain. Falls back to
+ * the original query order if the chain can't be resolved into a single sequence.
+ */
+function orderStages(stages: PipelineStageRecord[]): PipelineStageRecord[] {
+  const firstId = computeFirstStageId(stages);
+  if (!firstId) return stages;
+  const ordered: PipelineStageRecord[] = [];
+  const seen = new Set<string>();
+  let currentId: string | undefined = firstId;
+  while (currentId && !seen.has(currentId)) {
+    const stage = stages.find((s) => s.Id === currentId);
+    if (!stage) break;
+    ordered.push(stage);
+    seen.add(currentId);
+    currentId = stage.NextStageId ?? undefined;
+  }
+  return ordered.length === stages.length ? ordered : stages;
 }

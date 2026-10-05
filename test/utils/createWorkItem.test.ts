@@ -46,6 +46,27 @@ describe('createWorkItem', () => {
     expect(result.subject).to.equal('Fix bug');
   });
 
+  it('returns success with workItemId and workItemName from response', async () => {
+    (connectionStub.request as sinon.SinonStub).resolves({
+      success: 'true',
+      workItemId: '1fkxx000000003F',
+      workItemName: 'WI-000003',
+    });
+
+    const result = await createWorkItem({
+      connection: connectionStub as unknown as Connection,
+      projectId: 'PROJ001',
+      subject: 'new work item',
+      description: '',
+    });
+
+    expect(result.success).to.be.true;
+    expect(result.workItemId).to.equal('1fkxx000000003F');
+    expect(result.workItemName).to.equal('WI-000003');
+    // subject is not in the response, so it falls back to the requested subject
+    expect(result.subject).to.equal('new work item');
+  });
+
   it('returns success with uppercase Id and Name from response', async () => {
     (connectionStub.request as sinon.SinonStub).resolves({ Id: 'WI002', Name: 'WI-002', Subject: 'My subject' });
 

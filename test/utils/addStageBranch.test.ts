@@ -17,14 +17,17 @@
 import { expect } from '@oclif/test';
 import sinon from 'sinon';
 import { Connection } from '@salesforce/core';
-import { addStageBranch } from '../../src/utils/addStageBranch.js';
+import { addStageBranch, getStageBranch, deleteOrphanedBranch } from '../../src/utils/addStageBranch.js';
 
 describe('addStageBranch utilities', () => {
   let connectionStub: sinon.SinonStubbedInstance<Connection>;
+  let queryStub: sinon.SinonStub;
 
   beforeEach(() => {
     connectionStub = sinon.createStubInstance(Connection);
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
+    queryStub = sinon.stub();
+    connectionStub.query = queryStub as unknown as typeof connectionStub.query;
   });
 
   afterEach(() => {
@@ -124,5 +127,56 @@ describe('addStageBranch utilities', () => {
     } catch (e: unknown) {
       expect((e as Error).message).to.contain('Network timeout');
     }
+  });
+
+  describe('getStageBranch', () => {
+    it('returns the branch when the stage references one', async () => {
+      queryStub.resolves({
+        records: [{ SourceCodeRepositoryBranchId: '0Xq000000000001', SourceCodeRepositoryBranch: { Name: '$$UAT' } }],
+      });
+
+      const result = await getStageBranch(connectionStub as unknown as Connection, '0Xp000000000001');
+
+      expect(result).to.deep.equal({ branchId: '0Xq000000000001', branchName: '$$UAT' });
+      expect(queryStub.firstCall.args[0]).to.contain("WHERE Id = '0Xp000000000001'");
+    });
+
+    it('returns undefined when the stage has no branch', async () => {
+      queryStub.resolves({ records: [{ SourceCodeRepositoryBranchId: null, SourceCodeRepositoryBranch: null }] });
+
+      const result = await getStageBranch(connectionStub as unknown as Connection, '0Xp000000000001');
+      expect(result).to.be.undefined;
+    });
+
+    it('returns undefined when the stage is not found', async () => {
+      queryStub.resolves({ records: [] });
+
+      const result = await getStageBranch(connectionStub as unknown as Connection, '0Xp000000000001');
+      expect(result).to.be.undefined;
+    });
+  });
+
+  describe('deleteOrphanedBranch', () => {
+    it('deletes the branch and returns true when no stage references it', async () => {
+      queryStub.resolves({ records: [] });
+      const deleteStub = sinon.stub().resolves({ success: true });
+      connectionStub.sobject = sinon.stub().returns({ delete: deleteStub }) as unknown as typeof connectionStub.sobject;
+
+      const deleted = await deleteOrphanedBranch(connectionStub as unknown as Connection, '0Xq000000000001');
+
+      expect(deleted).to.equal(true);
+      expect(deleteStub.calledOnceWith('0Xq000000000001')).to.equal(true);
+    });
+
+    it('leaves the branch intact and returns false when a stage still references it', async () => {
+      queryStub.resolves({ records: [{ Id: '0Xp000000000002' }] });
+      const deleteStub = sinon.stub().resolves({ success: true });
+      connectionStub.sobject = sinon.stub().returns({ delete: deleteStub }) as unknown as typeof connectionStub.sobject;
+
+      const deleted = await deleteOrphanedBranch(connectionStub as unknown as Connection, '0Xq000000000001');
+
+      expect(deleted).to.equal(false);
+      expect(deleteStub.called).to.equal(false);
+    });
   });
 });

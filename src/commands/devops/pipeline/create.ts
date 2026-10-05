@@ -185,6 +185,12 @@ export default class DevopsPipelineCreate extends SfCommand<CreatePipelineResult
     if (projectIds && projectIds.length > 0) {
       this.log(`  Projects:    ${projectIds.join(', ')}`);
     }
+    if (result.stages && result.stages.length > 0) {
+      this.log('  Stages:');
+      for (const stage of result.stages) {
+        this.log(`    ${stage.name ?? ''} (${stage.id})`);
+      }
+    }
     this.log('  Next steps:');
     const orgLabel = username ?? '<org>';
     const pipelineIdLabel = result.pipelineId ?? '<ID>';

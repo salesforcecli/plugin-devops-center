@@ -72,6 +72,10 @@ describe('devops pipeline create', () => {
             repoType: 'github',
             created: false,
           },
+          stages: [
+            { id: '0Sx000000000001', name: 'Integration' },
+            { id: '0Sx000000000002', name: 'UAT' },
+          ],
         });
 
         await CreateCommand.run([
@@ -86,6 +90,9 @@ describe('devops pipeline create', () => {
         expect(ctx.stdout).to.contain('Successfully created pipeline: Release Pipeline');
         expect(ctx.stdout).to.contain('0XB000000000001');
         expect(ctx.stdout).to.contain('https://github.com/myorg/myrepo');
+        expect(ctx.stdout).to.contain('Stages:');
+        expect(ctx.stdout).to.contain('Integration (0Sx000000000001)');
+        expect(ctx.stdout).to.contain('UAT (0Sx000000000002)');
         expect(ctx.stdout).to.contain('Next steps');
         expect(ctx.stdout).to.contain('sf devops pipeline stage add');
         expect(ctx.stdout).to.contain('sf devops pipeline project add');

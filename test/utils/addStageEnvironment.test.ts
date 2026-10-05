@@ -21,6 +21,7 @@ import {
   addStageEnvironment,
   createEnvironment,
   getEnvironment,
+  getStageEnvironment,
   validateEnvironment,
   pollForAuthentication,
 } from '../../src/utils/addStageEnvironment.js';
@@ -28,12 +29,15 @@ import {
 describe('addStageEnvironment utilities', () => {
   let connectionStub: sinon.SinonStubbedInstance<Connection>;
   let requestStub: sinon.SinonStub;
+  let queryStub: sinon.SinonStub;
 
   beforeEach(() => {
     connectionStub = sinon.createStubInstance(Connection);
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
     requestStub = sinon.stub();
     connectionStub.request = requestStub as unknown as typeof connectionStub.request;
+    queryStub = sinon.stub();
+    connectionStub.query = queryStub as unknown as typeof connectionStub.query;
   });
 
   afterEach(() => {
@@ -110,6 +114,40 @@ describe('addStageEnvironment utilities', () => {
       } catch (e: unknown) {
         expect((e as Error).message).to.contain('already exists');
       }
+    });
+  });
+
+  describe('getStageEnvironment', () => {
+    it('returns the environment when the stage references one', async () => {
+      queryStub.resolves({
+        records: [{ DevOpsEnvironmentId: '0Hi000000000001', DevOpsEnvironment: { Name: 'Production_Org' } }],
+      });
+
+      const result = await getStageEnvironment(connectionStub as unknown as Connection, '0Xp000000000001');
+
+      expect(result).to.deep.equal({ environmentId: '0Hi000000000001', environmentName: 'Production_Org' });
+      expect(queryStub.firstCall.args[0]).to.contain("WHERE Id = '0Xp000000000001'");
+    });
+
+    it('returns undefined when the stage has no environment', async () => {
+      queryStub.resolves({ records: [{ DevOpsEnvironmentId: null, DevOpsEnvironment: null }] });
+
+      const result = await getStageEnvironment(connectionStub as unknown as Connection, '0Xp000000000001');
+      expect(result).to.be.undefined;
+    });
+
+    it('returns undefined when the stage is not found', async () => {
+      queryStub.resolves({ records: [] });
+
+      const result = await getStageEnvironment(connectionStub as unknown as Connection, '0Xp000000000001');
+      expect(result).to.be.undefined;
+    });
+
+    it('returns the environment id when the related name is missing', async () => {
+      queryStub.resolves({ records: [{ DevOpsEnvironmentId: '0Hi000000000001', DevOpsEnvironment: null }] });
+
+      const result = await getStageEnvironment(connectionStub as unknown as Connection, '0Xp000000000001');
+      expect(result).to.deep.equal({ environmentId: '0Hi000000000001', environmentName: undefined });
     });
   });
 

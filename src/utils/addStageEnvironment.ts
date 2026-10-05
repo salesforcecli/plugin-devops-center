@@ -15,8 +15,57 @@
  */
 
 import { Connection } from '@salesforce/core';
+import { validateSalesforceId } from './soqlUtils.js';
 
 export type OrgType = 'Production' | 'Sandbox';
+
+export type ExistingStageEnvironment = {
+  environmentId: string;
+  environmentName?: string;
+};
+
+/**
+ * Returns the environment currently associated with a pipeline stage, if any.
+ *
+ * A stage references its environment via DevopsPipelineStage.DevOpsEnvironmentId. Adding a new
+ * environment re-points that lookup, so callers must check for an existing environment first to
+ * avoid orphaning the old DevopsEnvironment record.
+ */
+export async function getStageEnvironment(
+  connection: Connection,
+  stageId: string
+): Promise<ExistingStageEnvironment | undefined> {
+  validateSalesforceId(stageId, 'stage');
+  const result = await connection.query<{
+    DevOpsEnvironmentId: string | null;
+    DevOpsEnvironment: { Name: string } | null;
+  }>(`SELECT DevOpsEnvironmentId, DevOpsEnvironment.Name FROM DevopsPipelineStage WHERE Id = '${stageId}' LIMIT 1`);
+  const record = (result.records ?? [])[0];
+  if (!record?.DevOpsEnvironmentId) {
+    return undefined;
+  }
+  return { environmentId: record.DevOpsEnvironmentId, environmentName: record.DevOpsEnvironment?.Name };
+}
+
+/**
+ * Deletes a DevopsEnvironment record only when no pipeline stage still references it.
+ * Returns true when the record was deleted, false when it is still referenced (left intact).
+ *
+ * Used to clean up the environment a stage was re-pointed away from during a --force replace, so the
+ * old record isn't orphaned in the org. The reference check keeps an environment shared by another
+ * stage safe.
+ */
+export async function deleteOrphanedEnvironment(connection: Connection, environmentId: string): Promise<boolean> {
+  validateSalesforceId(environmentId, 'environment');
+  const refs = await connection.query<{ Id: string }>(
+    `SELECT Id FROM DevopsPipelineStage WHERE DevOpsEnvironmentId = '${environmentId}' LIMIT 1`
+  );
+  if ((refs.records ?? []).length > 0) {
+    return false;
+  }
+  await connection.sobject('DevopsEnvironment').delete(environmentId);
+  return true;
+}
 
 const ORG_TYPE_API_MAP: Record<OrgType, string> = {
   Production: 'PRODUCTION',

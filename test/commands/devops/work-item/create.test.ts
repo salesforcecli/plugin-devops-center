@@ -62,6 +62,9 @@ describe('devops work-item create', () => {
         await CreateCommand.run(['--target-org', 'testOrg', '--project-id', '1Qg000000000001', '--subject', 'Fix bug']);
 
         expect(ctx.stdout).to.contain('Successfully created work item');
+        expect(ctx.stdout).to.contain('ID: WI001');
+        expect(ctx.stdout).to.contain('Name: WI-001');
+        expect(ctx.stdout).to.contain('Subject: Fix bug');
       });
   });
 

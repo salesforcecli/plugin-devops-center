@@ -15,6 +15,7 @@
  */
 
 import { Connection } from '@salesforce/core';
+import { validateSalesforceId } from './soqlUtils.js';
 
 export type AddStageBranchParams = {
   connection: Connection;
@@ -23,6 +24,55 @@ export type AddStageBranchParams = {
   branchName: string;
   createVcsBranch: boolean;
 };
+
+export type ExistingStageBranch = {
+  branchId: string;
+  branchName?: string;
+};
+
+/**
+ * Returns the branch currently associated with a pipeline stage, if any.
+ *
+ * A stage references its branch via DevopsPipelineStage.SourceCodeRepositoryBranchId. Adding a new
+ * branch re-points that lookup, so callers must check for an existing branch first to avoid
+ * orphaning the old SourceCodeRepositoryBranch record.
+ */
+export async function getStageBranch(
+  connection: Connection,
+  stageId: string
+): Promise<ExistingStageBranch | undefined> {
+  validateSalesforceId(stageId, 'stage');
+  const result = await connection.query<{
+    SourceCodeRepositoryBranchId: string | null;
+    SourceCodeRepositoryBranch: { Name: string } | null;
+  }>(
+    `SELECT SourceCodeRepositoryBranchId, SourceCodeRepositoryBranch.Name FROM DevopsPipelineStage WHERE Id = '${stageId}' LIMIT 1`
+  );
+  const record = (result.records ?? [])[0];
+  if (!record?.SourceCodeRepositoryBranchId) {
+    return undefined;
+  }
+  return { branchId: record.SourceCodeRepositoryBranchId, branchName: record.SourceCodeRepositoryBranch?.Name };
+}
+
+/**
+ * Deletes a SourceCodeRepositoryBranch record only when no pipeline stage still references it.
+ * Returns true when the record was deleted, false when it is still referenced (left intact).
+ *
+ * Used to clean up the branch a stage was re-pointed away from during a --force replace, so the old
+ * record isn't orphaned in the org. The reference check keeps a branch shared by another stage safe.
+ */
+export async function deleteOrphanedBranch(connection: Connection, branchId: string): Promise<boolean> {
+  validateSalesforceId(branchId, 'branch');
+  const refs = await connection.query<{ Id: string }>(
+    `SELECT Id FROM DevopsPipelineStage WHERE SourceCodeRepositoryBranchId = '${branchId}' LIMIT 1`
+  );
+  if ((refs.records ?? []).length > 0) {
+    return false;
+  }
+  await connection.sobject('SourceCodeRepositoryBranch').delete(branchId);
+  return true;
+}
 
 export type AddStageBranchResult = {
   success: boolean;
