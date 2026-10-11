@@ -43,7 +43,7 @@ describe('addStageBranch utilities', () => {
     });
 
     const result = await addStageBranch({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0Xo000000000001',
       stageId: '0Xp000000000001',
       branchName: 'main',
@@ -75,7 +75,7 @@ describe('addStageBranch utilities', () => {
     });
 
     const result = await addStageBranch({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0Xo000000000001',
       stageId: '0Xp000000000002',
       branchName: 'integration',
@@ -100,7 +100,7 @@ describe('addStageBranch utilities', () => {
     });
 
     const result = await addStageBranch({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0Xo000000000001',
       stageId: '0Xp000000000001',
       branchName: 'nonexistent',
@@ -117,7 +117,7 @@ describe('addStageBranch utilities', () => {
 
     try {
       await addStageBranch({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         pipelineId: '0Xo000000000001',
         stageId: '0Xp000000000001',
         branchName: 'main',
@@ -135,7 +135,7 @@ describe('addStageBranch utilities', () => {
         records: [{ SourceCodeRepositoryBranchId: '0Xq000000000001', SourceCodeRepositoryBranch: { Name: '$$UAT' } }],
       });
 
-      const result = await getStageBranch(connectionStub as unknown as Connection, '0Xp000000000001');
+      const result = await getStageBranch(connectionStub, '0Xp000000000001');
 
       expect(result).to.deep.equal({ branchId: '0Xq000000000001', branchName: '$$UAT' });
       expect(queryStub.firstCall.args[0]).to.contain("WHERE Id = '0Xp000000000001'");
@@ -144,14 +144,14 @@ describe('addStageBranch utilities', () => {
     it('returns undefined when the stage has no branch', async () => {
       queryStub.resolves({ records: [{ SourceCodeRepositoryBranchId: null, SourceCodeRepositoryBranch: null }] });
 
-      const result = await getStageBranch(connectionStub as unknown as Connection, '0Xp000000000001');
+      const result = await getStageBranch(connectionStub, '0Xp000000000001');
       expect(result).to.be.undefined;
     });
 
     it('returns undefined when the stage is not found', async () => {
       queryStub.resolves({ records: [] });
 
-      const result = await getStageBranch(connectionStub as unknown as Connection, '0Xp000000000001');
+      const result = await getStageBranch(connectionStub, '0Xp000000000001');
       expect(result).to.be.undefined;
     });
   });
@@ -162,7 +162,7 @@ describe('addStageBranch utilities', () => {
       const deleteStub = sinon.stub().resolves({ success: true });
       connectionStub.sobject = sinon.stub().returns({ delete: deleteStub }) as unknown as typeof connectionStub.sobject;
 
-      const deleted = await deleteOrphanedBranch(connectionStub as unknown as Connection, '0Xq000000000001');
+      const deleted = await deleteOrphanedBranch(connectionStub, '0Xq000000000001');
 
       expect(deleted).to.equal(true);
       expect(deleteStub.calledOnceWith('0Xq000000000001')).to.equal(true);
@@ -173,7 +173,7 @@ describe('addStageBranch utilities', () => {
       const deleteStub = sinon.stub().resolves({ success: true });
       connectionStub.sobject = sinon.stub().returns({ delete: deleteStub }) as unknown as typeof connectionStub.sobject;
 
-      const deleted = await deleteOrphanedBranch(connectionStub as unknown as Connection, '0Xq000000000001');
+      const deleted = await deleteOrphanedBranch(connectionStub, '0Xq000000000001');
 
       expect(deleted).to.equal(false);
       expect(deleteStub.called).to.equal(false);

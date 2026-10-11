@@ -68,11 +68,11 @@ export abstract class ResumeCommand<T extends typeof SfCommand> extends AsyncCom
 
   public async init(): Promise<void> {
     await super.init();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     const { flags } = await this.parse({
       flags: this.ctor.flags,
       baseFlags: (super.ctor as typeof ResumeCommand).baseFlags,
-    }); // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    });  
     this.flags = flags as Flags<T>;
     this.setOutputService(
       new OutputServiceFactory().forResume(

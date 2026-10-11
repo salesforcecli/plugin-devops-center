@@ -66,7 +66,7 @@ export async function createWorkItem(params: CreateWorkItemParams): Promise<Crea
  */
 function parseErrorMessage(error: unknown): string {
   const err = error as Record<string, unknown> & { response?: { data?: unknown }; body?: unknown; message?: unknown };
-  const data: unknown = (err.response?.data ?? err.body ?? err) as unknown;
+  const data: unknown = (err.response?.data ?? err.body ?? err);
   const message: unknown =
     (typeof data === 'object' &&
       data !== null &&

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-console, @typescript-eslint/require-await */
+/* eslint-disable no-console */
 
 import { Connection, Messages } from '@salesforce/core';
 import { SfCommand } from '@salesforce/sf-plugins-core';
@@ -36,8 +36,8 @@ export class ResumeCommandOutputService extends AbstractResumeOutputService<AorO
   public constructor(flags: Flags<typeof SfCommand>, operationType: string, con: Connection) {
     super(
       {
-        concise: flags['concise'] as boolean | undefined,
-        verbose: flags['verbose'] as boolean | undefined,
+        concise: flags['concise'],
+        verbose: flags['verbose'],
       },
       ''
     );

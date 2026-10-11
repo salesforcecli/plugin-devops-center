@@ -42,13 +42,13 @@ export abstract class ReportOnPromoteCommand<T extends typeof SfCommand> extends
 
   public async init(): Promise<void> {
     await super.init();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     const { flags } = await this.parse({
       flags: this.ctor.flags,
       baseFlags: (super.ctor as typeof ReportOnPromoteCommand).baseFlags,
       enableJsonFlag: this.ctor.enableJsonFlag,
     });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     this.flags = flags as Flags<T>;
   }
 

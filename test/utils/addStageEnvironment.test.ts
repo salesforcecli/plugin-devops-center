@@ -54,7 +54,7 @@ describe('addStageEnvironment utilities', () => {
         externalCredential: 'Production_Org_EC',
       });
 
-      const result = await createEnvironment(connectionStub as unknown as Connection, {
+      const result = await createEnvironment(connectionStub, {
         pipelineId: '0Xo000000000001',
         stageId: '0Xp000000000001',
         environmentName: 'Production_Org',
@@ -86,7 +86,7 @@ describe('addStageEnvironment utilities', () => {
         externalCredential: 'UAT_Sandbox_EC',
       });
 
-      const result = await createEnvironment(connectionStub as unknown as Connection, {
+      const result = await createEnvironment(connectionStub, {
         pipelineId: '0Xo000000000001',
         stageId: '0Xp000000000002',
         environmentName: 'UAT_Sandbox',
@@ -104,7 +104,7 @@ describe('addStageEnvironment utilities', () => {
       requestStub.rejects(new Error('Bad Request: Environment name already exists'));
 
       try {
-        await createEnvironment(connectionStub as unknown as Connection, {
+        await createEnvironment(connectionStub, {
           pipelineId: '0Xo000000000001',
           stageId: '0Xp000000000001',
           environmentName: 'Duplicate_Env',
@@ -123,7 +123,7 @@ describe('addStageEnvironment utilities', () => {
         records: [{ DevOpsEnvironmentId: '0Hi000000000001', DevOpsEnvironment: { Name: 'Production_Org' } }],
       });
 
-      const result = await getStageEnvironment(connectionStub as unknown as Connection, '0Xp000000000001');
+      const result = await getStageEnvironment(connectionStub, '0Xp000000000001');
 
       expect(result).to.deep.equal({ environmentId: '0Hi000000000001', environmentName: 'Production_Org' });
       expect(queryStub.firstCall.args[0]).to.contain("WHERE Id = '0Xp000000000001'");
@@ -132,21 +132,21 @@ describe('addStageEnvironment utilities', () => {
     it('returns undefined when the stage has no environment', async () => {
       queryStub.resolves({ records: [{ DevOpsEnvironmentId: null, DevOpsEnvironment: null }] });
 
-      const result = await getStageEnvironment(connectionStub as unknown as Connection, '0Xp000000000001');
+      const result = await getStageEnvironment(connectionStub, '0Xp000000000001');
       expect(result).to.be.undefined;
     });
 
     it('returns undefined when the stage is not found', async () => {
       queryStub.resolves({ records: [] });
 
-      const result = await getStageEnvironment(connectionStub as unknown as Connection, '0Xp000000000001');
+      const result = await getStageEnvironment(connectionStub, '0Xp000000000001');
       expect(result).to.be.undefined;
     });
 
     it('returns the environment id when the related name is missing', async () => {
       queryStub.resolves({ records: [{ DevOpsEnvironmentId: '0Hi000000000001', DevOpsEnvironment: null }] });
 
-      const result = await getStageEnvironment(connectionStub as unknown as Connection, '0Xp000000000001');
+      const result = await getStageEnvironment(connectionStub, '0Xp000000000001');
       expect(result).to.deep.equal({ environmentId: '0Hi000000000001', environmentName: undefined });
     });
   });
@@ -160,7 +160,7 @@ describe('addStageEnvironment utilities', () => {
         orgType: 'PRODUCTION',
       });
 
-      const result = await getEnvironment(connectionStub as unknown as Connection, '0Hi000000000001');
+      const result = await getEnvironment(connectionStub, '0Hi000000000001');
 
       expect(result.id).to.equal('0Hi000000000001');
       expect(result.organizationId).to.equal('00D000000000001');
@@ -176,7 +176,7 @@ describe('addStageEnvironment utilities', () => {
         name: 'Production_Org',
       });
 
-      const result = await getEnvironment(connectionStub as unknown as Connection, '0Hi000000000001');
+      const result = await getEnvironment(connectionStub, '0Hi000000000001');
       expect(result.organizationId).to.be.undefined;
     });
   });
@@ -191,7 +191,7 @@ describe('addStageEnvironment utilities', () => {
         namedCredential: 'Production_Org_NC',
       });
 
-      const result = await validateEnvironment(connectionStub as unknown as Connection, '0Hi000000000001');
+      const result = await validateEnvironment(connectionStub, '0Hi000000000001');
 
       expect(result.organizationId).to.equal('00D000000000001');
       expect(result.namedCredential).to.equal('Production_Org_NC');
@@ -206,7 +206,7 @@ describe('addStageEnvironment utilities', () => {
       requestStub.rejects(new Error('Validation failed: org not reachable'));
 
       try {
-        await validateEnvironment(connectionStub as unknown as Connection, '0Hi000000000001');
+        await validateEnvironment(connectionStub, '0Hi000000000001');
         expect.fail('should have thrown');
       } catch (e: unknown) {
         expect((e as Error).message).to.contain('org not reachable');
@@ -224,7 +224,7 @@ describe('addStageEnvironment utilities', () => {
       });
 
       const result = await pollForAuthentication(
-        connectionStub as unknown as Connection,
+        connectionStub,
         '0Hi000000000001',
         10_000,
         100
@@ -243,7 +243,7 @@ describe('addStageEnvironment utilities', () => {
       });
 
       const result = await pollForAuthentication(
-        connectionStub as unknown as Connection,
+        connectionStub,
         '0Hi000000000001',
         10_000,
         50
@@ -262,7 +262,7 @@ describe('addStageEnvironment utilities', () => {
       });
 
       const result = await pollForAuthentication(
-        connectionStub as unknown as Connection,
+        connectionStub,
         '0Hi000000000001',
         10_000,
         50
@@ -275,7 +275,7 @@ describe('addStageEnvironment utilities', () => {
       requestStub.rejects(new Error('Auth not complete'));
 
       try {
-        await pollForAuthentication(connectionStub as unknown as Connection, '0Hi000000000001', 200, 50);
+        await pollForAuthentication(connectionStub, '0Hi000000000001', 200, 50);
         expect.fail('should have thrown');
       } catch (e: unknown) {
         expect((e as Error).message).to.contain('timed out');
@@ -309,7 +309,7 @@ describe('addStageEnvironment utilities', () => {
       const onCreated = sinon.stub();
 
       const result = await addStageEnvironment({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         pipelineId: '0Xo000000000001',
         stageId: '0Xp000000000001',
         environmentName: 'Production_Org',
@@ -351,7 +351,7 @@ describe('addStageEnvironment utilities', () => {
 
       try {
         await addStageEnvironment({
-          connection: connectionStub as unknown as Connection,
+          connection: connectionStub,
           pipelineId: '0Xo000000000001',
           stageId: '0Xp000000000001',
           environmentName: 'Production_Org',
@@ -370,7 +370,7 @@ describe('addStageEnvironment utilities', () => {
 
       try {
         await addStageEnvironment({
-          connection: connectionStub as unknown as Connection,
+          connection: connectionStub,
           pipelineId: '0Xo000000000001',
           stageId: '0Xp000000000001',
           environmentName: 'Production_Org',

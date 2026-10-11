@@ -59,7 +59,7 @@ describe('DOCeStreaming', () => {
     sandbox = sinon.createSandbox();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sandbox.stub(Org, 'create' as any).returns(DOCE_ORG);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     instance = new DOCeStreamingTest(await Org.create({ aliasOrUsername: 'test@salesforce.com' }), Duration.minutes(3));
   });
 
@@ -87,7 +87,7 @@ describe('DOCeStreaming', () => {
       try {
         await instance.monitor();
       } catch (error) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+         
         expect(error.name).to.equal('BoomError');
       }
     });

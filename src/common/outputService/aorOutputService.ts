@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-console, class-methods-use-this */
+/* eslint-disable no-console */
 
 import { Messages } from '@salesforce/core';
 import { StandardColors } from '@salesforce/sf-plugins-core';

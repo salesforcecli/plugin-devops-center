@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable camelcase */
+ 
 
 import { Org, StatusResult } from '@salesforce/core';
 import { Duration } from '@salesforce/kit';
@@ -36,7 +36,7 @@ export default class AsyncOpStreaming extends SObjectStreaming {
    * Connects to the AsyncOperationResults CDC channel and begins to monit for changes to the AOR we are monitoring.  If the AOR......
    */
   public async monitor(): Promise<void | AnyJson> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+     
     return this.watchForSObject(this.asyncOpStreamProcessor.bind(this));
   }
 
@@ -46,7 +46,7 @@ export default class AsyncOpStreaming extends SObjectStreaming {
    * @param payload The payload from the CDC event
    * @returns StatusResult Completed: true => will end the stream.
    */
-  // eslint-disable-next-line class-methods-use-this
+   
   protected asyncOpStreamProcessor(payload: JsonMap): StatusResult {
     const jsonPayload = ensureJsonMap(payload);
 
