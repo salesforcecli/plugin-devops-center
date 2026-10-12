@@ -18,11 +18,11 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsPipelineUpdate from '../../../../src/commands/devops/pipeline/update.js';
 
 describe('devops pipeline update', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let UpdateCommand: any;
+  let UpdateCommand: typeof DevopsPipelineUpdate;
 
   const sobjectUpdateStub = sinon.stub().resolves({ id: '0XB000000000001', success: true, errors: [] });
   const mockSobject = { update: sobjectUpdateStub };
@@ -38,15 +38,18 @@ describe('devops pipeline update', () => {
   const fetchPipelineStagesStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/pipeline/update.js', {
-      '../../../../src/utils/activatePipeline.js': {
-        activatePipeline: activatePipelineStub,
-        updatePipelineRecord: updatePipelineRecordStub,
-      },
-      '../../../../src/utils/pipelineUtils.js': {
-        fetchPipelineStages: fetchPipelineStagesStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsPipelineUpdate }>(
+      '../../../../src/commands/devops/pipeline/update.js',
+      {
+        '../../../../src/utils/activatePipeline.js': {
+          activatePipeline: activatePipelineStub,
+          updatePipelineRecord: updatePipelineRecordStub,
+        },
+        '../../../../src/utils/pipelineUtils.js': {
+          fetchPipelineStages: fetchPipelineStagesStub,
+        },
+      }
+    );
     UpdateCommand = mod.default;
   });
 
@@ -167,7 +170,7 @@ describe('devops pipeline update', () => {
         try {
           await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -194,7 +197,7 @@ describe('devops pipeline update', () => {
             '--deactivate',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -214,7 +217,7 @@ describe('devops pipeline update', () => {
         try {
           await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--activate']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -235,7 +238,7 @@ describe('devops pipeline update', () => {
         try {
           await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--activate']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -256,7 +259,7 @@ describe('devops pipeline update', () => {
         try {
           await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--deactivate']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -275,7 +278,7 @@ describe('devops pipeline update', () => {
 
         try {
           await UpdateCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0XB000000000001', '--activate']);
-        } catch (e) {
+        } catch {
           // expected
         }
 

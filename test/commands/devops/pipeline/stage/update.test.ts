@@ -18,11 +18,11 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsPipelineStageUpdate from '../../../../../src/commands/devops/pipeline/stage/update.js';
 
 describe('devops pipeline stage update', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let UpdateCommand: any;
+  let UpdateCommand: typeof DevopsPipelineStageUpdate;
   const updateStub = sinon.stub();
   const mockConnection = {
     getApiVersion: () => '65.0',
@@ -31,7 +31,10 @@ describe('devops pipeline stage update', () => {
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
 
   before(async () => {
-    const mod = await esmock('../../../../../src/commands/devops/pipeline/stage/update.js', {});
+    const mod = await esmock<{ default: typeof DevopsPipelineStageUpdate }>(
+      '../../../../../src/commands/devops/pipeline/stage/update.js',
+      {}
+    );
     UpdateCommand = mod.default;
   });
 
@@ -79,7 +82,7 @@ describe('devops pipeline stage update', () => {
         try {
           await UpdateCommand.run(['-o', 'testOrg', '-s', '1QVxx0000000001', '-n', 'Integration']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -96,7 +99,7 @@ describe('devops pipeline stage update', () => {
 
         try {
           await UpdateCommand.run(['-o', 'testOrg', '-s', '1QVxx0000000001', '-n', 'Integration']);
-        } catch (e) {
+        } catch {
           // expected
         }
 

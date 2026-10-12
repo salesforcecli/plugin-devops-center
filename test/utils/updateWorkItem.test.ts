@@ -37,7 +37,7 @@ describe('updateWorkItem status transition guard', () => {
     it('allows IN_PROGRESS when the work item is NEW', async () => {
       (connectionStub.query as sinon.SinonStub).resolves({ records: [{ Status: 'NEW' }] });
 
-      await assertStatusTransitionAllowed(connectionStub as unknown as Connection, workItemId, 'IN_PROGRESS');
+      await assertStatusTransitionAllowed(connectionStub, workItemId, 'IN_PROGRESS');
 
       const soql = (connectionStub.query as sinon.SinonStub).firstCall.args[0] as string;
       expect(soql).to.contain('SELECT Status FROM WorkItem');
@@ -48,7 +48,7 @@ describe('updateWorkItem status transition guard', () => {
       (connectionStub.query as sinon.SinonStub).resolves({ records: [{ Status: 'IN_PROGRESS' }] });
 
       try {
-        await assertStatusTransitionAllowed(connectionStub as unknown as Connection, workItemId, 'IN_PROGRESS');
+        await assertStatusTransitionAllowed(connectionStub, workItemId, 'IN_PROGRESS');
         expect.fail('should have thrown');
       } catch (e: unknown) {
         expect((e as Error).message).to.contain('currently IN_PROGRESS');
@@ -59,14 +59,14 @@ describe('updateWorkItem status transition guard', () => {
     it('allows READY_TO_PROMOTE when the work item is IN_REVIEW', async () => {
       (connectionStub.query as sinon.SinonStub).resolves({ records: [{ Status: 'IN_REVIEW' }] });
 
-      await assertStatusTransitionAllowed(connectionStub as unknown as Connection, workItemId, 'READY_TO_PROMOTE');
+      await assertStatusTransitionAllowed(connectionStub, workItemId, 'READY_TO_PROMOTE');
     });
 
     it('blocks READY_TO_PROMOTE when the work item is not IN_REVIEW', async () => {
       (connectionStub.query as sinon.SinonStub).resolves({ records: [{ Status: 'NEW' }] });
 
       try {
-        await assertStatusTransitionAllowed(connectionStub as unknown as Connection, workItemId, 'READY_TO_PROMOTE');
+        await assertStatusTransitionAllowed(connectionStub, workItemId, 'READY_TO_PROMOTE');
         expect.fail('should have thrown');
       } catch (e: unknown) {
         expect((e as Error).message).to.contain('currently NEW');
@@ -75,7 +75,7 @@ describe('updateWorkItem status transition guard', () => {
     });
 
     it('does not query for a target status with no precondition', async () => {
-      await assertStatusTransitionAllowed(connectionStub as unknown as Connection, workItemId, 'CLOSED');
+      await assertStatusTransitionAllowed(connectionStub, workItemId, 'CLOSED');
 
       expect((connectionStub.query as sinon.SinonStub).called).to.be.false;
     });
@@ -84,7 +84,7 @@ describe('updateWorkItem status transition guard', () => {
       (connectionStub.query as sinon.SinonStub).resolves({ records: [] });
 
       try {
-        await assertStatusTransitionAllowed(connectionStub as unknown as Connection, workItemId, 'IN_PROGRESS');
+        await assertStatusTransitionAllowed(connectionStub, workItemId, 'IN_PROGRESS');
         expect.fail('should have thrown');
       } catch (e: unknown) {
         expect((e as Error).message).to.contain('not found');
@@ -98,7 +98,7 @@ describe('updateWorkItem status transition guard', () => {
 
       try {
         await updateWorkItem({
-          connection: connectionStub as unknown as Connection,
+          connection: connectionStub,
           workItemId,
           projectId,
           status: 'In Progress',
@@ -116,7 +116,7 @@ describe('updateWorkItem status transition guard', () => {
       (connectionStub.request as sinon.SinonStub).resolves({ status: 'IN_PROGRESS' });
 
       const result = await updateWorkItem({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         workItemId,
         projectId,
         status: 'In Progress',
@@ -134,7 +134,7 @@ describe('updateWorkItem status transition guard', () => {
       (connectionStub.sobject as sinon.SinonStub).returns({ update: updateStub });
 
       const result = await updateWorkItem({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         workItemId,
         projectId,
         subject: 'New subject',
@@ -158,7 +158,7 @@ describe('updateWorkItem status transition guard', () => {
       (connectionStub.sobject as sinon.SinonStub).returns({ update: updateStub });
 
       const result = await updateWorkItem({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         workItemId,
         projectId,
         description: 'New description',
@@ -175,7 +175,7 @@ describe('updateWorkItem status transition guard', () => {
       (connectionStub.request as sinon.SinonStub).resolves({ success: 'true' });
 
       const result = await updateWorkItem({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         workItemId,
         projectId,
         subject: 'New subject',
@@ -195,7 +195,7 @@ describe('updateWorkItem status transition guard', () => {
       (connectionStub.request as sinon.SinonStub).rejects(new Error('network error'));
 
       const result = await updateWorkItem({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         workItemId,
         projectId,
         subject: 'New subject',

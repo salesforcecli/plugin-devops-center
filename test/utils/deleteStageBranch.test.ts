@@ -39,7 +39,7 @@ describe('deleteStageBranch utilities', () => {
   it('clears the branch lookup for the target stage', async () => {
     updateStub.resolves([{ success: true }]);
 
-    const result = await deleteStageBranch(connectionStub as unknown as Connection, 'STAGE1', [
+    const result = await deleteStageBranch(connectionStub, 'STAGE1', [
       { stageId: 'STAGE1', stageName: 'Production', branchName: 'main' },
     ]);
 
@@ -54,7 +54,7 @@ describe('deleteStageBranch utilities', () => {
   it('cascades the clear to upstream stages', async () => {
     updateStub.resolves([{ success: true }, { success: true }]);
 
-    const result = await deleteStageBranch(connectionStub as unknown as Connection, 'INT', [
+    const result = await deleteStageBranch(connectionStub, 'INT', [
       { stageId: 'INT', stageName: 'Integration', branchName: 'integration' },
       { stageId: 'DEV', stageName: 'Development', branchName: 'dev' },
     ]);
@@ -70,7 +70,7 @@ describe('deleteStageBranch utilities', () => {
   it('returns failure when an update fails', async () => {
     updateStub.resolves([{ success: false, errors: [{ message: 'record locked' }] }]);
 
-    const result = await deleteStageBranch(connectionStub as unknown as Connection, 'STAGE1', [
+    const result = await deleteStageBranch(connectionStub, 'STAGE1', [
       { stageId: 'STAGE1', stageName: 'Production', branchName: 'main' },
     ]);
 
@@ -81,7 +81,7 @@ describe('deleteStageBranch utilities', () => {
   it('handles a single (non-array) update result', async () => {
     updateStub.resolves({ success: true });
 
-    const result = await deleteStageBranch(connectionStub as unknown as Connection, 'STAGE1', [
+    const result = await deleteStageBranch(connectionStub, 'STAGE1', [
       { stageId: 'STAGE1', stageName: 'Production', branchName: 'main' },
     ]);
 

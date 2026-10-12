@@ -5,6 +5,7 @@
     "module": "Node16",
     "moduleResolution": "Node16",
     "skipLibCheck": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "types": ["mocha", "node"]
   }
 }

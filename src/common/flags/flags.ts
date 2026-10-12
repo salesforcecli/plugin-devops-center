@@ -100,7 +100,7 @@ export const getDefaultDevopsCenterUsernameAlias = async (): Promise<string | un
  * or to the alias/username set in --target-devops-center config variable.
  */
 const getOrgOrThrow = async (input?: string): Promise<Org> => {
-  const usernameOrAlias = input ? input : await getDefaultDevopsCenterUsernameAlias();
+  const usernameOrAlias = input ?? (await getDefaultDevopsCenterUsernameAlias());
   if (!usernameOrAlias) {
     throw messages.createError('errors.NoDefaultDoceEnv');
   }

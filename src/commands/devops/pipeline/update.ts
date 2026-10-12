@@ -83,7 +83,7 @@ export default class DevopsPipelineUpdate extends SfCommand<PipelineUpdateResult
       this.error(messages.getMessage('error.NoFlags'));
     }
 
-    let stages: PipelineStageRecord[] = [];
+    let stages: PipelineStageRecord[];
     try {
       stages = await fetchPipelineStages(connection, pipelineId);
     } catch (error: unknown) {

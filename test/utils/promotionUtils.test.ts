@@ -71,7 +71,7 @@ describe('validatePromotion', () => {
   it('omits checkCombineDetails from request body when false (default)', async () => {
     (connectionStub.request as sinon.SinonStub).resolves(successResponse);
 
-    await validatePromotion(connectionStub as unknown as Connection, 'PIPE001', ['1fkxx0000000001'], '1QVxx0000000003');
+    await validatePromotion(connectionStub, 'PIPE001', ['1fkxx0000000001'], '1QVxx0000000003');
 
     const body = JSON.parse((connectionStub.request as sinon.SinonStub).firstCall.args[0].body as string);
     expect(body).to.not.have.property('checkCombineDetails');
@@ -80,13 +80,7 @@ describe('validatePromotion', () => {
   it('omits checkCombineDetails from request body when explicitly false', async () => {
     (connectionStub.request as sinon.SinonStub).resolves(successResponse);
 
-    await validatePromotion(
-      connectionStub as unknown as Connection,
-      'PIPE001',
-      ['1fkxx0000000001'],
-      '1QVxx0000000003',
-      false
-    );
+    await validatePromotion(connectionStub, 'PIPE001', ['1fkxx0000000001'], '1QVxx0000000003', false);
 
     const body = JSON.parse((connectionStub.request as sinon.SinonStub).firstCall.args[0].body as string);
     expect(body).to.not.have.property('checkCombineDetails');
@@ -95,13 +89,7 @@ describe('validatePromotion', () => {
   it('includes checkCombineDetails: true in request body when explicitly true', async () => {
     (connectionStub.request as sinon.SinonStub).resolves(successResponse);
 
-    await validatePromotion(
-      connectionStub as unknown as Connection,
-      'PIPE001',
-      ['1fkxx0000000001'],
-      '1QVxx0000000003',
-      true
-    );
+    await validatePromotion(connectionStub, 'PIPE001', ['1fkxx0000000001'], '1QVxx0000000003', true);
 
     const body = JSON.parse((connectionStub.request as sinon.SinonStub).firstCall.args[0].body as string);
     expect(body.checkCombineDetails).to.be.true;
@@ -110,12 +98,7 @@ describe('validatePromotion', () => {
   it('sends correct endpoint and base payload', async () => {
     (connectionStub.request as sinon.SinonStub).resolves(successResponse);
 
-    await validatePromotion(
-      connectionStub as unknown as Connection,
-      'PIPE001',
-      ['1fkxx0000000001', '1fkxx0000000002'],
-      '1QVxx0000000003'
-    );
+    await validatePromotion(connectionStub, 'PIPE001', ['1fkxx0000000001', '1fkxx0000000002'], '1QVxx0000000003');
 
     const call = (connectionStub.request as sinon.SinonStub).firstCall.args[0];
     expect(call.method).to.equal('POST');
@@ -129,14 +112,7 @@ describe('validatePromotion', () => {
   it('sends allWorkItemsInStage: true when explicitly set', async () => {
     (connectionStub.request as sinon.SinonStub).resolves(successResponse);
 
-    await validatePromotion(
-      connectionStub as unknown as Connection,
-      'PIPE001',
-      ['1fkxx0000000001'],
-      '1QVxx0000000003',
-      false,
-      true
-    );
+    await validatePromotion(connectionStub, 'PIPE001', ['1fkxx0000000001'], '1QVxx0000000003', false, true);
 
     const body = JSON.parse((connectionStub.request as sinon.SinonStub).firstCall.args[0].body as string);
     expect(body.allWorkItemsInStage).to.be.true;
@@ -145,12 +121,7 @@ describe('validatePromotion', () => {
   it('trims 18-char IDs to 15 chars in the request body', async () => {
     (connectionStub.request as sinon.SinonStub).resolves(successResponse);
 
-    await validatePromotion(
-      connectionStub as unknown as Connection,
-      'PIPE001',
-      ['1fkWt000000hGr7IAE'],
-      '1QVWt000000G3huOAC'
-    );
+    await validatePromotion(connectionStub, 'PIPE001', ['1fkWt000000hGr7IAE'], '1QVWt000000G3huOAC');
 
     const body = JSON.parse((connectionStub.request as sinon.SinonStub).firstCall.args[0].body as string);
     expect(body.selectedWorkItemIds).to.deep.equal(['1fkWt000000hGr7']);
@@ -165,13 +136,7 @@ describe('validatePromotion', () => {
       combineDetails: { items: ['1fkxx0000000001'] },
     });
 
-    const result = await validatePromotion(
-      connectionStub as unknown as Connection,
-      'PIPE001',
-      ['1fkxx0000000001'],
-      '1QVxx0000000003',
-      true
-    );
+    const result = await validatePromotion(connectionStub, 'PIPE001', ['1fkxx0000000001'], '1QVxx0000000003', true);
 
     expect(result.success).to.be.false;
     expect(result.errorType).to.equal('COMBINE_REQUIRED');

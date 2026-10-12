@@ -102,9 +102,7 @@ export async function fetchWorkItemDetail(
     const stages = await fetchPipelineStages(connection, pipelineId);
     if (stages.length) {
       let targetStageId = resolveTargetStageId(record.DevopsPipelineStageId ?? undefined, stages);
-      if (!targetStageId) {
-        targetStageId = computeFirstStageId(stages);
-      }
+      targetStageId ??= computeFirstStageId(stages);
       detail.targetBranch = getBranchNameFromStage(findStageById(stages, targetStageId));
     }
   }

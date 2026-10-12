@@ -41,7 +41,7 @@ describe('promoteStage utilities', () => {
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
     const result = await promoteStage({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0XB000000000001',
       workItemIds: ['0Wx000000000001', '0Wx000000000002'],
       targetStageId: '05S000000000002',
@@ -76,7 +76,7 @@ describe('promoteStage utilities', () => {
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
     await promoteStage({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0XB000000000001',
       workItemIds: ['0Wx000000000001'],
       targetStageId: '05S000000000002',
@@ -102,7 +102,7 @@ describe('promoteStage utilities', () => {
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
     await promoteStage({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0XB000000000001',
       workItemIds: ['1fkWt000000hGr7IAE'],
       targetStageId: '1QVWt000000G3huOAC',
@@ -122,7 +122,7 @@ describe('promoteStage utilities', () => {
 
     try {
       await promoteStage({
-        connection: connectionStub as unknown as Connection,
+        connection: connectionStub,
         pipelineId: '0XB000000000001',
         workItemIds: ['0Wx000000000001'],
         targetStageId: '05S000000000002',
@@ -138,7 +138,7 @@ describe('promoteStage utilities', () => {
     (connectionStub.getApiVersion as sinon.SinonStub).returns('65.0');
 
     const result = await promoteStage({
-      connection: connectionStub as unknown as Connection,
+      connection: connectionStub,
       pipelineId: '0XB000000000001',
       workItemIds: ['0Wx000000000001'],
       targetStageId: '05S000000000002',
@@ -164,7 +164,7 @@ describe('promoteStage utilities', () => {
         ],
       });
 
-      const result = await findInFlightPromotions(connectionStub as unknown as Connection, '1QVxx0000000003');
+      const result = await findInFlightPromotions(connectionStub, '1QVxx0000000003');
 
       const soql = (connectionStub.query as sinon.SinonStub).firstCall.args[0] as string;
       expect(soql).to.contain('FROM DevopsPipelnStgProm');
@@ -181,7 +181,7 @@ describe('promoteStage utilities', () => {
         records: [{ Id: '0Pr000000000003', Status: 'FINALIZING', RequestInfoId: '8Mw003', RequestInfo: null }],
       });
 
-      const result = await findInFlightPromotions(connectionStub as unknown as Connection, '1QVxx0000000003');
+      const result = await findInFlightPromotions(connectionStub, '1QVxx0000000003');
 
       expect(result).to.deep.equal([{ id: '0Pr000000000003', requestToken: '8Mw003', status: 'FINALIZING' }]);
     });
@@ -189,7 +189,7 @@ describe('promoteStage utilities', () => {
     it('returns an empty array when no promotions are in flight', async () => {
       (connectionStub.query as sinon.SinonStub).resolves({ records: [] });
 
-      const result = await findInFlightPromotions(connectionStub as unknown as Connection, '1QVxx0000000003');
+      const result = await findInFlightPromotions(connectionStub, '1QVxx0000000003');
 
       expect(result).to.deep.equal([]);
     });

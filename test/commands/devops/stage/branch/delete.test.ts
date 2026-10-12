@@ -18,11 +18,11 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsStageBranchDelete from '../../../../../src/commands/devops/stage/branch/delete.js';
 
 describe('devops stage branch delete', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let DeleteBranchCommand: any;
+  let DeleteBranchCommand: typeof DevopsStageBranchDelete;
   const mockQueryStub = sinon.stub();
   const mockConnection = { getApiVersion: () => '65.0', query: mockQueryStub };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
@@ -54,14 +54,17 @@ describe('devops stage branch delete', () => {
   ];
 
   before(async () => {
-    const mod = await esmock('../../../../../src/commands/devops/stage/branch/delete.js', {
-      '../../../../../src/utils/deleteStageBranch.js': {
-        deleteStageBranch: deleteStageBranchStub,
-      },
-      '../../../../../src/utils/pipelineUtils.js': {
-        fetchPipelineStages: fetchPipelineStagesStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsStageBranchDelete }>(
+      '../../../../../src/commands/devops/stage/branch/delete.js',
+      {
+        '../../../../../src/utils/deleteStageBranch.js': {
+          deleteStageBranch: deleteStageBranchStub,
+        },
+        '../../../../../src/utils/pipelineUtils.js': {
+          fetchPipelineStages: fetchPipelineStagesStub,
+        },
+      }
+    );
     DeleteBranchCommand = mod.default;
   });
 
@@ -166,7 +169,7 @@ describe('devops stage branch delete', () => {
             '0Xp000000000001',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -194,7 +197,7 @@ describe('devops stage branch delete', () => {
             '0Xp000000000099',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -224,7 +227,7 @@ describe('devops stage branch delete', () => {
             '0Xp000000000001',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -251,7 +254,7 @@ describe('devops stage branch delete', () => {
             '--stage-id',
             '0Xp000000000001',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 

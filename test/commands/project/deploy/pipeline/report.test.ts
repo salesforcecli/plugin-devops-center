@@ -81,7 +81,7 @@ describe('project deploy pipeline report', () => {
 
         try {
           await ReportCommand.run([]);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -110,7 +110,7 @@ describe('project deploy pipeline report', () => {
       .it('runs project deploy pipeline report without any fo the required flags', async (ctx) => {
         try {
           await ReportCommand.run([]);
-        } catch (e) {
+        } catch {
           // expected
         }
         expect(ctx.stderr).to.contain('Exactly one of the following must be provided: --job-id, --use-most-recent');
@@ -122,7 +122,7 @@ describe('project deploy pipeline report', () => {
       .it('runs project deploy pipeline report specifying both -r and -i flags', async (ctx) => {
         try {
           await ReportCommand.run(['-r', `-i=${mockAorId}`]);
-        } catch (e) {
+        } catch {
           // expected
         }
         expect(ctx.stderr).to.contain('--job-id cannot also be provided when using --use-most-recent');
@@ -135,7 +135,7 @@ describe('project deploy pipeline report', () => {
       .it('runs project deploy pipeline report specifying -r when there are no Ids in cache', async (ctx) => {
         try {
           await ReportCommand.run(['-r']);
-        } catch (e) {
+        } catch {
           // expected
         }
         expect(ctx.stderr).to.contain("Can't find the job ID. Verify that a pipeline promotion has been started");
@@ -302,7 +302,7 @@ describe('project deploy pipeline report', () => {
 
         try {
           await ReportCommand.run([`-i=${mockAorId}`]);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -317,7 +317,7 @@ describe('project deploy pipeline report', () => {
 
         try {
           await ReportCommand.run([`-i=${mockAorId}`]);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -332,7 +332,7 @@ describe('project deploy pipeline report', () => {
 
         try {
           await ReportCommand.run([`-i=${mockAorId}`]);
-        } catch (e) {
+        } catch {
           // expected
         }
 

@@ -18,11 +18,11 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsPromotionValidate from '../../../../src/commands/devops/promotion/validate.js';
 
 describe('devops promotion validate', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let ValidateCommand: any;
+  let ValidateCommand: typeof DevopsPromotionValidate;
   const validatePromotionStub = sinon.stub();
   const resolveProjectIdFromWorkItemStub = sinon.stub();
   const getPipelineIdForProjectStub = sinon.stub();
@@ -32,19 +32,22 @@ describe('devops promotion validate', () => {
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/promotion/validate.js', {
-      '../../../../src/utils/promotionUtils.js': {
-        validatePromotion: validatePromotionStub,
-      },
-      '../../../../src/utils/prepareWorkItem.js': {
-        resolveProjectIdFromWorkItem: resolveProjectIdFromWorkItemStub,
-      },
-      '../../../../src/utils/pipelineUtils.js': {
-        getPipelineIdForProject: getPipelineIdForProjectStub,
-        fetchPipelineStages: fetchPipelineStagesStub,
-        computeFirstStageId: computeFirstStageIdStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsPromotionValidate }>(
+      '../../../../src/commands/devops/promotion/validate.js',
+      {
+        '../../../../src/utils/promotionUtils.js': {
+          validatePromotion: validatePromotionStub,
+        },
+        '../../../../src/utils/prepareWorkItem.js': {
+          resolveProjectIdFromWorkItem: resolveProjectIdFromWorkItemStub,
+        },
+        '../../../../src/utils/pipelineUtils.js': {
+          getPipelineIdForProject: getPipelineIdForProjectStub,
+          fetchPipelineStages: fetchPipelineStagesStub,
+          computeFirstStageId: computeFirstStageIdStub,
+        },
+      }
+    );
     ValidateCommand = mod.default;
   });
 
@@ -321,7 +324,7 @@ describe('devops promotion validate', () => {
         try {
           await ValidateCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -345,7 +348,7 @@ describe('devops promotion validate', () => {
         try {
           await ValidateCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -366,7 +369,7 @@ describe('devops promotion validate', () => {
         try {
           await ValidateCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -384,7 +387,7 @@ describe('devops promotion validate', () => {
         try {
           await ValidateCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000099', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -403,7 +406,7 @@ describe('devops promotion validate', () => {
 
         try {
           await ValidateCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -420,7 +423,7 @@ describe('devops promotion validate', () => {
 
         try {
           await ValidateCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -442,7 +445,7 @@ describe('devops promotion validate', () => {
         try {
           await ValidateCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -460,7 +463,7 @@ describe('devops promotion validate', () => {
         try {
           await ValidateCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 

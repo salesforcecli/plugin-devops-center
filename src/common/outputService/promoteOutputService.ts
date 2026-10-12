@@ -20,7 +20,7 @@ import { DeploySummaryBuilder } from './deploySummaryBuilder.js';
 import { OutputService } from './outputService.js';
 import { ResumeOutputService, AbstractResumeOutputService } from './resumeOutputService.js';
 
-/* eslint-disable @typescript-eslint/no-empty-interface, no-console */
+/* eslint-disable no-console */
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
 const output = Messages.loadMessages('@salesforce/plugin-devops-center', 'deploy.output');

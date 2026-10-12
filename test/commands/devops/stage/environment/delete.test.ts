@@ -18,11 +18,11 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsStageEnvironmentDelete from '../../../../../src/commands/devops/stage/environment/delete.js';
 
 describe('devops stage environment delete', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let DeleteCommand: any;
+  let DeleteCommand: typeof DevopsStageEnvironmentDelete;
   const deleteStageEnvironmentStub = sinon.stub();
 
   const mockQueryStub = sinon.stub();
@@ -33,11 +33,14 @@ describe('devops stage environment delete', () => {
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
 
   before(async () => {
-    const mod = await esmock('../../../../../src/commands/devops/stage/environment/delete.js', {
-      '../../../../../src/utils/deleteStageEnvironment.js': {
-        deleteStageEnvironment: deleteStageEnvironmentStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsStageEnvironmentDelete }>(
+      '../../../../../src/commands/devops/stage/environment/delete.js',
+      {
+        '../../../../../src/utils/deleteStageEnvironment.js': {
+          deleteStageEnvironment: deleteStageEnvironmentStub,
+        },
+      }
+    );
     DeleteCommand = mod.default;
   });
 
@@ -92,7 +95,7 @@ describe('devops stage environment delete', () => {
             '--environment-id',
             '0Xe000000000001',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -119,7 +122,7 @@ describe('devops stage environment delete', () => {
             '--environment-id',
             '0Xe000000000001',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 

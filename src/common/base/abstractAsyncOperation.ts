@@ -70,7 +70,7 @@ export abstract class AsyncCommand extends SfCommand<AsyncOperationResultJson> {
    * @returns
    */
   protected catch(error: Error | SfError): Promise<never> {
-    if (error.name && error.name.includes('GenericTimeoutError')) {
+    if (error.name?.includes('GenericTimeoutError')) {
       const err = messages.createError('error.ClientTimeout', [this.config.bin, this.baseCommand]);
       return super.catch({ ...error, name: err.name, message: err.message, code: err.code });
     }

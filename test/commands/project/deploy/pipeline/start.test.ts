@@ -165,7 +165,7 @@ describe('project deploy pipeline start', () => {
       .it('runs project deploy pipeline start with no provided project name', async (ctx) => {
         try {
           await StartCommand.run(['--branch-name=test']);
-        } catch (e) {
+        } catch {
           // expected
         }
         expect(ctx.stderr).to.contain('Missing required flag devops-center-project-name');
@@ -177,7 +177,7 @@ describe('project deploy pipeline start', () => {
       .it('runs project deploy pipeline start with no provided branch name', async (ctx) => {
         try {
           await StartCommand.run(['--devops-center-project-name=test']);
-        } catch (e) {
+        } catch {
           // expected
         }
         expect(ctx.stderr).to.contain('Missing required flag branch-name');
@@ -191,7 +191,7 @@ describe('project deploy pipeline start', () => {
         async (ctx) => {
           try {
             await StartCommand.run(['-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests']);
-          } catch (e) {
+          } catch {
             // expected
           }
           expect(ctx.stderr).to.contain(
@@ -208,7 +208,7 @@ describe('project deploy pipeline start', () => {
         async (ctx) => {
           try {
             await StartCommand.run(['-p=testProject', '-b=testBranch', '-l=RunLocalTests', '-t=DummyTestClass']);
-          } catch (e) {
+          } catch {
             // expected
           }
           expect(ctx.stderr).to.contain('runTests can be used only with a testLevel of RunSpecifiedTests.');
@@ -272,7 +272,7 @@ describe('project deploy pipeline start', () => {
 
         try {
           await StartCommand.run(['-p=testProject', '-b=testBranch', '--wait=3']);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -589,7 +589,7 @@ describe('project deploy pipeline start', () => {
 
           try {
             await StartCommand.run(['-p=testProject', '-b=testBranch']);
-          } catch (e) {
+          } catch {
             // expected
           }
 
@@ -609,7 +609,7 @@ describe('project deploy pipeline start', () => {
 
           try {
             await StartCommand.run(['-p=testProject', '-b=testBranch']);
-          } catch (e) {
+          } catch {
             // expected
           }
 

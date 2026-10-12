@@ -126,7 +126,6 @@ describe('requiredDoceOrgFlag', () => {
       });
       assert.fail('This should have failed');
     } catch (err) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.message).to.include(
         'Before you run a DevOps Center CLI command, you must first use one of the "org login" commands to authorize the org in which DevOps Center is installed. Then, when you run a DevOps Center command, be sure that you specify the DevOps Center org username with the "--devops-center-username" flag. Alternatively, you can set the "target-devops-center" configuration variable to the username with the "config set" command.'
       );
@@ -148,7 +147,6 @@ describe('requiredDoceOrgFlag', () => {
       });
       assert.fail('This should have failed');
     } catch (err) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.message).to.include(`No authorization information found for ${invalidAlias}`);
     }
   });
@@ -168,7 +166,6 @@ describe('requiredDoceOrgFlag', () => {
       });
       assert.fail('This should have failed');
     } catch (err) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.message).to.include(`No authorization information found for ${invalidTargetDevopsCenter}`);
     }
   });
@@ -206,7 +203,6 @@ describe('waitFlag', () => {
         flags: { wait },
       });
     } catch (err) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.message).to.include('The value must be at least 3.');
     }
   });
@@ -232,7 +228,6 @@ describe('waitFlag', () => {
         flags: { wait, async },
       });
     } catch (err) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.message).to.include('--async=true cannot also be provided when using --wait');
     }
   });
@@ -244,7 +239,6 @@ describe('waitFlag', () => {
         flags: { verbose, concise },
       });
     } catch (err) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(err.message).to.include('--verbose=true cannot also be provided when using --concise');
     }
   });
