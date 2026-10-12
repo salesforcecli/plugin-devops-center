@@ -38,22 +38,25 @@ const DOCE_ORG = {
   },
 };
 
-const stubStreamingClient = async (options?: StreamingClient.Options) => ({
-  handshake: async () => StreamingClient.ConnectionState.CONNECTED,
-  replay: async () => -1,
-  subscribe: async () =>
-    options?.streamProcessor({
-      payload: { message: 'Completed' },
-      event: { replayId: 20 },
-    }),
-});
+const stubStreamingClient = async (...args: unknown[]) => {
+  const options = args[0] as StreamingClient.Options | undefined;
+  return {
+    handshake: async () => StreamingClient.ConnectionState.CONNECTED,
+    replay: async () => -1,
+    subscribe: async () =>
+      options?.streamProcessor({
+        payload: { message: 'Completed' },
+        event: { replayId: 20 },
+      }),
+  };
+};
 
 const testProcessor = (event: JsonMap) => ({ completed: true, payload: event.payload } as StatusResult);
 
 describe('DOCeStreaming', () => {
   let sandbox: sinon.SinonSandbox;
   let instance: DOCeStreamingTest;
-  let streamingClient;
+  let streamingClient: sinon.SinonStub;
 
   beforeEach(async () => {
     sandbox = sinon.createSandbox();
@@ -74,7 +77,6 @@ describe('DOCeStreaming', () => {
     })
     .it('correctly handles the stream creation', async () => {
       await instance.monitor();
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(streamingClient.called).to.equal(true);
     });
 
@@ -87,7 +89,7 @@ describe('DOCeStreaming', () => {
       try {
         await instance.monitor();
       } catch (error) {
-        expect(error.name).to.equal('BoomError');
+        expect((error as Error).name).to.equal('BoomError');
       }
     });
 });
