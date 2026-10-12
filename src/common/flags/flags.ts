@@ -100,7 +100,9 @@ export const getDefaultDevopsCenterUsernameAlias = async (): Promise<string | un
  * or to the alias/username set in --target-devops-center config variable.
  */
 const getOrgOrThrow = async (input?: string): Promise<Org> => {
-  const usernameOrAlias = input ?? (await getDefaultDevopsCenterUsernameAlias());
+  // An empty string (e.g. `--target-devops-center=`) must also fall back to the config variable, so `??` can't be used.
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  const usernameOrAlias = input ? input : await getDefaultDevopsCenterUsernameAlias();
   if (!usernameOrAlias) {
     throw messages.createError('errors.NoDefaultDoceEnv');
   }
