@@ -39,7 +39,8 @@ export abstract class AbstractResumeOutputService<T extends AorOutputFlags>
   extends AbstractAorOutputService<T>
   implements ResumeOutputService
 {
-  protected con: Connection;
+  // assigned in the subclass constructor
+  protected con!: Connection;
 
   /**
    * This method will print a table of the deployed components for the current AOR

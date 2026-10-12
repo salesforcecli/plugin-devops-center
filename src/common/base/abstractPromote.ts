@@ -55,9 +55,12 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
   };
 
   protected flags!: Flags<T>;
-  private targetStage: PipelineStage;
-  private sourceStageId: string;
-  private deployOptions: Partial<PromoteOptions>;
+  // assigned in executePromotion
+  private targetStage!: PipelineStage;
+  // assigned in executePromotion
+  private sourceStageId!: string;
+  // assigned in buildPromoteOptions
+  private deployOptions!: Partial<PromoteOptions>;
   private numRetries409 = 50; // this is the number of times we retry if we get a http-409-Conflict response
 
   public async init(): Promise<void> {

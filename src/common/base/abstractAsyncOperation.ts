@@ -27,9 +27,12 @@ const messages = Messages.loadMessages('@salesforce/plugin-devops-center', 'comm
 
 export abstract class AsyncCommand extends SfCommand<AsyncOperationResultJson> {
   public static readonly enableJsonFlag = true;
-  protected targetOrg: Org;
-  private asyncOperationId: string;
-  private outputService: PromoteOutputService;
+  // assigned by the subclass command before monitorOperation runs
+  protected targetOrg!: Org;
+  // assigned in setAsyncOperationId
+  private asyncOperationId!: string;
+  // assigned in setOutputService
+  private outputService!: PromoteOutputService;
 
   protected abstract baseCommand: string;
 

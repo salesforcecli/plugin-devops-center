@@ -48,8 +48,8 @@ export default abstract class SObjectStreaming extends DOCeStreaming {
     const jsonPayload = ensureJsonMap(event.payload);
     const changeEventHeader = ensureJsonMap(jsonPayload.ChangeEventHeader);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    if (changeEventHeader.recordIds != null && containsSfId(this.idsToInspect, changeEventHeader.recordIds[0])) {
+    const recordIds = changeEventHeader.recordIds;
+    if (Array.isArray(recordIds) && containsSfId(this.idsToInspect, recordIds[0] as string)) {
       return matchProcessor(jsonPayload);
     } else {
       return { completed: false };

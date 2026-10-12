@@ -150,7 +150,7 @@ export function matchesSfId(firstId: string, secondId: string): boolean {
  * @returns an array of {key : value}
  */
 export function sObjectToArrayOfKeyValue(sObj: object): Array<{ key: string; value: unknown }> {
-  const acumulator = [];
+  const acumulator: Array<{ key: string; value: unknown }> = [];
   return Object.entries(sObj).reduce<Array<{ key: string; value: unknown }>>((res, [key, value]) => {
     if (key !== 'attributes') {
       if (typeof value === 'object' && value !== null) {

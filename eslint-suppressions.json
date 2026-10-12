@@ -27,11 +27,6 @@
       "count": 1
     }
   },
-  "src/common/utils.ts": {
-    "@typescript-eslint/no-unsafe-argument": {
-      "count": 1
-    }
-  },
   "src/utils/createPullRequest.ts": {
     "@typescript-eslint/no-base-to-string": {
       "count": 1
