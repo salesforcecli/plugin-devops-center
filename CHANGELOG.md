@@ -1,3 +1,10 @@
+## [2.3.1](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.0...2.3.1) (2026-10-14)
+
+### Bug Fixes
+
+- revert to ternary in flags/flags.ts ([91d4c3e](https://github.com/salesforcecli/plugin-devops-center/commit/91d4c3e08feb6a6d382e5cb6738f7297ee830141))
+- update dev-scripts, eslint, and TypeScript and fix some errors ([edd76ee](https://github.com/salesforcecli/plugin-devops-center/commit/edd76ee44311f2e4a309d3c94acc1d25bebca746))
+
 # [2.3.0](https://github.com/salesforcecli/plugin-devops-center/compare/2.2.0...2.3.0) (2026-10-05)
 
 ### Bug Fixes
