@@ -1,3 +1,9 @@
+## [2.3.2](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.1...2.3.2) (2026-10-14)
+
+### Bug Fixes
+
+- **deps:** bump websocket-driver from 0.7.4 to 0.7.5 ([a1b53d7](https://github.com/salesforcecli/plugin-devops-center/commit/a1b53d7a004771a53479ec4e493acb833ada4ec5))
+
 ## [2.3.1](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.0...2.3.1) (2026-10-14)
 
 ### Bug Fixes
