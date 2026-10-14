@@ -18,6 +18,8 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type Promote from '../../../src/commands/devops/promote.js';
+import type { promoteStage } from '../../../src/utils/promoteStage.js';
 
 let queryMock: sinon.SinonStub;
 
@@ -39,16 +41,15 @@ const mockOrg = {
 
 describe('devops promote', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let PromoteCommand: any;
-  const promoteStageStub = sinon.stub();
+  let PromoteCommand: typeof Promote;
+  const promoteStageStub = sinon.stub<Parameters<typeof promoteStage>, ReturnType<typeof promoteStage>>();
   const findInFlightPromotionsStub = sinon.stub();
   const resolveProjectIdFromWorkItemStub = sinon.stub();
   const getPipelineIdForProjectStub = sinon.stub();
   const validatePromotionStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../src/commands/devops/promote.js', {
+    const mod = await esmock<{ default: typeof Promote }>('../../../src/commands/devops/promote.js', {
       '../../../src/utils/promoteStage.js': {
         promoteStage: promoteStageStub,
         findInFlightPromotions: findInFlightPromotionsStub,
@@ -213,7 +214,7 @@ describe('devops promote', () => {
         try {
           await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -265,7 +266,7 @@ describe('devops promote', () => {
         try {
           await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -299,7 +300,7 @@ describe('devops promote', () => {
             '1QVxx0000000003',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -333,7 +334,7 @@ describe('devops promote', () => {
             '1QVxx0000000003',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -474,7 +475,7 @@ describe('devops promote', () => {
         try {
           await PromoteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -497,7 +498,7 @@ describe('devops promote', () => {
             '1QVxx0000000003',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -522,7 +523,7 @@ describe('devops promote', () => {
         try {
           await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -606,7 +607,7 @@ describe('devops promote', () => {
         try {
           await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -631,7 +632,7 @@ describe('devops promote', () => {
         try {
           await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -658,7 +659,7 @@ describe('devops promote', () => {
         try {
           await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -682,7 +683,7 @@ describe('devops promote', () => {
         try {
           await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -724,7 +725,7 @@ describe('devops promote', () => {
 
         try {
           await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -742,7 +743,7 @@ describe('devops promote', () => {
 
         try {
           await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -785,7 +786,7 @@ describe('devops promote', () => {
 
         try {
           await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -802,7 +803,7 @@ describe('devops promote', () => {
 
         try {
           await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -823,7 +824,7 @@ describe('devops promote', () => {
 
         try {
           await PromoteCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000003']);
-        } catch (e) {
+        } catch {
           // expected
         }
 

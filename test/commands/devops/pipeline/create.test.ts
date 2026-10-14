@@ -18,12 +18,12 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type PipelineCreate from '../../../../src/commands/devops/pipeline/create.js';
 import { GitHubOwnerNotFoundError } from '../../../../src/utils/createPipeline.js';
 
 describe('devops pipeline create', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let CreateCommand: any;
+  let CreateCommand: typeof PipelineCreate;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const createPipelineStub = sinon.stub();
@@ -31,7 +31,7 @@ describe('devops pipeline create', () => {
   const validateGitHubOwnerStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/pipeline/create.js', {
+    const mod = await esmock<{ default: typeof PipelineCreate }>('../../../../src/commands/devops/pipeline/create.js', {
       '../../../../src/utils/createPipeline.js': {
         createPipeline: createPipelineStub,
         detectRepoType: detectRepoTypeStub,
@@ -156,7 +156,7 @@ describe('devops pipeline create', () => {
             '--create-repo',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -185,7 +185,7 @@ describe('devops pipeline create', () => {
             '--create-repo',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -214,7 +214,7 @@ describe('devops pipeline create', () => {
             '--create-repo',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -293,7 +293,7 @@ describe('devops pipeline create', () => {
             '--create-repo',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -326,7 +326,7 @@ describe('devops pipeline create', () => {
             '--create-repo',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -365,7 +365,7 @@ describe('devops pipeline create', () => {
             '--create-repo',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -394,7 +394,7 @@ describe('devops pipeline create', () => {
             'https://gitlab.com/myorg/myrepo',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -421,7 +421,7 @@ describe('devops pipeline create', () => {
             '--repo',
             'https://github.com/myorg/myrepo',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 

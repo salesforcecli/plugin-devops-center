@@ -62,8 +62,10 @@ export default abstract class QuickPromotionCommand<T extends typeof SfCommand> 
   };
 
   protected flags!: Flags<T>;
-  private targetStage: PipelineStage;
-  private deployOptions: Partial<PromoteOptions>;
+  // assigned in executeQuickPromotion
+  private targetStage!: PipelineStage;
+  // assigned in buildPromoteOptions
+  private deployOptions!: Partial<PromoteOptions>;
 
   public async init(): Promise<void> {
     await super.init();
@@ -104,7 +106,7 @@ export default abstract class QuickPromotionCommand<T extends typeof SfCommand> 
       )
     );
 
-    return this.monitorOperation(this.flags.async as boolean, this.flags.wait);
+    return this.monitorOperation(this.flags.async, this.flags.wait);
   }
 
   protected getTargetStage(): PipelineStage {

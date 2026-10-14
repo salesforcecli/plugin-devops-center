@@ -18,21 +18,24 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsPipelineProjectDelete from '../../../../../src/commands/devops/pipeline/project/delete.js';
 
 describe('devops pipeline project delete', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let DeleteCommand: any;
+  let DeleteCommand: typeof DevopsPipelineProjectDelete;
   const detachProjectStub = sinon.stub();
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
 
   before(async () => {
-    const mod = await esmock('../../../../../src/commands/devops/pipeline/project/delete.js', {
-      '../../../../../src/utils/detachProject.js': {
-        detachProject: detachProjectStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsPipelineProjectDelete }>(
+      '../../../../../src/commands/devops/pipeline/project/delete.js',
+      {
+        '../../../../../src/utils/detachProject.js': {
+          detachProject: detachProjectStub,
+        },
+      }
+    );
     DeleteCommand = mod.default;
   });
 
@@ -91,7 +94,7 @@ describe('devops pipeline project delete', () => {
             '--project-id',
             '0Hn000000000001',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -122,7 +125,7 @@ describe('devops pipeline project delete', () => {
             '--project-id',
             '0Hn000000000001',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -148,7 +151,7 @@ describe('devops pipeline project delete', () => {
             '--project-id',
             '0Hn000000000001',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 

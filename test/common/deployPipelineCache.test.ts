@@ -67,7 +67,7 @@ describe('deployPipelineCache', () => {
     try {
       // Unset a key value pair
       await DeployPipelineCache.unset('ABC');
-    } catch (err) {
+    } catch {
       excThrown = true;
     }
     expect(excThrown);
@@ -97,7 +97,7 @@ describe('deployPipelineCache', () => {
     try {
       // Unset a key value pair
       await DeployPipelineCache.update('ABC', {});
-    } catch (err) {
+    } catch {
       excThrown = true;
     }
     expect(excThrown);
@@ -109,7 +109,7 @@ describe('deployPipelineCache', () => {
     let excThrown = false;
     try {
       cache.getLatestKeyOrThrow();
-    } catch (err) {
+    } catch {
       excThrown = true;
     }
     expect(excThrown);

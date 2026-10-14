@@ -18,25 +18,28 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsPipelineStageAdd from '../../../../../src/commands/devops/pipeline/stage/add.js';
 
 describe('devops pipeline stage add', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let AddCommand: any;
+  let AddCommand: typeof DevopsPipelineStageAdd;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const addPipelineStageStub = sinon.stub();
   const fetchPipelineStagesStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../../src/commands/devops/pipeline/stage/add.js', {
-      '../../../../../src/utils/addPipelineStage.js': {
-        addPipelineStage: addPipelineStageStub,
-      },
-      '../../../../../src/utils/pipelineUtils.js': {
-        fetchPipelineStages: fetchPipelineStagesStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsPipelineStageAdd }>(
+      '../../../../../src/commands/devops/pipeline/stage/add.js',
+      {
+        '../../../../../src/utils/addPipelineStage.js': {
+          addPipelineStage: addPipelineStageStub,
+        },
+        '../../../../../src/utils/pipelineUtils.js': {
+          fetchPipelineStages: fetchPipelineStagesStub,
+        },
+      }
+    );
     AddCommand = mod.default;
   });
 
@@ -104,7 +107,7 @@ describe('devops pipeline stage add', () => {
             '0Xc000000000099',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -132,7 +135,7 @@ describe('devops pipeline stage add', () => {
             '--next-stage-id',
             '0Xc000000000002',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 

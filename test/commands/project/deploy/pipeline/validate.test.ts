@@ -43,15 +43,18 @@ const DOCE_ORG = {
   },
 };
 
-const stubStreamingClient = async (options?: StreamingClient.Options) => ({
-  handshake: async () => StreamingClient.ConnectionState.CONNECTED,
-  replay: async () => -1,
-  subscribe: async () =>
-    options?.streamProcessor({
-      payload: { message: 'Completed' },
-      event: { replayId: 20 },
-    }),
-});
+const stubStreamingClient = async (...args: unknown[]) => {
+  const options = args[0] as StreamingClient.Options | undefined;
+  return {
+    handshake: async () => StreamingClient.ConnectionState.CONNECTED,
+    replay: async () => -1,
+    subscribe: async () =>
+      options?.streamProcessor({
+        payload: { message: 'Completed' },
+        event: { replayId: 20 },
+      }),
+  };
+};
 
 describe('project deploy pipeline validate', () => {
   let sandbox: sinon.SinonSandbox;

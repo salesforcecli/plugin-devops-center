@@ -18,21 +18,24 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsProjectUpdate from '../../../../src/commands/devops/project/update.js';
 
 describe('devops project update', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let UpdateCommand: any;
+  let UpdateCommand: typeof DevopsProjectUpdate;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
   const updateProjectStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/project/update.js', {
-      '../../../../src/utils/updateProject.js': {
-        updateProject: updateProjectStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsProjectUpdate }>(
+      '../../../../src/commands/devops/project/update.js',
+      {
+        '../../../../src/utils/updateProject.js': {
+          updateProject: updateProjectStub,
+        },
+      }
+    );
     UpdateCommand = mod.default;
   });
 
@@ -162,7 +165,7 @@ describe('devops project update', () => {
 
         try {
           await UpdateCommand.run(['--target-org', 'testOrg', '--project-id', '1Qg000000000001']);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -191,7 +194,7 @@ describe('devops project update', () => {
             '--description',
             'Bad update',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -217,7 +220,7 @@ describe('devops project update', () => {
             '--description',
             'test',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 

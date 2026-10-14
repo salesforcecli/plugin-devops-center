@@ -6,7 +6,8 @@
     "module": "Node16",
     "moduleResolution": "Node16",
     "strictNullChecks": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["mocha", "node"]
   },
   "include": ["./src/**/*.ts"]
 }

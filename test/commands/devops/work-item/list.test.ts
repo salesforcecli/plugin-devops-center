@@ -19,6 +19,7 @@ import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
 import { WorkItem } from '../../../../src/utils/types.js';
+import type DevopsWorkItemList from '../../../../src/commands/devops/work-item/list.js';
 
 const MOCK_WORK_ITEM: WorkItem = {
   id: 'WI001',
@@ -34,17 +35,19 @@ const MOCK_WORK_ITEM: WorkItem = {
 
 describe('devops work-item list', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let ListCommand: any;
+  let ListCommand: typeof DevopsWorkItemList;
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => ({ getApiVersion: () => '65.0' }) };
   const fetchWorkItemsStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/work-item/list.js', {
-      '../../../../src/utils/workItems.js': {
-        fetchWorkItems: fetchWorkItemsStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsWorkItemList }>(
+      '../../../../src/commands/devops/work-item/list.js',
+      {
+        '../../../../src/utils/workItems.js': {
+          fetchWorkItems: fetchWorkItemsStub,
+        },
+      }
+    );
     ListCommand = mod.default;
   });
 
@@ -100,7 +103,7 @@ describe('devops work-item list', () => {
 
         try {
           await ListCommand.run(['--target-org', 'testOrg', '--project-id', '1Qg000000000001']);
-        } catch (e) {
+        } catch {
           // expected
         }
 

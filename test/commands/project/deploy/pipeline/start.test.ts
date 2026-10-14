@@ -45,15 +45,18 @@ const DOCE_ORG = {
   },
 };
 
-const stubStreamingClient = async (options?: StreamingClient.Options) => ({
-  handshake: async () => StreamingClient.ConnectionState.CONNECTED,
-  replay: async () => -1,
-  subscribe: async () =>
-    options?.streamProcessor({
-      payload: { message: 'Completed' },
-      event: { replayId: 20 },
-    }),
-});
+const stubStreamingClient = async (...args: unknown[]) => {
+  const options = args[0] as StreamingClient.Options | undefined;
+  return {
+    handshake: async () => StreamingClient.ConnectionState.CONNECTED,
+    replay: async () => -1,
+    subscribe: async () =>
+      options?.streamProcessor({
+        payload: { message: 'Completed' },
+        event: { replayId: 20 },
+      }),
+  };
+};
 
 describe('project deploy pipeline start', () => {
   let sandbox: sinon.SinonSandbox;
@@ -165,7 +168,7 @@ describe('project deploy pipeline start', () => {
       .it('runs project deploy pipeline start with no provided project name', async (ctx) => {
         try {
           await StartCommand.run(['--branch-name=test']);
-        } catch (e) {
+        } catch {
           // expected
         }
         expect(ctx.stderr).to.contain('Missing required flag devops-center-project-name');
@@ -177,7 +180,7 @@ describe('project deploy pipeline start', () => {
       .it('runs project deploy pipeline start with no provided branch name', async (ctx) => {
         try {
           await StartCommand.run(['--devops-center-project-name=test']);
-        } catch (e) {
+        } catch {
           // expected
         }
         expect(ctx.stderr).to.contain('Missing required flag branch-name');
@@ -191,7 +194,7 @@ describe('project deploy pipeline start', () => {
         async (ctx) => {
           try {
             await StartCommand.run(['-p=testProject', '-b=testBranch', '-l=RunSpecifiedTests']);
-          } catch (e) {
+          } catch {
             // expected
           }
           expect(ctx.stderr).to.contain(
@@ -208,7 +211,7 @@ describe('project deploy pipeline start', () => {
         async (ctx) => {
           try {
             await StartCommand.run(['-p=testProject', '-b=testBranch', '-l=RunLocalTests', '-t=DummyTestClass']);
-          } catch (e) {
+          } catch {
             // expected
           }
           expect(ctx.stderr).to.contain('runTests can be used only with a testLevel of RunSpecifiedTests.');
@@ -272,7 +275,7 @@ describe('project deploy pipeline start', () => {
 
         try {
           await StartCommand.run(['-p=testProject', '-b=testBranch', '--wait=3']);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -552,7 +555,7 @@ describe('project deploy pipeline start', () => {
     });
 
     describe('retry promotion request on 409 error', () => {
-      const mockError = new Error();
+      const mockError: Error & { errorCode?: string } = new Error();
 
       beforeEach(() => {
         pipelineStageMock = {
@@ -584,12 +587,12 @@ describe('project deploy pipeline start', () => {
         .stderr()
         .it('retries the request when the http response code is 409', async (ctx) => {
           mockError.message = 'CONFLICT';
-          mockError['errorCode'] = 'CONFLICT';
+          mockError.errorCode = 'CONFLICT';
           requestMock = sinon.stub().throws(mockError);
 
           try {
             await StartCommand.run(['-p=testProject', '-b=testBranch']);
-          } catch (e) {
+          } catch {
             // expected
           }
 
@@ -604,12 +607,12 @@ describe('project deploy pipeline start', () => {
         .stderr()
         .it('fails the request when the http response code is some non-409 error', async (ctx) => {
           mockError.message = 'ERROR';
-          mockError['errorCode'] = 'ERROR';
+          mockError.errorCode = 'ERROR';
           requestMock = sinon.stub().throws(mockError);
 
           try {
             await StartCommand.run(['-p=testProject', '-b=testBranch']);
-          } catch (e) {
+          } catch {
             // expected
           }
 
@@ -623,7 +626,7 @@ describe('project deploy pipeline start', () => {
         .stderr()
         .it('succeeds the request after few retries', async (ctx) => {
           mockError.message = 'CONFLICT';
-          mockError['errorCode'] = 'CONFLICT';
+          mockError.errorCode = 'CONFLICT';
           requestMock = sinon.stub().throws(mockError);
           requestMock.onCall(4).resolves({ jobId: 'mock-aor-id' });
 

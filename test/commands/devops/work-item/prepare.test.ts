@@ -18,11 +18,11 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsWorkItemPrepare from '../../../../src/commands/devops/work-item/prepare.js';
 
 describe('devops work-item prepare', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let PrepareCommand: any;
+  let PrepareCommand: typeof DevopsWorkItemPrepare;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const prepareWorkItemStub = sinon.stub();
@@ -32,33 +32,36 @@ describe('devops work-item prepare', () => {
   const mockWorkItemContext = { projectId: 'PROJ001', pipelineStageId: '05S000000000001' };
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/work-item/prepare.js', {
-      '../../../../src/utils/prepareWorkItem.js': {
-        prepareWorkItem: prepareWorkItemStub,
-        resolveProjectIdFromWorkItem: resolveProjectIdFromWorkItemStub,
-      },
-      '../../../../src/utils/pipelineUtils.js': {
-        getPipelineIdForProject: getPipelineIdForProjectStub,
-      },
-      '@salesforce/sf-plugins-core': {
-        ...(await import('@salesforce/sf-plugins-core')),
-        Flags: {
-          ...(await import('@salesforce/sf-plugins-core')).Flags,
-          requiredOrg: () => ({
-            type: 'option' as const,
-            char: 'o' as const,
-            parse: async () => mockOrg,
-            default: async () => mockOrg,
-            required: true,
-          }),
-          orgApiVersion: () => ({
-            type: 'option' as const,
-            parse: async () => '65.0',
-            required: false,
-          }),
+    const mod = await esmock<{ default: typeof DevopsWorkItemPrepare }>(
+      '../../../../src/commands/devops/work-item/prepare.js',
+      {
+        '../../../../src/utils/prepareWorkItem.js': {
+          prepareWorkItem: prepareWorkItemStub,
+          resolveProjectIdFromWorkItem: resolveProjectIdFromWorkItemStub,
         },
-      },
-    });
+        '../../../../src/utils/pipelineUtils.js': {
+          getPipelineIdForProject: getPipelineIdForProjectStub,
+        },
+        '@salesforce/sf-plugins-core': {
+          ...(await import('@salesforce/sf-plugins-core')),
+          Flags: {
+            ...(await import('@salesforce/sf-plugins-core')).Flags,
+            requiredOrg: () => ({
+              type: 'option' as const,
+              char: 'o' as const,
+              parse: async () => mockOrg,
+              default: async () => mockOrg,
+              required: true,
+            }),
+            orgApiVersion: () => ({
+              type: 'option' as const,
+              parse: async () => '65.0',
+              required: false,
+            }),
+          },
+        },
+      }
+    );
     PrepareCommand = mod.default;
   });
 
@@ -156,7 +159,7 @@ describe('devops work-item prepare', () => {
         try {
           await PrepareCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000002']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -175,7 +178,7 @@ describe('devops work-item prepare', () => {
 
         try {
           await PrepareCommand.run(['-o', 'testOrg', '-i', '1fkxx0000000001', '-t', '1QVxx0000000002']);
-        } catch (e) {
+        } catch {
           // expected
         }
 

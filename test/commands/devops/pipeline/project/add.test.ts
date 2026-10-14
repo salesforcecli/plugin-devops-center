@@ -18,23 +18,26 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsPipelineProjectAdd from '../../../../../src/commands/devops/pipeline/project/add.js';
 
 describe('devops pipeline project add', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let AddCommand: any;
+  let AddCommand: typeof DevopsPipelineProjectAdd;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
   const attachProjectStub = sinon.stub();
   const findExistingStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../../src/commands/devops/pipeline/project/add.js', {
-      '../../../../../src/utils/attachProject.js': {
-        attachProject: attachProjectStub,
-        findExistingAttachment: findExistingStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsPipelineProjectAdd }>(
+      '../../../../../src/commands/devops/pipeline/project/add.js',
+      {
+        '../../../../../src/utils/attachProject.js': {
+          attachProject: attachProjectStub,
+          findExistingAttachment: findExistingStub,
+        },
+      }
+    );
     AddCommand = mod.default;
   });
 
@@ -96,7 +99,7 @@ describe('devops pipeline project add', () => {
             '0Hn000000000001',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -129,7 +132,7 @@ describe('devops pipeline project add', () => {
             '--project-id',
             '0Hn000000000001',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -155,7 +158,7 @@ describe('devops pipeline project add', () => {
             '--project-id',
             '0Hn000000000001',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 

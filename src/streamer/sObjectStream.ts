@@ -35,7 +35,6 @@ export default abstract class SObjectStreaming extends DOCeStreaming {
    * @param matchProcessor This processor will be used in the matchingProcessor, it's provided by each implementation.
    */
   protected async watchForSObject(matchProcessor: (message: JsonMap) => StatusResult): Promise<void | AnyJson> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return this.startStream(this.channelName, (event: JsonMap) => this.matchingProcessor(event, matchProcessor));
   }
 
@@ -49,8 +48,8 @@ export default abstract class SObjectStreaming extends DOCeStreaming {
     const jsonPayload = ensureJsonMap(event.payload);
     const changeEventHeader = ensureJsonMap(jsonPayload.ChangeEventHeader);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    if (changeEventHeader.recordIds != null && containsSfId(this.idsToInspect, changeEventHeader.recordIds[0])) {
+    const recordIds = changeEventHeader.recordIds;
+    if (Array.isArray(recordIds) && containsSfId(this.idsToInspect, recordIds[0] as string)) {
       return matchProcessor(jsonPayload);
     } else {
       return { completed: false };

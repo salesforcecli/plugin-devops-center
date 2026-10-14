@@ -18,11 +18,11 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsWorkItemUpdate from '../../../../src/commands/devops/work-item/update.js';
 
 describe('devops work-item update', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let UpdateCommand: any;
+  let UpdateCommand: typeof DevopsWorkItemUpdate;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
   const updateWorkItemStub = sinon.stub();
@@ -30,14 +30,17 @@ describe('devops work-item update', () => {
   const resolveProjectIdForWorkItemStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/work-item/update.js', {
-      '../../../../src/utils/updateWorkItem.js': {
-        updateWorkItem: updateWorkItemStub,
-        resolveWorkItemByName: resolveWorkItemByNameStub,
-        resolveProjectIdForWorkItem: resolveProjectIdForWorkItemStub,
-        ALLOWED_STATUSES: ['In Progress', 'Ready to Promote'],
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsWorkItemUpdate }>(
+      '../../../../src/commands/devops/work-item/update.js',
+      {
+        '../../../../src/utils/updateWorkItem.js': {
+          updateWorkItem: updateWorkItemStub,
+          resolveWorkItemByName: resolveWorkItemByNameStub,
+          resolveProjectIdForWorkItem: resolveProjectIdForWorkItemStub,
+          ALLOWED_STATUSES: ['In Progress', 'Ready to Promote'],
+        },
+      }
+    );
     UpdateCommand = mod.default;
   });
 
@@ -155,7 +158,7 @@ describe('devops work-item update', () => {
         try {
           await UpdateCommand.run(['--target-org', 'testOrg', '--work-item-id', '0Wx000000000001']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -208,7 +211,7 @@ describe('devops work-item update', () => {
             '--status',
             'In Progress',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 

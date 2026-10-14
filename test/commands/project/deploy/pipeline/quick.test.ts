@@ -65,15 +65,18 @@ const mockPipelineStage: PipelineStage = {
   sf_devops__Pipeline_Stages__r: { records: [mockPipelineStagePrev] },
 };
 
-const stubStreamingClient = async (options?: StreamingClient.Options) => ({
-  handshake: async () => StreamingClient.ConnectionState.CONNECTED,
-  replay: async () => -1,
-  subscribe: async () =>
-    options?.streamProcessor({
-      payload: { message: 'Completed' },
-      event: { replayId: 20 },
-    }),
-});
+const stubStreamingClient = async (...args: unknown[]) => {
+  const options = args[0] as StreamingClient.Options | undefined;
+  return {
+    handshake: async () => StreamingClient.ConnectionState.CONNECTED,
+    replay: async () => -1,
+    subscribe: async () =>
+      options?.streamProcessor({
+        payload: { message: 'Completed' },
+        event: { replayId: 20 },
+      }),
+  };
+};
 
 describe('project deploy pipeline quick', () => {
   let sandbox: sinon.SinonSandbox;
@@ -172,7 +175,7 @@ describe('project deploy pipeline quick', () => {
       .it('runs project deploy pipeline quick without specifying any target Devops Center org', async (ctx) => {
         try {
           await QuickCommand.run([]);
-        } catch (e) {
+        } catch {
           // expected
         }
         expect(ctx.stderr).to.contain(
@@ -208,7 +211,7 @@ describe('project deploy pipeline quick', () => {
         .it('runs project deploy pipeline quick without any of the required flags', async (ctx) => {
           try {
             await QuickCommand.run([]);
-          } catch (e) {
+          } catch {
             /* expected */
           }
           expect(ctx.stderr).to.contain('Exactly one of the following must be provided: --job-id, --use-most-recent');
@@ -220,7 +223,7 @@ describe('project deploy pipeline quick', () => {
         .it('runs project deploy pipeline quick specifying both -r and -i flags', async (ctx) => {
           try {
             await QuickCommand.run(['-r', `-i=${mockValidatedAorId}`]);
-          } catch (e) {
+          } catch {
             /* expected */
           }
           expect(ctx.stderr).to.contain('--job-id cannot also be provided when using --use-most-recent');
@@ -233,7 +236,7 @@ describe('project deploy pipeline quick', () => {
         .it('runs project deploy pipeline quick specifying -r when there are no Ids in cache', async (ctx) => {
           try {
             await QuickCommand.run(['-r']);
-          } catch (e) {
+          } catch {
             /* expected */
           }
           expect(ctx.stderr).to.contain("Can't find the job ID. Verify that a pipeline promotion has been started");
@@ -245,7 +248,7 @@ describe('project deploy pipeline quick', () => {
         .it('runs project deploy pipeline quick specifying both --verbose and --concise flags', async (ctx) => {
           try {
             await QuickCommand.run(['-r', '--verbose', '--concise']);
-          } catch (e) {
+          } catch {
             /* expected */
           }
           expect(ctx.stderr).to.contain('--verbose=true cannot also be provided when using --concise');
@@ -422,7 +425,7 @@ describe('project deploy pipeline quick', () => {
           stubStreamer();
           try {
             await QuickCommand.run([`-i=${mockValidatedAorId}`]);
-          } catch (e) {
+          } catch {
             /* expected */
           }
           expect(ctx.stderr).to.contain('The job ID is invalid for the quick deployment');
@@ -437,7 +440,7 @@ describe('project deploy pipeline quick', () => {
           stubStreamer();
           try {
             await QuickCommand.run([`-i=${mockValidatedAorId}`]);
-          } catch (e) {
+          } catch {
             /* expected */
           }
           expect(ctx.stderr).to.contain("We can't perform the quick deployment for the specified job ID");
@@ -452,7 +455,7 @@ describe('project deploy pipeline quick', () => {
           stubStreamer();
           try {
             await QuickCommand.run([`-i=${mockValidatedAorId}`]);
-          } catch (e) {
+          } catch {
             /* expected */
           }
           expect(ctx.stderr).to.contain('The job ID is invalid for the quick deployment');
@@ -532,7 +535,7 @@ describe('project deploy pipeline quick', () => {
 
           try {
             await QuickCommand.run([`-i=${mockValidatedAorId}`]);
-          } catch (e) {
+          } catch {
             /* expected */
           }
 

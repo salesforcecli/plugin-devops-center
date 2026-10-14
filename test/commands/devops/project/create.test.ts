@@ -18,21 +18,24 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsProjectCreate from '../../../../src/commands/devops/project/create.js';
 
 describe('devops project create', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let CreateCommand: any;
+  let CreateCommand: typeof DevopsProjectCreate;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
   const createProjectStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/project/create.js', {
-      '../../../../src/utils/createProject.js': {
-        createProject: createProjectStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsProjectCreate }>(
+      '../../../../src/commands/devops/project/create.js',
+      {
+        '../../../../src/utils/createProject.js': {
+          createProject: createProjectStub,
+        },
+      }
+    );
     CreateCommand = mod.default;
   });
 
@@ -107,7 +110,7 @@ describe('devops project create', () => {
 
         try {
           await CreateCommand.run(['--target-org', 'testOrg', '--name', 'Duplicate']);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -126,7 +129,7 @@ describe('devops project create', () => {
 
         try {
           await CreateCommand.run(['--target-org', 'testOrg', '--name', 'Test']);
-        } catch (e) {
+        } catch {
           // expected
         }
 

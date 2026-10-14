@@ -18,21 +18,24 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsRequestStatus from '../../../../src/commands/devops/request/status.js';
 
 describe('devops request status', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let StatusCommand: any;
+  let StatusCommand: typeof DevopsRequestStatus;
   const getRequestStatusStub = sinon.stub();
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/request/status.js', {
-      '../../../../src/utils/getRequestStatus.js': {
-        getRequestStatus: getRequestStatusStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsRequestStatus }>(
+      '../../../../src/commands/devops/request/status.js',
+      {
+        '../../../../src/utils/getRequestStatus.js': {
+          getRequestStatus: getRequestStatusStub,
+        },
+      }
+    );
     StatusCommand = mod.default;
   });
 
@@ -104,7 +107,7 @@ describe('devops request status', () => {
 
         try {
           await StatusCommand.run(['--target-org', 'testOrg', '--request-token', 'a0B000000000099']);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -123,7 +126,7 @@ describe('devops request status', () => {
 
         try {
           await StatusCommand.run(['--target-org', 'testOrg', '--request-token', 'a0B000000000001']);
-        } catch (e) {
+        } catch {
           // expected
         }
 

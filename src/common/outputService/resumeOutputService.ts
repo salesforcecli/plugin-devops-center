@@ -21,8 +21,6 @@ import { DeployComponent } from '../types.js';
 import { getFormattedDeployComponentsByAyncOpId } from '../utils.js';
 import { AorOutputService, AorOutputFlags, AbstractAorOutputService } from './aorOutputService.js';
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
-
 /**
  * Interface for output methods for resume operations
  *
@@ -41,7 +39,8 @@ export abstract class AbstractResumeOutputService<T extends AorOutputFlags>
   extends AbstractAorOutputService<T>
   implements ResumeOutputService
 {
-  protected con: Connection;
+  // assigned in the subclass constructor
+  protected con!: Connection;
 
   /**
    * This method will print a table of the deployed components for the current AOR

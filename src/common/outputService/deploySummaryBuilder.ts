@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-console, @typescript-eslint/no-non-null-assertion */
+/* eslint-disable no-console */
 
 import { Connection, Messages } from '@salesforce/core';
 import { AsyncOperationType } from '../constants.js';
@@ -91,8 +91,10 @@ export abstract class DeploySummaryOutputService<T extends OutputFlags> extends 
   protected con: Connection;
 
   protected branch: string;
-  protected stageName: string;
-  protected environmentName: string;
+  // assigned by the subclass in buildSummary
+  protected stageName!: string;
+  // assigned by the subclass in buildSummary
+  protected environmentName!: string;
 
   public constructor(con: Connection, branch: string, flags: T) {
     super(flags);
@@ -131,7 +133,8 @@ export abstract class DeploySummaryOutputService<T extends OutputFlags> extends 
  */
 class AdHocDeploySummaryOutputService<T extends OutputFlags> extends DeploySummaryOutputService<T> {
   private workItemsPromote: WorkItemPromote[];
-  private workItems: string[];
+  // assigned in buildSummary
+  private workItems!: string[];
 
   public constructor(workItemsPromote: WorkItemPromote[], con: Connection, branch: string, flags: T) {
     super(con, branch, flags);
@@ -170,7 +173,8 @@ class AdHocDeploySummaryOutputService<T extends OutputFlags> extends DeploySumma
  */
 abstract class VersionedOrSoupSummaryOutputService<T extends OutputFlags> extends DeploySummaryOutputService<T> {
   protected changeBundleInstalls: ChangeBundleInstall[];
-  protected workItems: Map<string, string[]>;
+  // assigned by the subclass in buildSummary
+  protected workItems!: Map<string, string[]>;
 
   public constructor(changeBundleInstalls: ChangeBundleInstall[], con: Connection, branch: string, flags: T) {
     super(con, branch, flags);

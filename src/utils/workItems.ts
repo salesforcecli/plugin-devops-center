@@ -51,7 +51,7 @@ function extractOwnerFromVcsPayload(payload: unknown): string | undefined {
     return obj.owner.trim();
   }
 
-  const list = (obj.owners || obj.items || obj.records) as unknown[];
+  const list = (obj.owners ?? obj.items ?? obj.records) as unknown[];
   if (Array.isArray(list)) {
     for (const candidate of list) {
       if (typeof candidate === 'string' && candidate.trim()) return candidate.trim();

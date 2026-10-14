@@ -18,21 +18,24 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsWorkItemCreate from '../../../../src/commands/devops/work-item/create.js';
 
 describe('devops work-item create', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let CreateCommand: any;
+  let CreateCommand: typeof DevopsWorkItemCreate;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
   const createWorkItemStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/work-item/create.js', {
-      '../../../../src/utils/createWorkItem.js': {
-        createWorkItem: createWorkItemStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsWorkItemCreate }>(
+      '../../../../src/commands/devops/work-item/create.js',
+      {
+        '../../../../src/utils/createWorkItem.js': {
+          createWorkItem: createWorkItemStub,
+        },
+      }
+    );
     CreateCommand = mod.default;
   });
 
@@ -108,7 +111,7 @@ describe('devops work-item create', () => {
             '--subject',
             'Fix bug',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -134,7 +137,7 @@ describe('devops work-item create', () => {
             '--subject',
             'Fix bug',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 

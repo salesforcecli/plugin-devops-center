@@ -18,23 +18,26 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsReviewCreate from '../../../../src/commands/devops/review/create.js';
 
 describe('devops review create', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let CreateCommand: any;
+  let CreateCommand: typeof DevopsReviewCreate;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
   const fetchDetailStub = sinon.stub();
   const createPrStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/review/create.js', {
-      '../../../../src/utils/createPullRequest.js': {
-        fetchWorkItemDetail: fetchDetailStub,
-        createPullRequest: createPrStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsReviewCreate }>(
+      '../../../../src/commands/devops/review/create.js',
+      {
+        '../../../../src/utils/createPullRequest.js': {
+          fetchWorkItemDetail: fetchDetailStub,
+          createPullRequest: createPrStub,
+        },
+      }
+    );
     CreateCommand = mod.default;
   });
 
@@ -108,7 +111,7 @@ describe('devops review create', () => {
         try {
           await CreateCommand.run(['--target-org', 'testOrg', '--work-item-name', 'WI-000001']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -131,7 +134,7 @@ describe('devops review create', () => {
         try {
           await CreateCommand.run(['--target-org', 'testOrg', '--work-item-name', 'WI-000001']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -150,7 +153,7 @@ describe('devops review create', () => {
 
         try {
           await CreateCommand.run(['--target-org', 'testOrg', '--work-item-name', 'WI-000001']);
-        } catch (e) {
+        } catch {
           // expected
         }
 

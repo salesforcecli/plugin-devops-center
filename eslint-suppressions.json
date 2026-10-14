@@ -1,0 +1,214 @@
+{
+  "src/commands/devops/stage/branch/delete.ts": {
+    "complexity": {
+      "count": 1
+    }
+  },
+  "src/common/flags/flags.ts": {
+    "@typescript-eslint/no-base-to-string": {
+      "count": 1
+    }
+  },
+  "src/common/outputService/deploySummaryBuilder.ts": {
+    "@typescript-eslint/no-misused-promises": {
+      "count": 1
+    },
+    "@typescript-eslint/switch-exhaustiveness-check": {
+      "count": 1
+    }
+  },
+  "src/common/outputService/promoteOutputService.ts": {
+    "@typescript-eslint/no-misused-promises": {
+      "count": 2
+    }
+  },
+  "src/common/outputService/resumeOutputService.ts": {
+    "@typescript-eslint/no-misused-promises": {
+      "count": 1
+    }
+  },
+  "src/utils/createPullRequest.ts": {
+    "@typescript-eslint/no-base-to-string": {
+      "count": 1
+    },
+    "preserve-caught-error": {
+      "count": 1
+    }
+  },
+  "src/utils/workItems.ts": {
+    "@typescript-eslint/no-base-to-string": {
+      "count": 1
+    }
+  },
+  "test/commands/devops/pipeline/stage/update.test.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 1
+    },
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 1
+    }
+  },
+  "test/commands/devops/work-item/combine.test.ts": {
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 2
+    }
+  },
+  "test/commands/devops/work-item/prepare.test.ts": {
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 2
+    }
+  },
+  "test/commands/project/deploy/pipeline/quick.test.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 20
+    },
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 21
+    }
+  },
+  "test/commands/project/deploy/pipeline/report.test.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 11
+    },
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 15
+    }
+  },
+  "test/commands/project/deploy/pipeline/resume.test.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 9
+    },
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 10
+    }
+  },
+  "test/commands/project/deploy/pipeline/start.test.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 19
+    },
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 20
+    }
+  },
+  "test/commands/project/deploy/pipeline/validate.test.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 3
+    }
+  },
+  "test/common/outputService/aorOutputService.test.ts": {
+    "@typescript-eslint/no-misused-promises": {
+      "count": 1
+    }
+  },
+  "test/common/outputService/promoteOutputService.test.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 17
+    },
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 5
+    }
+  },
+  "test/common/outputService/resumeCommandOutputService.test.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 8
+    },
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 8
+    },
+    "@typescript-eslint/no-unsafe-return": {
+      "count": 1
+    }
+  },
+  "test/common/utils.test.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 10
+    }
+  },
+  "test/configMeta.test.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 3
+    },
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 6
+    }
+  },
+  "test/streamer/asyncOpStream.test.ts": {
+    "@typescript-eslint/no-misused-promises": {
+      "count": 1
+    }
+  },
+  "test/utils/activatePipeline.test.ts": {
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 2
+    }
+  },
+  "test/utils/addStageBranch.test.ts": {
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 8
+    }
+  },
+  "test/utils/addStageEnvironment.test.ts": {
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 16
+    }
+  },
+  "test/utils/attachProject.test.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 2
+    },
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 3
+    }
+  },
+  "test/utils/combineWorkItems.test.ts": {
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 7
+    }
+  },
+  "test/utils/createPipeline.test.ts": {
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 10
+    }
+  },
+  "test/utils/createProject.test.ts": {
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 1
+    }
+  },
+  "test/utils/deleteStageBranch.test.ts": {
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 1
+    }
+  },
+  "test/utils/prepareWorkItem.test.ts": {
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 9
+    }
+  },
+  "test/utils/promoteStage.test.ts": {
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 5
+    }
+  },
+  "test/utils/promotionUtils.test.ts": {
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 15
+    }
+  },
+  "test/utils/updateWorkItem.test.ts": {
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 2
+    }
+  },
+  "test/utils/workItems.test.ts": {
+    "@typescript-eslint/no-unsafe-call": {
+      "count": 8
+    },
+    "@typescript-eslint/no-unsafe-member-access": {
+      "count": 18
+    }
+  }
+}

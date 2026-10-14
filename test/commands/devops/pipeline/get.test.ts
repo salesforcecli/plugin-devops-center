@@ -18,17 +18,17 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsPipelineGet from '../../../../src/commands/devops/pipeline/get.js';
 
 describe('devops pipeline get', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let GetCommand: any;
+  let GetCommand: typeof DevopsPipelineGet;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
   const getPipelineStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/pipeline/get.js', {
+    const mod = await esmock<{ default: typeof DevopsPipelineGet }>('../../../../src/commands/devops/pipeline/get.js', {
       '../../../../src/utils/getPipeline.js': {
         getPipeline: getPipelineStub,
       },
@@ -145,7 +145,7 @@ describe('devops pipeline get', () => {
 
         try {
           await GetCommand.run(['--target-org', 'testOrg', '--pipeline-id', '0Do000000000001']);
-        } catch (e) {
+        } catch {
           // expected
         }
 

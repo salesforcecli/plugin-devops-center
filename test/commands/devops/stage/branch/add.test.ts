@@ -18,11 +18,11 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsStageBranchAdd from '../../../../../src/commands/devops/stage/branch/add.js';
 
 describe('devops stage branch add', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let AddBranchCommand: any;
+  let AddBranchCommand: typeof DevopsStageBranchAdd;
   const mockConnection = { getApiVersion: () => '65.0' };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
   const addStageBranchStub = sinon.stub();
@@ -31,16 +31,19 @@ describe('devops stage branch add', () => {
   const fetchPipelineStagesStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../../src/commands/devops/stage/branch/add.js', {
-      '../../../../../src/utils/addStageBranch.js': {
-        addStageBranch: addStageBranchStub,
-        getStageBranch: getStageBranchStub,
-        deleteOrphanedBranch: deleteOrphanedBranchStub,
-      },
-      '../../../../../src/utils/pipelineUtils.js': {
-        fetchPipelineStages: fetchPipelineStagesStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsStageBranchAdd }>(
+      '../../../../../src/commands/devops/stage/branch/add.js',
+      {
+        '../../../../../src/utils/addStageBranch.js': {
+          addStageBranch: addStageBranchStub,
+          getStageBranch: getStageBranchStub,
+          deleteOrphanedBranch: deleteOrphanedBranchStub,
+        },
+        '../../../../../src/utils/pipelineUtils.js': {
+          fetchPipelineStages: fetchPipelineStagesStub,
+        },
+      }
+    );
     AddBranchCommand = mod.default;
   });
 
@@ -168,7 +171,7 @@ describe('devops stage branch add', () => {
             'dev',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -284,7 +287,7 @@ describe('devops stage branch add', () => {
             'main',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -318,7 +321,7 @@ describe('devops stage branch add', () => {
             'nonexistent',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -346,7 +349,7 @@ describe('devops stage branch add', () => {
             '--branch-name',
             'main',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -376,7 +379,7 @@ describe('devops stage branch add', () => {
             'UAT123',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 

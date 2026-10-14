@@ -18,11 +18,11 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsPromotionComplete from '../../../../src/commands/devops/promotion/complete.js';
 
 describe('devops promotion complete', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let CompleteCommand: any;
+  let CompleteCommand: typeof DevopsPromotionComplete;
   const getUndeployedWorkItemsStub = sinon.stub();
   const validateDeployStub = sinon.stub();
   const executeDeployStub = sinon.stub();
@@ -33,13 +33,16 @@ describe('devops promotion complete', () => {
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection };
 
   before(async () => {
-    const mod = await esmock('../../../../src/commands/devops/promotion/complete.js', {
-      '../../../../src/utils/promotionUtils.js': {
-        getUndeployedWorkItems: getUndeployedWorkItemsStub,
-        validateDeploy: validateDeployStub,
-        executeDeploy: executeDeployStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsPromotionComplete }>(
+      '../../../../src/commands/devops/promotion/complete.js',
+      {
+        '../../../../src/utils/promotionUtils.js': {
+          getUndeployedWorkItems: getUndeployedWorkItemsStub,
+          validateDeploy: validateDeployStub,
+          executeDeploy: executeDeployStub,
+        },
+      }
+    );
     CompleteCommand = mod.default;
   });
 
@@ -117,7 +120,7 @@ describe('devops promotion complete', () => {
         try {
           await CompleteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -138,7 +141,7 @@ describe('devops promotion complete', () => {
         try {
           await CompleteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -157,7 +160,7 @@ describe('devops promotion complete', () => {
 
         try {
           await CompleteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -179,7 +182,7 @@ describe('devops promotion complete', () => {
         try {
           await CompleteCommand.run(['-o', 'testOrg', '-t', '1QVxx0000000001']);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 

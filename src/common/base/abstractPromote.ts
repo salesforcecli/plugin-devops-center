@@ -16,13 +16,7 @@
 import { SfCommand } from '@salesforce/sf-plugins-core';
 import { Interfaces } from '@oclif/core';
 import { HttpRequest } from '@jsforce/jsforce-node';
-import {
-  fetchAndValidatePipelineStage,
-  PipelineStage,
-  PromoteOptions,
-  TestLevel,
-  validateTestFlags,
-} from '../index.js';
+import { fetchAndValidatePipelineStage, PipelineStage, PromoteOptions, validateTestFlags } from '../index.js';
 import { devopsCenterProjectName, requiredDoceOrgFlag, wait, verbose, concise } from '../flags/flags.js';
 import {
   branchName,
@@ -61,27 +55,30 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
   };
 
   protected flags!: Flags<T>;
-  private targetStage: PipelineStage;
-  private sourceStageId: string;
-  private deployOptions: Partial<PromoteOptions>;
+  // assigned in executePromotion
+  private targetStage!: PipelineStage;
+  // assigned in executePromotion
+  private sourceStageId!: string;
+  // assigned in buildPromoteOptions
+  private deployOptions!: Partial<PromoteOptions>;
   private numRetries409 = 50; // this is the number of times we retry if we get a http-409-Conflict response
 
   public async init(): Promise<void> {
     await super.init();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     const { flags } = await this.parse({
       flags: this.ctor.flags,
       baseFlags: (super.ctor as typeof PromoteCommand).baseFlags,
       enableJsonFlag: this.ctor.enableJsonFlag,
     });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     this.flags = flags as Flags<T>;
     this.targetOrg = this.flags['devops-center-username'];
     this.setOutputService(new OutputServiceFactory().forDeployment(this.flags, this.targetOrg.getConnection()));
   }
 
   protected async executePromotion(): Promise<AsyncOperationResultJson> {
-    validateTestFlags(this.flags['test-level'] as TestLevel | undefined, this.flags.tests);
+    validateTestFlags(this.flags['test-level'], this.flags.tests);
     this.targetStage = await fetchAndValidatePipelineStage(
       this.targetOrg,
       this.flags['devops-center-project-name'],
@@ -90,7 +87,7 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
     this.sourceStageId = this.getSourceStageId();
     this.setAsyncOperationId(await this.requestPromotionFlow());
 
-    return this.monitorOperation(this.flags.async as boolean, this.flags.wait);
+    return this.monitorOperation(this.flags.async, this.flags.wait);
   }
 
   /**
@@ -163,8 +160,8 @@ export abstract class PromoteCommand<T extends typeof SfCommand> extends AsyncCo
 
   private buildPromoteOptions(): void {
     this.deployOptions = {
-      fullDeploy: this.flags['deploy-all'] as boolean,
-      testLevel: (this.flags['test-level'] as string) ?? 'Default',
+      fullDeploy: this.flags['deploy-all'],
+      testLevel: this.flags['test-level'] ?? 'Default',
       runTests: this.flags.tests ? this.flags.tests.join(',') : undefined,
       // get more promote options from the concrete implementation if needed
       ...this.getPromoteOptions(),

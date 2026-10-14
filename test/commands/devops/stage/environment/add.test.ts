@@ -18,11 +18,11 @@ import esmock from 'esmock';
 import { expect, test } from '@oclif/test';
 import sinon from 'sinon';
 import { Org } from '@salesforce/core';
+import type DevopsStageEnvironmentAdd from '../../../../../src/commands/devops/stage/environment/add.js';
 
 describe('devops stage environment add', () => {
   let sandbox: sinon.SinonSandbox;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let AddEnvironmentCommand: any;
+  let AddEnvironmentCommand: typeof DevopsStageEnvironmentAdd;
   const queryStub = sinon.stub().resolves({ records: [{ IsActive: false }] });
   const mockConnection = { getApiVersion: () => '65.0', query: queryStub };
   const mockOrg = { id: '1', getOrgId: () => '1', getConnection: () => mockConnection, getUsername: () => 'testOrg' };
@@ -33,19 +33,22 @@ describe('devops stage environment add', () => {
   const execFileStub = sinon.stub();
 
   before(async () => {
-    const mod = await esmock('../../../../../src/commands/devops/stage/environment/add.js', {
-      '../../../../../src/utils/addStageEnvironment.js': {
-        addStageEnvironment: addStageEnvironmentStub,
-        getStageEnvironment: getStageEnvironmentStub,
-        deleteOrphanedEnvironment: deleteOrphanedEnvironmentStub,
-      },
-      '../../../../../src/utils/pipelineUtils.js': {
-        fetchPipelineStages: fetchPipelineStagesStub,
-      },
-      'node:child_process': {
-        execFile: execFileStub,
-      },
-    });
+    const mod = await esmock<{ default: typeof DevopsStageEnvironmentAdd }>(
+      '../../../../../src/commands/devops/stage/environment/add.js',
+      {
+        '../../../../../src/utils/addStageEnvironment.js': {
+          addStageEnvironment: addStageEnvironmentStub,
+          getStageEnvironment: getStageEnvironmentStub,
+          deleteOrphanedEnvironment: deleteOrphanedEnvironmentStub,
+        },
+        '../../../../../src/utils/pipelineUtils.js': {
+          fetchPipelineStages: fetchPipelineStagesStub,
+        },
+        'node:child_process': {
+          execFile: execFileStub,
+        },
+      }
+    );
     AddEnvironmentCommand = mod.default;
   });
 
@@ -239,7 +242,7 @@ describe('devops stage environment add', () => {
             'Production',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -273,7 +276,7 @@ describe('devops stage environment add', () => {
             'Production',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -303,7 +306,7 @@ describe('devops stage environment add', () => {
             '--org-type',
             'Sandbox',
           ]);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -420,7 +423,7 @@ describe('devops stage environment add', () => {
             'Production',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -491,7 +494,7 @@ describe('devops stage environment add', () => {
             'Production',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -570,7 +573,7 @@ describe('devops stage environment add', () => {
             '--force',
           ]);
           expect.fail('should have thrown');
-        } catch (e) {
+        } catch {
           // expected
         }
 

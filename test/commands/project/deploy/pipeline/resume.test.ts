@@ -145,7 +145,7 @@ describe('project deploy pipeline resume', () => {
       .it('runs project deploy pipeline resume without specifying any target Devops Center org', async (ctx) => {
         try {
           await ResumeCmd.run([]);
-        } catch (e) {
+        } catch {
           // expected
         }
         expect(ctx.stderr).to.contain(
@@ -173,7 +173,7 @@ describe('project deploy pipeline resume', () => {
       .it('runs project deploy pipeline resume without any of the required flags', async (ctx) => {
         try {
           await ResumeCmd.run([]);
-        } catch (e) {
+        } catch {
           // expected
         }
         expect(ctx.stderr).to.contain('Exactly one of the following must be provided: --job-id, --use-most-recent');
@@ -185,7 +185,7 @@ describe('project deploy pipeline resume', () => {
       .it('runs project deploy pipeline resume specifying both -r and -i flags', async (ctx) => {
         try {
           await ResumeCmd.run(['-r', `-i=${mockAorId}`]);
-        } catch (e) {
+        } catch {
           // expected
         }
         expect(ctx.stderr).to.contain('--job-id cannot also be provided when using --use-most-recent');
@@ -198,7 +198,7 @@ describe('project deploy pipeline resume', () => {
       .it('runs project deploy pipeline resume specifying -r when there are no Ids in cache', async (ctx) => {
         try {
           await ResumeCmd.run(['-r']);
-        } catch (e) {
+        } catch {
           // expected
         }
         expect(ctx.stderr).to.contain("Can't find the job ID. Verify that a pipeline promotion has been started");
@@ -210,7 +210,7 @@ describe('project deploy pipeline resume', () => {
       .it('runs project deploy pipeline resume specifying both --verbose and --concise flags', async (ctx) => {
         try {
           await ResumeCmd.run(['-r', '--verbose', '--concise']);
-        } catch (e) {
+        } catch {
           // expected
         }
         expect(ctx.stderr).to.contain('--verbose=true cannot also be provided when using --concise');
@@ -249,7 +249,7 @@ describe('project deploy pipeline resume', () => {
 
         try {
           await ResumeCmd.run([`-i=${mockAorId}`]);
-        } catch (e) {
+        } catch {
           // expected
         }
 
@@ -319,7 +319,7 @@ describe('project deploy pipeline resume', () => {
 
         try {
           await ResumeCmd.run([`-i=${mockAorId}`]);
-        } catch (e) {
+        } catch {
           // expected
         }
 
