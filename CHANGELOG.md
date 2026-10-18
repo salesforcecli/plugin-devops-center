@@ -1,3 +1,9 @@
+## [2.3.3](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.2...2.3.3) (2026-10-18)
+
+### Bug Fixes
+
+- **deps:** bump fast-uri from 3.0.1 to 3.1.8 ([b0283a0](https://github.com/salesforcecli/plugin-devops-center/commit/b0283a075d4ee43c911a850802351fc6046d70a4))
+
 ## [2.3.2](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.1...2.3.2) (2026-10-14)
 
 ### Bug Fixes

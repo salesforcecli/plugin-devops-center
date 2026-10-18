@@ -161,7 +161,7 @@ EXAMPLES
       https://github.com/myorg/myrepo --project-id 0Hn000000000001 --project-id 0Hn000000000002
 ```
 
-_See code: [src/commands/devops/pipeline/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/pipeline/create.ts)_
+_See code: [src/commands/devops/pipeline/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/pipeline/create.ts)_
 
 ## `sf devops pipeline get`
 
@@ -193,7 +193,7 @@ EXAMPLES
     $ sf devops pipeline get --target-org my-devops-org --pipeline-id 0Do000000000001
 ```
 
-_See code: [src/commands/devops/pipeline/get.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/pipeline/get.ts)_
+_See code: [src/commands/devops/pipeline/get.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/pipeline/get.ts)_
 
 ## `sf devops pipeline list`
 
@@ -224,7 +224,7 @@ EXAMPLES
     $ sf devops pipeline list --target-org my-devops-org
 ```
 
-_See code: [src/commands/devops/pipeline/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/pipeline/list.ts)_
+_See code: [src/commands/devops/pipeline/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/pipeline/list.ts)_
 
 ## `sf devops pipeline project add`
 
@@ -258,7 +258,7 @@ EXAMPLES
       0Hn000000000001
 ```
 
-_See code: [src/commands/devops/pipeline/project/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/pipeline/project/add.ts)_
+_See code: [src/commands/devops/pipeline/project/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/pipeline/project/add.ts)_
 
 ## `sf devops pipeline project delete`
 
@@ -292,7 +292,7 @@ EXAMPLES
       0Hn000000000001
 ```
 
-_See code: [src/commands/devops/pipeline/project/delete.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/pipeline/project/delete.ts)_
+_See code: [src/commands/devops/pipeline/project/delete.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/pipeline/project/delete.ts)_
 
 ## `sf devops pipeline stage add`
 
@@ -333,7 +333,7 @@ EXAMPLES
       --next-stage-id 0Xc000000000003
 ```
 
-_See code: [src/commands/devops/pipeline/stage/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/pipeline/stage/add.ts)_
+_See code: [src/commands/devops/pipeline/stage/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/pipeline/stage/add.ts)_
 
 ## `sf devops pipeline stage delete`
 
@@ -368,7 +368,7 @@ EXAMPLES
       0Xc000000000002
 ```
 
-_See code: [src/commands/devops/pipeline/stage/delete.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/pipeline/stage/delete.ts)_
+_See code: [src/commands/devops/pipeline/stage/delete.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/pipeline/stage/delete.ts)_
 
 ## `sf devops pipeline stage update`
 
@@ -401,7 +401,7 @@ EXAMPLES
     $ sf devops pipeline stage update --target-org my-devops-org --stage-id 1QV000000000001 --name "Integration"
 ```
 
-_See code: [src/commands/devops/pipeline/stage/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/pipeline/stage/update.ts)_
+_See code: [src/commands/devops/pipeline/stage/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/pipeline/stage/update.ts)_
 
 ## `sf devops pipeline update`
 
@@ -445,7 +445,7 @@ EXAMPLES
       Pipeline"
 ```
 
-_See code: [src/commands/devops/pipeline/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/pipeline/update.ts)_
+_See code: [src/commands/devops/pipeline/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/pipeline/update.ts)_
 
 ## `sf devops project create`
 
@@ -482,7 +482,7 @@ EXAMPLES
       update"
 ```
 
-_See code: [src/commands/devops/project/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/project/create.ts)_
+_See code: [src/commands/devops/project/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/project/create.ts)_
 
 ## `sf devops project list`
 
@@ -517,7 +517,7 @@ EXAMPLES
     $ sf devops project list --target-org devops-center@example.com
 ```
 
-_See code: [src/commands/devops/project/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/project/list.ts)_
+_See code: [src/commands/devops/project/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/project/list.ts)_
 
 ## `sf devops project update`
 
@@ -567,7 +567,7 @@ EXAMPLES
       --description "Archived" --no-is-active
 ```
 
-_See code: [src/commands/devops/project/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/project/update.ts)_
+_See code: [src/commands/devops/project/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/project/update.ts)_
 
 ## `sf devops promote`
 
@@ -669,7 +669,7 @@ FLAG DESCRIPTIONS
     spaces.
 ```
 
-_See code: [src/commands/devops/promote.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/promote.ts)_
+_See code: [src/commands/devops/promote.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/promote.ts)_
 
 ## `sf devops promotion complete`
 
@@ -752,7 +752,7 @@ FLAG DESCRIPTIONS
     spaces.
 ```
 
-_See code: [src/commands/devops/promotion/complete.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/promotion/complete.ts)_
+_See code: [src/commands/devops/promotion/complete.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/promotion/complete.ts)_
 
 ## `sf devops promotion validate`
 
@@ -793,7 +793,7 @@ EXAMPLES
       1fk000000000001 --work-item-id 1fk000000000002
 ```
 
-_See code: [src/commands/devops/promotion/validate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/promotion/validate.ts)_
+_See code: [src/commands/devops/promotion/validate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/promotion/validate.ts)_
 
 ## `sf devops request status`
 
@@ -824,7 +824,7 @@ EXAMPLES
     $ sf devops request status --target-org my-devops-org --request-token a0B000000000001
 ```
 
-_See code: [src/commands/devops/request/status.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/request/status.ts)_
+_See code: [src/commands/devops/request/status.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/request/status.ts)_
 
 ## `sf devops review create`
 
@@ -861,7 +861,7 @@ EXAMPLES
     $ sf devops review create --target-org my-devops-org --work-item-id 0Wx000000000001
 ```
 
-_See code: [src/commands/devops/review/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/review/create.ts)_
+_See code: [src/commands/devops/review/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/review/create.ts)_
 
 ## `sf devops stage branch add`
 
@@ -907,7 +907,7 @@ EXAMPLES
       --branch-name integration --create-vcs-branch
 ```
 
-_See code: [src/commands/devops/stage/branch/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/stage/branch/add.ts)_
+_See code: [src/commands/devops/stage/branch/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/stage/branch/add.ts)_
 
 ## `sf devops stage branch delete`
 
@@ -945,7 +945,7 @@ EXAMPLES
       0Xp000000000001
 ```
 
-_See code: [src/commands/devops/stage/branch/delete.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/stage/branch/delete.ts)_
+_See code: [src/commands/devops/stage/branch/delete.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/stage/branch/delete.ts)_
 
 ## `sf devops stage environment add`
 
@@ -989,7 +989,7 @@ EXAMPLES
       Production_Org --org-type Production
 ```
 
-_See code: [src/commands/devops/stage/environment/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/stage/environment/add.ts)_
+_See code: [src/commands/devops/stage/environment/add.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/stage/environment/add.ts)_
 
 ## `sf devops stage environment delete`
 
@@ -1023,7 +1023,7 @@ EXAMPLES
       0Xe000000000001
 ```
 
-_See code: [src/commands/devops/stage/environment/delete.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/stage/environment/delete.ts)_
+_See code: [src/commands/devops/stage/environment/delete.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/stage/environment/delete.ts)_
 
 ## `sf devops work-item combine`
 
@@ -1072,7 +1072,7 @@ FLAG DESCRIPTIONS
     are merged into the parent's branch during promotion.
 ```
 
-_See code: [src/commands/devops/work-item/combine.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/work-item/combine.ts)_
+_See code: [src/commands/devops/work-item/combine.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/work-item/combine.ts)_
 
 ## `sf devops work-item create`
 
@@ -1113,7 +1113,7 @@ EXAMPLES
       --description "Implement dark mode toggle in settings page"
 ```
 
-_See code: [src/commands/devops/work-item/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/work-item/create.ts)_
+_See code: [src/commands/devops/work-item/create.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/work-item/create.ts)_
 
 ## `sf devops work-item list`
 
@@ -1149,7 +1149,7 @@ EXAMPLES
     $ sf devops work-item list --target-org my-devops-org --project-id 1Qg000000000001 --json
 ```
 
-_See code: [src/commands/devops/work-item/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/work-item/list.ts)_
+_See code: [src/commands/devops/work-item/list.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/work-item/list.ts)_
 
 ## `sf devops work-item prepare`
 
@@ -1190,7 +1190,7 @@ EXAMPLES
       --target-stage-id 05S000000000002
 ```
 
-_See code: [src/commands/devops/work-item/prepare.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/work-item/prepare.ts)_
+_See code: [src/commands/devops/work-item/prepare.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/work-item/prepare.ts)_
 
 ## `sf devops work-item update`
 
@@ -1237,7 +1237,7 @@ EXAMPLES
       --description "Users can't log in on mobile" --status "In Progress"
 ```
 
-_See code: [src/commands/devops/work-item/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/devops/work-item/update.ts)_
+_See code: [src/commands/devops/work-item/update.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/devops/work-item/update.ts)_
 
 ## `sf project deploy pipeline quick`
 
@@ -1311,7 +1311,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/quick.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/project/deploy/pipeline/quick.ts)_
+_See code: [src/commands/project/deploy/pipeline/quick.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/project/deploy/pipeline/quick.ts)_
 
 ## `sf project deploy pipeline report`
 
@@ -1359,7 +1359,7 @@ FLAG DESCRIPTIONS
     your most recent operation was longer than 3 days ago, this flag won't find the job ID.
 ```
 
-_See code: [src/commands/project/deploy/pipeline/report.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/project/deploy/pipeline/report.ts)_
+_See code: [src/commands/project/deploy/pipeline/report.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/project/deploy/pipeline/report.ts)_
 
 ## `sf project deploy pipeline resume`
 
@@ -1426,7 +1426,7 @@ FLAG DESCRIPTIONS
     returns the job ID. To check the status of the operation, run "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/resume.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/project/deploy/pipeline/resume.ts)_
+_See code: [src/commands/project/deploy/pipeline/resume.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/project/deploy/pipeline/resume.ts)_
 
 ## `sf project deploy pipeline start`
 
@@ -1526,7 +1526,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/start.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/project/deploy/pipeline/start.ts)_
+_See code: [src/commands/project/deploy/pipeline/start.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/project/deploy/pipeline/start.ts)_
 
 ## `sf project deploy pipeline validate`
 
@@ -1626,7 +1626,7 @@ FLAG DESCRIPTIONS
     "sf project deploy pipeline report".
 ```
 
-_See code: [src/commands/project/deploy/pipeline/validate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.2/src/commands/project/deploy/pipeline/validate.ts)_
+_See code: [src/commands/project/deploy/pipeline/validate.ts](https://github.com/salesforcecli/plugin-devops-center/blob/2.3.3/src/commands/project/deploy/pipeline/validate.ts)_
 
 <!-- commandsstop -->
 
