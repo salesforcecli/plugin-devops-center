@@ -1,3 +1,9 @@
+## [2.3.4](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.3...2.3.4) (2026-10-18)
+
+### Bug Fixes
+
+- **deps:** bump fast-copy from 3.0.2 to 3.1.0 ([e78d286](https://github.com/salesforcecli/plugin-devops-center/commit/e78d2863cf770639d1990efbe1400d8b2d45a430))
+
 ## [2.3.3](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.2...2.3.3) (2026-10-18)
 
 ### Bug Fixes
