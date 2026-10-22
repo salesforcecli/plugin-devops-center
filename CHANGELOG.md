@@ -1,3 +1,9 @@
+## [2.3.5](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.4...2.3.5) (2026-10-22)
+
+### Bug Fixes
+
+- **deps:** bump markdown-it from 14.3.2 to 14.3.3 ([6e32914](https://github.com/salesforcecli/plugin-devops-center/commit/6e32914e2ed392f26c022cab2e7830a01f0b0cc8))
+
 ## [2.3.4](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.3...2.3.4) (2026-10-18)
 
 ### Bug Fixes
