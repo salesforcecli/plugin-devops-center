@@ -1,3 +1,9 @@
+## [2.3.7](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.6...2.3.7) (2026-10-25)
+
+### Bug Fixes
+
+- **deps:** bump zod from 4.4.3 to 4.6.7 ([f002d46](https://github.com/salesforcecli/plugin-devops-center/commit/f002d468edf815ae2e55eb55e512d2d7078ab1ef))
+
 ## [2.3.6](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.5...2.3.6) (2026-10-25)
 
 ### Bug Fixes
