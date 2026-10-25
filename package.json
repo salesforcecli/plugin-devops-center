@@ -28,7 +28,7 @@
     "eslint-config-salesforce-typescript": "^7.0.0",
     "eslint-plugin-sf-plugin": "^3.0.1",
     "esmock": "^2.7.6",
-    "oclif": "^6.0.8",
+    "oclif": "^6.0.10",
     "tsx": "^4",
     "typescript": "^6.0.0"
   },
