@@ -1,3 +1,9 @@
+## [2.3.8](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.7...2.3.8) (2026-11-08)
+
+### Bug Fixes
+
+- **deps:** bump undici from 8.11.2 to 8.12.4 ([56869c6](https://github.com/salesforcecli/plugin-devops-center/commit/56869c64c6da947daca789ca4796e76037fa1b9a))
+
 ## [2.3.7](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.6...2.3.7) (2026-10-25)
 
 ### Bug Fixes
