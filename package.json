@@ -26,7 +26,7 @@
     "@types/sinon": "^10.0.20",
     "eslint": "^10.4.0",
     "eslint-config-salesforce-typescript": "^7.0.0",
-    "eslint-plugin-sf-plugin": "^3.0.1",
+    "eslint-plugin-sf-plugin": "^3.0.4",
     "esmock": "^2.7.6",
     "oclif": "^6.0.10",
     "tsx": "^4",
