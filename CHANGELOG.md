@@ -1,3 +1,9 @@
+## [2.3.12](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.11...2.3.12) (2026-11-15)
+
+### Bug Fixes
+
+- **deps:** bump form-data from 4.0.5 to 4.0.6 ([8f067e4](https://github.com/salesforcecli/plugin-devops-center/commit/8f067e4ac411e6bb8a58fb192be0da015225e0f4))
+
 ## [2.3.11](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.10...2.3.11) (2026-11-15)
 
 ### Bug Fixes
