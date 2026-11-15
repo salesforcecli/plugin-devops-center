@@ -1,3 +1,9 @@
+## [2.3.11](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.10...2.3.11) (2026-11-15)
+
+### Bug Fixes
+
+- **deps:** bump esbuild from 0.28.0 to 0.28.2 ([0b2a775](https://github.com/salesforcecli/plugin-devops-center/commit/0b2a77595f129d583c9530598ffc396b1998daef))
+
 ## [2.3.10](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.9...2.3.10) (2026-11-15)
 
 ### Bug Fixes
