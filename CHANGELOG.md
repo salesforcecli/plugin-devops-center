@@ -1,3 +1,9 @@
+## [2.3.10](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.9...2.3.10) (2026-11-15)
+
+### Bug Fixes
+
+- **deps:** bump js-yaml from 3.14.2 to 3.15.2 ([11c294c](https://github.com/salesforcecli/plugin-devops-center/commit/11c294ca2286b20507696d91255c2269f319f2b2))
+
 ## [2.3.9](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.8...2.3.9) (2026-11-15)
 
 ### Bug Fixes
