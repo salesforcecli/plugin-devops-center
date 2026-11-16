@@ -1,3 +1,9 @@
+## [2.3.14](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.13...2.3.14) (2026-11-16)
+
+### Bug Fixes
+
+- **deps:** bump brace-expansion from 1.1.11 to 1.1.22 ([7efe569](https://github.com/salesforcecli/plugin-devops-center/commit/7efe569c89f7e46843380272304a8d9c95a5b4dd))
+
 ## [2.3.13](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.12...2.3.13) (2026-11-16)
 
 ### Bug Fixes
