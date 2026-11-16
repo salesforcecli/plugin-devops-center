@@ -1,3 +1,9 @@
+## [2.3.16](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.15...2.3.16) (2026-11-16)
+
+### Bug Fixes
+
+- **deps:** bump lodash from 4.17.21 to 4.18.1 ([2ac3e47](https://github.com/salesforcecli/plugin-devops-center/commit/2ac3e474f51568606ee51e2b4754cd8f1d6a1853))
+
 ## [2.3.15](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.14...2.3.15) (2026-11-16)
 
 ### Bug Fixes
