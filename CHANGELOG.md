@@ -1,3 +1,9 @@
+## [2.3.15](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.14...2.3.15) (2026-11-16)
+
+### Bug Fixes
+
+- **deps:** bump picomatch from 2.3.1 to 2.3.2 ([2853f93](https://github.com/salesforcecli/plugin-devops-center/commit/2853f931d3a1c30c325a43edd468ca7ac7152032))
+
 ## [2.3.14](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.13...2.3.14) (2026-11-16)
 
 ### Bug Fixes
