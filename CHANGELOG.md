@@ -1,3 +1,9 @@
+## [2.3.13](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.12...2.3.13) (2026-11-16)
+
+### Bug Fixes
+
+- **deps:** bump baseline-browser-mapping from 2.10.34 to 2.11.37 ([57e7140](https://github.com/salesforcecli/plugin-devops-center/commit/57e7140f5bb4128672c7d96fce2463cf977d0a64))
+
 ## [2.3.12](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.11...2.3.12) (2026-11-15)
 
 ### Bug Fixes
