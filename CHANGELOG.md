@@ -1,3 +1,9 @@
+## [2.3.17](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.16...2.3.17) (2026-11-17)
+
+### Bug Fixes
+
+- **deps:** bump browserslist from 4.28.2 to 4.29.5 ([4b73d69](https://github.com/salesforcecli/plugin-devops-center/commit/4b73d69c7faee9a03ddec61b98a4e7fbb643287e))
+
 ## [2.3.16](https://github.com/salesforcecli/plugin-devops-center/compare/2.3.15...2.3.16) (2026-11-16)
 
 ### Bug Fixes
