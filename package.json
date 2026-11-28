@@ -11,7 +11,7 @@
     "@salesforce/core": "^9.0.0",
     "@salesforce/kit": "^4.0.0",
     "@salesforce/sf-plugins-core": "^13.0.0",
-    "@salesforce/ts-types": "^3.0.0"
+    "@salesforce/ts-types": "^3.2.4"
   },
   "devDependencies": {
     "@oclif/plugin-command-snapshot": "^5.2.3",
